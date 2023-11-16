@@ -9,22 +9,28 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategory
@@ -32,30 +38,49 @@ import com.aamo.cookbook.repository.RecipeCategoryRepository
 import com.aamo.cookbook.repository.RecipeRepository
 import com.aamo.cookbook.ui.theme.RecipeScreen
 
-enum class Screens() {
-  Categories,
-  Recipes,
-  Recipe,
-  NewRecipe,
+enum class Screens(val title: String) {
+  Categories("Valitse kategoria"),
+  Recipes("Reseptit"),
+  Recipe("Resepti"),
+  NewRecipe("Uusi resepti"),
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable fun CookBookApp(modifier: Modifier = Modifier) {
-  val categories = remember { RecipeCategoryRepository().loadCategories() }
+  var selectedCategory by remember { mutableStateOf("") }
+  var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
+  val categories = RecipeCategoryRepository().loadCategories()
   val navController = rememberNavController()
-  val currentRoute = navController
-    .currentBackStackEntryFlow
-    .collectAsState(initial = navController.currentBackStackEntry).value?.destination?.route
+  val backStackEntry by navController.currentBackStackEntryAsState()
+  val currentRoute = backStackEntry?.destination?.route
+  val canNavigateBack = navController.previousBackStackEntry != null
+  val currentScreen = Screens.valueOf(
+    backStackEntry?.destination?.route ?: Screens.Categories.name
+  )
 
   Scaffold(
     topBar = {
-      CenterAlignedTopAppBar(
+      TopAppBar(
         title = {
-          Text(
-            "Cookbook",
-            style = MaterialTheme.typography.displayLarge
-          )
-        })
+          Text(currentScreen.title)
+        },
+        colors = TopAppBarDefaults.smallTopAppBarColors(
+          actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
+          navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
+          containerColor = MaterialTheme.colorScheme.primary,
+          titleContentColor = MaterialTheme.colorScheme.primaryContainer,
+        ),
+        navigationIcon = {
+          if (canNavigateBack){
+            IconButton(onClick = { navController.navigateUp() }) {
+              Icon(
+                imageVector = Icons.Filled.ArrowBack,
+                contentDescription = "Back button"
+              )
+            }
+          }
+        },
+      )
     },
     floatingActionButton = {
       if(currentRoute == Screens.Categories.name || currentRoute == Screens.Recipes.name){
@@ -81,7 +106,9 @@ enum class Screens() {
               items(categories) { category ->
                 CategoryItem(
                   category = category,
-                  onClick = { navController.navigate(Screens.Recipes.name) },
+                  onClick = {
+                    selectedCategory = category.name
+                    navController.navigate(Screens.Recipes.name) },
                   modifier = Modifier.fillMaxWidth())
                 Divider(color = MaterialTheme.colorScheme.secondary)
               }
@@ -90,14 +117,15 @@ enum class Screens() {
         }
         composable(Screens.Recipes.name) {
           RecipesScreen(
-            recipes = RecipeRepository().loadRecipes(),
-            onSelect = { _ ->
+            recipes = RecipeRepository().loadRecipes(selectedCategory),
+            onSelect = { recipe ->
+              selectedRecipe = recipe
               navController.navigate(Screens.Recipe.name)
             }
           )
         }
         composable(Screens.Recipe.name){
-          RecipeScreen(recipe = Recipe("asd"))
+          if(selectedRecipe != null) RecipeScreen(recipe = selectedRecipe!!)
         }
         composable(Screens.NewRecipe.name){
           NewRecipeScreen()
@@ -113,6 +141,6 @@ enum class Screens() {
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier.clickable(onClick = onClick)) {
-    Text(text = category.name, modifier.padding(16.dp))
+    Text(text = (if (category.name != "") category.name else "Muut"), modifier.padding(16.dp))
   }
 }
