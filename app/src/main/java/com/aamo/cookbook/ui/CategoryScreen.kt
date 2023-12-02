@@ -22,47 +22,79 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategory
 import com.aamo.cookbook.repository.RecipeCategoryRepository
 import com.aamo.cookbook.repository.RecipeRepository
-import com.aamo.cookbook.ui.theme.RecipeScreen
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 
-enum class Screens(val title: String) {
-  Categories("Valitse kategoria"),
-  Recipes("Reseptit"),
-  Recipe("Resepti"),
-  NewRecipe("Uusi resepti"),
+enum class Screens() {
+  Categories(),
+  Recipes(),
+  Recipe(),
+  NewRecipe(),
+}
+
+class AppViewModel : ViewModel(){
+  class AppUiState(){
+    data class UiState(
+      val selectedCategory: String? = null,
+      val selectedRecipe: Recipe? = null,
+      val nextRecipeStepButtonEnabled: Boolean = false
+    )
+
+    private val _uiState = MutableStateFlow(UiState())
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    fun setCategory(category: String?){
+      _uiState.update { currentState -> currentState.copy(selectedCategory = category) }
+    }
+
+    fun setRecipe(recipe: Recipe?){
+      _uiState.update { currentState -> currentState.copy(selectedRecipe = recipe) }
+    }
+  }
+
+  val appUiState = AppUiState()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@Composable fun CookBookApp(modifier: Modifier = Modifier) {
-  var selectedCategory by remember { mutableStateOf("") }
-  var selectedRecipe by remember { mutableStateOf<Recipe?>(null) }
-  val categories = RecipeCategoryRepository().loadCategories()
-  val navController = rememberNavController()
+@Composable fun CookBookApp(
+  viewModel: AppViewModel = viewModel(),
+  navController: NavHostController = rememberNavController())
+{
+  val uiState by viewModel.appUiState.uiState.collectAsState()
   val backStackEntry by navController.currentBackStackEntryAsState()
   val currentRoute = backStackEntry?.destination?.route
-  val canNavigateBack = navController.previousBackStackEntry != null
-  val currentScreen = Screens.valueOf(
-    backStackEntry?.destination?.route ?: Screens.Categories.name
-  )
+  val chapterIndex = backStackEntry?.arguments?.getInt("chapterIndex")
+
+  LaunchedEffect(uiState.selectedCategory != null
+          && (currentRoute == null || currentRoute == Screens.Categories.name)){
+    viewModel.appUiState.setCategory(null)
+  }
 
   Scaffold(
     topBar = {
       TopAppBar(
         title = {
-          Text(currentScreen.title)
+          Text(getScreenTitle(currentRoute ?: Screens.Categories.name, uiState))
         },
         colors = TopAppBarDefaults.smallTopAppBarColors(
           actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
@@ -71,7 +103,7 @@ enum class Screens(val title: String) {
           titleContentColor = MaterialTheme.colorScheme.primaryContainer,
         ),
         navigationIcon = {
-          if (canNavigateBack){
+          if (navController.previousBackStackEntry != null){
             IconButton(onClick = { navController.navigateUp() }) {
               Icon(
                 imageVector = Icons.Filled.ArrowBack,
@@ -95,44 +127,61 @@ enum class Screens(val title: String) {
     floatingActionButtonPosition = FabPosition.End,
     content = { innerPadding ->
       NavHost(
-        modifier = modifier.padding(innerPadding),
+        modifier = Modifier.padding(innerPadding),
         navController = navController,
         startDestination = Screens.Categories.name
       ) {
         composable(Screens.Categories.name) {
-          Column {
-            Divider(color = MaterialTheme.colorScheme.secondary)
-            LazyColumn() {
-              items(categories) { category ->
-                CategoryItem(
-                  category = category,
-                  onClick = {
-                    selectedCategory = category.name
-                    navController.navigate(Screens.Recipes.name) },
-                  modifier = Modifier.fillMaxWidth())
-                Divider(color = MaterialTheme.colorScheme.secondary)
-              }
-            }
-          }
+          CategoryList(categories = RecipeCategoryRepository().loadCategories(),
+            onSelect = {
+              viewModel.appUiState.setCategory(it.name)
+              navController.navigate(Screens.Recipes.name)
+            })
         }
         composable(Screens.Recipes.name) {
-          RecipesScreen(
-            recipes = RecipeRepository().loadRecipes(selectedCategory),
-            onSelect = { recipe ->
-              selectedRecipe = recipe
-              navController.navigate(Screens.Recipe.name)
-            }
-          )
+          if(uiState.selectedCategory != null){
+            RecipesScreen(
+              recipes = RecipeRepository().loadRecipes(uiState.selectedCategory!!),
+              onSelect = { recipe ->
+                viewModel.appUiState.setRecipe(recipe)
+                navController.navigate("${Screens.Recipe.name}/0")
+              }
+            )
+          }
         }
-        composable(Screens.Recipe.name){
-          if(selectedRecipe != null) RecipeScreen(recipe = selectedRecipe!!)
+        composable("${Screens.Recipe.name}/{chapterIndex}",
+          arguments = listOf(navArgument("chapterIndex") { type = NavType.IntType })
+        ){_ ->
+          if(uiState.selectedRecipe != null && chapterIndex != null){
+            RecipeScreen(uiState.selectedRecipe!!,
+              progressChanged = { completed ->
+            })
+          }
         }
         composable(Screens.NewRecipe.name){
-          NewRecipeScreen()
+          NewRecipeScreen(uiState.selectedCategory ?: "")
         }
       }
+    },
+    bottomBar = {
+
     }
   )
+}
+
+@Composable fun CategoryList(categories: List<RecipeCategory>, onSelect: (RecipeCategory) -> Unit) {
+  Column {
+    Divider(color = MaterialTheme.colorScheme.secondary)
+    LazyColumn() {
+      items(categories) { category ->
+        CategoryItem(
+          category = category,
+          onClick = { onSelect(category) },
+          modifier = Modifier.fillMaxWidth())
+        Divider(color = MaterialTheme.colorScheme.secondary)
+      }
+    }
+  }
 }
 
 @Composable fun CategoryItem(
@@ -141,6 +190,18 @@ enum class Screens(val title: String) {
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier.clickable(onClick = onClick)) {
-    Text(text = (if (category.name != "") category.name else "Muut"), modifier.padding(16.dp))
+    Text(text = (if (category.name != "") category.name else "Muut"),
+      style = MaterialTheme.typography.titleLarge,
+      modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp))
+  }
+}
+
+fun getScreenTitle(route: String, appUiState: AppViewModel.AppUiState.UiState) : String{
+  return when(route){
+    Screens.Categories.name -> "Valitse kategoria"
+    Screens.Recipes.name -> appUiState.selectedCategory ?: ""
+    "${Screens.Recipe.name}/{chapterIndex}" -> appUiState.selectedRecipe?.name ?: ""
+    Screens.NewRecipe.name -> "Uusi resepti"
+    else -> ""
   }
 }
