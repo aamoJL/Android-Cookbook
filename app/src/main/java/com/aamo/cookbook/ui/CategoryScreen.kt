@@ -153,9 +153,7 @@ class AppViewModel : ViewModel(){
           arguments = listOf(navArgument("chapterIndex") { type = NavType.IntType })
         ){_ ->
           if(uiState.selectedRecipe != null && chapterIndex != null){
-            RecipeScreen(uiState.selectedRecipe!!,
-              progressChanged = { completed ->
-            })
+            RecipeScreen().Screen(uiState.selectedRecipe!!)
           }
         }
         composable(Screens.NewRecipe.name){
