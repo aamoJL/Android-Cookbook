@@ -1,10 +1,11 @@
 package com.aamo.cookbook.repository
 
 import com.aamo.cookbook.model.Recipe
+import java.util.UUID
 
-class RecipeRepository{
+class RecipeRepository {
 
-  val recipes = listOf<Recipe>(
+  private val recipes = mutableListOf<Recipe>(
 
   // Pääruoka
 //  Recipe("Kalakeitto", "Pääruoka", "Keitto"),
@@ -64,11 +65,23 @@ class RecipeRepository{
 //  Recipe("Kermavaahto", "", ""),
   )
 
-  fun loadRecipes(): List<Recipe>{
+  fun getRecipe(id: UUID?) : Recipe? {
+    return recipes.firstOrNull { x -> x.id == id }
+  }
+
+  fun getRecipes(): List<Recipe>{
     return recipes
   }
 
-  fun loadRecipes(category: String): List<Recipe>{
+  fun getRecipes(category: String): List<Recipe>{
     return recipes.filter { x -> x.category == category }
+  }
+
+  fun addRecipe(recipe: Recipe) : Boolean{
+    if(recipes.firstOrNull { x -> x.id == recipe.id } == null){
+      recipes.add(recipe)
+      return true
+    }
+    return false
   }
 }

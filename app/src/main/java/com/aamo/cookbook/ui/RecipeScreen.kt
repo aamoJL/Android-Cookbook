@@ -289,6 +289,7 @@ class RecipeScreen {
           colors = when {
             isCompleted && nextButtonProperties.highlighted ->
               ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary)
+
             nextButtonProperties.highlighted -> ButtonDefaults.buttonColors()
             else -> ButtonDefaults.filledTonalButtonColors()
           },

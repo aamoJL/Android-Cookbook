@@ -7,7 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import com.aamo.cookbook.ui.CookBookApp
+import com.aamo.cookbook.ui.CategoryScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 
 class MainActivity : ComponentActivity() {
@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
       CookbookTheme {
         // A surface container using the 'background' color from the theme
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          CookBookApp()
+          CategoryScreen().Screen()
         }
       }
     }
