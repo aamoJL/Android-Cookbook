@@ -5,6 +5,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,7 +23,53 @@ fun FormTextField(
   value: String,
   onValueChange: (String) -> Unit,
   label: String,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  imeAction: ImeAction = ImeAction.Next
+) {
+  var textFieldValueState by remember {
+    mutableStateOf(
+      TextFieldValue(
+        text = value, selection = when {
+          value.isEmpty() -> TextRange.Zero
+          else -> TextRange(value.length, value.length)
+        }
+      )
+    )
+  }
+  var lastTextValue by remember(value) { mutableStateOf(value) }
+
+  val textFieldValue = textFieldValueState.copy(text = value)
+
+  TextField(
+    value = textFieldValue,
+    onValueChange = { newTextFieldValueState ->
+      textFieldValueState = newTextFieldValueState
+
+      val valueChanged = lastTextValue != newTextFieldValueState.text
+      lastTextValue = newTextFieldValueState.text
+
+      if (valueChanged) {
+        onValueChange(newTextFieldValueState.text)
+      }
+    },
+    singleLine = true,
+    label = { Text(text = label) },
+    keyboardOptions = KeyboardOptions(
+      keyboardType = KeyboardType.Text,
+      imeAction = imeAction,
+    ),
+    modifier = modifier.fillMaxWidth()
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FormOutlinedTextField(
+  value: String,
+  onValueChange: (String) -> Unit,
+  label: String,
+  modifier: Modifier = Modifier,
+  imeAction: ImeAction = ImeAction.Next
 ) {
   var textFieldValueState by remember {
     mutableStateOf(
@@ -54,7 +101,7 @@ fun FormTextField(
     label = { Text(text = label) },
     keyboardOptions = KeyboardOptions(
       keyboardType = KeyboardType.Text,
-      imeAction = ImeAction.Next,
+      imeAction = imeAction,
     ),
     modifier = modifier.fillMaxWidth()
   )
