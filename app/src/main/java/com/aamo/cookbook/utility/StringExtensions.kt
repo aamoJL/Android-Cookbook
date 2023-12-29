@@ -12,3 +12,15 @@ fun String.toUUIDorNull(): UUID? {
     null
   }
 }
+
+/**
+ * Returns a string having leading character of the given chars removed.
+ */
+fun String.trimFirst(vararg chars: Char, ignoreCase: Boolean = true): String {
+  chars.forEach {
+    if (this.startsWith(it, ignoreCase)) {
+      return this.drop(1)
+    }
+  }
+  return this
+}

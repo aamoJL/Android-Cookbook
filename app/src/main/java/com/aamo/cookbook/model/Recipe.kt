@@ -43,6 +43,10 @@ data class Recipe(
       val description: String,
       val ingredients: Set<Ingredient> = emptySet(),
       val id: UUID = UUID.randomUUID(),
-    ){}
+    ) {
+      fun getDescriptionWithFormattedEndChar(): String {
+        return "${description}${if (ingredients.isEmpty()) "." else ":"}"
+      }
+    }
   }
 }

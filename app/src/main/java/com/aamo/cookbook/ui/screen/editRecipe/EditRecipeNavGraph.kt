@@ -48,7 +48,9 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
       },
       onSubmitChanges = {
         // TODO save recipe
-      })
+      },
+      onBack = { navHostController.navigateUp() }
+    )
   }
   composable(EditRecipeScreenPage.EditRecipeChapter.route) {
     val editRecipeViewModel =
@@ -63,7 +65,8 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
       onSubmitChanges = {
         editRecipeViewModel.applyChapterChanges()
         navHostController.navigateUp()
-      }
+      },
+      onBack = { navHostController.navigateUp() }
     )
   }
   composable(EditRecipeScreenPage.EditChapterStep.route) {
@@ -79,7 +82,8 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
       onSubmitChanges = {
         editRecipeViewModel.applyStepChanges()
         navHostController.navigateUp()
-      }
+      },
+      onBack = { navHostController.navigateUp() }
     )
   }
   composable(EditRecipeScreenPage.EditStepIngredient.route) {
@@ -91,6 +95,7 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
       onSubmitChanges = {
         editRecipeViewModel.applyIngredientChanges()
         navHostController.navigateUp()
-      })
+      },
+      onBack = { navHostController.navigateUp() })
   }
 }

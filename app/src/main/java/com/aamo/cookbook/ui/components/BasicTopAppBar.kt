@@ -1,5 +1,6 @@
 package com.aamo.cookbook.ui.components
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -15,8 +16,8 @@ import androidx.compose.runtime.Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BasicTopAppBar(
   title: String,
-  backEnabled: Boolean = true,
-  onBack: () -> Unit = {}
+  onBack: (() -> Unit)? = null,
+  actions: @Composable RowScope.() -> Unit = {},
 ) {
   TopAppBar(
     title = {
@@ -29,13 +30,14 @@ fun BasicTopAppBar(
       titleContentColor = MaterialTheme.colorScheme.primaryContainer,
     ),
     navigationIcon = {
-      if (backEnabled) {
+      if (onBack != null) {
         IconButton(onClick = {
           onBack()
         }) {
           Icon(Icons.Filled.ArrowBack, contentDescription = "Takaisin")
         }
       }
-    }
+    },
+    actions = actions
   )
 }

@@ -30,7 +30,7 @@ class CategoriesScreen {
     onAddClick: () -> Unit,
   ) {
     Scaffold(
-      topBar = { BasicTopAppBar(title = "Valitse kategoria", backEnabled = false) },
+      topBar = { BasicTopAppBar(title = "Valitse kategoria") },
       floatingActionButton = {
         FloatingActionButton(
           onClick = {

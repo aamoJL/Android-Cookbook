@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components
+package com.aamo.cookbook.ui.components.form
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
@@ -16,6 +16,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.core.text.isDigitsOnly
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,14 +44,16 @@ fun FormNumberField(
 
   TextField(
     value = textFieldValue,
-    onValueChange = { newTextFieldValueState ->
-      textFieldValueState = newTextFieldValueState
+    onValueChange = { newState ->
+      if (newState.text.isDigitsOnly() || newState.text.isEmpty()) {
+        textFieldValueState = newState
 
-      val valueChanged = lastTextValue != newTextFieldValueState.text
-      lastTextValue = newTextFieldValueState.text
+        val valueChanged = lastTextValue != newState.text
+        lastTextValue = newState.text
 
-      if (valueChanged) {
-        onValueChange(newTextFieldValueState.text.toIntOrNull())
+        if (valueChanged) {
+          onValueChange(newState.text.toIntOrNull())
+        }
       }
     },
     singleLine = true,
@@ -86,14 +89,16 @@ fun FormOutlinedNumberField(
 
   OutlinedTextField(
     value = textFieldValue,
-    onValueChange = { newTextFieldValueState ->
-      textFieldValueState = newTextFieldValueState
+    onValueChange = { newState ->
+      if (newState.text.isDigitsOnly() || newState.text.isEmpty()) {
+        textFieldValueState = newState
 
-      val valueChanged = lastTextValue != newTextFieldValueState.text
-      lastTextValue = newTextFieldValueState.text
+        val valueChanged = lastTextValue != newState.text
+        lastTextValue = newState.text
 
-      if (valueChanged) {
-        onValueChange(newTextFieldValueState.text.toIntOrNull())
+        if (valueChanged) {
+          onValueChange(newState.text.toIntOrNull())
+        }
       }
     },
     singleLine = true,
