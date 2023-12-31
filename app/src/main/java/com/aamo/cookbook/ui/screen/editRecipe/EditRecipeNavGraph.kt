@@ -5,10 +5,11 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.aamo.cookbook.AppViewModel
 import com.aamo.cookbook.Screen
 import com.aamo.cookbook.utility.sharedViewModel
 import com.aamo.cookbook.utility.toUUIDorNull
+import com.aamo.cookbook.viewModel.AppViewModel
+import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
 /**
  * Enum class for screen navigation
@@ -23,7 +24,7 @@ enum class EditRecipeScreenPage(val route: String) {
 fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
   composable(EditRecipeScreenPage.EditRecipeInfo.route) {
     val parentEntry = remember(it) {
-      navHostController.getBackStackEntry(Screen.EditRecipe.route)
+      navHostController.getBackStackEntry(Screen.EditRecipe.getRoute())
     }
     val recipeIdArgument =
       parentEntry.arguments?.getString(Screen.EditRecipe.argumentName)
@@ -40,10 +41,13 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
       }
     }
 
-    EditRecipeScreen().Screen(
+    EditRecipeScreen(
       editRecipeViewModel,
       onEditChapter = { index ->
-        editRecipeViewModel.selectedChapterIndex = index
+        editRecipeViewModel.initChapterUiState(
+          chapter = editRecipeViewModel.infoUiState.value.chapters.elementAtOrNull(index),
+          index = index
+        )
         navHostController.navigate(EditRecipeScreenPage.EditRecipeChapter.route)
       },
       onSubmitChanges = {
@@ -56,14 +60,20 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
     val editRecipeViewModel =
       it.sharedViewModel<EditRecipeViewModel>(navController = navHostController)
 
-    EditRecipeChapterScreen().Screen(
+    EditRecipeChapterScreen(
       viewModel = editRecipeViewModel,
       onEditStep = { stepIndex ->
-        editRecipeViewModel.selectedStepIndex = stepIndex
+        editRecipeViewModel.initStepUiState(
+          step = editRecipeViewModel.chapterUiState.value.steps.elementAtOrNull(stepIndex),
+          index = stepIndex
+        )
         navHostController.navigate(route = EditRecipeScreenPage.EditChapterStep.route)
       },
       onSubmitChanges = {
-        editRecipeViewModel.applyChapterChanges()
+        editRecipeViewModel.addOrUpdateChapter(
+          chapter = editRecipeViewModel.chapterUiState.value.toChapter(),
+          index = editRecipeViewModel.chapterUiState.value.index
+        )
         navHostController.navigateUp()
       },
       onBack = { navHostController.navigateUp() }
@@ -73,14 +83,22 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
     val editRecipeViewModel =
       it.sharedViewModel<EditRecipeViewModel>(navController = navHostController)
 
-    EditRecipeChapterStepScreen().Screen(
+    EditRecipeChapterStepScreen(
       viewModel = editRecipeViewModel,
       onEditIngredient = { ingredientIndex ->
-        editRecipeViewModel.selectedIngredientIndex = ingredientIndex
+        editRecipeViewModel.initIngredientUiState(
+          ingredient = editRecipeViewModel.stepUiState.value.ingredients.elementAtOrNull(
+            ingredientIndex
+          ),
+          index = ingredientIndex
+        )
         navHostController.navigate(route = EditRecipeScreenPage.EditStepIngredient.route)
       },
       onSubmitChanges = {
-        editRecipeViewModel.applyStepChanges()
+        editRecipeViewModel.addOrUpdateStep(
+          step = editRecipeViewModel.stepUiState.value.toStep(),
+          index = editRecipeViewModel.stepUiState.value.index
+        )
         navHostController.navigateUp()
       },
       onBack = { navHostController.navigateUp() }
@@ -90,10 +108,13 @@ fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
     val editRecipeViewModel =
       it.sharedViewModel<EditRecipeViewModel>(navController = navHostController)
 
-    EditRecipeChapterStepIngredientScreen().Screen(
+    EditRecipeChapterStepIngredientScreen(
       viewModel = editRecipeViewModel,
       onSubmitChanges = {
-        editRecipeViewModel.applyIngredientChanges()
+        editRecipeViewModel.addOrUpdateIngredient(
+          ingredient = editRecipeViewModel.ingredientUiState.value.toIngredient(),
+          index = editRecipeViewModel.ingredientUiState.value.index
+        )
         navHostController.navigateUp()
       },
       onBack = { navHostController.navigateUp() })

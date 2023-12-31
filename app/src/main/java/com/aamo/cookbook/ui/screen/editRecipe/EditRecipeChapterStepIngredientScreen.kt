@@ -23,94 +23,93 @@ import com.aamo.cookbook.ui.components.form.FormFloatField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
-class EditRecipeChapterStepIngredientScreen {
-  @OptIn(ExperimentalMaterial3Api::class)
-  @Composable
-  fun Screen(
-    viewModel: EditRecipeViewModel,
-    onSubmitChanges: () -> Unit,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
-  ) {
-    val uiState by viewModel.ingredientUiState.collectAsState()
-    val formIsValid by remember(uiState) { mutableStateOf(formValidation(uiState)) }
-    var openUnsavedDialog by remember { mutableStateOf(false) }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditRecipeChapterStepIngredientScreen(
+  viewModel: EditRecipeViewModel,
+  onSubmitChanges: () -> Unit,
+  onBack: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  val uiState by viewModel.ingredientUiState.collectAsState()
+  val formIsValid by remember(uiState) { mutableStateOf(formValidation(uiState)) }
+  var openUnsavedDialog by remember { mutableStateOf(false) }
 
-    if (openUnsavedDialog) {
-      UnsavedDialog(
-        onDismiss = {
-          openUnsavedDialog = false
-        },
-        onConfirm = {
-          openUnsavedDialog = false
-          onBack()
-        })
-    }
-
-    BackHandler(true) {
-      if (uiState.unsavedChanges) {
-        openUnsavedDialog = true
-      } else {
-        onBack()
-      }
-    }
-
-    Scaffold(
-      topBar = {
-        BasicTopAppBar(title = uiState.screenTitle, onBack = {
-          if (uiState.unsavedChanges) {
-            openUnsavedDialog = true
-          } else {
-            onBack()
-          }
-        })
+  if (openUnsavedDialog) {
+    UnsavedDialog(
+      onDismiss = {
+        openUnsavedDialog = false
       },
-      bottomBar = {
-        SaveButton(enabled = formIsValid, onClick = {
-          onSubmitChanges()
-        }, modifier = Modifier.padding(8.dp))
-      }
+      onConfirm = {
+        openUnsavedDialog = false
+        onBack()
+      })
+  }
+
+  BackHandler(true) {
+    if (uiState.unsavedChanges) {
+      openUnsavedDialog = true
+    } else {
+      onBack()
+    }
+  }
+
+  Scaffold(
+    topBar = {
+      BasicTopAppBar(title = uiState.screenTitle, onBack = {
+        if (uiState.unsavedChanges) {
+          openUnsavedDialog = true
+        } else {
+          onBack()
+        }
+      })
+    },
+    bottomBar = {
+      SaveButton(enabled = formIsValid, onClick = {
+        onSubmitChanges()
+      }, modifier = Modifier.padding(8.dp))
+    }
+  ) {
+    Column(
+      modifier = modifier
+        .padding(it)
+        .padding(8.dp)
     ) {
-      Column(
-        modifier = modifier
-          .padding(it)
-          .padding(8.dp)
-      ) {
-        IngredientForm(viewModel = viewModel)
-      }
+      IngredientForm(viewModel = viewModel)
     }
   }
+}
 
-  @Composable
-  fun IngredientForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
-    val uiState by viewModel.ingredientUiState.collectAsState()
+@Composable
+private fun IngredientForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
+  val uiState by viewModel.ingredientUiState.collectAsState()
 
-    FormBase(title = "Ainesosan tiedot", modifier = modifier) {
-      FormTextField(
-        value = uiState.name,
-        onValueChange = { viewModel.setIngredientName(it) },
-        label = "Nimi"
+  FormBase(title = "Ainesosan tiedot", modifier = modifier) {
+    FormTextField(
+      value = uiState.name,
+      onValueChange = { viewModel.setIngredientName(it) },
+      label = "Nimi"
+    )
+    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+      FormFloatField(
+        initialValue = if (uiState.amount == 0f) null else uiState.amount,
+        onValueChange = { viewModel.setIngredientAmount(it) },
+        label = "Määrä",
+        modifier = Modifier.weight(1f, true)
       )
-      Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-        FormFloatField(
-          initialValue = if (uiState.amount == 0f) null else uiState.amount,
-          onValueChange = { viewModel.setIngredientAmount(it) },
-          label = "Määrä",
-          modifier = Modifier.weight(1f, true)
-        )
-        FormTextField(
-          value = uiState.unit,
-          onValueChange = { viewModel.setIngredientUnit(it) },
-          label = "Mitta",
-          imeAction = ImeAction.Done,
-          modifier = Modifier.width(100.dp)
-        )
-      }
+      FormTextField(
+        value = uiState.unit,
+        onValueChange = { viewModel.setIngredientUnit(it) },
+        label = "Mitta",
+        imeAction = ImeAction.Done,
+        modifier = Modifier.width(100.dp)
+      )
     }
   }
+}
 
-  private fun formValidation(uiState: EditRecipeViewModel.IngredientScreenUiState): Boolean {
-    return uiState.name.isNotEmpty()
-  }
+private fun formValidation(uiState: EditRecipeViewModel.IngredientScreenUiState): Boolean {
+  return uiState.name.isNotEmpty()
 }

@@ -21,65 +21,63 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 
-class CategoriesScreen {
-  @OptIn(ExperimentalMaterial3Api::class)
-  @Composable
-  fun Screen(
-    categories: List<String>,
-    onSelect: (String) -> Unit,
-    onAddClick: () -> Unit,
-  ) {
-    Scaffold(
-      topBar = { BasicTopAppBar(title = "Valitse kategoria") },
-      floatingActionButton = {
-        FloatingActionButton(
-          onClick = {
-            onAddClick()
-          }) {
-          Icon(Icons.Filled.Add, "Lisää resepti nappi")
-        }
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoriesScreen(
+  categories: List<String>,
+  onSelect: (String) -> Unit,
+  onAddClick: () -> Unit,
+) {
+  Scaffold(
+    topBar = { BasicTopAppBar(title = "Valitse kategoria") },
+    floatingActionButton = {
+      FloatingActionButton(
+        onClick = {
+          onAddClick()
+        }) {
+        Icon(Icons.Filled.Add, "Lisää resepti nappi")
       }
-    ) { innerPadding ->
-      Column(modifier = Modifier.padding(innerPadding)) {
-        CategoryList(
-          categories = categories,
-          onSelect = {
-            onSelect(it)
-          })
+    }
+  ) { innerPadding ->
+    Column(modifier = Modifier.padding(innerPadding)) {
+      CategoryList(
+        categories = categories,
+        onSelect = {
+          onSelect(it)
+        })
+    }
+  }
+}
+
+@Composable
+private fun CategoryList(categories: List<String>, onSelect: (String) -> Unit) {
+  Column {
+    Divider(color = MaterialTheme.colorScheme.secondary)
+    LazyColumn {
+      items(categories) { category ->
+        CategoryItem(
+          category = category,
+          onClick = { onSelect(category) },
+          modifier = Modifier.fillMaxWidth()
+        )
+        Divider(color = MaterialTheme.colorScheme.secondary)
       }
     }
   }
+}
 
-  @Composable
-  fun CategoryList(categories: List<String>, onSelect: (String) -> Unit) {
-    Column {
-      Divider(color = MaterialTheme.colorScheme.secondary)
-      LazyColumn() {
-        items(categories) { category ->
-          CategoryItem(
-            category = category,
-            onClick = { onSelect(category) },
-            modifier = Modifier.fillMaxWidth()
-          )
-          Divider(color = MaterialTheme.colorScheme.secondary)
-        }
-      }
-    }
-  }
-
-  @Composable
-  fun CategoryItem(
-    category: String,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-  ) {
-    Box(modifier = modifier.clickable(onClick = onClick)) {
-      Text(
-        text = (if (category != "") category else "Muut"),
-        style = MaterialTheme.typography.titleLarge,
-        modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp)
-      )
-    }
+@Composable
+private fun CategoryItem(
+  category: String,
+  onClick: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Box(modifier = modifier.clickable(onClick = onClick)) {
+    Text(
+      text = (if (category != "") category else "Muut"),
+      style = MaterialTheme.typography.titleLarge,
+      modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp)
+    )
   }
 }
 

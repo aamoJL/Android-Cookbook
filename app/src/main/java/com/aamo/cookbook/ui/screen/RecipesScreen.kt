@@ -21,53 +21,51 @@ import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 
-class RecipesScreen {
-  @OptIn(ExperimentalMaterial3Api::class)
-  @Composable
-  fun Screen(
-    recipes: List<Recipe>,
-    onSelect: (Recipe) -> Unit,
-    onBack: () -> Unit,
-    modifier: Modifier = Modifier
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RecipesScreen(
+  recipes: List<Recipe>,
+  onSelect: (Recipe) -> Unit,
+  onBack: () -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Scaffold(
+    topBar = {
+      BasicTopAppBar(title = recipes.elementAtOrNull(0)?.category ?: "", onBack = onBack)
+    }
   ) {
-    Scaffold(
-      topBar = {
-        BasicTopAppBar(title = recipes.elementAtOrNull(0)?.category ?: "", onBack = onBack)
-      }
-    ) {
-      Surface(modifier = modifier.padding(it)) {
-        LazyVerticalGrid(
-          columns = GridCells.Fixed(2),
-        ) {
-          items(recipes) { recipe ->
-            RecipeItem(
-              recipe = recipe,
-              onClick = { onSelect(recipe) },
-              Modifier.fillMaxWidth()
-            )
-          }
+    Surface(modifier = modifier.padding(it)) {
+      LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+      ) {
+        items(recipes) { recipe ->
+          RecipeItem(
+            recipe = recipe,
+            onClick = { onSelect(recipe) },
+            Modifier.fillMaxWidth()
+          )
         }
       }
     }
   }
+}
 
-  @Composable
-  fun RecipeItem(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    Surface(
-      color = MaterialTheme.colorScheme.secondaryContainer,
-      modifier = modifier
-        .clickable(onClick = onClick)
-        .height(200.dp)
-    ) {
-      Box(modifier = Modifier) {
-        Text(
-          text = recipe.name,
-          textAlign = TextAlign.Center,
-          modifier = Modifier
-            .padding(8.dp)
-            .align(Alignment.Center)
-        )
-      }
+@Composable
+private fun RecipeItem(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = Modifier) {
+  Surface(
+    color = MaterialTheme.colorScheme.secondaryContainer,
+    modifier = modifier
+      .clickable(onClick = onClick)
+      .height(200.dp)
+  ) {
+    Box(modifier = Modifier) {
+      Text(
+        text = recipe.name,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+          .padding(8.dp)
+          .align(Alignment.Center)
+      )
     }
   }
 }

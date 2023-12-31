@@ -16,10 +16,12 @@ data class Recipe(
     val unit: String,
     val id: UUID = UUID.randomUUID(),
   ){
-    fun toFormattedString() : String{
-      return if(amount == 0f){
+    // TODO: remove deprecated function
+    @Deprecated("Deprecated", ReplaceWith("Weighted composable"))
+    fun toFormattedString(): String {
+      return if (amount == 0f) {
         name
-      } else{
+      } else {
         val formattedAmount = amount.toString()
           .trimEnd { it == '0' }.trimEnd { it == '.' }.trimEnd { it == ',' }
 
@@ -44,6 +46,10 @@ data class Recipe(
       val ingredients: Set<Ingredient> = emptySet(),
       val id: UUID = UUID.randomUUID(),
     ) {
+      /**
+       * Returns the description as a string that ends with ':' or '.',
+       * depending if the step has any ingredients.
+       */
       fun getDescriptionWithFormattedEndChar(): String {
         return "${description}${if (ingredients.isEmpty()) "." else ":"}"
       }

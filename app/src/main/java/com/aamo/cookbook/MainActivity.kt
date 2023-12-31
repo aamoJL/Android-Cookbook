@@ -7,15 +7,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.ViewModel
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.repository.RecipeRepository
 import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
@@ -23,34 +20,24 @@ import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeScreenPage
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.toUUIDorNull
+import com.aamo.cookbook.viewModel.AppViewModel
 import java.util.UUID
 
 /**
  * Enum class for screen navigation
  */
-enum class Screen(val route: String, val argumentName: String = "") {
+enum class Screen(private val route: String, val argumentName: String = "") {
   Categories("categories"),
-  Recipes("recipes/{categoryName}", "categoryName"),
-  Recipe("recipe/{recipeId}", "recipeId"),
-  EditRecipe("edit/recipe/{recipeId}", "recipeId");
+  Recipes("recipes/", "categoryName"),
+  Recipe("recipe/", "recipeId"),
+  EditRecipe("edit/recipe/", "recipeId");
 
-  fun getRouteWithArgument(argument: String): String =
-    route.replace("{${argumentName}}", argument)
-}
-
-class AppViewModel : ViewModel() {
-  fun getCategories(): List<String> = Repositories.recipeRepository.getRecipes().distinctBy {
-    it.category
-  }.map { recipe -> recipe.category }
-
-  fun getRecipes(category: String): List<Recipe> =
-    Repositories.recipeRepository.getRecipes(category)
-
-  fun getRecipe(recipeId: UUID): Recipe? = Repositories.recipeRepository.getRecipe(recipeId)
-
-  object Repositories {
-    val recipeRepository = RecipeRepository()
+  fun getRoute(): String = when (argumentName) {
+    "" -> route
+    else -> route.plus("{$argumentName}")
   }
+
+  fun getRouteWithArgument(argument: String): String = route.plus(argument)
 }
 
 class MainActivity : ComponentActivity() {
@@ -65,12 +52,12 @@ class MainActivity : ComponentActivity() {
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
           NavHost(
             navController = navController,
-            startDestination = Screen.Categories.route
+            startDestination = Screen.Categories.getRoute()
           ) {
-            composable(Screen.Categories.route) {
+            composable(Screen.Categories.getRoute()) {
               val categories = viewModel.getCategories()
 
-              CategoriesScreen().Screen(
+              CategoriesScreen(
                 categories = categories,
                 onSelect = {
                   navController.navigate(
@@ -79,12 +66,12 @@ class MainActivity : ComponentActivity() {
                 },
                 onAddClick = {
                   navController.navigate(
-                    Screen.EditRecipe.route
+                    Screen.EditRecipe.getRoute()
                   )
                 })
             }
             composable(
-              Screen.Recipes.route,
+              Screen.Recipes.getRoute(),
               arguments = listOf(navArgument(Screen.Recipes.argumentName) {
                 type = NavType.StringType
                 defaultValue = ""
@@ -93,7 +80,7 @@ class MainActivity : ComponentActivity() {
               val category = it.arguments!!.getString(Screen.Recipes.argumentName)!!
               val recipes = viewModel.getRecipes(category)
 
-              RecipesScreen().Screen(
+              RecipesScreen(
                 recipes = recipes,
                 onSelect = { recipe ->
                   navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
@@ -102,7 +89,7 @@ class MainActivity : ComponentActivity() {
               )
             }
             composable(
-              Screen.Recipe.route,
+              Screen.Recipe.getRoute(),
               arguments = listOf(navArgument(Screen.Recipe.argumentName) {
                 type = NavType.StringType
                 defaultValue = UUID(0, 0).toString()
@@ -111,11 +98,11 @@ class MainActivity : ComponentActivity() {
               val recipeId = it.arguments!!.getString(Screen.Recipe.argumentName)!!.toUUIDorNull()
                 ?: UUID(0, 0)
 
-              RecipeScreen().Screen(recipeId, onBack = { navController.navigateUp() })
+              RecipeScreen(recipeId, onBack = { navController.navigateUp() })
             }
             navigation(
               startDestination = EditRecipeScreenPage.EditRecipeInfo.route,
-              route = Screen.EditRecipe.route,
+              route = Screen.EditRecipe.getRoute(),
               arguments = listOf(navArgument(Screen.EditRecipe.argumentName) {
                 type = NavType.StringType
               })
