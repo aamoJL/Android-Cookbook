@@ -18,7 +18,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -29,13 +31,13 @@ fun CategoriesScreen(
   onAddClick: () -> Unit,
 ) {
   Scaffold(
-    topBar = { BasicTopAppBar(title = "Valitse kategoria") },
+    topBar = { BasicTopAppBar(title = stringResource(R.string.screen_title_categories)) },
     floatingActionButton = {
       FloatingActionButton(
         onClick = {
           onAddClick()
         }) {
-        Icon(Icons.Filled.Add, "Lisää resepti nappi")
+        Icon(Icons.Filled.Add, stringResource(R.string.description_add_new_recipe))
       }
     }
   ) { innerPadding ->
@@ -74,7 +76,7 @@ private fun CategoryItem(
 ) {
   Box(modifier = modifier.clickable(onClick = onClick)) {
     Text(
-      text = (if (category != "") category else "Muut"),
+      text = (if (category != "") category else stringResource(R.string.other_category)),
       style = MaterialTheme.typography.titleLarge,
       modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp)
     )

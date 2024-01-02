@@ -16,8 +16,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 
@@ -31,7 +33,9 @@ fun RecipesScreen(
 ) {
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = recipes.elementAtOrNull(0)?.category ?: "", onBack = onBack)
+      BasicTopAppBar(
+        title = recipes.elementAtOrNull(0)?.category ?: stringResource(R.string.screen_title_error_recipes_not_found),
+        onBack = onBack)
     }
   ) {
     Surface(modifier = modifier.padding(it)) {

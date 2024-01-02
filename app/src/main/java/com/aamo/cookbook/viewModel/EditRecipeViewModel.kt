@@ -35,10 +35,6 @@ class EditRecipeViewModel : ViewModel() {
     ),
     val unsavedChanges: Boolean = false
   ) {
-    val screenTitle = when (id) {
-      UUID(0, 0) -> "Lisää uusi resepti"
-      else -> "Muokkaa reseptiä"
-    }
 
     fun toRecipe(): Recipe {
       return Recipe(name, category, subCategory, servings ?: 1, chapters, id)
@@ -52,11 +48,6 @@ class EditRecipeViewModel : ViewModel() {
     val steps: Set<Recipe.Chapter.Step> = emptySet(),
     val unsavedChanges: Boolean = false
   ) {
-    val screenTitle = when (id) {
-      UUID(0, 0) -> "Lisää uusi kappale"
-      else -> "Muokkaa kappaletta"
-    }
-
     fun toChapter(): Recipe.Chapter {
       return Recipe.Chapter(name, steps)
     }
@@ -69,11 +60,6 @@ class EditRecipeViewModel : ViewModel() {
     val ingredients: Set<Recipe.Ingredient> = emptySet(),
     val unsavedChanges: Boolean = false
   ) {
-    val screenTitle = when (id) {
-      UUID(0, 0) -> "Lisää uusi vaihe"
-      else -> "Muokkaa vaihetta"
-    }
-
     fun toStep(): Recipe.Chapter.Step {
       return Recipe.Chapter.Step(description, ingredients)
     }
@@ -87,11 +73,6 @@ class EditRecipeViewModel : ViewModel() {
     val unit: String = "",
     val unsavedChanges: Boolean = false
   ) {
-    val screenTitle = when (id) {
-      UUID(0, 0) -> "Lisää uusi ainesosa"
-      else -> "Muokkaa ainesosaa"
-    }
-
     fun toIngredient(): Recipe.Ingredient {
       return Recipe.Ingredient(name, amount ?: 0f, unit)
     }

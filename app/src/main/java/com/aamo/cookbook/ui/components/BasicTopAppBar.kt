@@ -11,6 +11,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import com.aamo.cookbook.R
+import com.aamo.cookbook.utility.Tags
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -21,7 +26,7 @@ fun BasicTopAppBar(
 ) {
   TopAppBar(
     title = {
-      Text(text = title)
+      Text(text = title, Modifier.testTag(Tags.SCREEN_TITLE.name))
     },
     colors = TopAppBarDefaults.smallTopAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
@@ -34,7 +39,7 @@ fun BasicTopAppBar(
         IconButton(onClick = {
           onBack()
         }) {
-          Icon(Icons.Filled.ArrowBack, contentDescription = "Takaisin")
+          Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.description_screen_back))
         }
       }
     },

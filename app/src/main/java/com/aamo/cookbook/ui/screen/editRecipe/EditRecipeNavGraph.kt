@@ -1,15 +1,13 @@
 package com.aamo.cookbook.ui.screen.editRecipe
 
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
-import com.aamo.cookbook.Screen
 import com.aamo.cookbook.utility.sharedViewModel
-import com.aamo.cookbook.utility.toUUIDorNull
 import com.aamo.cookbook.viewModel.AppViewModel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 /**
  * Enum class for screen navigation
@@ -21,18 +19,12 @@ enum class EditRecipeScreenPage(val route: String) {
   EditStepIngredient("edit/ingredient")
 }
 
-fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController) {
+fun NavGraphBuilder.editRecipeGraph(navHostController: NavHostController, recipeId: UUID?) {
   composable(EditRecipeScreenPage.EditRecipeInfo.route) {
-    val parentEntry = remember(it) {
-      navHostController.getBackStackEntry(Screen.EditRecipe.getRoute())
-    }
-    val recipeIdArgument =
-      parentEntry.arguments?.getString(Screen.EditRecipe.argumentName)
     val editRecipeViewModel =
       it.sharedViewModel<EditRecipeViewModel>(navController = navHostController)
 
-    LaunchedEffect(true) {
-      val recipeId = recipeIdArgument?.toUUIDorNull()
+    LaunchedEffect(recipeId) {
       if (recipeId != null && editRecipeViewModel.infoUiState.value.id != recipeId) {
         val recipe =
           AppViewModel.Repositories.recipeRepository.getRecipe(recipeId)

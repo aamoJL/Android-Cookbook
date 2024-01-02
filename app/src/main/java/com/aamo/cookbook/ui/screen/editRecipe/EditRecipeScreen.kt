@@ -28,10 +28,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -39,8 +42,10 @@ import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -78,7 +83,10 @@ fun EditRecipeScreen(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = uiState.screenTitle, onBack = {
+      BasicTopAppBar(title = when (uiState.id) {
+        UUID(0, 0) -> stringResource(R.string.screen_title_new_recipe)
+        else -> stringResource(R.string.screen_title_existing_recipe)
+      }, onBack = {
         if (uiState.unsavedChanges) {
           openUnsavedDialog = true
         } else {
@@ -86,7 +94,10 @@ fun EditRecipeScreen(
         }
       }, actions = {
         IconButton(onClick = onSubmitChanges) {
-          Icon(imageVector = Icons.Filled.Done, contentDescription = "Tallenna resepti")
+          Icon(
+            imageVector = Icons.Filled.Done,
+            contentDescription = stringResource(R.string.description_save_recipe)
+          )
         }
       })
     }
@@ -107,7 +118,7 @@ fun EditRecipeScreen(
 private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
   val uiState by viewModel.infoUiState.collectAsState()
 
-  FormBase(title = "Reseptin tiedot", modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_recipe), modifier = modifier) {
     Row(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
       modifier = Modifier.fillMaxWidth()
@@ -115,13 +126,13 @@ private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifi
       FormTextField(
         value = uiState.name,
         onValueChange = { viewModel.setRecipeName(it) },
-        label = "Nimi",
+        label = stringResource(R.string.textfield_recipe_name),
         modifier = Modifier.weight(2f, true)
       )
       FormNumberField(
         value = uiState.servings,
         onValueChange = { viewModel.setServings(it) },
-        label = "Annokset",
+        label = stringResource(R.string.textfield_recipe_servings),
         modifier = Modifier.weight(1f, true)
       )
     }
@@ -132,13 +143,13 @@ private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifi
       FormTextField(
         value = uiState.category,
         onValueChange = { viewModel.setCategory(it) },
-        label = "Kategoria",
+        label = stringResource(R.string.textfield_recipe_category),
         modifier = Modifier.weight(1f)
       )
       FormTextField(
         value = uiState.subCategory,
         onValueChange = { viewModel.setSubCategory(it) },
-        label = "(Alakategoria)",
+        label = stringResource(R.string.textfield_recipe_subcategory),
         imeAction = ImeAction.Done,
         modifier = Modifier.weight(1f)
       )
@@ -155,9 +166,9 @@ private fun ChapterList(
   val uiState by viewModel.infoUiState.collectAsState()
 
   FormList(
-    title = "Kappaleet",
+    title = stringResource(R.string.form_list_title_chapters),
     onAddClick = {
-      onEditChapter(-1)
+      onEditChapter(viewModel.infoUiState.value.chapters.size)
     },
     modifier = modifier
   ) {
@@ -184,7 +195,7 @@ private fun ChapterItem(
 ) {
   Box(modifier = Modifier.clickable {
     onClick()
-  }) {
+  }.testTag(Tags.CHAPTER_ITEM.name)) {
     Column(modifier = modifier.fillMaxWidth()) {
       Text(text = "${number}. ${chapter.name}", style = MaterialTheme.typography.titleMedium)
       Column(

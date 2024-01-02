@@ -18,7 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 
 @Composable
 fun FormList(
@@ -54,7 +56,7 @@ fun ListTitleBar(title: String, onAddClick: () -> Unit, modifier: Modifier = Mod
       OutlinedIconButton(
         onClick = { onAddClick() },
       ) {
-        Icon(Icons.Filled.Add, "Add new item.")
+        Icon(Icons.Filled.Add, stringResource(R.string.description_form_add_new_item))
       }
     }
   }

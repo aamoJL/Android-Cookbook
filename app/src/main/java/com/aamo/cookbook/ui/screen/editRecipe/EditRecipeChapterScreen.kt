@@ -23,10 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -36,6 +38,7 @@ import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +76,10 @@ fun EditRecipeChapterScreen(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = uiState.screenTitle, onBack = {
+      BasicTopAppBar(title = when (uiState.id) {
+        UUID(0, 0) -> stringResource(R.string.screen_title_new_chapter)
+        else -> stringResource(R.string.screen_title_existing_chapter)
+      }, onBack = {
         if (uiState.unsavedChanges) {
           openUnsavedDialog = true
         } else {
@@ -112,7 +118,7 @@ private fun StepList(
   val uiState by viewModel.chapterUiState.collectAsState()
 
   FormList(
-    title = "Vaiheet",
+    title = stringResource(R.string.form_list_title_steps),
     onAddClick = { onEditStep(-1) },
     modifier = modifier
   ) {
@@ -132,12 +138,12 @@ private fun StepList(
 fun ChapterForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
   val uiState by viewModel.chapterUiState.collectAsState()
 
-  FormBase(title = "${uiState.index + 1}. Kappaleen tiedot", modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_chapter, uiState.index + 1), modifier = modifier) {
     FormTextField(
       value = uiState.name,
       onValueChange = { viewModel.setChapterName(it) },
       imeAction = ImeAction.Done,
-      label = "Nimi"
+      label = stringResource(R.string.textfield_chapter_name)
     )
   }
 }

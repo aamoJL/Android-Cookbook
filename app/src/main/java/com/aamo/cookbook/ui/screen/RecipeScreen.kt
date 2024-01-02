@@ -41,19 +41,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LabelledCheckBox
-import com.aamo.cookbook.viewModel.AppViewModel
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
 
@@ -61,39 +57,6 @@ import java.util.UUID
 TODO: configuration change changes page to 0
 TODO: checkbox state changes randomly when changing configuration
 */
-
-class RecipeScreenViewModel : ViewModel() {
-  private var _recipe = MutableStateFlow(Recipe("", ""))
-  val recipe = _recipe.asStateFlow()
-
-  private var _currentProgress = MutableStateFlow<List<Int>>(emptyList())
-  val currentProgress = _currentProgress.asStateFlow()
-
-  val currentChapter = _currentProgress.map {
-    it.withIndex().indexOfFirst { item ->
-      item.value != recipe.value.chapters.elementAtOrNull(item.index)?.steps?.size
-    }
-  }
-
-  fun getRecipe(id: UUID) {
-    viewModelScope.launch {
-      val repo = AppViewModel.Repositories.recipeRepository
-      val fetchedRecipe = repo.getRecipe(id)
-      if (fetchedRecipe != null) {
-        _recipe.value = fetchedRecipe
-        _currentProgress.update { fetchedRecipe.chapters.map { 0 } }
-      }
-    }
-  }
-
-  fun updateProgress(index: Int, value: Int) {
-    _currentProgress.update {
-      it.mapIndexed { i, item ->
-        if (i == index) value else item
-      }
-    }
-  }
-}
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
@@ -111,13 +74,12 @@ fun RecipeScreen(
   val pagerState = rememberPagerState(pageCount = { pageCount })
   val currentProgress by viewModel.currentProgress.collectAsState()
   val currentChapterIndex by viewModel.currentChapter.collectAsState(initial = 0)
+  val scope = rememberCoroutineScope()
+  val recipe by viewModel.recipe.collectAsState()
 
   LaunchedEffect(recipeId) {
     viewModel.getRecipe(recipeId)
   }
-
-  val scope = rememberCoroutineScope()
-  val recipe by viewModel.recipe.collectAsState()
 
   Scaffold(
     topBar = { BasicTopAppBar(title = recipe.name, onBack = onBack) }
@@ -136,6 +98,7 @@ fun RecipeScreen(
             modifier = Modifier
               .fillMaxSize()
               .weight(1f, true)
+              .testTag(Tags.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
               0 -> SummaryPage(recipe = recipe)
@@ -308,6 +271,8 @@ private fun SummaryPage(recipe: Recipe) {
 
 @Composable
 private fun CompletedPage() {
+  // TODO: completed page
+  // Remember to change string to resources!
   PageBase(title = "Valmis!")
 }
 
@@ -324,7 +289,7 @@ private fun ChapterPage(
       StepCheckBox(
         step = step,
         checked = checked.value,
-        modifier = Modifier,
+        modifier = Modifier.testTag(Tags.PROGRESS_CHECKBOX.name),
         onCheckedChange = {
           checked.value = it
           onProgressChange(index, it)
@@ -360,6 +325,7 @@ private fun StepCheckBox(
     label = "${step.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
     modifier = modifier.fillMaxWidth()
   ) {
+    // TODO: styling
     Column(modifier = Modifier) {
       for (ingredient in step.ingredients) {
         Text(

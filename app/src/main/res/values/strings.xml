@@ -1,6 +1,38 @@
 <resources>
     <string name="app_name">Cookbook</string>
-    <string name="title_activity_category">CategoryActivity</string>
-    <string name="title_activity_recipe">RecipeActivity</string>
-    <string name="title_activity_category_recipes">CategoryRecipesActivity</string>
+    <string name="other_category">Muut</string>
+    // Screen titles
+    <string name="screen_title_categories">Valitse kategoria</string>
+    <string name="screen_title_error_recipes_not_found">Reseptejä ei löytynyt</string>
+    <string name="screen_title_new_chapter">Lisää uusi kappale</string>
+    <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
+    <string name="screen_title_new_recipe">Lisää uusi resepti</string>
+    <string name="screen_title_existing_recipe">Muokkaa reseptiä</string>
+    <string name="screen_title_new_step">Lisää uusi vaihe</string>
+    <string name="screen_title_existing_step">Muokkaa vaihetta</string>
+    <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
+    <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
+    // Form titles
+    <string name="form_title_recipe">Reseptin tiedot</string>
+    <string name="form_title_chapter">%1$s. Kappaleen tiedot</string>
+    <string name="form_title_step">Vaiheen tiedot</string>
+    <string name="form_title_ingredient">Ainesosan tiedot</string>
+    <string name="form_list_title_chapters">Kappaleet</string>
+    <string name="form_list_title_steps">Vaiheet</string>
+    <string name="form_list_title_ingredients">Ainesosat</string>
+    // Button descriptions
+    <string name="description_add_new_recipe">Lisää uusi resepti</string>
+    <string name="description_save_recipe">Tallenna resepti</string>
+    <string name="description_form_add_new_item">Add new item</string>
+    <string name="description_screen_back">Takaisin</string>
+    // Textfield labels
+    <string name="textfield_recipe_name">Nimi</string>
+    <string name="textfield_recipe_servings">Annokset</string>
+    <string name="textfield_recipe_category">Kategoria</string>
+    <string name="textfield_recipe_subcategory">(Alakategoria)</string>
+    <string name="textfield_chapter_name">Nimi</string>
+    <string name="textfield_step_description">Kuvaus</string>
+    <string name="textfield_ingredient_name">Nimi</string>
+    <string name="textfield_ingredient_amount">Määrä</string>
+    <string name="textfield_ingredient_unit">Mitta</string>
 </resources>

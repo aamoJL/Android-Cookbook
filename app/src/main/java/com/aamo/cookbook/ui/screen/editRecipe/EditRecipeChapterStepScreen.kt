@@ -23,10 +23,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -36,6 +38,7 @@ import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -73,7 +76,10 @@ fun EditRecipeChapterStepScreen(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(uiState.screenTitle, onBack = {
+      BasicTopAppBar(when (uiState.id) {
+        UUID(0, 0) -> stringResource(R.string.screen_title_new_step)
+        else -> stringResource(R.string.screen_title_existing_step)
+      }, onBack = {
         if (uiState.unsavedChanges) {
           openUnsavedDialog = true
         } else {
@@ -111,7 +117,7 @@ private fun StepList(
   val uiState by viewModel.stepUiState.collectAsState()
 
   FormList(
-    title = "Ainesosat",
+    title = stringResource(R.string.form_list_title_ingredients),
     onAddClick = {
       onEditIngredient(-1)
     },
@@ -137,12 +143,12 @@ private fun StepForm(
 ) {
   val uiState by viewModel.stepUiState.collectAsState()
 
-  FormBase(title = "Vaiheen tiedot", modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_step), modifier = modifier) {
     FormTextField(
       value = uiState.description,
       onValueChange = { viewModel.setStepDescription(it) },
       imeAction = ImeAction.Done,
-      label = "Kuvaus"
+      label = stringResource(R.string.textfield_step_description)
     )
   }
 }
