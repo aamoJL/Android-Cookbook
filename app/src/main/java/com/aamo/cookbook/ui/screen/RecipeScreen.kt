@@ -6,13 +6,16 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
@@ -21,10 +24,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -42,12 +47,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LabelledCheckBox
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
@@ -62,8 +72,9 @@ TODO: checkbox state changes randomly when changing configuration
 @Composable
 fun RecipeScreen(
   recipeId: UUID,
-  onBack: () -> Unit,
   modifier: Modifier = Modifier,
+  onBack: () -> Unit = {},
+  onEdit: (id: UUID) -> Unit = {},
   viewModel: RecipeScreenViewModel = viewModel()
 ) {
   val pageCount by combine(viewModel.recipe, viewModel.currentProgress) { recipe, progress ->
@@ -82,7 +93,11 @@ fun RecipeScreen(
   }
 
   Scaffold(
-    topBar = { BasicTopAppBar(title = recipe.name, onBack = onBack) }
+    topBar = { BasicTopAppBar(title = recipe.name, onBack = onBack){
+      IconButton(onClick = { onEdit(recipeId) }) {
+        Icon(imageVector = Icons.Filled.Edit, contentDescription = stringResource(R.string.description_edit_recipe))
+      }
+    } }
   ) {
     Surface(
       modifier = modifier
@@ -256,14 +271,43 @@ private fun PageBase(
 @Composable
 private fun SummaryPage(recipe: Recipe) {
   PageBase(title = recipe.name) {
-    for (chapter in recipe.chapters) {
-      Text(
-        text = chapter.name,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
-      )
-      for (step in chapter.steps) {
-        Ingredients(step = step, Modifier.padding(start = 24.dp))
+    recipe.chapters.forEach { chapter ->
+      Column(modifier = Modifier.fillMaxWidth()) {
+        Text(
+          text = chapter.name,
+          style = MaterialTheme.typography.titleMedium,
+          modifier = Modifier.padding(vertical = 4.dp))
+        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+          chapter.steps.forEach { step ->
+            Column(modifier = Modifier.padding(start = 16.dp)) {
+              for (ingredient in step.ingredients) {
+                Row {
+                  Text(
+                    text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                      .defaultMinSize(minWidth = 40.dp)
+                      .weight(1f)
+                  )
+                  Text(
+                    text = ingredient.unit,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = FontStyle.Italic,
+                    modifier = Modifier
+                      .weight(1f)
+                      .padding(horizontal = 8.dp)
+                  )
+                  Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.weight(5f)
+                  )
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
@@ -299,18 +343,6 @@ private fun ChapterPage(
 }
 
 @Composable
-private fun Ingredients(step: Recipe.Chapter.Step, modifier: Modifier = Modifier) {
-  Column(modifier = modifier) {
-    for (ingredient in step.ingredients) {
-      Text(
-        text = ingredient.toFormattedString(),
-        style = MaterialTheme.typography.bodyMedium
-      )
-    }
-  }
-}
-
-@Composable
 private fun StepCheckBox(
   step: Recipe.Chapter.Step,
   checked: Boolean,
@@ -325,14 +357,31 @@ private fun StepCheckBox(
     label = "${step.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
     modifier = modifier.fillMaxWidth()
   ) {
-    // TODO: styling
-    Column(modifier = Modifier) {
+    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       for (ingredient in step.ingredients) {
-        Text(
-          text = ingredient.toFormattedString(),
-          style = MaterialTheme.typography.bodyMedium,
-          modifier = Modifier.padding(start = 40.dp)
-        )
+        Row(modifier = Modifier) {
+          Text(
+            text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+            style = MaterialTheme.typography.bodyMedium,
+            textAlign = TextAlign.End,
+            modifier = Modifier
+              .defaultMinSize(minWidth = 40.dp)
+              .weight(1f)
+          )
+          Text(
+            text = ingredient.unit,
+            style = MaterialTheme.typography.bodyMedium,
+            fontStyle = FontStyle.Italic,
+            modifier = Modifier
+              .weight(1f)
+              .padding(horizontal = 8.dp)
+          )
+          Text(
+            text = ingredient.name,
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(5f)
+          )
+        }
       }
     }
   }

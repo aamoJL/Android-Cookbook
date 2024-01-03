@@ -25,6 +25,8 @@
     <string name="description_save_recipe">Tallenna resepti</string>
     <string name="description_form_add_new_item">Add new item</string>
     <string name="description_screen_back">Takaisin</string>
+    <string name="description_edit_recipe">Muokkaa reseptiä</string>
+    <string name="description_delete_recipe">Delete recipe</string>
     // Textfield labels
     <string name="textfield_recipe_name">Nimi</string>
     <string name="textfield_recipe_servings">Annokset</string>
@@ -35,4 +37,12 @@
     <string name="textfield_ingredient_name">Nimi</string>
     <string name="textfield_ingredient_amount">Määrä</string>
     <string name="textfield_ingredient_unit">Mitta</string>
+    // Dialog
+    <string name="dialog_title_delete_recipe">Poista resepti?</string>
+    <string name="dialog_text_delete_recipe">Haluatko varmasti poistaa reseptin?</string>
+    <string name="dialog_confirm_delete_recipe">Poista</string>
+    <string name="dialog_dismiss_default">Peruuta</string>
+    <string name="dialog_title_unsaved_default">Tallentamattomia tietoja!</string>
+    <string name="dialog_text_unsaved_default">Muutoksesi menetetään, jos palaat edelliselle sivulle.</string>
+    <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
 </resources>

@@ -36,7 +36,7 @@ import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
-import com.aamo.cookbook.utility.toStringWithoutZero
+import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
 
@@ -166,12 +166,12 @@ fun StepItem(
       Column(
         modifier = Modifier
           .padding(start = 8.dp)
-          .width(IntrinsicSize.Min)
+          .width(IntrinsicSize.Max)
       ) {
         for (ingredient in step.ingredients) {
           Row {
             Text(
-              text = ingredient.amount.toStringWithoutZero(),
+              text = if(ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
               style = MaterialTheme.typography.bodySmall,
               textAlign = TextAlign.End,
               modifier = Modifier
@@ -183,13 +183,13 @@ fun StepItem(
               style = MaterialTheme.typography.bodySmall,
               fontStyle = FontStyle.Italic,
               modifier = Modifier
-                .padding(start = 8.dp)
+                .padding(horizontal = 8.dp)
                 .weight(1f)
             )
             Text(
               text = ingredient.name,
               style = MaterialTheme.typography.bodySmall,
-              modifier = Modifier.weight(2f)
+              modifier = Modifier.weight(5f)
             )
           }
         }

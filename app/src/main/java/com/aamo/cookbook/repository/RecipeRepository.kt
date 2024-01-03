@@ -123,15 +123,44 @@ class RecipeRepository {
     return recipes
   }
 
-  fun getRecipes(category: String): List<Recipe>{
+  fun getRecipes(category: String): List<Recipe> {
     return recipes.filter { x -> x.category == category }
   }
 
-  fun addRecipe(recipe: Recipe) : Boolean{
-    if(recipes.firstOrNull { x -> x.id == recipe.id } == null){
+  fun addRecipe(recipe: Recipe) : Boolean {
+    if(getRecipe(recipe.id) == null){
       recipes.add(recipe)
       return true
     }
     return false
+  }
+
+  fun addOrUpdate(recipe: Recipe) : Boolean {
+    return if(getRecipe(recipe.id) != null){
+      updateRecipe(recipe)
+    }
+    else {
+      addRecipe(recipe)
+    }
+  }
+
+  private fun updateRecipe(recipe: Recipe) : Boolean {
+    val index = recipes.indexOfFirst { it.id == recipe.id }
+
+    if(index != -1){
+      recipes[index] = recipe
+    }
+
+    return index != -1
+  }
+
+  fun removeRecipe(id: UUID): Boolean {
+    val index = recipes.indexOfFirst { it.id == id }
+
+    if(index != -1) {
+      recipes.removeAt(index)
+    }
+
+    return index != -1
   }
 }

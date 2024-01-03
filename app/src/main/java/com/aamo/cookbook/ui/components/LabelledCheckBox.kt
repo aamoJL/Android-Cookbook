@@ -30,21 +30,23 @@ import androidx.compose.ui.unit.dp
         indication = rememberRipple(color = MaterialTheme.colorScheme.primary),
         interactionSource = remember { MutableInteractionSource() },
         onClick = { onCheckedChange(!checked) }
-      ).padding(horizontal = 4.dp, vertical = 10.dp)
+      )
+      .padding(horizontal = 4.dp, vertical = 8.dp)
   ) {
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.Top) {
       Checkbox(
         checked = checked,
         onCheckedChange = null
       )
-      Spacer(Modifier.size(6.dp))
-      Text(
-        text = label,
-        style = MaterialTheme.typography.titleMedium
-      )
-    }
-    Row {
-      content()
+      Spacer(Modifier.size(8.dp))
+      Column {
+        Text(
+          text = label,
+          style = MaterialTheme.typography.titleMedium,
+          modifier = Modifier.padding(bottom = 4.dp)
+        )
+        content()
+      }
     }
   }
 }

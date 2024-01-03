@@ -36,7 +36,7 @@ import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
-import com.aamo.cookbook.utility.toStringWithoutZero
+import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
 
@@ -44,10 +44,10 @@ import java.util.UUID
 @Composable
 fun EditRecipeChapterStepScreen(
   viewModel: EditRecipeViewModel,
-  onEditIngredient: (index: Int) -> Unit,
-  onSubmitChanges: () -> Unit,
-  onBack: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  onEditIngredient: (index: Int) -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onBack: () -> Unit = {}
 ) {
   val uiState by viewModel.stepUiState.collectAsState()
   val formIsValid by remember(uiState) {
@@ -166,7 +166,7 @@ private fun IngredientItem(
     .fillMaxWidth()) {
     Row(modifier = modifier.width(IntrinsicSize.Min)) {
       Text(
-        text = if (ingredient.amount != 0f) ingredient.amount.toStringWithoutZero() else "",
+        text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
         style = MaterialTheme.typography.titleMedium,
         textAlign = TextAlign.End,
         modifier = Modifier
@@ -178,13 +178,13 @@ private fun IngredientItem(
         style = MaterialTheme.typography.titleMedium,
         fontStyle = FontStyle.Italic,
         modifier = Modifier
-          .padding(start = 8.dp)
+          .padding(horizontal = 8.dp)
           .weight(1f)
       )
       Text(
         text = ingredient.name,
         style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.weight(2f)
+        modifier = Modifier.weight(5f)
       )
     }
   }

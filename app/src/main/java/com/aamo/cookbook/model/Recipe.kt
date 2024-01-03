@@ -15,20 +15,7 @@ data class Recipe(
     val amount: Float,
     val unit: String,
     val id: UUID = UUID.randomUUID(),
-  ){
-    // TODO: remove deprecated function
-    @Deprecated("Deprecated", ReplaceWith("Weighted composable"))
-    fun toFormattedString(): String {
-      return if (amount == 0f) {
-        name
-      } else {
-        val formattedAmount = amount.toString()
-          .trimEnd { it == '0' }.trimEnd { it == '.' }.trimEnd { it == ',' }
-
-        "$formattedAmount $unit – $name"
-      }
-    }
-  }
+  )
 
   /**
    * Part of a recipe, that can be made separately from other chapters.

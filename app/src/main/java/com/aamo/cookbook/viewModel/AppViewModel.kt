@@ -13,7 +13,11 @@ class AppViewModel : ViewModel() {
   fun getRecipes(category: String): List<Recipe> =
     Repositories.recipeRepository.getRecipes(category)
 
-  fun getRecipe(recipeId: UUID): Recipe? = Repositories.recipeRepository.getRecipe(recipeId)
+  fun getRecipe(id: UUID): Recipe? = Repositories.recipeRepository.getRecipe(id)
+
+  fun addOrUpdateRecipe(recipe: Recipe): Boolean = Repositories.recipeRepository.addOrUpdate(recipe)
+
+  fun removeRecipe(id: UUID): Boolean = Repositories.recipeRepository.removeRecipe(id)
 
   object Repositories {
     val recipeRepository = RecipeRepository()

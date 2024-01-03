@@ -110,7 +110,10 @@ fun MainNavGraph(
       val recipeId = it.arguments?.getString(Screen.Recipe.argumentName)?.toUUIDorNull()
         ?: UUID(0, 0)
 
-      RecipeScreen(recipeId, onBack = { navController.navigateUp() })
+      RecipeScreen(
+        recipeId = recipeId,
+        onBack = { navController.navigateUp() },
+        onEdit = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) })
     }
     navigation(
       startDestination = EditRecipeScreenPage.EditRecipeInfo.route,
@@ -120,10 +123,20 @@ fun MainNavGraph(
         defaultValue = ""
       })
     ) {
-      val recipeIdArgument =
-        navController.currentBackStackEntry?.arguments?.getString(Screen.EditRecipe.argumentName)
-
-      this.editRecipeGraph(navController, recipeIdArgument?.toUUIDorNull())
+      this.editRecipeGraph(
+        navController,
+        onSubmit = {
+          if (viewModel.addOrUpdateRecipe(it)) {
+            navController.navigateUp()
+          }
+        },
+        onDelete = {
+          if (viewModel.removeRecipe(it)) {
+            navController.navigate(Screen.Categories.getRoute()){
+              popUpTo(Screen.Categories.getRoute()){ inclusive = true }
+            }
+          }
+        })
     }
   }
 }

@@ -13,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -21,6 +24,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -43,7 +47,7 @@ import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
-import com.aamo.cookbook.utility.toStringWithoutZero
+import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
 
@@ -51,26 +55,45 @@ import java.util.UUID
 @Composable
 fun EditRecipeScreen(
   viewModel: EditRecipeViewModel,
-  onEditChapter: (index: Int) -> Unit,
-  onSubmitChanges: () -> Unit,
-  onBack: () -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  onEditChapter: (index: Int) -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onDelete: () -> Unit = {},
+  onBack: () -> Unit = {}
 ) {
   val uiState by viewModel.infoUiState.collectAsState()
   val formIsValid by remember(uiState) {
     mutableStateOf(formValidation(uiState))
   }
   var openUnsavedDialog by remember { mutableStateOf(false) }
+  var openDeleteDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
     UnsavedDialog(
-      onDismiss = {
-        openUnsavedDialog = false
-      },
+      onDismiss = { openUnsavedDialog = false },
       onConfirm = {
         openUnsavedDialog = false
         onBack()
       })
+  }
+  else if (openDeleteDialog) {
+    AlertDialog(
+      title = { Text(text = stringResource(R.string.dialog_title_delete_recipe)) },
+      text = { Text(text = stringResource(R.string.dialog_text_delete_recipe)) },
+      onDismissRequest = { openDeleteDialog = false },
+      confirmButton = {
+        TextButton(onClick = {
+          openDeleteDialog = false
+          onDelete()
+        }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+        ){
+          Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
+        } },
+      dismissButton = {
+        TextButton(onClick = { openDeleteDialog = false }){
+          Text(text = stringResource(R.string.dialog_dismiss_default))
+        } },
+      )
   }
 
   BackHandler(true) {
@@ -93,7 +116,16 @@ fun EditRecipeScreen(
           onBack()
         }
       }, actions = {
-        IconButton(onClick = onSubmitChanges) {
+        if(uiState.id != UUID(0,0)){
+          IconButton(onClick = { openDeleteDialog = true }) {
+            Icon(
+              imageVector = Icons.Filled.Delete,
+              tint = MaterialTheme.colorScheme.error,
+              contentDescription = stringResource(R.string.description_delete_recipe)
+            )
+          }
+        }
+        IconButton(onClick = onSubmitChanges, enabled = formIsValid) {
           Icon(
             imageVector = Icons.Filled.Done,
             contentDescription = stringResource(R.string.description_save_recipe)
@@ -193,15 +225,17 @@ private fun ChapterItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = Modifier.clickable {
-    onClick()
-  }.testTag(Tags.CHAPTER_ITEM.name)) {
-    Column(modifier = modifier.fillMaxWidth()) {
+  Box(modifier = Modifier
+    .clickable {
+      onClick()
+    }
+    .testTag(Tags.CHAPTER_ITEM.name)) {
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier.fillMaxWidth()) {
       Text(text = "${number}. ${chapter.name}", style = MaterialTheme.typography.titleMedium)
       Column(
         modifier = Modifier
           .padding(start = 16.dp)
-          .width(IntrinsicSize.Min)
+          .width(IntrinsicSize.Max)
       ) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
           for ((index, step) in chapter.steps.withIndex()) {
@@ -214,7 +248,7 @@ private fun ChapterItem(
                 for (ingredient in step.ingredients) {
                   Row {
                     Text(
-                      text = ingredient.amount.toStringWithoutZero(),
+                      text = if(ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
                       style = MaterialTheme.typography.bodySmall,
                       textAlign = TextAlign.End,
                       modifier = Modifier
@@ -227,12 +261,12 @@ private fun ChapterItem(
                       fontStyle = FontStyle.Italic,
                       modifier = Modifier
                         .weight(1f)
-                        .padding(start = 4.dp)
+                        .padding(horizontal = 8.dp)
                     )
                     Text(
                       text = ingredient.name,
                       style = MaterialTheme.typography.bodySmall,
-                      modifier = Modifier.weight(2f)
+                      modifier = Modifier.weight(5f)
                     )
                   }
                 }
