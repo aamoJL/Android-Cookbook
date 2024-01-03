@@ -15,18 +15,7 @@ data class Recipe(
     val amount: Float,
     val unit: String,
     val id: UUID = UUID.randomUUID(),
-  ){
-    fun toFormattedString() : String{
-      return if(amount == 0f){
-        name
-      } else{
-        val formattedAmount = amount.toString()
-          .trimEnd { it == '0' }.trimEnd { it == '.' }.trimEnd { it == ',' }
-
-        "$formattedAmount $unit – $name"
-      }
-    }
-  }
+  )
 
   /**
    * Part of a recipe, that can be made separately from other chapters.
@@ -43,6 +32,14 @@ data class Recipe(
       val description: String,
       val ingredients: Set<Ingredient> = emptySet(),
       val id: UUID = UUID.randomUUID(),
-    ){}
+    ) {
+      /**
+       * Returns the description as a string that ends with ':' or '.',
+       * depending if the step has any ingredients.
+       */
+      fun getDescriptionWithFormattedEndChar(): String {
+        return "${description}${if (ingredients.isEmpty()) "." else ":"}"
+      }
+    }
   }
 }
