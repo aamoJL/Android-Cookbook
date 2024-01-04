@@ -6,20 +6,16 @@ import com.aamo.cookbook.repository.RecipeRepository
 import java.util.UUID
 
 class AppViewModel : ViewModel() {
-  fun getCategories(): List<String> = Repositories.recipeRepository.getRecipes().distinctBy {
+  private val recipeRepository = RecipeRepository()
+  fun getCategories(): List<String> = recipeRepository.getRecipes().distinctBy {
     it.category
   }.map { recipe -> recipe.category }
 
-  fun getRecipes(category: String): List<Recipe> =
-    Repositories.recipeRepository.getRecipes(category)
+  fun getRecipes(category: String): List<Recipe> = recipeRepository.getRecipes(category)
 
-  fun getRecipe(id: UUID): Recipe? = Repositories.recipeRepository.getRecipe(id)
+  fun getRecipe(id: UUID): Recipe? = recipeRepository.getRecipe(id)
 
-  fun addOrUpdateRecipe(recipe: Recipe): Boolean = Repositories.recipeRepository.addOrUpdate(recipe)
+  fun addOrUpdateRecipe(recipe: Recipe): Boolean = recipeRepository.addOrUpdate(recipe)
 
-  fun removeRecipe(id: UUID): Boolean = Repositories.recipeRepository.removeRecipe(id)
-
-  object Repositories {
-    val recipeRepository = RecipeRepository()
-  }
+  fun removeRecipe(id: UUID): Boolean = recipeRepository.removeRecipe(id)
 }

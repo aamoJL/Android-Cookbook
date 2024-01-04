@@ -23,6 +23,7 @@ enum class EditRecipeScreenPage(val route: String) {
 }
 
 fun NavGraphBuilder.editRecipeGraph(
+  viewModel: AppViewModel,
   navController: NavHostController,
   onSubmit: (Recipe) -> Unit = {},
   onDelete: (UUID) -> Unit = {}
@@ -37,7 +38,7 @@ fun NavGraphBuilder.editRecipeGraph(
     LaunchedEffect(recipeId) {
       if (recipeId != null && editRecipeViewModel.infoUiState.value.id != recipeId) {
         val recipe =
-          AppViewModel.Repositories.recipeRepository.getRecipe(recipeId)
+          viewModel.getRecipe(recipeId)
         if (recipe != null)
           editRecipeViewModel.initInfoUiState(recipe)
       }

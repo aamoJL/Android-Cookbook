@@ -15,24 +15,7 @@ class EditRecipeViewModel : ViewModel() {
     val category: String = "",
     val subCategory: String = "",
     val servings: Int? = null,
-    val chapters: Set<Recipe.Chapter> = setOf(
-      Recipe.Chapter(
-        "Taikina", setOf(
-          Recipe.Chapter.Step(
-            "Sekoita", setOf(
-              Recipe.Ingredient("Kananmuna", 2f, "kpl"),
-              Recipe.Ingredient("Kahvi", 50f, "dl")
-            )
-          ),
-          Recipe.Chapter.Step(
-            "Lisää joukkoon", setOf(
-              Recipe.Ingredient("Jauho", 500f, "g"),
-              Recipe.Ingredient("Maito", 50f, "ml")
-            )
-          )
-        )
-      )
-    ),
+    val chapters: Set<Recipe.Chapter> = emptySet(),
     val unsavedChanges: Boolean = false
   ) {
 

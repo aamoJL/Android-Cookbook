@@ -124,6 +124,7 @@ fun MainNavGraph(
       })
     ) {
       this.editRecipeGraph(
+        viewModel = viewModel,
         navController,
         onSubmit = {
           if (viewModel.addOrUpdateRecipe(it)) {

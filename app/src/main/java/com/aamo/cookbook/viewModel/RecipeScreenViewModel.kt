@@ -3,6 +3,7 @@ package com.aamo.cookbook.viewModel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.repository.RecipeRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
@@ -11,6 +12,7 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 
 class RecipeScreenViewModel : ViewModel() {
+  private var recipeRepository = RecipeRepository()
   private var _recipe = MutableStateFlow(Recipe("", ""))
   val recipe = _recipe.asStateFlow()
 
@@ -25,7 +27,7 @@ class RecipeScreenViewModel : ViewModel() {
 
   fun getRecipe(id: UUID) {
     viewModelScope.launch {
-      val repo = AppViewModel.Repositories.recipeRepository
+      val repo = recipeRepository
       val fetchedRecipe = repo.getRecipe(id)
       if (fetchedRecipe != null) {
         _recipe.value = fetchedRecipe
