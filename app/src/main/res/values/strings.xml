@@ -15,7 +15,7 @@
     // Form titles
     <string name="form_title_recipe">Reseptin tiedot</string>
     <string name="form_title_chapter">%1$s. Kappaleen tiedot</string>
-    <string name="form_title_step">Vaiheen tiedot</string>
+    <string name="form_title_step">%1$s. Vaiheen tiedot</string>
     <string name="form_title_ingredient">Ainesosan tiedot</string>
     <string name="form_list_title_chapters">Kappaleet</string>
     <string name="form_list_title_steps">Vaiheet</string>

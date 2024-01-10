@@ -40,7 +40,7 @@ class EditRecipeScreenTestNewRecipe {
       }
     }
 
-    Navigation(rule).navigateTo_EditRecipeScreen()
+    Navigation(rule).navigateTo_NewRecipeScreen()
   }
 
   @Test
@@ -103,7 +103,7 @@ class EditRecipeChapterScreenTestNewChapter {
       }
     }
 
-    Navigation(rule).navigateTo_EditRecipeScreen()
+    Navigation(rule).navigateTo_NewRecipeScreen()
 
     // Change page to new chapter page
     rule.onNodeWithContentDescription(R.string.description_form_add_new_item).performClick()

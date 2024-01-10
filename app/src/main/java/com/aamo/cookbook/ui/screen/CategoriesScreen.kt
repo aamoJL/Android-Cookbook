@@ -27,16 +27,13 @@ import com.aamo.cookbook.ui.components.BasicTopAppBar
 @Composable
 fun CategoriesScreen(
   categories: List<String>,
-  onSelect: (String) -> Unit,
-  onAddClick: () -> Unit,
+  onSelectCategory: (String) -> Unit,
+  onAddRecipeClick: () -> Unit,
 ) {
   Scaffold(
     topBar = { BasicTopAppBar(title = stringResource(R.string.screen_title_categories)) },
     floatingActionButton = {
-      FloatingActionButton(
-        onClick = {
-          onAddClick()
-        }) {
+      FloatingActionButton(onClick = onAddRecipeClick) {
         Icon(Icons.Filled.Add, stringResource(R.string.description_add_new_recipe))
       }
     }
@@ -44,9 +41,8 @@ fun CategoriesScreen(
     Column(modifier = Modifier.padding(innerPadding)) {
       CategoryList(
         categories = categories,
-        onSelect = {
-          onSelect(it)
-        })
+        onSelect = onSelectCategory
+      )
     }
   }
 }

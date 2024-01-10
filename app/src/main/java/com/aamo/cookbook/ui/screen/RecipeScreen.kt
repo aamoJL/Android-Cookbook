@@ -35,10 +35,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -53,56 +52,53 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LabelledCheckBox
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
-import kotlinx.coroutines.flow.combine
+import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
-import java.util.UUID
-
-/*
-TODO: configuration change changes page to 0
-TODO: checkbox state changes randomly when changing configuration
-*/
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RecipeScreen(
-  recipeId: UUID,
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
-  onEdit: (id: UUID) -> Unit = {},
-  viewModel: RecipeScreenViewModel = viewModel()
+  onEditRecipe: (id: Int) -> Unit = {},
+  viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
 ) {
-  val pageCount by combine(viewModel.recipe, viewModel.currentProgress) { recipe, progress ->
-    if (progress.sum() == recipe.chapters.sumOf { it.steps.size })
-      recipe.chapters.size + 2
-    else recipe.chapters.size + 1
-  }.collectAsState(initial = 1)
-  val pagerState = rememberPagerState(pageCount = { pageCount })
+  val recipe = viewModel.recipe
   val currentProgress by viewModel.currentProgress.collectAsState()
-  val currentChapterIndex by viewModel.currentChapter.collectAsState(initial = 0)
-  val scope = rememberCoroutineScope()
-  val recipe by viewModel.recipe.collectAsState()
-
-  LaunchedEffect(recipeId) {
-    viewModel.getRecipe(recipeId)
+  val pageCount by rememberSaveable(currentProgress) {
+    mutableIntStateOf(
+      if (currentProgress.any { x -> x.any { !it } }) recipe.chapters.size + 1
+      else recipe.chapters.size + 2
+    )
   }
+  val pagerState = rememberPagerState(pageCount = { pageCount })
+  val scope = rememberCoroutineScope()
 
   Scaffold(
-    topBar = { BasicTopAppBar(title = recipe.name, onBack = onBack){
-      IconButton(onClick = { onEdit(recipeId) }) {
-        Icon(imageVector = Icons.Filled.Edit, contentDescription = stringResource(R.string.description_edit_recipe))
+    topBar = {
+      BasicTopAppBar(title = recipe.value.name, onBack = onBack) {
+        IconButton(onClick = { onEditRecipe(recipe.value.id) }) {
+          Icon(
+            imageVector = Icons.Filled.Edit,
+            contentDescription = stringResource(R.string.description_edit_recipe)
+          )
+        }
       }
-    } }
-  ) {
+    }
+  ) { paddingValues ->
     Surface(
       modifier = modifier
         .fillMaxSize()
-        .padding(it)
+        .padding(paddingValues)
     ) {
       Box {
         Column(modifier = Modifier) {
@@ -119,18 +115,16 @@ fun RecipeScreen(
               0 -> SummaryPage(recipe = recipe)
               in (1..recipe.chapters.size) -> {
                 val chapterIndex = pageIndex - 1
+                val chapter = recipe.chapters.elementAt(chapterIndex)
 
                 ChapterPage(
-                  chapter = recipe.chapters.elementAt(chapterIndex),
-                  chapterNumber = pageIndex,
-                  onProgressChange = { _, value ->
-                    if (value) viewModel.updateProgress(
-                      chapterIndex,
-                      viewModel.currentProgress.value[chapterIndex] + 1
-                    )
-                    else viewModel.updateProgress(
-                      chapterIndex,
-                      viewModel.currentProgress.value[chapterIndex] - 1
+                  chapter = chapter,
+                  chapterProgress = currentProgress.elementAtOrElse(chapterIndex){ emptyList() },
+                  onProgressChange = { stepIndex, value ->
+                    viewModel.updateProgress(
+                      chapterIndex = chapterIndex,
+                      stepIndex = stepIndex,
+                      value = value
                     )
                   }
                 )
@@ -147,6 +141,9 @@ fun RecipeScreen(
             .padding(16.dp),
           horizontalArrangement = Arrangement.Center
         ) {
+          val currentChapterIndex = currentProgress.indexOfFirst { progress ->
+            progress.any { x -> !x }
+          }
           val currentProgressPage = when (currentChapterIndex) {
             -1 -> recipe.chapters.size + 1
             else -> currentChapterIndex + 1
@@ -164,20 +161,19 @@ fun RecipeScreen(
             icon = Icons.Outlined.Info
           )
 
-          repeat(recipe.chapters.size) { iteration ->
-            val isTargetPage = currentChapterIndex == iteration
+          repeat(recipe.chapters.size) { index ->
+            val isTargetPage = currentChapterIndex == index
             PageIndicatorItem(
-              selected = iteration + 1 == pagerState.currentPage,
+              selected = index + 1 == pagerState.currentPage,
               onClick = {
                 scope.launch {
-                  pagerState.animateScrollToPage(iteration + 1)
+                  pagerState.animateScrollToPage(index + 1)
                 }
               },
               isTargetPage = isTargetPage,
               color = if (isTargetPage) MaterialTheme.colorScheme.inversePrimary else
                 MaterialTheme.colorScheme.secondaryContainer,
-              icon = if (recipe.chapters.elementAt(iteration).steps.size ==
-                currentProgress.elementAt(iteration)
+              icon = if (currentProgress.elementAtOrElse(index){ emptyList() }.all { it }
               ) Icons.Filled.Done else null
             )
           }
@@ -269,18 +265,21 @@ private fun PageBase(
 }
 
 @Composable
-private fun SummaryPage(recipe: Recipe) {
-  PageBase(title = recipe.name) {
+private fun SummaryPage(
+  recipe: RecipeWithChaptersStepsAndIngredients
+) {
+  PageBase(title = recipe.value.name) {
     recipe.chapters.forEach { chapter ->
       Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-          text = chapter.name,
+          text = chapter.value.name,
           style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.padding(vertical = 4.dp))
+          modifier = Modifier.padding(vertical = 4.dp)
+        )
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
           chapter.steps.forEach { step ->
             Column(modifier = Modifier.padding(start = 16.dp)) {
-              for (ingredient in step.ingredients) {
+              step.ingredients.forEach { ingredient ->
                 Row {
                   Text(
                     text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
@@ -322,29 +321,28 @@ private fun CompletedPage() {
 
 @Composable
 private fun ChapterPage(
-  chapter: Recipe.Chapter,
-  chapterNumber: Int,
+  chapter: ChapterWithStepsAndIngredients,
+  chapterProgress: List<Boolean>,
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
 ) {
-  PageBase(title = "${chapterNumber}. ${chapter.name}") {
+  PageBase(title = "${chapter.value.orderNumber}. ${chapter.value.name}") {
     for ((index, step) in chapter.steps.withIndex()) {
-      val checked = rememberSaveable(step.id) { mutableStateOf(false) }
+      val checked = chapterProgress.elementAtOrElse(index) { false }
 
       StepCheckBox(
-        step = step,
-        checked = checked.value,
+        step = step.value,
+        ingredients = step.ingredients.filter { it.stepId == step.value.id },
+        checked = checked,
         modifier = Modifier.testTag(Tags.PROGRESS_CHECKBOX.name),
-        onCheckedChange = {
-          checked.value = it
-          onProgressChange(index, it)
-        })
+        onCheckedChange = { onProgressChange(index, it) })
     }
   }
 }
 
 @Composable
 private fun StepCheckBox(
-  step: Recipe.Chapter.Step,
+  step: Step,
+  ingredients: List<Ingredient>,
   checked: Boolean,
   onCheckedChange: (checked: Boolean) -> Unit,
   modifier: Modifier = Modifier
@@ -354,11 +352,11 @@ private fun StepCheckBox(
     onCheckedChange = {
       onCheckedChange(it)
     },
-    label = "${step.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
+    label = "${step.description}${if (ingredients.isEmpty()) '.' else ':'}",
     modifier = modifier.fillMaxWidth()
   ) {
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-      for (ingredient in step.ingredients) {
+      for (ingredient in ingredients) {
         Row(modifier = Modifier) {
           Text(
             text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),

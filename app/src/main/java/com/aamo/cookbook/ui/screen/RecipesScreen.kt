@@ -16,18 +16,20 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.utility.Tags
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipesScreen(
   recipes: List<Recipe>,
-  onSelect: (Recipe) -> Unit,
+  onSelectRecipe: (Recipe) -> Unit,
   onBack: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -45,7 +47,7 @@ fun RecipesScreen(
         items(recipes) { recipe ->
           RecipeItem(
             recipe = recipe,
-            onClick = { onSelect(recipe) },
+            onClick = { onSelectRecipe(recipe) },
             Modifier.fillMaxWidth()
           )
         }
@@ -61,6 +63,7 @@ private fun RecipeItem(recipe: Recipe, onClick: () -> Unit, modifier: Modifier =
     modifier = modifier
       .clickable(onClick = onClick)
       .height(200.dp)
+      .testTag(Tags.RECIPE_ITEM.name)
   ) {
     Box(modifier = Modifier) {
       Text(

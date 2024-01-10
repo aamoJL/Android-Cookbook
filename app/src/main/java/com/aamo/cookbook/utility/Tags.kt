@@ -5,4 +5,6 @@ enum class Tags {
   PROGRESS_CHECKBOX,
   PAGER,
   SCREEN_TITLE,
+  RECIPE_ITEM,
+  CATEGORY_ITEM
 }

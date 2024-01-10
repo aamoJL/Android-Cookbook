@@ -29,7 +29,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
@@ -38,7 +38,6 @@ import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,7 +76,7 @@ fun EditRecipeChapterStepScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(when (uiState.id) {
-        UUID(0, 0) -> stringResource(R.string.screen_title_new_step)
+        0 -> stringResource(R.string.screen_title_new_step)
         else -> stringResource(R.string.screen_title_existing_step)
       }, onBack = {
         if (uiState.unsavedChanges) {
@@ -143,7 +142,7 @@ private fun StepForm(
 ) {
   val uiState by viewModel.stepUiState.collectAsState()
 
-  FormBase(title = stringResource(R.string.form_title_step), modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_step, uiState.orderNumber), modifier = modifier) {
     FormTextField(
       value = uiState.description,
       onValueChange = { viewModel.setStepDescription(it) },
@@ -155,7 +154,7 @@ private fun StepForm(
 
 @Composable
 private fun IngredientItem(
-  ingredient: Recipe.Ingredient,
+  ingredient: Ingredient,
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {

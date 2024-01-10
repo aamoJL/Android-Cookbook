@@ -26,7 +26,6 @@ import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,7 +61,7 @@ fun EditRecipeChapterStepIngredientScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(title = when (uiState.id) {
-        UUID(0, 0) -> stringResource(R.string.screen_title_new_ingredient)
+        0 -> stringResource(R.string.screen_title_new_ingredient)
         else -> stringResource(R.string.screen_title_existing_ingredient)
       }, onBack = {
         if (uiState.unsavedChanges) {

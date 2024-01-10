@@ -67,21 +67,17 @@ dependencies {
   implementation(platform("androidx.compose:compose-bom:2023.03.00"))
   implementation("androidx.navigation:navigation-compose:2.7.6")
   implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+  implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
   implementation("androidx.room:room-runtime:2.6.1")
+  implementation("androidx.test.ext:junit-ktx:1.1.5")
   annotationProcessor("androidx.room:room-compiler:2.6.1")
   ksp ("androidx.room:room-compiler:2.6.1")
-  // optional - RxJava2 support for Room
-  //implementation ("androidx.room:room-rxjava2:2.6.1")
-  // optional - RxJava3 support for Room
-  //implementation ("androidx.room:room-rxjava3:2.6.1")
-  // optional - Guava support for Room, including Optional and ListenableFuture
-  //implementation ("androidx.room:room-guava:2.6.1")
-  // optional - Paging 3 Integration
-  //implementation ("androidx.room:room-paging:2.6.1")
+  implementation("androidx.room:room-ktx:2.6.1")
 
   testImplementation("junit:junit:4.13.2")
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")
+  testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.7.1")
   // optional - Test helpers
   //testImplementation ("androidx.room:room-testing:2.6.1")
 

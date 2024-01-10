@@ -2,30 +2,35 @@ package com.aamo.cookbook
 
 import androidx.activity.ComponentActivity
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.ComposeNavigator
 import androidx.navigation.testing.TestNavHostController
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeScreenPage
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Navigation
+import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.assertCurrentRouteName
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
-import com.aamo.cookbook.utility.toUUIDorNull
 import com.aamo.cookbook.viewModel.AppViewModel
+import com.aamo.cookbook.viewModel.ViewModelProvider
 import junit.framework.TestCase
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import kotlin.math.min
 
 class RecipesScreenTest {
   private lateinit var navController: TestNavHostController
   private lateinit var selectedCategory: String
 
-  private var viewModel: AppViewModel = AppViewModel()
+  private lateinit var viewModel: AppViewModel
   private val categoryIndex: Int = 0
 
   @get:Rule
@@ -34,6 +39,7 @@ class RecipesScreenTest {
   @Before
   fun setupNavHost() {
     rule.setContent {
+      viewModel = viewModel(factory = ViewModelProvider.Factory)
       navController = TestNavHostController(LocalContext.current)
       navController.navigatorProvider.addNavigator(ComposeNavigator())
       CookbookTheme {
@@ -43,9 +49,8 @@ class RecipesScreenTest {
         )
       }
     }
-    selectedCategory = viewModel.getCategories().elementAt(categoryIndex)
 
-    Navigation(rule).navigateTo_RecipesScreen(selectedCategory)
+    Navigation(rule).navigateTo_RecipesScreen(0)
   }
 
   @Test
@@ -66,26 +71,22 @@ class RecipesScreenTest {
   }
 
   @Test
-  fun recipes_areVisible() {
-    val recipes = viewModel.getRecipes(selectedCategory)
-
-    recipes.subList(0, min(3, recipes.size)).forEach {
-      rule.onNodeWithText(it.name).assertExists()
-    }
+  fun recipes_areVisible() = runTest {
+    val firstRecipe = viewModel.getRecipesByCategory(selectedCategory).first().first()
+    rule.onNodeWithTag(Tags.RECIPE_ITEM.name).assertTextContains(firstRecipe.name)
   }
 
   @Test
-  fun onRecipeSelection() {
+  fun onRecipeSelection() = runTest {
     val index = 0
-    val expectedRecipe = viewModel.getRecipes(selectedCategory).elementAt(index)
+    val expectedRecipe = viewModel.getRecipesByCategory(selectedCategory).first().elementAt(index)
 
-    Navigation(rule).navigateTo_RecipeScreen(expectedRecipe.category, expectedRecipe.name)
+    Navigation(rule).navigateTo_RecipeScreen(0,0)
 
     navController.assertCurrentRouteName(Screen.Recipe.getRoute())
     TestCase.assertEquals(
       expectedRecipe.id,
-      navController.currentBackStackEntry?.arguments?.getString(Screen.Recipe.argumentName)
-        ?.toUUIDorNull()
+      navController.currentBackStackEntry?.arguments?.getInt(Screen.Recipe.argumentName, -1)
     )
   }
 
@@ -95,9 +96,8 @@ class RecipesScreenTest {
 
     navController.assertCurrentRouteName(EditRecipeScreenPage.EditRecipeInfo.route)
     TestCase.assertEquals(
-      null,
-      navController.currentBackStackEntry?.arguments?.getString(Screen.Recipe.argumentName)
-        ?.toUUIDorNull()
+      -1,
+      navController.currentBackStackEntry?.arguments?.getInt(Screen.Recipe.argumentName, -1)
     )
   }
 }
