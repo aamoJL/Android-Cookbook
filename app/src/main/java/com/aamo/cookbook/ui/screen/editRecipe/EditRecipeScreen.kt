@@ -39,7 +39,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.Chapter
+import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
@@ -49,14 +50,13 @@ import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeScreen(
   viewModel: EditRecipeViewModel,
   modifier: Modifier = Modifier,
-  onEditChapter: (index: Int) -> Unit = {},
+  onEditChapter: (ChapterWithStepsAndIngredients) -> Unit = {},
   onSubmitChanges: () -> Unit = {},
   onDelete: () -> Unit = {},
   onBack: () -> Unit = {}
@@ -75,25 +75,28 @@ fun EditRecipeScreen(
         openUnsavedDialog = false
         onBack()
       })
-  }
-  else if (openDeleteDialog) {
+  } else if (openDeleteDialog) {
     AlertDialog(
       title = { Text(text = stringResource(R.string.dialog_title_delete_recipe)) },
       text = { Text(text = stringResource(R.string.dialog_text_delete_recipe)) },
       onDismissRequest = { openDeleteDialog = false },
       confirmButton = {
-        TextButton(onClick = {
-          openDeleteDialog = false
-          onDelete()
-        }, colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-        ){
+        TextButton(
+          onClick = {
+            openDeleteDialog = false
+            onDelete()
+          },
+          colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+        ) {
           Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
-        } },
+        }
+      },
       dismissButton = {
-        TextButton(onClick = { openDeleteDialog = false }){
+        TextButton(onClick = { openDeleteDialog = false }) {
           Text(text = stringResource(R.string.dialog_dismiss_default))
-        } },
-      )
+        }
+      },
+    )
   }
 
   BackHandler(true) {
@@ -107,7 +110,7 @@ fun EditRecipeScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(title = when (uiState.id) {
-        UUID(0, 0) -> stringResource(R.string.screen_title_new_recipe)
+        0 -> stringResource(R.string.screen_title_new_recipe)
         else -> stringResource(R.string.screen_title_existing_recipe)
       }, onBack = {
         if (uiState.unsavedChanges) {
@@ -116,7 +119,7 @@ fun EditRecipeScreen(
           onBack()
         }
       }, actions = {
-        if(uiState.id != UUID(0,0)){
+        if (uiState.id != 0) {
           IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
               imageVector = Icons.Filled.Delete,
@@ -141,7 +144,13 @@ fun EditRecipeScreen(
     ) {
       InfoForm(viewModel = viewModel)
       Spacer(modifier = Modifier.padding(8.dp))
-      ChapterList(viewModel = viewModel, onEditChapter = onEditChapter)
+      ChapterList(
+        chapters = uiState.chapters,
+        onEditChapter = { chapter ->
+          onEditChapter(chapter ?: ChapterWithStepsAndIngredients(
+            value = Chapter(orderNumber = uiState.chapters.size + 1)
+          ))
+        })
     }
   }
 }
@@ -191,24 +200,19 @@ private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifi
 
 @Composable
 private fun ChapterList(
-  viewModel: EditRecipeViewModel,
-  onEditChapter: (index: Int) -> Unit,
+  chapters: List<ChapterWithStepsAndIngredients>,
+  onEditChapter: (ChapterWithStepsAndIngredients?) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val uiState by viewModel.infoUiState.collectAsState()
-
   FormList(
     title = stringResource(R.string.form_list_title_chapters),
-    onAddClick = {
-      onEditChapter(viewModel.infoUiState.value.chapters.size)
-    },
+    onAddClick = { onEditChapter(null) },
     modifier = modifier
   ) {
-    for ((index, chapter) in uiState.chapters.withIndex()) {
+    for (chapter in chapters) {
       ChapterItem(
-        number = index + 1,
         chapter = chapter,
-        onClick = { onEditChapter(index) },
+        onClick = { onEditChapter(chapter) },
         modifier = Modifier
           .padding(horizontal = 8.dp, vertical = 12.dp)
           .fillMaxWidth()
@@ -220,8 +224,7 @@ private fun ChapterList(
 
 @Composable
 private fun ChapterItem(
-  number: Int,
-  chapter: Recipe.Chapter,
+  chapter: ChapterWithStepsAndIngredients,
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -231,7 +234,10 @@ private fun ChapterItem(
     }
     .testTag(Tags.CHAPTER_ITEM.name)) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier.fillMaxWidth()) {
-      Text(text = "${number}. ${chapter.name}", style = MaterialTheme.typography.titleMedium)
+      Text(
+        text = "${chapter.value.orderNumber}. ${chapter.value.name}",
+        style = MaterialTheme.typography.titleMedium
+      )
       Column(
         modifier = Modifier
           .padding(start = 16.dp)
@@ -241,14 +247,14 @@ private fun ChapterItem(
           for ((index, step) in chapter.steps.withIndex()) {
             Column {
               Text(
-                text = "${index + 1}. ${step.getDescriptionWithFormattedEndChar()}",
+                text = "${index + 1}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
                 style = MaterialTheme.typography.bodyMedium
               )
               Column(modifier = Modifier.padding(start = 16.dp)) {
                 for (ingredient in step.ingredients) {
                   Row {
                     Text(
-                      text = if(ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+                      text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
                       style = MaterialTheme.typography.bodySmall,
                       textAlign = TextAlign.End,
                       modifier = Modifier

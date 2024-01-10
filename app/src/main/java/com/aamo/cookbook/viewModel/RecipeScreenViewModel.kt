@@ -1,43 +1,47 @@
 package com.aamo.cookbook.viewModel
 
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aamo.cookbook.Screen
+import com.aamo.cookbook.database.repository.RecipeRepository
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.util.UUID
 
-class RecipeScreenViewModel : ViewModel() {
-  private var _recipe = MutableStateFlow(Recipe("", ""))
-  val recipe = _recipe.asStateFlow()
-
-  private var _currentProgress = MutableStateFlow<List<Int>>(emptyList())
-  val currentProgress = _currentProgress.asStateFlow()
-
-  val currentChapter = _currentProgress.map {
-    it.withIndex().indexOfFirst { item ->
-      item.value != recipe.value.chapters.elementAtOrNull(item.index)?.steps?.size
-    }
-  }
-
-  fun getRecipe(id: UUID) {
+class RecipeScreenViewModel(
+  private val recipeRepository: RecipeRepository,
+  private val savedStateHandle: SavedStateHandle
+) : ViewModel() {
+  fun init() {
     viewModelScope.launch {
-      val repo = AppViewModel.Repositories.recipeRepository
-      val fetchedRecipe = repo.getRecipe(id)
-      if (fetchedRecipe != null) {
-        _recipe.value = fetchedRecipe
-        _currentProgress.update { fetchedRecipe.chapters.map { 0 } }
+      val recipeId = savedStateHandle[Screen.Recipe.argumentName] ?: 0
+      recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
+        ?: RecipeWithChaptersStepsAndIngredients(Recipe())
+    }.invokeOnCompletion {
+      _currentProgress.update {
+        recipe.chapters.map { x -> x.steps.map { false } }
       }
     }
   }
 
-  fun updateProgress(index: Int, value: Int) {
+  var recipe: RecipeWithChaptersStepsAndIngredients = RecipeWithChaptersStepsAndIngredients(Recipe())
+
+  private val _currentProgress: MutableStateFlow<List<List<Boolean>>> =
+    MutableStateFlow(listOf(emptyList()))
+
+  val currentProgress = _currentProgress.asStateFlow()
+
+  fun updateProgress(chapterIndex: Int, stepIndex: Int, value: Boolean) {
     _currentProgress.update {
-      it.mapIndexed { i, item ->
-        if (i == index) value else item
+      it.mapIndexed { ci, chapters ->
+        chapters.mapIndexed { si, stepValue ->
+          if (ci == chapterIndex && si == stepIndex) value
+          else stepValue
+        }
       }
     }
   }

@@ -5,7 +5,7 @@ import com.aamo.cookbook.utility.trimFirst
 import org.junit.Test
 import java.util.UUID
 
-class StringExtensionsKtTest {
+class StringExtensionsTest {
 
   @Test
   fun toUUIDorNull() {

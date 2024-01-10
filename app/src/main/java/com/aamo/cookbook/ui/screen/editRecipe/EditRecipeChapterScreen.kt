@@ -29,7 +29,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
@@ -38,13 +39,12 @@ import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
-import java.util.UUID
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterScreen(
   viewModel: EditRecipeViewModel,
-  onEditStep: (index: Int) -> Unit,
+  onEditStep: (StepWithIngredients) -> Unit,
   onSubmitChanges: () -> Unit,
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
@@ -77,7 +77,7 @@ fun EditRecipeChapterScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(title = when (uiState.id) {
-        UUID(0, 0) -> stringResource(R.string.screen_title_new_chapter)
+        0 -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
       }, onBack = {
         if (uiState.unsavedChanges) {
@@ -104,29 +104,31 @@ fun EditRecipeChapterScreen(
     ) {
       ChapterForm(viewModel = viewModel)
       Spacer(modifier = Modifier.padding(8.dp))
-      StepList(viewModel = viewModel, onEditStep = onEditStep)
+      StepList(
+        steps = uiState.steps,
+        onEditStep = { step ->
+          onEditStep(step ?: StepWithIngredients(value = Step(orderNumber = uiState.steps.size + 1)))
+        }
+      )
     }
   }
 }
 
 @Composable
 private fun StepList(
-  viewModel: EditRecipeViewModel,
-  onEditStep: (index: Int) -> Unit,
+  steps: List<StepWithIngredients>,
+  onEditStep: (StepWithIngredients?) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val uiState by viewModel.chapterUiState.collectAsState()
-
   FormList(
     title = stringResource(R.string.form_list_title_steps),
-    onAddClick = { onEditStep(-1) },
+    onAddClick = { onEditStep(null) },
     modifier = modifier
   ) {
-    for ((index, step) in uiState.steps.withIndex()) {
+    for (step in steps) {
       StepItem(
-        number = index + 1,
         step = step,
-        onClick = { onEditStep(index) },
+        onClick = { onEditStep(step) },
         modifier = Modifier.padding(15.dp)
       )
       Divider()
@@ -138,7 +140,7 @@ private fun StepList(
 fun ChapterForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
   val uiState by viewModel.chapterUiState.collectAsState()
 
-  FormBase(title = stringResource(R.string.form_title_chapter, uiState.index + 1), modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_chapter, uiState.orderNumber), modifier = modifier) {
     FormTextField(
       value = uiState.name,
       onValueChange = { viewModel.setChapterName(it) },
@@ -150,17 +152,14 @@ fun ChapterForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
 
 @Composable
 fun StepItem(
-  number: Int,
-  step: Recipe.Chapter.Step,
+  step: StepWithIngredients,
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = Modifier.clickable {
-    onClick()
-  }) {
+  Box(modifier = Modifier.clickable { onClick() }) {
     Column(modifier = modifier.fillMaxWidth()) {
       Text(
-        text = "${number}. ${step.getDescriptionWithFormattedEndChar()}",
+        text = "${step.value.orderNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
         style = MaterialTheme.typography.titleMedium,
       )
       Column(
@@ -171,7 +170,7 @@ fun StepItem(
         for (ingredient in step.ingredients) {
           Row {
             Text(
-              text = if(ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+              text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
               style = MaterialTheme.typography.bodySmall,
               textAlign = TextAlign.End,
               modifier = Modifier
