@@ -26,6 +26,32 @@ interface RecipeDao {
   @Upsert
   suspend fun upsertIngredients(ingredients: List<Ingredient>) : List<Long>
 
+  @Transaction
+  suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
+    val recipeId = upsertRecipe(recipe.value).toInt()
+      .let { if (it == -1) recipe.value.id else it }
+
+    recipe.chapters.forEachIndexed { ci, chapter ->
+      val chapterId =
+        upsertChapter(chapter.value.copy(orderNumber = ci + 1, recipeId = recipeId))
+          .toInt()
+          .let { if (it == -1) chapter.value.id else it }
+
+      chapter.steps.forEachIndexed { si, step ->
+        val stepId =
+          upsertStep(step.value.copy(orderNumber = si + 1, chapterId = chapterId))
+            .toInt()
+            .let { if (it == -1) step.value.id else it }
+
+        upsertIngredients(step.ingredients.map { ingredient ->
+          ingredient.copy(stepId = stepId)
+        })
+      }
+    }
+
+    return recipeId
+  }
+
   @Delete
   suspend fun deleteRecipe(recipe: Recipe)
 

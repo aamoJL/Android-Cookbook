@@ -18,30 +18,8 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
   override suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients? =
     recipeDao.getRecipeWithChaptersStepsAndIngredients(id)
 
-  override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
-    val recipeId = recipeDao.upsertRecipe(recipe.value).toInt()
-      .let { if (it == -1) recipe.value.id else it }
-
-    recipe.chapters.forEachIndexed { ci, chapter ->
-      val chapterId =
-        recipeDao.upsertChapter(chapter.value.copy(orderNumber = ci + 1, recipeId = recipeId))
-          .toInt()
-          .let { if (it == -1) chapter.value.id else it }
-
-      chapter.steps.forEachIndexed { si, step ->
-        val stepId =
-          recipeDao.upsertStep(step.value.copy(orderNumber = si + 1, chapterId = chapterId))
-            .toInt()
-            .let { if (it == -1) step.value.id else it }
-
-        recipeDao.upsertIngredients(step.ingredients.map { ingredient ->
-          ingredient.copy(stepId = stepId)
-        })
-      }
-    }
-
-    return recipeId
-  }
+  override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int =
+    recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
 
   override suspend fun deleteRecipe(recipe: Recipe) = recipeDao.deleteRecipe(recipe)
 }
