@@ -46,6 +46,28 @@ class EditRecipeChapterStepIngredientScreenTest {
     }
   }
 
+  /**
+   * Sets ui state to represent a new ingredient
+   */
+  private fun withNewIngredient() {
+    uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
+      ingredient = Ingredient(),
+      index = 0
+    )
+    wasClicked = false
+  }
+
+  /**
+   * Sets ui state to represent an existing ingredient
+   */
+  private fun withExistingIngredient() {
+    uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
+      ingredient = Mocker.mockRecipeList().first().chapters.first().steps.first().ingredients.first(),
+      index = 0
+    )
+    wasClicked = false
+  }
+
   @Test
   fun pageTitle_equals() {
     withNewIngredient().apply {
@@ -162,27 +184,5 @@ class EditRecipeChapterStepIngredientScreenTest {
     }
 
     Assert.assertEquals(expected, uiState.formState)
-  }
-
-  /**
-   * Sets ui state to represent a new ingredient
-   */
-  private fun withNewIngredient() {
-    uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
-      ingredient = Ingredient(),
-      index = 0
-    )
-    wasClicked = false
-  }
-
-  /**
-   * Sets ui state to represent an existing ingredient
-   */
-  private fun withExistingIngredient() {
-    uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
-      ingredient = Mocker.mockRecipeList().first().chapters.first().steps.first().ingredients.first(),
-      index = 0
-    )
-    wasClicked = false
   }
 }

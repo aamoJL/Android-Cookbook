@@ -2,17 +2,15 @@ package com.aamo.cookbook.ui.screen.editRecipe
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -31,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
@@ -45,7 +44,7 @@ import com.aamo.cookbook.viewModel.EditRecipeViewModel
 fun EditRecipeChapterStepScreen(
   viewModel: EditRecipeViewModel,
   modifier: Modifier = Modifier,
-  onEditIngredient: (Ingredient) -> Unit = {},
+  onEditIngredient: (Ingredient?) -> Unit = {},
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {}
 ) {
@@ -57,18 +56,19 @@ fun EditRecipeChapterStepScreen(
     onBack = onBack,
     onSubmitChanges = onSubmitChanges,
     onEditIngredient = onEditIngredient,
+    onDeleteIngredient = { viewModel.deleteIngredient(it) },
     onFormStateChange = { viewModel.setStepFormState(it) }
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterStepScreenContent(
   uiState: EditRecipeViewModel.StepScreenUiState,
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onSubmitChanges: () -> Unit = {},
-  onEditIngredient: (Ingredient) -> Unit = {},
+  onEditIngredient: (Ingredient?) -> Unit = {},
+  onDeleteIngredient: (Ingredient) -> Boolean = { false },
   onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {}
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
@@ -120,38 +120,40 @@ fun EditRecipeChapterStepScreenContent(
         onStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
-      StepList(
-        uiState = uiState,
-        onEditIngredient = { ingredient ->
-          onEditIngredient(ingredient ?: Ingredient())
-        }
+      IngredientList(
+        ingredients = uiState.ingredients,
+        onEditIngredient = onEditIngredient,
+        onDeleteIngredient = onDeleteIngredient
       )
     }
   }
 }
 
 @Composable
-private fun StepList(
-  uiState: EditRecipeViewModel.StepScreenUiState,
+private fun IngredientList(
+  ingredients: List<Ingredient>,
   onEditIngredient: (Ingredient?) -> Unit,
+  onDeleteIngredient: (Ingredient) -> Boolean,
   modifier: Modifier = Modifier
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_ingredients),
-    onAddClick = {
-      onEditIngredient(null)
-    },
+    onAddClick = { onEditIngredient(null) },
     modifier = modifier
   ) {
-    for (ingredient in uiState.ingredients) {
-      IngredientItem(
-        ingredient = ingredient,
-        onClick = {
-          onEditIngredient(ingredient)
-        },
-        modifier = Modifier.padding(vertical = 16.dp)
-      )
-      Divider(thickness = 1.dp)
+    LazyColumn {
+      itemsIndexed(
+        items = ingredients,
+        key = { _, ingredient -> ingredient.hashCode() }
+      ) { _, ingredient ->
+        IngredientListItem(
+          ingredient = ingredient,
+          onClick = { onEditIngredient(ingredient) },
+          onDismiss = { onDeleteIngredient(ingredient) },
+          modifier = Modifier.padding(vertical = 16.dp)
+        )
+        Divider(thickness = 1.dp)
+      }
     }
   }
 }
@@ -174,38 +176,37 @@ private fun StepForm(
 }
 
 @Composable
-private fun IngredientItem(
+private fun IngredientListItem(
   ingredient: Ingredient,
   onClick: () -> Unit,
+  onDismiss: () -> (Boolean),
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = Modifier
-    .clickable { onClick() }
-    .fillMaxWidth()
-    .testTag(Tags.INGREDIENT_ITEM.name)
-  ) {
-    Row(modifier = modifier.width(IntrinsicSize.Min).padding(horizontal = 8.dp)) {
-      Text(
-        text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
-        style = MaterialTheme.typography.titleMedium,
-        textAlign = TextAlign.End,
-        modifier = Modifier
-          .defaultMinSize(minWidth = 40.dp)
-          .weight(1f)
-      )
-      Text(
-        text = ingredient.unit,
-        style = MaterialTheme.typography.titleMedium,
-        fontStyle = FontStyle.Italic,
-        modifier = Modifier
-          .padding(horizontal = 8.dp)
-          .weight(1f)
-      )
-      Text(
-        text = ingredient.name,
-        style = MaterialTheme.typography.titleMedium,
-        modifier = Modifier.weight(5f)
-      )
-    }
+  BasicDismissibleItem(dismissAction = onDismiss) {
+    ListItem(
+      modifier = Modifier
+        .clickable { onClick() }
+        .testTag(Tags.INGREDIENT_ITEM.name),
+      headlineContent = {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = modifier.padding(horizontal = 8.dp)
+        ) {
+          Text(
+            text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.End,
+          )
+          Text(
+            text = ingredient.unit,
+            style = MaterialTheme.typography.titleMedium,
+            fontStyle = FontStyle.Italic,
+          )
+          Text(
+            text = ingredient.name,
+            style = MaterialTheme.typography.titleMedium,
+          )
+        }
+      })
   }
 }

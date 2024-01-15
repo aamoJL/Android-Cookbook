@@ -47,4 +47,5 @@
     <string name="dialog_title_unsaved_default">Tallentamattomia tietoja!</string>
     <string name="dialog_text_unsaved_default">Muutoksesi menetetään, jos palaat edelliselle sivulle.</string>
     <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
+    <string name="description_delete_list_item">delete</string>
 </resources>

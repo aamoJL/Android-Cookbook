@@ -11,19 +11,26 @@ class TestRecipeRepository : RecipeRepository {
     val recipes = Mocker.mockRecipeList()
   }
 
+  private var recipes = Data.recipes
+
   override fun getAllRecipesStream(): Flow<List<Recipe>> {
     return flow {
-      emit(Data.recipes.map { it.value })
+      emit(recipes.map { it.value })
     }
   }
 
   override suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients? {
-    return Data.recipes.firstOrNull { it.value.id == id }
+    return recipes.firstOrNull { it.value.id == id }
   }
 
   override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {
     return recipe.value.id
   }
 
-  override suspend fun deleteRecipe(recipe: Recipe) { return }
+  override suspend fun deleteRecipe(recipe: Recipe) {
+    val index = recipes.indexOfFirst { it.value.id == recipe.id }
+    if(index != -1){
+      recipes.minus(recipes.elementAt(index))
+    }
+  }
 }

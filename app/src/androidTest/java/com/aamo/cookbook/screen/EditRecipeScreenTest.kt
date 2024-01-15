@@ -11,6 +11,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
@@ -21,7 +23,7 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
-import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
@@ -30,6 +32,7 @@ import org.junit.Test
 class EditRecipeScreenTest {
   private var uiState by mutableStateOf(EditRecipeViewModel.InfoScreenUiState())
   private var wasClicked = false
+  private var wasDismissed = false
 
   @get:Rule
   val rule = createAndroidComposeRule<ComponentActivity>()
@@ -43,11 +46,38 @@ class EditRecipeScreenTest {
           onFormStateChange = { uiState = uiState.copy(formState = it) },
           onEditChapter = { wasClicked = true },
           onSubmitChanges = { wasClicked = true },
+          onDeleteChapter = { true.also { wasDismissed = true }},
           onDelete = { wasClicked = true },
           onBack = { wasClicked = true },
         )
       }
     }
+  }
+
+  /**
+   * Sets ui state to represent an existing recipe
+   */
+  private fun withExistingRecipe() : RecipeWithChaptersStepsAndIngredients {
+    val recipe = Mocker.mockRecipeList().first()
+    uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
+      recipe = recipe
+    )
+    wasClicked = false
+    wasDismissed = false
+    return recipe
+  }
+
+  /**
+   * Sets ui state to represent a new recipe
+   */
+  private fun withNewRecipe() : RecipeWithChaptersStepsAndIngredients {
+    val recipe = RecipeWithChaptersStepsAndIngredients(Recipe())
+    uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
+      recipe = recipe
+    )
+    wasClicked = false
+    wasDismissed = false
+    return recipe
   }
 
   @Test
@@ -177,13 +207,13 @@ class EditRecipeScreenTest {
     withNewRecipe().apply {
       val nodes = rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name).fetchSemanticsNodes()
 
-      Assert.assertEquals(uiState.chapters.size, nodes.size)
+      assert(nodes.isEmpty())
     }
 
     withExistingRecipe().apply {
       val nodes = rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name).fetchSemanticsNodes()
 
-      Assert.assertEquals(uiState.chapters.size, nodes.size)
+      assert(nodes.isNotEmpty())
     }
   }
 
@@ -256,26 +286,15 @@ class EditRecipeScreenTest {
       performTextInput(expected.servings.toString())
     }
 
-    Assert.assertEquals(expected, uiState.formState)
+    assertEquals(expected, uiState.formState)
   }
 
-  /**
-   * Sets ui state to represent an existing recipe
-   */
-  private fun withExistingRecipe() {
-    uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
-      recipe = Mocker.mockRecipeList().first()
-    )
-    wasClicked = false
-  }
+  @Test
+  fun onChapterDeletion() {
+    withExistingRecipe().apply {
+      rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name)[0].performTouchInput { swipeRight() }
 
-  /**
-   * Sets ui state to represent a new recipe
-   */
-  private fun withNewRecipe() {
-    uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
-      recipe = RecipeWithChaptersStepsAndIngredients(Recipe())
-    )
-    wasClicked = false
+      assert(wasDismissed)
+    }
   }
 }

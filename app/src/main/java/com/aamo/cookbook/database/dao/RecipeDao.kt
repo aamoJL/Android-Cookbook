@@ -26,8 +26,38 @@ interface RecipeDao {
   @Upsert
   suspend fun upsertIngredients(ingredients: List<Ingredient>) : List<Long>
 
+  /**
+   * Adds or updates the given [recipe] to the database
+   * The items' order numbers will be changed to according to the list indexing
+   */
   @Transaction
   suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
+    // Delete items that are not in the recipe anymore
+    getRecipeWithChaptersStepsAndIngredients(recipe.value.id).also { oldRecipe ->
+      if (oldRecipe != null) {
+        val currentChapterIds = recipe.chapters.map { c -> c.value.id }.filter { it != 0 }
+        val currentStepIds =
+          recipe.chapters.flatMap { c -> c.steps.map { s -> s.value.id }.filter { it != 0 } }
+        val currentIngredientIds = recipe.chapters.flatMap { c ->
+          c.steps.flatMap { s -> s.ingredients.map { i -> i.id } }.filter { it != 0 }
+        }
+
+        oldRecipe.chapters.forEach { chapter ->
+          if (!currentChapterIds.contains(chapter.value.id)) deleteChapter(chapter.value)
+          else {
+            chapter.steps.forEach { step ->
+              if (!currentStepIds.contains(step.value.id)) deleteStep(step.value)
+              else {
+                step.ingredients.forEach { ingredient ->
+                  if (!currentIngredientIds.contains(ingredient.id)) deleteIngredient(ingredient)
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+
     val recipeId = upsertRecipe(recipe.value).toInt()
       .let { if (it == -1) recipe.value.id else it }
 
@@ -54,6 +84,15 @@ interface RecipeDao {
 
   @Delete
   suspend fun deleteRecipe(recipe: Recipe)
+
+  @Delete
+  suspend fun deleteChapter(chapter: Chapter)
+
+  @Delete
+  suspend fun deleteStep(step: Step)
+
+  @Delete
+  suspend fun deleteIngredient(ingredient: Ingredient)
 
   @Query("SELECT * FROM recipes ORDER BY name ASC")
   fun getRecipes(): Flow<List<Recipe>>

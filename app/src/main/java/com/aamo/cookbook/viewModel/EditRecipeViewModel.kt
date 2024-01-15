@@ -199,13 +199,13 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     _ingredientUiState.update { IngredientScreenUiState.fromIngredient(ingredient, index) }
 
   fun addOrUpdateChapter(chapter: ChapterWithStepsAndIngredients) {
-    val index = chapter.value.orderNumber - 1
     val chapters = _infoUiState.value.chapters.toMutableList()
+    val index = chapters.indexOf(chapters.firstOrNull { it.value.id == chapter.value.id })
 
     if (chapters.elementAtOrNull(index) != null) {
       chapters[index] = chapter
     } else {
-      chapters.add(chapter)
+      chapters.add(chapter.copy(value = chapter.value.copy(orderNumber = chapters.size + 1)))
     }
 
     _infoUiState.update { s ->
@@ -217,13 +217,13 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
   }
 
   fun addOrUpdateStep(step: StepWithIngredients) {
-    val index = step.value.orderNumber - 1
     val steps = _chapterUiState.value.steps.toMutableList()
+    val index = steps.indexOf(steps.firstOrNull { it.value.id == step.value.id })
 
     if (steps.elementAtOrNull(index) != null) {
       steps[index] = step
     } else {
-      steps.add(step)
+      steps.add(step.copy(value = step.value.copy(orderNumber = steps.size + 1)))
     }
 
     _chapterUiState.update { s ->
@@ -283,5 +283,58 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
         unsavedChanges = true
       )
     }
+  }
+
+  fun deleteChapter(chapter: ChapterWithStepsAndIngredients) : Boolean {
+    val index = _infoUiState.value.chapters.indexOf(chapter)
+
+    if(index != -1) {
+      _infoUiState.update { state ->
+        state.copy(
+          chapters = state.chapters.minus(chapter).let { list ->
+            list.mapIndexed { index, chapter ->
+              chapter.copy(value = chapter.value.copy(orderNumber = index + 1))
+            }
+          },
+          unsavedChanges = true
+        )
+      }
+    }
+
+    return index != -1
+  }
+
+  fun deleteStep(step: StepWithIngredients) : Boolean {
+    val index = _chapterUiState.value.steps.indexOf(step)
+
+    if(index != -1) {
+      _chapterUiState.update { state ->
+        state.copy(
+          steps = state.steps.minus(step).let { list ->
+            list.mapIndexed { index, step ->
+              step.copy(value = step.value.copy(orderNumber = index + 1))
+            }
+          },
+          unsavedChanges = true
+        )
+      }
+    }
+
+    return index != -1
+  }
+
+  fun deleteIngredient(ingredient: Ingredient): Boolean {
+    val index = _stepUiState.value.ingredients.indexOf(ingredient)
+
+    if(index != -1) {
+      _stepUiState.update { state ->
+        state.copy(
+          ingredients = state.ingredients.minus(ingredient),
+          unsavedChanges = true
+        )
+      }
+    }
+
+    return index != -1
   }
 }

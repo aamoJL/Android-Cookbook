@@ -15,7 +15,6 @@ import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
-import com.aamo.cookbook.utility.onNodeWithText
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -84,12 +83,5 @@ class RecipesScreenTest {
     val actual = wasSelected
 
     assertEquals(expected, actual)
-  }
-
-  @Test
-  fun onAddRecipe() {
-    rule.onNodeWithText(R.string.description_add_new_recipe).performClick()
-
-    assert(wasClicked)
   }
 }

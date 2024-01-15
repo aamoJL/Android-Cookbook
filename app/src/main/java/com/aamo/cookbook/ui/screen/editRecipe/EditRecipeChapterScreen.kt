@@ -2,7 +2,6 @@ package com.aamo.cookbook.ui.screen.editRecipe
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -11,8 +10,10 @@ import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -30,8 +31,8 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
@@ -45,7 +46,7 @@ import com.aamo.cookbook.viewModel.EditRecipeViewModel
 @Composable
 fun EditRecipeChapterScreen(
   viewModel: EditRecipeViewModel,
-  onEditStep: (StepWithIngredients) -> Unit,
+  onEditStep: (StepWithIngredients?) -> Unit,
   onSubmitChanges: () -> Unit,
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
@@ -55,6 +56,7 @@ fun EditRecipeChapterScreen(
   EditRecipeChapterScreenContent(
     uiState = uiState,
     onFormStateChange = { viewModel.setChapterFormState(it) },
+    onDeleteStep = { viewModel.deleteStep(it) },
     onEditStep = onEditStep,
     onSubmitChanges = onSubmitChanges,
     onBack = onBack,
@@ -62,13 +64,13 @@ fun EditRecipeChapterScreen(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterScreenContent(
   uiState: EditRecipeViewModel.ChapterScreenUiState,
   modifier: Modifier = Modifier,
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit = {},
-  onEditStep: (StepWithIngredients) -> Unit = {},
+  onEditStep: (StepWithIngredients?) -> Unit = {},
+  onDeleteStep: (StepWithIngredients) -> (Boolean) = { false },
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {},
 ) {
@@ -119,9 +121,8 @@ fun EditRecipeChapterScreenContent(
       Spacer(modifier = Modifier.padding(8.dp))
       StepList(
         steps = uiState.steps,
-        onEditStep = { step ->
-          onEditStep(step ?: StepWithIngredients(value = Step(orderNumber = uiState.steps.size + 1)))
-        }
+        onEditStep = onEditStep,
+        onDeleteStep = onDeleteStep
       )
     }
   }
@@ -131,20 +132,28 @@ fun EditRecipeChapterScreenContent(
 private fun StepList(
   steps: List<StepWithIngredients>,
   onEditStep: (StepWithIngredients?) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  onDeleteStep: (StepWithIngredients) -> Boolean
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_steps),
     onAddClick = { onEditStep(null) },
     modifier = modifier
   ) {
-    for (step in steps) {
-      StepItem(
-        step = step,
-        onClick = { onEditStep(step) },
-        modifier = Modifier.padding(15.dp)
-      )
-      Divider()
+    LazyColumn {
+      itemsIndexed(
+        items = steps,
+        key = { _, step -> step.hashCode() }
+      ) {index , step ->
+        StepListItem(
+          step = step,
+          stepNumber = index + 1,
+          onClick = { onEditStep(step) },
+          onDismiss = { onDeleteStep(step) },
+          modifier = Modifier.padding(15.dp)
+        )
+        Divider()
+      }
     }
   }
 }
@@ -167,48 +176,57 @@ fun ChapterForm(
 }
 
 @Composable
-fun StepItem(
+fun StepListItem(
   step: StepWithIngredients,
+  stepNumber: Int,
   onClick: () -> Unit,
-  modifier: Modifier = Modifier
+  onDismiss: () -> Boolean,
+  modifier: Modifier = Modifier,
 ) {
-  Box(modifier = Modifier.clickable { onClick() }.testTag(Tags.STEP_ITEM.name)) {
-    Column(modifier = modifier.fillMaxWidth()) {
-      Text(
-        text = "${step.value.orderNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
-        style = MaterialTheme.typography.titleMedium,
-      )
-      Column(
-        modifier = Modifier
-          .padding(start = 8.dp)
-          .width(IntrinsicSize.Max)
-      ) {
-        for (ingredient in step.ingredients) {
-          Row {
-            Text(
-              text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
-              style = MaterialTheme.typography.bodySmall,
-              textAlign = TextAlign.End,
-              modifier = Modifier
-                .defaultMinSize(minWidth = 40.dp)
-                .weight(1f)
-            )
-            Text(
-              text = ingredient.unit,
-              style = MaterialTheme.typography.bodySmall,
-              fontStyle = FontStyle.Italic,
-              modifier = Modifier
-                .padding(horizontal = 8.dp)
-                .weight(1f)
-            )
-            Text(
-              text = ingredient.name,
-              style = MaterialTheme.typography.bodySmall,
-              modifier = Modifier.weight(5f)
-            )
+  BasicDismissibleItem(dismissAction = onDismiss) {
+    ListItem(
+      modifier = Modifier
+        .clickable { onClick() }
+        .testTag(Tags.STEP_ITEM.name),
+      headlineContent = {
+        Column(modifier = modifier.fillMaxWidth()) {
+          Text(
+            text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
+            style = MaterialTheme.typography.titleMedium,
+          )
+          Column(
+            modifier = Modifier
+              .padding(start = 8.dp)
+              .width(IntrinsicSize.Max)
+          ) {
+            for (ingredient in step.ingredients) {
+              Row {
+                Text(
+                  text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+                  style = MaterialTheme.typography.bodySmall,
+                  textAlign = TextAlign.End,
+                  modifier = Modifier
+                    .defaultMinSize(minWidth = 40.dp)
+                    .weight(1f)
+                )
+                Text(
+                  text = ingredient.unit,
+                  style = MaterialTheme.typography.bodySmall,
+                  fontStyle = FontStyle.Italic,
+                  modifier = Modifier
+                    .padding(horizontal = 8.dp)
+                    .weight(1f)
+                )
+                Text(
+                  text = ingredient.name,
+                  style = MaterialTheme.typography.bodySmall,
+                  modifier = Modifier.weight(5f)
+                )
+              }
+            }
           }
         }
       }
-    }
+    )
   }
 }

@@ -11,6 +11,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Chapter
@@ -30,6 +32,7 @@ import org.junit.Test
 class EditRecipeChapterScreenTest {
   private var uiState by mutableStateOf(EditRecipeViewModel.ChapterScreenUiState())
   private var wasClicked = false
+  private var wasDismissed = false
 
   @get:Rule
   val rule = createAndroidComposeRule<ComponentActivity>()
@@ -41,12 +44,35 @@ class EditRecipeChapterScreenTest {
         EditRecipeChapterScreenContent(
           uiState = uiState,
           onFormStateChange = { uiState = uiState.copy(formState = it) },
+          onDeleteStep = { true.also { wasDismissed = true } },
           onEditStep = { wasClicked = true },
           onSubmitChanges = { wasClicked = true },
           onBack = { wasClicked = true },
         )
       }
     }
+  }
+
+  /**
+   * Sets ui state to represent a new chapter
+   */
+  private fun withNewChapter() {
+    uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
+      chapter = ChapterWithStepsAndIngredients(Chapter())
+    )
+    wasClicked = false
+    wasDismissed = false
+  }
+
+  /**
+   * Sets ui state to represent an existing chapter
+   */
+  private fun withExistingChapter() {
+    uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
+      chapter = Mocker.mockRecipeList().first().chapters.first()
+    )
+    wasClicked = false
+    wasDismissed = false
   }
 
   @Test
@@ -167,23 +193,12 @@ class EditRecipeChapterScreenTest {
     Assert.assertEquals(expected, uiState.formState)
   }
 
-  /**
-   * Sets ui state to represent a new chapter
-   */
-  private fun withNewChapter() {
-    uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
-      chapter = ChapterWithStepsAndIngredients(Chapter())
-    )
-    wasClicked = false
-  }
+  @Test
+  fun onStepDeletion() {
+    withExistingChapter().apply {
+      rule.onAllNodesWithTag(Tags.STEP_ITEM.name)[0].performTouchInput { swipeRight() }
 
-  /**
-   * Sets ui state to represent an existing chapter
-   */
-  private fun withExistingChapter() {
-    uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
-      chapter = Mocker.mockRecipeList().first().chapters.first()
-    )
-    wasClicked = false
+      assert(wasDismissed)
+    }
   }
 }

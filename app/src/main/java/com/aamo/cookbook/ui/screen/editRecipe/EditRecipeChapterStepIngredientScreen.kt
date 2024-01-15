@@ -111,7 +111,6 @@ private fun IngredientForm(
   modifier: Modifier = Modifier,
   onStateChange: (EditRecipeViewModel.IngredientScreenUiState.IngredientFormState) -> Unit = {}
 ) {
-
   FormBase(title = stringResource(R.string.form_title_ingredient), modifier = modifier) {
     FormTextField(
       value = formState.name,

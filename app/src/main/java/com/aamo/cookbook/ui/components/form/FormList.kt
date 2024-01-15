@@ -1,12 +1,9 @@
 package com.aamo.cookbook.ui.components.form
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ElevatedCard
@@ -29,13 +26,9 @@ fun FormList(
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit
 ) {
-  val scrollState = rememberScrollState()
-
   ElevatedCard(modifier = modifier) {
     ListTitleBar(title = title, onAddClick = onAddClick)
-    Column(modifier = Modifier.verticalScroll(scrollState)) {
-      content()
-    }
+    content()
   }
 }
 

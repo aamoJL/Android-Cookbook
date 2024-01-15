@@ -24,6 +24,11 @@ data class Recipe(
     onDelete = ForeignKey.CASCADE
   )]
 )
+/**
+ * @param [orderNumber] Chapter's index number in a recipe. Starts from one.
+ * Primarily used to fetch the chapters in the right order from the database.
+ * The order number will be assigned when a recipe is saved to the database
+ */
 data class Chapter(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
@@ -38,6 +43,11 @@ data class Chapter(
     childColumns = arrayOf("chapterId"),
     onDelete = ForeignKey.CASCADE
   )])
+/**
+ * @param [orderNumber] Step's index number in a chapter. Starts from one.
+ * Primarily used to fetch the steps in the right order from the database.
+ * The order number will be assigned when a recipe is saved to the database
+ */
 data class Step(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,

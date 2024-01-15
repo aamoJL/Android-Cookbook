@@ -220,6 +220,7 @@ class RecipeDatabaseTest {
     var step = Step(description = "new step")
     var ingredient = Ingredient(name = "new ingredient")
 
+    // Add items to the database and assign the produced id to the child items
     recipeDao.upsertRecipe(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
@@ -243,6 +244,28 @@ class RecipeDatabaseTest {
         ?.firstOrNull { it.value.id == step.id }?.ingredients
         ?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
+  }
+
+  @Test
+  @Throws(IOException::class)
+  fun upsertRecipe_ItemsRemoved() = runTest {
+    var recipe = Mocker.mockRecipeList().first()
+
+    recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe).also {
+      // Assign id and remove the first chapter
+      recipe = recipe.copy(
+        value = recipe.value.copy(id = it),
+        chapters = recipe.chapters.drop(1))
+    }
+
+    recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
+
+    // Order numbers should be updated
+    val expected = recipe.copy(chapters = recipe.chapters.mapIndexed { index, chapter ->
+      chapter.copy(value = chapter.value.copy(orderNumber = index + 1))
+    })
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.value.id)
+    assertEquals(expected, actual)
   }
 
   @Test
