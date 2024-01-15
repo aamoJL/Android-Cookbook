@@ -26,7 +26,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,6 +37,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
@@ -51,7 +51,6 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeScreen(
   viewModel: EditRecipeViewModel,
@@ -61,10 +60,30 @@ fun EditRecipeScreen(
   onDelete: () -> Unit = {},
   onBack: () -> Unit = {}
 ) {
-  val uiState by viewModel.infoUiState.collectAsState()
-  val formIsValid by remember(uiState) {
-    mutableStateOf(formValidation(uiState))
-  }
+  val uiState by viewModel.infoUiState.collectAsStateWithLifecycle()
+
+  EditRecipeScreenPageContent(
+    uiState = uiState,
+    onFormStateChange = { viewModel.setInfoFormState(it) },
+    onEditChapter = onEditChapter,
+    onSubmitChanges = onSubmitChanges,
+    onDelete = onDelete,
+    onBack = onBack,
+    modifier = modifier
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditRecipeScreenPageContent(
+  uiState: EditRecipeViewModel.InfoScreenUiState,
+  modifier: Modifier = Modifier,
+  onFormStateChange: (EditRecipeViewModel.InfoScreenUiState.InfoFormState) -> Unit = {},
+  onEditChapter: (ChapterWithStepsAndIngredients) -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onDelete: () -> Unit = {},
+  onBack: () -> Unit = {},
+) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
   var openDeleteDialog by remember { mutableStateOf(false) }
 
@@ -100,11 +119,8 @@ fun EditRecipeScreen(
   }
 
   BackHandler(true) {
-    if (uiState.unsavedChanges) {
-      openUnsavedDialog = true
-    } else {
-      onBack()
-    }
+    if (uiState.unsavedChanges) openUnsavedDialog = true
+    else onBack()
   }
 
   Scaffold(
@@ -113,22 +129,18 @@ fun EditRecipeScreen(
         0 -> stringResource(R.string.screen_title_new_recipe)
         else -> stringResource(R.string.screen_title_existing_recipe)
       }, onBack = {
-        if (uiState.unsavedChanges) {
-          openUnsavedDialog = true
-        } else {
-          onBack()
-        }
+        if (uiState.unsavedChanges) openUnsavedDialog = true
+        else onBack()
       }, actions = {
         if (uiState.id != 0) {
           IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
               imageVector = Icons.Filled.Delete,
-              tint = MaterialTheme.colorScheme.error,
               contentDescription = stringResource(R.string.description_delete_recipe)
             )
           }
         }
-        IconButton(onClick = onSubmitChanges, enabled = formIsValid) {
+        IconButton(onClick = onSubmitChanges, enabled = uiState.canBeSaved) {
           Icon(
             imageVector = Icons.Filled.Done,
             contentDescription = stringResource(R.string.description_save_recipe)
@@ -142,7 +154,10 @@ fun EditRecipeScreen(
         .padding(it)
         .padding(8.dp)
     ) {
-      InfoForm(viewModel = viewModel)
+      InfoForm(
+        uiState = uiState.formState,
+        onStateChange = onFormStateChange
+      )
       Spacer(modifier = Modifier.padding(8.dp))
       ChapterList(
         chapters = uiState.chapters,
@@ -156,9 +171,11 @@ fun EditRecipeScreen(
 }
 
 @Composable
-private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
-  val uiState by viewModel.infoUiState.collectAsState()
-
+private fun InfoForm(
+  uiState: EditRecipeViewModel.InfoScreenUiState.InfoFormState,
+  modifier: Modifier = Modifier,
+  onStateChange: (EditRecipeViewModel.InfoScreenUiState.InfoFormState) -> Unit = {}
+) {
   FormBase(title = stringResource(R.string.form_title_recipe), modifier = modifier) {
     Row(
       horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -166,13 +183,13 @@ private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifi
     ) {
       FormTextField(
         value = uiState.name,
-        onValueChange = { viewModel.setRecipeName(it) },
+        onValueChange = { onStateChange(uiState.copy(name = it)) },
         label = stringResource(R.string.textfield_recipe_name),
         modifier = Modifier.weight(2f, true)
       )
       FormNumberField(
         value = uiState.servings,
-        onValueChange = { viewModel.setServings(it) },
+        onValueChange = { onStateChange(uiState.copy(servings = it)) },
         label = stringResource(R.string.textfield_recipe_servings),
         modifier = Modifier.weight(1f, true)
       )
@@ -183,13 +200,13 @@ private fun InfoForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifi
     ) {
       FormTextField(
         value = uiState.category,
-        onValueChange = { viewModel.setCategory(it) },
+        onValueChange = { onStateChange(uiState.copy(category = it)) },
         label = stringResource(R.string.textfield_recipe_category),
         modifier = Modifier.weight(1f)
       )
       FormTextField(
         value = uiState.subCategory,
-        onValueChange = { viewModel.setSubCategory(it) },
+        onValueChange = { onStateChange(uiState.copy(subCategory = it)) },
         label = stringResource(R.string.textfield_recipe_subcategory),
         imeAction = ImeAction.Done,
         modifier = Modifier.weight(1f)
@@ -283,11 +300,5 @@ private fun ChapterItem(
       }
     }
   }
-}
-
-private fun formValidation(uiState: EditRecipeViewModel.InfoScreenUiState): Boolean {
-  return uiState.name.isNotEmpty()
-          && uiState.category.isNotEmpty()
-          && uiState.chapters.isNotEmpty()
 }
 

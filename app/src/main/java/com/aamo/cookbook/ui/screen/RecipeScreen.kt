@@ -35,7 +35,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.rememberCoroutineScope
@@ -50,11 +49,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LabelledCheckBox
@@ -64,7 +62,6 @@ import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun RecipeScreen(
   modifier: Modifier = Modifier,
@@ -72,12 +69,36 @@ fun RecipeScreen(
   onEditRecipe: (id: Int) -> Unit = {},
   viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
 ) {
-  val recipe = viewModel.recipe
-  val currentProgress by viewModel.currentProgress.collectAsState()
-  val pageCount by rememberSaveable(currentProgress) {
+  val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
+  val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
+
+  RecipeScreenContent(
+    summaryPageUiState = summaryUiState,
+    chapterUiStates = chapterUiStates,
+    onBack = onBack,
+    onEditRecipe = onEditRecipe,
+    onProgressChange = { chapterId, stepId, value ->
+      viewModel.updateProgress(chapterId, stepId, value)
+    },
+    modifier = modifier
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@Composable
+fun RecipeScreenContent(
+  summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
+  chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  modifier: Modifier = Modifier,
+  onBack: () -> Unit = {},
+  onEditRecipe: (id: Int) -> Unit = {},
+  onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit
+) {
+
+  val pageCount by rememberSaveable(chapterUiStates) {
     mutableIntStateOf(
-      if (currentProgress.any { x -> x.any { !it } }) recipe.chapters.size + 1
-      else recipe.chapters.size + 2
+      if (chapterUiStates.any { x -> x.progress.any { !it } }) chapterUiStates.size + 1
+      else chapterUiStates.size + 2
     )
   }
   val pagerState = rememberPagerState(pageCount = { pageCount })
@@ -85,8 +106,8 @@ fun RecipeScreen(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = recipe.value.name, onBack = onBack) {
-        IconButton(onClick = { onEditRecipe(recipe.value.id) }) {
+      BasicTopAppBar(title = summaryPageUiState.recipe.value.name, onBack = onBack) {
+        IconButton(onClick = { onEditRecipe(summaryPageUiState.recipe.value.id) }) {
           Icon(
             imageVector = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.description_edit_recipe)
@@ -112,20 +133,15 @@ fun RecipeScreen(
               .testTag(Tags.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
-              0 -> SummaryPage(recipe = recipe)
-              in (1..recipe.chapters.size) -> {
+              0 -> SummaryPage(uiState = summaryPageUiState)
+              in (1..chapterUiStates.size) -> {
                 val chapterIndex = pageIndex - 1
-                val chapter = recipe.chapters.elementAt(chapterIndex)
+                val uiState = chapterUiStates.elementAt(chapterIndex)
 
                 ChapterPage(
-                  chapter = chapter,
-                  chapterProgress = currentProgress.elementAtOrElse(chapterIndex){ emptyList() },
+                  uiState = uiState,
                   onProgressChange = { stepIndex, value ->
-                    viewModel.updateProgress(
-                      chapterIndex = chapterIndex,
-                      stepIndex = stepIndex,
-                      value = value
-                    )
+                    onProgressChange(chapterIndex, stepIndex, value)
                   }
                 )
               }
@@ -141,14 +157,14 @@ fun RecipeScreen(
             .padding(16.dp),
           horizontalArrangement = Arrangement.Center
         ) {
-          val currentChapterIndex = currentProgress.indexOfFirst { progress ->
-            progress.any { x -> !x }
+          val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
+            state.progress.any { !it }
           }
           val currentProgressPage = when (currentChapterIndex) {
-            -1 -> recipe.chapters.size + 1
+            -1 -> chapterUiStates.size + 1
             else -> currentChapterIndex + 1
           }
-          val lastPageEnabled = currentProgressPage == recipe.chapters.size + 1
+          val lastPageEnabled = currentProgressPage == chapterUiStates.size + 1
 
           PageIndicatorItem(
             selected = pagerState.currentPage == 0,
@@ -161,7 +177,7 @@ fun RecipeScreen(
             icon = Icons.Outlined.Info
           )
 
-          repeat(recipe.chapters.size) { index ->
+          repeat(chapterUiStates.size) { index ->
             val isTargetPage = currentChapterIndex == index
             PageIndicatorItem(
               selected = index + 1 == pagerState.currentPage,
@@ -173,20 +189,20 @@ fun RecipeScreen(
               isTargetPage = isTargetPage,
               color = if (isTargetPage) MaterialTheme.colorScheme.inversePrimary else
                 MaterialTheme.colorScheme.secondaryContainer,
-              icon = if (currentProgress.elementAtOrElse(index){ emptyList() }.all { it }
+              icon = if (chapterUiStates.elementAt(index).progress.all { it }
               ) Icons.Filled.Done else null
             )
           }
 
           PageIndicatorItem(
-            selected = pagerState.currentPage == recipe.chapters.size + 1,
+            selected = pagerState.currentPage == chapterUiStates.size + 1,
             enabled = lastPageEnabled,
             onClick = {
               scope.launch {
                 pagerState.animateScrollToPage(pagerState.pageCount - 1)
               }
             },
-            isTargetPage = currentProgressPage == recipe.chapters.size + 1,
+            isTargetPage = currentProgressPage == chapterUiStates.size + 1,
             color = if (lastPageEnabled) MaterialTheme.colorScheme.tertiaryContainer else
               MaterialTheme.colorScheme.onSurface,
             icon = if (lastPageEnabled) null else Icons.Filled.Lock
@@ -266,8 +282,10 @@ private fun PageBase(
 
 @Composable
 private fun SummaryPage(
-  recipe: RecipeWithChaptersStepsAndIngredients
+  uiState: RecipeScreenViewModel.SummaryPageUiState
 ) {
+  val recipe = uiState.recipe
+
   PageBase(title = recipe.value.name) {
     recipe.chapters.forEach { chapter ->
       Column(modifier = Modifier.fillMaxWidth()) {
@@ -321,13 +339,12 @@ private fun CompletedPage() {
 
 @Composable
 private fun ChapterPage(
-  chapter: ChapterWithStepsAndIngredients,
-  chapterProgress: List<Boolean>,
+  uiState: RecipeScreenViewModel.ChapterPageUiState,
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
 ) {
-  PageBase(title = "${chapter.value.orderNumber}. ${chapter.value.name}") {
-    for ((index, step) in chapter.steps.withIndex()) {
-      val checked = chapterProgress.elementAtOrElse(index) { false }
+  PageBase(title = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}") {
+    for ((index, step) in uiState.chapter.steps.withIndex()) {
+      val checked = uiState.progress.elementAtOrElse(index) { false }
 
       StepCheckBox(
         step = step.value,

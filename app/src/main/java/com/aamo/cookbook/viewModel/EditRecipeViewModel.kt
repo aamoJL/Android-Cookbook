@@ -19,72 +19,163 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 class EditRecipeViewModel(private val recipeRepository: RecipeRepository, private val savedStateHandle: SavedStateHandle) : ViewModel() {
+
+  /**
+   * Initializer for this viewmodel used in [ViewModelProvider.Factory]
+   */
   fun init() {
     viewModelScope.launch {
       val recipeId = savedStateHandle[Screen.Recipe.argumentName] ?: 0
       val recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
-      initInfoUiState(recipe?.value, recipe?.chapters)
+      initInfoUiState(recipe ?: RecipeWithChaptersStepsAndIngredients(Recipe()))
     }
   }
 
   data class InfoScreenUiState(
     val id: Int = 0,
-    val name: String = "",
-    val category: String = "",
-    val subCategory: String = "",
-    val servings: Int? = 1,
+    val formState: InfoFormState = InfoFormState(),
     val chapters: List<ChapterWithStepsAndIngredients> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
+    data class InfoFormState(
+      val name: String = "",
+      val category: String = "",
+      val subCategory: String = "",
+      val servings: Int? = 1,
+    )
+
+    val canBeSaved: Boolean
+      get() = formState.name.isNotEmpty()
+              && formState.category.isNotEmpty()
+              && chapters.isNotEmpty()
+
     fun toRecipe(): Recipe {
       return Recipe(
         id = id,
-        name = name,
-        category = category,
-        subCategory = subCategory,
-        servings = servings ?: 1
+        name = formState.name,
+        category = formState.category,
+        subCategory = formState.subCategory,
+        servings = formState.servings ?: 1
       )
     }
+
     fun toRecipeWithChaptersStepsAndIngredients(): RecipeWithChaptersStepsAndIngredients =
       RecipeWithChaptersStepsAndIngredients(toRecipe(), chapters)
+
+    companion object {
+      fun fromRecipe(recipe: RecipeWithChaptersStepsAndIngredients): InfoScreenUiState {
+        return InfoScreenUiState(
+          id = recipe.value.id,
+          formState = InfoFormState(
+            name = recipe.value.name,
+            category = recipe.value.category,
+            subCategory = recipe.value.subCategory,
+            servings = recipe.value.servings,
+          ),
+          chapters = recipe.chapters
+        )
+      }
+    }
   }
 
   data class ChapterScreenUiState(
     val id: Int = 0,
-    val name: String = "",
+    val formState: ChapterFormState = ChapterFormState(),
     val orderNumber: Int = 1,
     val steps: List<StepWithIngredients> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
-    private fun toChapter(): Chapter = Chapter(id, orderNumber, name)
+    data class ChapterFormState(
+      val name: String = "",
+    )
+
+    val canBeSaved: Boolean
+      get() = formState.name.isNotEmpty() && steps.isNotEmpty()
+
+    private fun toChapter(): Chapter = Chapter(id, orderNumber, formState.name)
     fun toChapterWithStepsAndIngredients(): ChapterWithStepsAndIngredients =
       ChapterWithStepsAndIngredients(toChapter(), steps)
+
+    companion object {
+      fun fromChapter(chapter: ChapterWithStepsAndIngredients): ChapterScreenUiState {
+        return ChapterScreenUiState(
+          id = chapter.value.id,
+          formState = ChapterFormState(
+            name = chapter.value.name
+          ),
+          orderNumber = chapter.value.orderNumber,
+          steps = chapter.steps
+        )
+      }
+    }
   }
 
   data class StepScreenUiState(
     val id: Int = 0,
-    val description: String = "",
+    val formState: StepFormState = StepFormState(),
     val orderNumber: Int = 1,
     val ingredients: List<Ingredient> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
-    private fun toStep(): Step = Step(id, orderNumber, description)
+    data class StepFormState(
+      val description: String = "",
+    )
+
+    val canBeSaved : Boolean
+      get() = formState.description.isNotEmpty()
+
+    private fun toStep(): Step = Step(id, orderNumber, formState.description)
     fun toStepWithIngredients(): StepWithIngredients = StepWithIngredients(toStep(), ingredients)
+
+    companion object {
+      fun fromStep(step: StepWithIngredients): StepScreenUiState {
+        return StepScreenUiState(
+          id = step.value.id,
+          formState = StepFormState(
+            description = step.value.description,
+          ),
+          orderNumber = step.value.orderNumber,
+          ingredients = step.ingredients,
+        )
+      }
+    }
   }
 
   data class IngredientScreenUiState(
-    val index: Int = -1,
     val id: Int = 0,
-    val name: String = "",
-    val amount: Float? = null,
-    val unit: String = "",
+    val index: Int = -1,
+    val formState: IngredientFormState = IngredientFormState(),
     val unsavedChanges: Boolean = false
   ) {
-    fun toIngredient(): Ingredient = Ingredient(id, name, amount ?: 0f, unit)
+    data class IngredientFormState(
+      val name: String = "",
+      val amount: Float? = null,
+      val unit: String = "",
+    )
+
+    val canBeSaved: Boolean
+      get() = formState.name.isNotEmpty()
+
+    fun toIngredient(): Ingredient =
+      Ingredient(id, formState.name, formState.amount ?: 0f, formState.unit)
+
+    companion object {
+      fun fromIngredient(ingredient: Ingredient, index: Int): IngredientScreenUiState {
+        return IngredientScreenUiState(
+          index = index,
+          id = ingredient.id,
+          formState = IngredientFormState(
+            name = ingredient.name,
+            amount = ingredient.amount,
+            unit = ingredient.unit
+          ),
+        )
+      }
+    }
   }
 
   private val _infoUiState = MutableStateFlow(InfoScreenUiState())
-  val infoUiState: StateFlow<InfoScreenUiState> = _infoUiState.asStateFlow()
+  var infoUiState: StateFlow<InfoScreenUiState> = _infoUiState.asStateFlow()
 
   private val _chapterUiState = MutableStateFlow(ChapterScreenUiState())
   val chapterUiState: StateFlow<ChapterScreenUiState> = _chapterUiState.asStateFlow()
@@ -95,64 +186,17 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
   private val _ingredientUiState = MutableStateFlow(IngredientScreenUiState())
   val ingredientUiState: StateFlow<IngredientScreenUiState> = _ingredientUiState.asStateFlow()
 
-  private fun initInfoUiState(recipe: Recipe?, chapters: List<ChapterWithStepsAndIngredients>?) {
-    val value = recipe ?: Recipe()
+  private fun initInfoUiState(recipe: RecipeWithChaptersStepsAndIngredients) =
+    _infoUiState.update { InfoScreenUiState.fromRecipe(recipe) }
 
-    _infoUiState.update { s ->
-      s.copy(
-        id = value.id,
-        name = value.name,
-        category = value.category,
-        subCategory = value.subCategory,
-        servings = value.servings,
-        chapters = chapters ?: emptyList(),
-        unsavedChanges = false
-      )
-    }
-  }
+  fun initChapterUiState(chapter: ChapterWithStepsAndIngredients) =
+    _chapterUiState.update { ChapterScreenUiState.fromChapter(chapter) }
 
-  fun initChapterUiState(chapter: Chapter?, steps: List<StepWithIngredients>?) {
-    val value = chapter ?: Chapter()
+  fun initStepUiState(step: StepWithIngredients) =
+    _stepUiState.update { StepScreenUiState.fromStep(step) }
 
-    _chapterUiState.update { s ->
-      s.copy(
-        id = value.id,
-        name = value.name,
-        orderNumber = value.orderNumber,
-        steps = steps ?: emptyList(),
-        unsavedChanges = false
-      )
-    }
-  }
-
-  fun initStepUiState(step: Step?, ingredients: List<Ingredient>?) {
-    val value = step ?: Step()
-
-    _stepUiState.update { s ->
-      s.copy(
-        id = value.id,
-        description = value.description,
-        orderNumber = value.orderNumber,
-        ingredients = ingredients ?: emptyList(),
-        unsavedChanges = false
-      )
-    }
-  }
-
-  fun initIngredientUiState(ingredient: Ingredient?, index: Int) {
-    val value = ingredient ?: Ingredient()
-
-    _ingredientUiState.update { s ->
-      s.copy(
-        index = index,
-        id = value.id,
-        name = value.name,
-        amount = value.amount,
-        unit = value.unit,
-        unsavedChanges = false
-      )
-    }
-  }
+  fun initIngredientUiState(ingredient: Ingredient, index: Int) =
+    _ingredientUiState.update { IngredientScreenUiState.fromIngredient(ingredient, index) }
 
   fun addOrUpdateChapter(chapter: ChapterWithStepsAndIngredients) {
     val index = chapter.value.orderNumber - 1
@@ -167,7 +211,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     _infoUiState.update { s ->
       s.copy(
         chapters = chapters,
-        unsavedChanges = true
+        unsavedChanges = true,
       )
     }
   }
@@ -207,30 +251,37 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     }
   }
 
-  fun setRecipeName(value: String) =
-    _infoUiState.update { s -> s.copy(name = value, unsavedChanges = true) }
+  fun setInfoFormState(state: InfoScreenUiState.InfoFormState) =
+    _infoUiState.update {
+      it.copy(
+        formState = state,
+        unsavedChanges = true
+      )
+    }
 
-  fun setCategory(value: String) =
-    _infoUiState.update { s -> s.copy(category = value, unsavedChanges = true) }
+  fun setChapterFormState(state: ChapterScreenUiState.ChapterFormState) =
+    _chapterUiState.update {
+      it.copy(
+        formState = state,
+        unsavedChanges = true
+      )
+    }
 
-  fun setSubCategory(value: String) =
-    _infoUiState.update { s -> s.copy(subCategory = value, unsavedChanges = true) }
+  fun setStepFormState(state: StepScreenUiState.StepFormState) {
+    _stepUiState.update {
+      it.copy(
+        formState = state,
+        unsavedChanges = true
+      )
+    }
+  }
 
-  fun setServings(value: Int?) =
-    _infoUiState.update { s -> s.copy(servings = value, unsavedChanges = true) }
-
-  fun setChapterName(value: String) =
-    _chapterUiState.update { s -> s.copy(name = value, unsavedChanges = true) }
-
-  fun setStepDescription(value: String) =
-    _stepUiState.update { s -> s.copy(description = value, unsavedChanges = true) }
-
-  fun setIngredientName(value: String) =
-    _ingredientUiState.update { s -> s.copy(name = value, unsavedChanges = true) }
-
-  fun setIngredientUnit(value: String) =
-    _ingredientUiState.update { s -> s.copy(unit = value, unsavedChanges = true) }
-
-  fun setIngredientAmount(value: Float?) =
-    _ingredientUiState.update { s -> s.copy(amount = value, unsavedChanges = true) }
+  fun setIngredientFormState(state: IngredientScreenUiState.IngredientFormState) {
+    _ingredientUiState.update {
+      it.copy(
+        formState = state,
+        unsavedChanges = true
+      )
+    }
+  }
 }

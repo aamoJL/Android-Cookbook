@@ -39,13 +39,13 @@ class RecipeScreenViewModelTest {
     val expected = repository.getRecipeWithChaptersStepsAndIngredients(recipeId)!!.chapters.map {
       it.steps.map { false }
     }
-    val actual = viewModel.currentProgress.value
+    val actual = viewModel.chapterPageUiStates.value.map { it.progress }
     assertEquals(expected, actual)
   }
 
   @Test
   fun updateProgress() {
-    val oldProgress = viewModel.currentProgress.value
+    val oldProgress = viewModel.chapterPageUiStates.value.map { it.progress }
     val chapterIndex = 0; val stepIndex = 0
     viewModel.updateProgress(chapterIndex, stepIndex, true)
 
@@ -53,7 +53,7 @@ class RecipeScreenViewModelTest {
       it.toMutableList()
     }.toMutableList()
     expected[chapterIndex][stepIndex] = true
-    val actual = viewModel.currentProgress.value
+    val actual = viewModel.chapterPageUiStates.value.map { it.progress }
     assertEquals(expected, actual)
   }
 }

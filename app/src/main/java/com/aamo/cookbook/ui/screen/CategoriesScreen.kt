@@ -18,17 +18,19 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.utility.Tags
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoriesScreen(
   categories: List<String>,
-  onSelectCategory: (String) -> Unit,
-  onAddRecipeClick: () -> Unit,
+  onSelectCategory: (String) -> Unit = {},
+  onAddRecipeClick: () -> Unit = {},
 ) {
   Scaffold(
     topBar = { BasicTopAppBar(title = stringResource(R.string.screen_title_categories)) },
@@ -70,7 +72,7 @@ private fun CategoryItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier.clickable(onClick = onClick)) {
+  Box(modifier = modifier.clickable(onClick = onClick).testTag(Tags.CATEGORY_ITEM.name)) {
     Text(
       text = (if (category != "") category else stringResource(R.string.other_category)),
       style = MaterialTheme.typography.titleLarge,

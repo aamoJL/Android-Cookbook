@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -36,29 +37,45 @@ import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterStepScreen(
   viewModel: EditRecipeViewModel,
   modifier: Modifier = Modifier,
-  onEditIngredient: (index: Int) -> Unit = {},
+  onEditIngredient: (Ingredient) -> Unit = {},
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {}
 ) {
   val uiState by viewModel.stepUiState.collectAsState()
-  val formIsValid by remember(uiState) {
-    mutableStateOf(formValidation(uiState))
-  }
+
+  EditRecipeChapterStepScreenContent(
+    uiState = uiState,
+    modifier = modifier,
+    onBack = onBack,
+    onSubmitChanges = onSubmitChanges,
+    onEditIngredient = onEditIngredient,
+    onFormStateChange = { viewModel.setStepFormState(it) }
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditRecipeChapterStepScreenContent(
+  uiState: EditRecipeViewModel.StepScreenUiState,
+  modifier: Modifier = Modifier,
+  onBack: () -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onEditIngredient: (Ingredient) -> Unit = {},
+  onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {}
+) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
     UnsavedDialog(
-      onDismiss = {
-        openUnsavedDialog = false
-      },
+      onDismiss = { openUnsavedDialog = false },
       onConfirm = {
         openUnsavedDialog = false
         onBack()
@@ -66,10 +83,9 @@ fun EditRecipeChapterStepScreen(
   }
 
   BackHandler(true) {
-    if (uiState.unsavedChanges) {
-      openUnsavedDialog = true
-    } else {
-      onBack()
+    when (uiState.unsavedChanges) {
+      true -> openUnsavedDialog = true
+      false -> onBack()
     }
   }
 
@@ -79,18 +95,16 @@ fun EditRecipeChapterStepScreen(
         0 -> stringResource(R.string.screen_title_new_step)
         else -> stringResource(R.string.screen_title_existing_step)
       }, onBack = {
-        if (uiState.unsavedChanges) {
-          openUnsavedDialog = true
-        } else {
-          onBack()
+        when (uiState.unsavedChanges) {
+          true -> openUnsavedDialog = true
+          false -> onBack()
         }
       })
     },
     bottomBar = {
       SaveButton(
-        enabled = formIsValid, onClick = {
-          onSubmitChanges()
-        },
+        enabled = uiState.canBeSaved,
+        onClick = { onSubmitChanges() },
         modifier = Modifier.padding(8.dp)
       )
     }
@@ -100,33 +114,40 @@ fun EditRecipeChapterStepScreen(
         .padding(it)
         .padding(8.dp)
     ) {
-      StepForm(viewModel = viewModel)
+      StepForm(
+        uiState = uiState.formState,
+        orderNumber = uiState.orderNumber,
+        onStateChange = onFormStateChange
+      )
       Spacer(modifier = Modifier.padding(8.dp))
-      StepList(viewModel = viewModel, onEditIngredient = onEditIngredient)
+      StepList(
+        uiState = uiState,
+        onEditIngredient = { ingredient ->
+          onEditIngredient(ingredient ?: Ingredient())
+        }
+      )
     }
   }
 }
 
 @Composable
 private fun StepList(
-  viewModel: EditRecipeViewModel,
-  onEditIngredient: (index: Int) -> Unit,
+  uiState: EditRecipeViewModel.StepScreenUiState,
+  onEditIngredient: (Ingredient?) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  val uiState by viewModel.stepUiState.collectAsState()
-
   FormList(
     title = stringResource(R.string.form_list_title_ingredients),
     onAddClick = {
-      onEditIngredient(-1)
+      onEditIngredient(null)
     },
     modifier = modifier
   ) {
-    for ((index, ingredient) in uiState.ingredients.withIndex()) {
+    for (ingredient in uiState.ingredients) {
       IngredientItem(
         ingredient = ingredient,
         onClick = {
-          onEditIngredient(index)
+          onEditIngredient(ingredient)
         },
         modifier = Modifier.padding(vertical = 16.dp)
       )
@@ -137,15 +158,15 @@ private fun StepList(
 
 @Composable
 private fun StepForm(
-  viewModel: EditRecipeViewModel,
-  modifier: Modifier = Modifier
+  uiState: EditRecipeViewModel.StepScreenUiState.StepFormState,
+  orderNumber: Int,
+  modifier: Modifier = Modifier,
+  onStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {},
 ) {
-  val uiState by viewModel.stepUiState.collectAsState()
-
-  FormBase(title = stringResource(R.string.form_title_step, uiState.orderNumber), modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_step, orderNumber), modifier = modifier) {
     FormTextField(
       value = uiState.description,
-      onValueChange = { viewModel.setStepDescription(it) },
+      onValueChange = { onStateChange(uiState.copy(description = it)) },
       imeAction = ImeAction.Done,
       label = stringResource(R.string.textfield_step_description)
     )
@@ -159,11 +180,11 @@ private fun IngredientItem(
   modifier: Modifier = Modifier
 ) {
   Box(modifier = Modifier
-    .clickable {
-      onClick()
-    }
-    .fillMaxWidth()) {
-    Row(modifier = modifier.width(IntrinsicSize.Min)) {
+    .clickable { onClick() }
+    .fillMaxWidth()
+    .testTag(Tags.INGREDIENT_ITEM.name)
+  ) {
+    Row(modifier = modifier.width(IntrinsicSize.Min).padding(horizontal = 8.dp)) {
       Text(
         text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
         style = MaterialTheme.typography.titleMedium,
@@ -187,8 +208,4 @@ private fun IngredientItem(
       )
     }
   }
-}
-
-private fun formValidation(uiState: EditRecipeViewModel.StepScreenUiState): Boolean {
-  return uiState.description.isNotEmpty()
 }

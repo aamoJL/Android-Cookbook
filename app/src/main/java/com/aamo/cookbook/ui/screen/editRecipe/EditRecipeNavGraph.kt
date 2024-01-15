@@ -16,10 +16,10 @@ import com.aamo.cookbook.viewModel.EditRecipeViewModel
  * Enum class for screen navigation
  */
 enum class EditRecipeScreenPage(val route: String) {
-  EditRecipeInfo("edit/info"),
-  EditRecipeChapter("edit/chapter"),
-  EditChapterStep("edit/step"),
-  EditStepIngredient("edit/ingredient")
+  EditInfo("edit/info"),
+  EditChapter("edit/chapter"),
+  EditStep("edit/step"),
+  EditIngredient("edit/ingredient")
 }
 
 fun NavGraphBuilder.editRecipeGraph(
@@ -31,18 +31,18 @@ fun NavGraphBuilder.editRecipeGraph(
 ) {
   navigation(
     route = screen.getRoute(),
-    startDestination = EditRecipeScreenPage.EditRecipeInfo.route,
+    startDestination = EditRecipeScreenPage.EditInfo.route,
     arguments = listOf(navArgument(screen.argumentName) { type = NavType.IntType })
   ) {
-      composable(EditRecipeScreenPage.EditRecipeInfo.route) {
+      composable(EditRecipeScreenPage.EditInfo.route) {
         val editRecipeViewModel =
           it.sharedViewModel<EditRecipeViewModel>(navController = navController)
 
         EditRecipeScreen(
           viewModel = editRecipeViewModel,
           onEditChapter = { chapter ->
-            editRecipeViewModel.initChapterUiState(chapter = chapter.value, steps = chapter.steps)
-            navController.navigate(EditRecipeScreenPage.EditRecipeChapter.route) {
+            editRecipeViewModel.initChapterUiState(chapter = chapter)
+            navController.navigate(EditRecipeScreenPage.EditChapter.route) {
               launchSingleTop = true
             }
           },
@@ -56,15 +56,15 @@ fun NavGraphBuilder.editRecipeGraph(
           onBack = onBack
         )
       }
-      composable(EditRecipeScreenPage.EditRecipeChapter.route) {
+      composable(EditRecipeScreenPage.EditChapter.route) {
         val editRecipeViewModel =
           it.sharedViewModel<EditRecipeViewModel>(navController = navController)
 
         EditRecipeChapterScreen(
           viewModel = editRecipeViewModel,
           onEditStep = { step ->
-            editRecipeViewModel.initStepUiState(step = step.value, ingredients = step.ingredients)
-            navController.navigate(route = EditRecipeScreenPage.EditChapterStep.route) {
+            editRecipeViewModel.initStepUiState(step = step)
+            navController.navigate(route = EditRecipeScreenPage.EditStep.route) {
               launchSingleTop = true
             }
           },
@@ -72,36 +72,44 @@ fun NavGraphBuilder.editRecipeGraph(
             editRecipeViewModel.addOrUpdateChapter(
               chapter = editRecipeViewModel.chapterUiState.value.toChapterWithStepsAndIngredients()
             )
-            navController.navigateUp()
+            navController.navigate(route = EditRecipeScreenPage.EditInfo.route) {
+              popUpTo(EditRecipeScreenPage.EditChapter.route) { inclusive = true }
+              launchSingleTop = true
+            }
           },
           onBack = { navController.navigateUp() }
         )
       }
-      composable(EditRecipeScreenPage.EditChapterStep.route) {
+      composable(EditRecipeScreenPage.EditStep.route) {
         val editRecipeViewModel =
           it.sharedViewModel<EditRecipeViewModel>(navController = navController)
 
         EditRecipeChapterStepScreen(
           viewModel = editRecipeViewModel,
-          onEditIngredient = { ingredientIndex ->
+          onEditIngredient = { ingredient ->
             editRecipeViewModel.initIngredientUiState(
-              ingredient = editRecipeViewModel.stepUiState.value.ingredients.elementAtOrNull(
-                ingredientIndex
-              ),
-              index = ingredientIndex
+              ingredient = ingredient,
+              index = editRecipeViewModel.stepUiState.value.ingredients.indexOf(ingredient)
+                .let { index ->
+                  if (index == -1) editRecipeViewModel.stepUiState.value.ingredients.size
+                  else index
+                }
             )
-            navController.navigate(route = EditRecipeScreenPage.EditStepIngredient.route) {
+            navController.navigate(route = EditRecipeScreenPage.EditIngredient.route) {
               launchSingleTop = true
             }
           },
           onSubmitChanges = {
             editRecipeViewModel.addOrUpdateStep(editRecipeViewModel.stepUiState.value.toStepWithIngredients())
-            navController.navigateUp()
+            navController.navigate(route = EditRecipeScreenPage.EditChapter.route) {
+              popUpTo(EditRecipeScreenPage.EditStep.route) { inclusive = true }
+              launchSingleTop = true
+            }
           },
           onBack = { navController.navigateUp() }
         )
       }
-      composable(EditRecipeScreenPage.EditStepIngredient.route) {
+      composable(EditRecipeScreenPage.EditIngredient.route) {
         val editRecipeViewModel =
           it.sharedViewModel<EditRecipeViewModel>(navController = navController)
 
@@ -112,7 +120,10 @@ fun NavGraphBuilder.editRecipeGraph(
               ingredient = editRecipeViewModel.ingredientUiState.value.toIngredient(),
               index = editRecipeViewModel.ingredientUiState.value.index
             )
-            navController.navigateUp()
+            navController.navigate(route = EditRecipeScreenPage.EditStep.route) {
+              popUpTo(EditRecipeScreenPage.EditIngredient.route) { inclusive = true }
+              launchSingleTop = true
+            }
           },
           onBack = { navController.navigateUp() })
       }

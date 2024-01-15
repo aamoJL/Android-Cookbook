@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -78,8 +79,10 @@ fun MainNavGraph(
     startDestination = Screen.Categories.getRoute()
   ) {
     composable(Screen.Categories.getRoute()) {
+      val categories by viewModel.getCategories().collectAsState(initial = emptyList())
+
       CategoriesScreen(
-        categories = viewModel.getCategories().collectAsState(initial = emptyList()).value,
+        categories = categories,
         onSelectCategory = {
           viewModel.setSelectedCategory(it)
           navController.navigate(Screen.Recipes.getRoute())
@@ -87,8 +90,9 @@ fun MainNavGraph(
         onAddRecipeClick = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
     composable(Screen.Recipes.getRoute()) {
-      val category by viewModel.selectedCategory.collectAsState()
-      val recipes by viewModel.getRecipesByCategory(category).collectAsState(initial = emptyList())
+      val recipes by viewModel.getRecipesByCategory(
+        viewModel.selectedCategory.collectAsStateWithLifecycle().value)
+        .collectAsStateWithLifecycle(initialValue = emptyList())
 
       RecipesScreen(
         recipes = recipes,

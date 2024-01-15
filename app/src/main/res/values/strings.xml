@@ -37,6 +37,8 @@
     <string name="textfield_ingredient_name">Nimi</string>
     <string name="textfield_ingredient_amount">Määrä</string>
     <string name="textfield_ingredient_unit">Mitta</string>
+    // Button labels
+    <string name="button_text_save">Tallenna</string>
     // Dialog
     <string name="dialog_title_delete_recipe">Poista resepti?</string>
     <string name="dialog_text_delete_recipe">Haluatko varmasti poistaa reseptin?</string>

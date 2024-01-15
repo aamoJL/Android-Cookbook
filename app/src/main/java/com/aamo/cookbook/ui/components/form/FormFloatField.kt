@@ -7,6 +7,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,36 +18,41 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.utility.trimFirst
-import java.text.DecimalFormat
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormFloatField(
-  initialValue: Float?,
+  value: Float?,
+  modifier: Modifier = Modifier,
   onValueChange: (Float?) -> Unit,
   label: String,
-  modifier: Modifier = Modifier
 ) {
   var textFieldValueState by remember {
     mutableStateOf(
       TextFieldValue(
-        text = initialValue?.toStringWithoutZero() ?: "",
-        selection = when (initialValue) {
+        text = value?.toStringWithoutZero() ?: "",
+        selection = when (value) {
           null -> TextRange.Zero
           else -> TextRange(
-            initialValue.toStringWithoutZero().length,
-            initialValue.toStringWithoutZero().length
+            value.toStringWithoutZero().length,
+            value.toStringWithoutZero().length
           )
         }
       )
     )
   }
+  var lastTextValue by remember { mutableStateOf(value?.toStringWithoutZero() ?: "") }
+  var lastFloatValue by remember { mutableStateOf(value) }
 
-  var lastTextValue by remember { mutableStateOf(initialValue?.toStringWithoutZero() ?: "") }
-  val textFieldValue = textFieldValueState
+  LaunchedEffect(value != lastFloatValue){
+    // This launched effect needs to be here, so the text value of the TextField will change
+    // if the value changes from outside of this composable
+    if(lastTextValue.toFloatOrNull() != value)
+      textFieldValueState = textFieldValueState.copy(text = value?.toStringWithoutZero() ?: "")
+  }
 
   TextField(
-    value = textFieldValue,
+    value = textFieldValueState,
     onValueChange = { newState ->
       val text = newState.text
 
@@ -56,11 +62,12 @@ fun FormFloatField(
       ) {
         textFieldValueState = newState
 
-        val valueChanged = lastTextValue != text
+        val newValue = text.toFloatOrNull()
         lastTextValue = text
 
-        if (valueChanged) {
-          onValueChange(text.toFloatOrNull())
+        if (newValue != value) {
+          lastFloatValue = newValue
+          onValueChange(newValue)
         }
       }
     },
@@ -75,7 +82,7 @@ fun FormFloatField(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedFormFloatField(
-  initialValue: Float?,
+  value: Float?,
   onValueChange: (Float?) -> Unit,
   label: String,
   modifier: Modifier = Modifier
@@ -83,38 +90,44 @@ fun OutlinedFormFloatField(
   var textFieldValueState by remember {
     mutableStateOf(
       TextFieldValue(
-        text = initialValue?.toStringWithoutZero() ?: "",
-        selection = when (initialValue) {
+        text = value?.toStringWithoutZero() ?: "",
+        selection = when (value) {
           null -> TextRange.Zero
           else -> TextRange(
-            initialValue.toStringWithoutZero().length,
-            initialValue.toStringWithoutZero().length
+            value.toStringWithoutZero().length,
+            value.toStringWithoutZero().length
           )
         }
       )
     )
   }
+  var lastTextValue by remember { mutableStateOf(value?.toStringWithoutZero() ?: "") }
+  var lastFloatValue by remember { mutableStateOf(value) }
 
-  var lastTextValue by remember { mutableStateOf(initialValue?.toStringWithoutZero() ?: "") }
-  val textFieldValue = textFieldValueState
+  LaunchedEffect(value != lastFloatValue){
+    // This launched effect needs to be here, so the text value of the TextField will change
+    // if the value changes from outside of this composable
+    if(lastTextValue.toFloatOrNull() != value)
+      textFieldValueState = textFieldValueState.copy(text = value?.toStringWithoutZero() ?: "")
+  }
 
   OutlinedTextField(
-    value = textFieldValue,
+    value = textFieldValueState,
     onValueChange = { newState ->
       val text = newState.text
-      val decimalSeparator = DecimalFormat().decimalFormatSymbols.decimalSeparator
 
       // Check if the text has no more than one non-digit chars
       if ((text.trimFirst('-').filterNot { it.isDigit() }.length <= 1) && (text.trimFirst('-')
-          .trimFirst(decimalSeparator).isEmpty() || text.toFloatOrNull() != null)
+          .trimFirst('.').isEmpty() || text.toFloatOrNull() != null)
       ) {
         textFieldValueState = newState
 
-        val valueChanged = lastTextValue != text
+        val newValue = text.toFloatOrNull()
         lastTextValue = text
 
-        if (valueChanged) {
-          onValueChange(text.toFloatOrNull())
+        if (newValue != value) {
+          lastFloatValue = newValue
+          onValueChange(newValue)
         }
       }
     },

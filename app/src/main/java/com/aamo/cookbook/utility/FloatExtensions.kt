@@ -1,7 +1,10 @@
 package com.aamo.cookbook.utility
 
 fun Float.toStringWithoutZero(): String {
-  return this.toString().trimEnd { it == '0' }.trimEnd { it == '.' }.trimEnd { it == ',' }
+  // Without converting to big decimal the string could be converted
+  // to scientific notation (e.g. "1.2E8")
+  return this.toBigDecimal().toPlainString().trimEnd { it == '0' }.trimEnd { it == '.' }
+    .trimEnd { it == ',' }
 }
 
 /**

@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -37,10 +38,10 @@ import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterScreen(
   viewModel: EditRecipeViewModel,
@@ -50,16 +51,32 @@ fun EditRecipeChapterScreen(
   modifier: Modifier = Modifier,
 ) {
   val uiState by viewModel.chapterUiState.collectAsState()
-  val formIsValid by remember(uiState) {
-    mutableStateOf(formValidation(uiState))
-  }
+
+  EditRecipeChapterScreenContent(
+    uiState = uiState,
+    onFormStateChange = { viewModel.setChapterFormState(it) },
+    onEditStep = onEditStep,
+    onSubmitChanges = onSubmitChanges,
+    onBack = onBack,
+    modifier = modifier
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditRecipeChapterScreenContent(
+  uiState: EditRecipeViewModel.ChapterScreenUiState,
+  modifier: Modifier = Modifier,
+  onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit = {},
+  onEditStep: (StepWithIngredients) -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onBack: () -> Unit = {},
+) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
     UnsavedDialog(
-      onDismiss = {
-        openUnsavedDialog = false
-      },
+      onDismiss = { openUnsavedDialog = false },
       onConfirm = {
         openUnsavedDialog = false
         onBack()
@@ -67,11 +84,8 @@ fun EditRecipeChapterScreen(
   }
 
   BackHandler(true) {
-    if (uiState.unsavedChanges) {
-      openUnsavedDialog = true
-    } else {
-      onBack()
-    }
+    if (uiState.unsavedChanges) openUnsavedDialog = true
+    else onBack()
   }
 
   Scaffold(
@@ -80,19 +94,14 @@ fun EditRecipeChapterScreen(
         0 -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
       }, onBack = {
-        if (uiState.unsavedChanges) {
-          openUnsavedDialog = true
-        } else {
-          onBack()
-        }
+        if (uiState.unsavedChanges) openUnsavedDialog = true
+        else onBack()
       })
     },
     bottomBar = {
       SaveButton(
-        enabled = formIsValid,
-        onClick = {
-          onSubmitChanges()
-        },
+        enabled = uiState.canBeSaved,
+        onClick = { onSubmitChanges() },
         modifier = Modifier.padding(8.dp)
       )
     }
@@ -102,7 +111,11 @@ fun EditRecipeChapterScreen(
         .padding(it)
         .padding(8.dp)
     ) {
-      ChapterForm(viewModel = viewModel)
+      ChapterForm(
+        uiState = uiState.formState,
+        orderNumber = uiState.orderNumber,
+        onFormStateChange = onFormStateChange
+      )
       Spacer(modifier = Modifier.padding(8.dp))
       StepList(
         steps = uiState.steps,
@@ -137,13 +150,16 @@ private fun StepList(
 }
 
 @Composable
-fun ChapterForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
-  val uiState by viewModel.chapterUiState.collectAsState()
-
-  FormBase(title = stringResource(R.string.form_title_chapter, uiState.orderNumber), modifier = modifier) {
+fun ChapterForm(
+  uiState: EditRecipeViewModel.ChapterScreenUiState.ChapterFormState,
+  orderNumber: Int,
+  onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  FormBase(title = stringResource(R.string.form_title_chapter, orderNumber), modifier = modifier) {
     FormTextField(
       value = uiState.name,
-      onValueChange = { viewModel.setChapterName(it) },
+      onValueChange = { onFormStateChange(uiState.copy(name = it)) },
       imeAction = ImeAction.Done,
       label = stringResource(R.string.textfield_chapter_name)
     )
@@ -156,7 +172,7 @@ fun StepItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = Modifier.clickable { onClick() }) {
+  Box(modifier = Modifier.clickable { onClick() }.testTag(Tags.STEP_ITEM.name)) {
     Column(modifier = modifier.fillMaxWidth()) {
       Text(
         text = "${step.value.orderNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
@@ -195,9 +211,4 @@ fun StepItem(
       }
     }
   }
-}
-
-private fun formValidation(uiState: EditRecipeViewModel.ChapterScreenUiState): Boolean {
-  return uiState.name.isNotEmpty()
-          && uiState.steps.isNotEmpty()
 }

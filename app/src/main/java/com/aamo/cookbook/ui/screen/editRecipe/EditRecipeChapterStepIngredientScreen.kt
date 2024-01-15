@@ -27,7 +27,6 @@ import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterStepIngredientScreen(
   viewModel: EditRecipeViewModel,
@@ -36,14 +35,30 @@ fun EditRecipeChapterStepIngredientScreen(
   modifier: Modifier = Modifier
 ) {
   val uiState by viewModel.ingredientUiState.collectAsState()
-  val formIsValid by remember(uiState) { mutableStateOf(formValidation(uiState)) }
+
+  EditRecipeChapterStepIngredientScreenContent(
+    uiState = uiState,
+    modifier = modifier,
+    onBack = onBack,
+    onSubmitChanges = onSubmitChanges,
+    onFormStateChange = { viewModel.setIngredientFormState(it) }
+  )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditRecipeChapterStepIngredientScreenContent(
+  uiState: EditRecipeViewModel.IngredientScreenUiState,
+  modifier: Modifier = Modifier,
+  onBack: () -> Unit = {},
+  onSubmitChanges: () -> Unit = {},
+  onFormStateChange: (EditRecipeViewModel.IngredientScreenUiState.IngredientFormState) -> Unit = {},
+) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
     UnsavedDialog(
-      onDismiss = {
-        openUnsavedDialog = false
-      },
+      onDismiss = { openUnsavedDialog = false },
       onConfirm = {
         openUnsavedDialog = false
         onBack()
@@ -51,10 +66,9 @@ fun EditRecipeChapterStepIngredientScreen(
   }
 
   BackHandler(true) {
-    if (uiState.unsavedChanges) {
-      openUnsavedDialog = true
-    } else {
-      onBack()
+    when(uiState.unsavedChanges){
+      true -> openUnsavedDialog = true
+      false -> onBack()
     }
   }
 
@@ -64,17 +78,18 @@ fun EditRecipeChapterStepIngredientScreen(
         0 -> stringResource(R.string.screen_title_new_ingredient)
         else -> stringResource(R.string.screen_title_existing_ingredient)
       }, onBack = {
-        if (uiState.unsavedChanges) {
-          openUnsavedDialog = true
-        } else {
-          onBack()
+        when(uiState.unsavedChanges){
+          true -> openUnsavedDialog = true
+          false -> onBack()
         }
       })
     },
     bottomBar = {
-      SaveButton(enabled = formIsValid, onClick = {
-        onSubmitChanges()
-      }, modifier = Modifier.padding(8.dp))
+      SaveButton(
+        enabled = uiState.canBeSaved,
+        onClick = { onSubmitChanges() },
+        modifier = Modifier.padding(8.dp)
+      )
     }
   ) {
     Column(
@@ -82,39 +97,41 @@ fun EditRecipeChapterStepIngredientScreen(
         .padding(it)
         .padding(8.dp)
     ) {
-      IngredientForm(viewModel = viewModel)
+      IngredientForm(
+        formState = uiState.formState,
+        onStateChange = onFormStateChange
+      )
     }
   }
 }
 
 @Composable
-private fun IngredientForm(viewModel: EditRecipeViewModel, modifier: Modifier = Modifier) {
-  val uiState by viewModel.ingredientUiState.collectAsState()
+private fun IngredientForm(
+  formState: EditRecipeViewModel.IngredientScreenUiState.IngredientFormState,
+  modifier: Modifier = Modifier,
+  onStateChange: (EditRecipeViewModel.IngredientScreenUiState.IngredientFormState) -> Unit = {}
+) {
 
   FormBase(title = stringResource(R.string.form_title_ingredient), modifier = modifier) {
     FormTextField(
-      value = uiState.name,
-      onValueChange = { viewModel.setIngredientName(it) },
+      value = formState.name,
+      onValueChange = { onStateChange(formState.copy(name = it)) },
       label = stringResource(R.string.textfield_ingredient_name)
     )
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
       FormFloatField(
-        initialValue = if (uiState.amount == 0f) null else uiState.amount,
-        onValueChange = { viewModel.setIngredientAmount(it) },
+        value = if (formState.amount == 0f) null else formState.amount,
+        onValueChange = { onStateChange(formState.copy(amount = it)) },
         label = stringResource(R.string.textfield_ingredient_amount),
         modifier = Modifier.weight(1f, true)
       )
       FormTextField(
-        value = uiState.unit,
-        onValueChange = { viewModel.setIngredientUnit(it) },
+        value = formState.unit,
+        onValueChange = { onStateChange(formState.copy(unit = it)) },
         label = stringResource(R.string.textfield_ingredient_unit),
         imeAction = ImeAction.Done,
         modifier = Modifier.width(100.dp)
       )
     }
   }
-}
-
-private fun formValidation(uiState: EditRecipeViewModel.IngredientScreenUiState): Boolean {
-  return uiState.name.isNotEmpty()
 }

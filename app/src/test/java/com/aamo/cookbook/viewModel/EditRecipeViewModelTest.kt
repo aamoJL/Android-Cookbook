@@ -16,7 +16,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
-class EditRecipeViewModelTestWithId {
+class EditRecipeViewModelTestExistingRecipe {
   private val recipeId = 1
   private lateinit var viewModel: EditRecipeViewModel
   private lateinit var repository: TestRecipeRepository
@@ -41,10 +41,12 @@ class EditRecipeViewModelTestWithId {
     if(recipe != null){
       val expected = EditRecipeViewModel.InfoScreenUiState(
         id = recipe.value.id,
-        name = recipe.value.name,
-        category = recipe.value.category,
-        subCategory = recipe.value.subCategory,
-        servings = recipe.value.servings,
+        formState = EditRecipeViewModel.InfoScreenUiState.InfoFormState(
+          name = recipe.value.name,
+          category = recipe.value.category,
+          subCategory = recipe.value.subCategory,
+          servings = recipe.value.servings,
+        ),
         chapters = recipe.chapters,
         unsavedChanges = false
       )
@@ -76,7 +78,7 @@ class EditRecipeViewModelTestWithId {
   @Test
   fun addOrUpdateStep_update() {
     val chapter = viewModel.infoUiState.value.chapters.first()
-    viewModel.initChapterUiState(chapter.value, chapter.steps)
+    viewModel.initChapterUiState(chapter)
 
     val oldUiState = viewModel.chapterUiState.value
     val step = oldUiState.steps.first().copy(
@@ -99,7 +101,7 @@ class EditRecipeViewModelTestWithId {
   @Test
   fun addOrUpdateIngredient_update() {
     val step = viewModel.infoUiState.value.chapters.first().steps.first()
-    viewModel.initStepUiState(step.value, step.ingredients)
+    viewModel.initStepUiState(step)
 
     val oldUiState = viewModel.stepUiState.value
     val ingredient = oldUiState.ingredients.first().copy(
@@ -119,7 +121,7 @@ class EditRecipeViewModelTestWithId {
   }
 }
 
-class EditRecipeViewModelTestWithoutId {
+class EditRecipeViewModelTestNewRecipe {
   private var recipeId = 0
   private lateinit var viewModel: EditRecipeViewModel
   private lateinit var repository: TestRecipeRepository
@@ -146,11 +148,13 @@ class EditRecipeViewModelTestWithoutId {
   @Test
   fun initChapterUiState() {
     val chapter = TestRecipeRepository.Data.recipes.first().chapters.first()
-    viewModel.initChapterUiState(chapter.value, chapter.steps)
+    viewModel.initChapterUiState(chapter)
 
     val expected = EditRecipeViewModel.ChapterScreenUiState(
       id = chapter.value.id,
-      name = chapter.value.name,
+      formState = EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
+        name = chapter.value.name,
+      ),
       orderNumber = chapter.value.orderNumber,
       steps = chapter.steps,
       unsavedChanges = false
@@ -163,12 +167,14 @@ class EditRecipeViewModelTestWithoutId {
   @Test
   fun initStepUiState() {
     val step = TestRecipeRepository.Data.recipes.first().chapters.first().steps.first()
-    viewModel.initStepUiState(step.value, step.ingredients)
+    viewModel.initStepUiState(step)
 
     val expected = EditRecipeViewModel.StepScreenUiState(
       id = step.value.id,
       orderNumber = step.value.orderNumber,
-      description = step.value.description,
+      formState = EditRecipeViewModel.StepScreenUiState.StepFormState(
+        description = step.value.description,
+      ),
       ingredients = step.ingredients,
       unsavedChanges = false
     )
@@ -186,9 +192,11 @@ class EditRecipeViewModelTestWithoutId {
     val expected = EditRecipeViewModel.IngredientScreenUiState(
       index = 0,
       id = ingredient.id,
-      name = ingredient.name,
-      unit = ingredient.unit,
-      amount = ingredient.amount,
+      formState = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(
+        name = ingredient.name,
+        unit = ingredient.unit,
+        amount = ingredient.amount,
+      ),
       unsavedChanges = false
     )
     val result = viewModel.ingredientUiState.value
@@ -244,119 +252,24 @@ class EditRecipeViewModelTestWithoutId {
   }
 
   @Test
-  fun setRecipeName() {
-    val value = "new"
-    viewModel.setRecipeName(value)
-
-    assertEquals(
-      viewModel.infoUiState.value, viewModel.infoUiState.value.copy(
-        name = value,
-        unsavedChanges = true
-      )
+  fun setInfoFormState_WithoutChapters() {
+    val oldState = viewModel.infoUiState.value
+    val value = EditRecipeViewModel.InfoScreenUiState.InfoFormState(
+      name = "",
+      category = "new category",
+      subCategory = "new sub",
+      servings = 5
     )
-  }
 
-  @Test
-  fun setCategory() {
-    val value = "new"
-    viewModel.setCategory(value)
+    viewModel.setInfoFormState(value)
 
-    assertEquals(
-      viewModel.infoUiState.value, viewModel.infoUiState.value.copy(
-        category = value,
-        unsavedChanges = true
-      )
+    val expected = oldState.copy(
+      formState = value,
+      unsavedChanges = true
     )
-  }
+    val actual = viewModel.infoUiState.value
 
-  @Test
-  fun setSubCategory() {
-    val value = "new"
-    viewModel.setSubCategory(value)
-
-    assertEquals(
-      viewModel.infoUiState.value, viewModel.infoUiState.value.copy(
-        subCategory = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setServings() {
-    val value = 10
-    viewModel.setServings(value)
-
-    assertEquals(
-      viewModel.infoUiState.value, viewModel.infoUiState.value.copy(
-        servings = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setChapterName() {
-    val value = "new"
-    viewModel.setChapterName(value)
-
-    assertEquals(
-      viewModel.chapterUiState.value, viewModel.chapterUiState.value.copy(
-        name = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setStepDescription() {
-    val value = "new"
-    viewModel.setStepDescription(value)
-
-    assertEquals(
-      viewModel.stepUiState.value, viewModel.stepUiState.value.copy(
-        description = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setIngredientName() {
-    val value = "new"
-    viewModel.setIngredientName(value)
-
-    assertEquals(
-      viewModel.ingredientUiState.value, viewModel.ingredientUiState.value.copy(
-        name = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setIngredientUnit() {
-    val value = "new"
-    viewModel.setIngredientUnit(value)
-
-    assertEquals(
-      viewModel.ingredientUiState.value, viewModel.ingredientUiState.value.copy(
-        unit = value,
-        unsavedChanges = true
-      )
-    )
-  }
-
-  @Test
-  fun setIngredientAmount() {
-    val value = 10f
-    viewModel.setIngredientAmount(value)
-
-    assertEquals(
-      viewModel.ingredientUiState.value, viewModel.ingredientUiState.value.copy(
-        amount = value,
-        unsavedChanges = true
-      )
-    )
+    assert(expected.chapters.isEmpty())
+    assertEquals(expected, actual)
   }
 }
