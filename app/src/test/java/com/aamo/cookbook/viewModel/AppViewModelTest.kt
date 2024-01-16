@@ -1,16 +1,21 @@
 package com.aamo.cookbook.viewModel
 
+import com.aamo.cookbook.MainDispatcherRule
 import com.aamo.cookbook.database.repository.TestRecipeRepository
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.single
 import kotlinx.coroutines.test.runTest
-import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.Assert.assertEquals
+import org.junit.Rule
+import org.junit.Test
 
 class AppViewModelTest {
   private val viewModel = AppViewModel(TestRecipeRepository())
+
+  @get:Rule
+  val mainDispatcherRule = MainDispatcherRule()
 
   @Test
   fun getRecipesByCategory() = runTest {
@@ -19,6 +24,17 @@ class AppViewModelTest {
 
     val expected = recipes.map { it.value }.sortedBy { it.name }
     val result = viewModel.getRecipesByCategory(category).single()
+    assertEquals(expected, result)
+  }
+
+  @Test
+  fun getRecipesBySubCategory() = runTest {
+    val recipes = TestRecipeRepository.Data.recipes
+    val category = recipes.first().value.category
+    val subCategory = recipes.first().value.subCategory
+
+    val expected = recipes.filter { it.value.category == category && it.value.subCategory == subCategory }.map { it.value }.sortedBy { it.name }
+    val result = viewModel.getRecipesBySubCategory(category, subCategory).single()
     assertEquals(expected, result)
   }
 

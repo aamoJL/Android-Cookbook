@@ -18,7 +18,7 @@ class Mocker {
 
       return (1..5).map { ri ->
         RecipeWithChaptersStepsAndIngredients(
-          value = Recipe(currentRecipeId, "recipe", "category", "", ri),
+          value = Recipe(currentRecipeId, "recipe", "category", "sub $ri", ri),
           chapters = (1..3).map { ci ->
             ChapterWithStepsAndIngredients(
               value = Chapter(currentChapterId, ci, "chapter $ci", currentRecipeId),

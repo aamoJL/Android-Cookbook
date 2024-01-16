@@ -7,11 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Divider
-import androidx.compose.material3.FloatingActionButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -25,36 +21,36 @@ import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.utility.Tags
 
 @Composable
-fun CategoriesScreen(
-  categories: List<String>,
-  onSelectCategory: (String) -> Unit = {},
-  onAddRecipeClick: () -> Unit = {},
+fun SubCategoriesScreen(
+  subCategories: List<String>,
+  onSelectSubCategory: (String) -> Unit = {},
+  onBack: () -> Unit,
 ) {
   Scaffold(
-    topBar = { BasicTopAppBar(title = stringResource(R.string.screen_title_categories)) },
-    floatingActionButton = {
-      FloatingActionButton(onClick = onAddRecipeClick) {
-        Icon(Icons.Filled.Add, stringResource(R.string.description_add_new_recipe))
-      }
+    topBar = {
+      BasicTopAppBar(
+        title = stringResource(R.string.screen_title_categories),
+        onBack = onBack
+      )
     }
   ) { innerPadding ->
     Column(modifier = Modifier.padding(innerPadding)) {
-      CategoryList(
-        categories = categories,
-        onSelect = onSelectCategory
+      SubCategoryList(
+        categories = subCategories,
+        onSelect = onSelectSubCategory
       )
     }
   }
 }
 
 @Composable
-private fun CategoryList(categories: List<String>, onSelect: (String) -> Unit) {
+private fun SubCategoryList(categories: List<String>, onSelect: (String) -> Unit) {
   Column {
     Divider(color = MaterialTheme.colorScheme.secondary)
     LazyColumn {
       items(categories) { category ->
-        CategoryItem(
-          category = category,
+        SubCategoryItem(
+          subCategory = category,
           onClick = { onSelect(category) },
           modifier = Modifier.fillMaxWidth()
         )
@@ -65,18 +61,16 @@ private fun CategoryList(categories: List<String>, onSelect: (String) -> Unit) {
 }
 
 @Composable
-private fun CategoryItem(
-  category: String,
+private fun SubCategoryItem(
+  subCategory: String,
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Box(modifier = modifier.clickable(onClick = onClick).testTag(Tags.CATEGORY_ITEM.name)) {
     Text(
-      text = (if (category != "") category else stringResource(R.string.other_category)),
+      text = (if (subCategory != "") subCategory else stringResource(R.string.other_category)),
       style = MaterialTheme.typography.titleLarge,
       modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp)
     )
   }
 }
-
-

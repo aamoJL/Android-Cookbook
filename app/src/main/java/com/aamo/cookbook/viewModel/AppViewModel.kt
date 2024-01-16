@@ -14,12 +14,23 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   private var _selectedCategory = MutableStateFlow("")
   val selectedCategory = _selectedCategory.asStateFlow()
 
+  private var _selectedSubCategory = MutableStateFlow("")
+  val selectedSubCategory = _selectedSubCategory.asStateFlow()
+
   fun getRecipesByCategory(category: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
-    list.filter { it.category == category }.sortedBy { it.category }
+    list.filter { it.category == category }.sortedBy { it.name }
+  }
+
+  fun getRecipesBySubCategory(category: String, subCategory: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
+    list.filter { it.category == category && it.subCategory == subCategory }.sortedBy { it.name }
   }
 
   fun getCategories(): Flow<List<String>> = recipeRepository.getAllRecipesStream().map { list ->
     list.map { it.category }.distinct().sortedBy { it }
+  }
+
+  fun getSubCategories(category: String): Flow<List<String>> = recipeRepository.getAllRecipesStream().map { list ->
+    list.filter { it.category == category }.map { it.subCategory }.distinct().sortedBy { it }
   }
 
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
@@ -31,4 +42,6 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   }
 
   fun setSelectedCategory(value: String) = _selectedCategory.update { value }
+
+  fun setSelectedSubCategory(value: String) = _selectedSubCategory.update { value }
 }

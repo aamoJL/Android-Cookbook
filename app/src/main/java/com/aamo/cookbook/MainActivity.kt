@@ -23,10 +23,13 @@ import androidx.navigation.navArgument
 import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
+import com.aamo.cookbook.ui.screen.SubCategoriesScreen
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.viewModel.AppViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 /**
@@ -34,7 +37,8 @@ import kotlinx.coroutines.launch
  */
 enum class Screen(private val route: String, val argumentName: String = "") {
   Categories("categories"),
-  Recipes("recipes/", "categoryName"),
+  SubCategories("subCategories"),
+  Recipes("recipes"),
   Recipe("recipe/", "recipeId"),
   EditRecipe("edit/recipe/", "recipeId");
 
@@ -85,14 +89,31 @@ fun MainNavGraph(
         categories = categories,
         onSelectCategory = {
           viewModel.setSelectedCategory(it)
-          navController.navigate(Screen.Recipes.getRoute())
+          navController.navigate(Screen.SubCategories.getRoute())
         },
         onAddRecipeClick = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
+    composable(Screen.SubCategories.getRoute()) {
+      val subCategories by viewModel.getSubCategories(viewModel.selectedCategory
+        .collectAsState().value)
+        .collectAsState(initial = emptyList())
+
+      SubCategoriesScreen(
+        subCategories = subCategories,
+        onSelectSubCategory = {
+          viewModel.setSelectedSubCategory(it)
+          navController.navigate(Screen.Recipes.getRoute())
+        },
+        onBack = { navController.navigateUp() }
+      )
+    }
     composable(Screen.Recipes.getRoute()) {
-      val recipes by viewModel.getRecipesByCategory(
-        viewModel.selectedCategory.collectAsStateWithLifecycle().value)
-        .collectAsStateWithLifecycle(initialValue = emptyList())
+      val recipes by combine(
+        viewModel.selectedCategory,
+        viewModel.selectedSubCategory
+      ) { category, subCategory ->
+        viewModel.getRecipesBySubCategory(category, subCategory).first()
+      }.collectAsStateWithLifecycle(initialValue = emptyList())
 
       RecipesScreen(
         recipes = recipes,

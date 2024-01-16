@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -84,7 +83,7 @@ fun RecipeScreen(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
@@ -262,6 +261,7 @@ private fun PageIndicatorItem(
 private fun PageBase(
   title: String,
   modifier: Modifier = Modifier,
+  subtitle: String = "",
   content: @Composable () -> Unit = {}
 ) {
   Column(
@@ -273,8 +273,13 @@ private fun PageBase(
     Text(
       text = title,
       style = MaterialTheme.typography.titleLarge,
-      modifier = Modifier.padding(vertical = 16.dp)
     )
+    if(subtitle.isNotEmpty()){
+      Text(
+        text = subtitle,
+        style = MaterialTheme.typography.bodySmall,
+      )
+    }
     Spacer(modifier = Modifier.height(8.dp))
     content()
   }
@@ -286,7 +291,10 @@ private fun SummaryPage(
 ) {
   val recipe = uiState.recipe
 
-  PageBase(title = recipe.value.name) {
+  PageBase(
+    title = recipe.value.name,
+    subtitle = "Annoksia: ${recipe.value.servings}"
+  ) {
     recipe.chapters.forEach { chapter ->
       Column(modifier = Modifier.fillMaxWidth()) {
         Text(
