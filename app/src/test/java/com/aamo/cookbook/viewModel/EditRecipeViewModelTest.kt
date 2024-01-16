@@ -132,13 +132,19 @@ class EditRecipeViewModelTest {
   fun addOrUpdateChapter_add() {
     withNewRecipe().also { viewModel ->
       val oldUiState = viewModel.infoUiState.value
-      val chapter = ChapterWithStepsAndIngredients(Chapter(
-        id = 0, 0, "new", 0
-      ))
-      viewModel.addOrUpdateChapter(chapter)
+      val count = 5
+      val chapters = List(count){
+        ChapterWithStepsAndIngredients(Chapter(name = "name $it"))
+      }
+
+      chapters.forEach {
+        viewModel.addOrUpdateChapter(it)
+      }
 
       val expected = oldUiState.copy(
-        chapters = oldUiState.chapters.plus(chapter.copy(value = chapter.value.copy(orderNumber = 1))),
+        chapters = chapters.mapIndexed { i, chapter ->
+          chapter.copy(value = chapter.value.copy(orderNumber = i + 1))
+        },
         unsavedChanges = true
       )
       val actual = viewModel.infoUiState.value
@@ -174,11 +180,19 @@ class EditRecipeViewModelTest {
   fun addOrUpdateStep_add() {
     withNewRecipe().also { viewModel ->
       val oldUiState = viewModel.chapterUiState.value
-      val step = StepWithIngredients(Step(description = "new"))
-      viewModel.addOrUpdateStep(step)
+      val count = 5
+      val steps = List(count){
+          StepWithIngredients(Step(description = "new $it"))
+      }
+
+      steps.forEach {
+        viewModel.addOrUpdateStep(it)
+      }
 
       val expected = oldUiState.copy(
-        steps = oldUiState.steps.plus(step.copy(value = step.value.copy(orderNumber = 1))),
+        steps = steps.mapIndexed { i, step ->
+          step.copy(value = step.value.copy(orderNumber = i + 1))
+        },
         unsavedChanges = true
       )
       val result = viewModel.chapterUiState.value
@@ -216,11 +230,17 @@ class EditRecipeViewModelTest {
   fun addOrUpdateIngredient_add() {
     withNewRecipe().also { viewModel ->
       val oldUiState = viewModel.stepUiState.value
-      val ingredient = Ingredient(name = "new")
-      viewModel.addOrUpdateIngredient(ingredient, -1)
+      val count = 5
+      val ingredients = List(count){
+        Ingredient(name = "name $it")
+      }
+
+      ingredients.forEach {
+        viewModel.addOrUpdateIngredient(it, -1)
+      }
 
       val expected = oldUiState.copy(
-        ingredients = oldUiState.ingredients.plus(ingredient),
+        ingredients = ingredients,
         unsavedChanges = true
       )
       val result = viewModel.stepUiState.value
@@ -232,8 +252,7 @@ class EditRecipeViewModelTest {
   @Test
   fun addOrUpdateIngredient_update() {
     withExistingRecipe().also { viewModel ->
-      val step = viewModel.infoUiState.value.chapters.first().steps.first()
-      viewModel.initStepUiState(step)
+      viewModel.initStepUiState(viewModel.infoUiState.value.chapters.first().steps.first())
 
       val oldUiState = viewModel.stepUiState.value
       val ingredient = oldUiState.ingredients.first().copy(

@@ -200,7 +200,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
   fun addOrUpdateChapter(chapter: ChapterWithStepsAndIngredients) {
     val chapters = _infoUiState.value.chapters.toMutableList()
-    val index = chapters.indexOf(chapters.firstOrNull { it.value.id == chapter.value.id })
+    val index = chapters.indexOf(chapters.firstOrNull { it.value.orderNumber == chapter.value.orderNumber })
 
     if (chapters.elementAtOrNull(index) != null) {
       chapters[index] = chapter
@@ -218,7 +218,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
   fun addOrUpdateStep(step: StepWithIngredients) {
     val steps = _chapterUiState.value.steps.toMutableList()
-    val index = steps.indexOf(steps.firstOrNull { it.value.id == step.value.id })
+    val index = steps.indexOf(steps.firstOrNull { it.value.orderNumber == step.value.orderNumber })
 
     if (steps.elementAtOrNull(index) != null) {
       steps[index] = step
