@@ -8,6 +8,7 @@ import androidx.room.Upsert
 import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.model.Step
 import kotlinx.coroutines.flow.Flow
@@ -100,4 +101,10 @@ interface RecipeDao {
   @Transaction
   @Query("SELECT * FROM recipes WHERE id = :recipeId")
   suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients?
+
+  @Query("SELECT DISTINCT category FROM recipes ")
+  suspend fun getCategories(): List<String>
+
+  @Query("SELECT category, subCategory FROM recipes")
+  suspend fun getCategoriesWithSubcategories(): List<RecipeCategoryTuple>
 }

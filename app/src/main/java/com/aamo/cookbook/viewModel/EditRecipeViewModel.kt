@@ -9,6 +9,7 @@ import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
@@ -35,6 +36,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val id: Int = 0,
     val formState: InfoFormState = InfoFormState(),
     val chapters: List<ChapterWithStepsAndIngredients> = emptyList(),
+    val categorySuggestions: List<RecipeCategoryTuple> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
     data class InfoFormState(
@@ -186,8 +188,15 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
   private val _ingredientUiState = MutableStateFlow(IngredientScreenUiState())
   val ingredientUiState: StateFlow<IngredientScreenUiState> = _ingredientUiState.asStateFlow()
 
-  private fun initInfoUiState(recipe: RecipeWithChaptersStepsAndIngredients) =
-    _infoUiState.update { InfoScreenUiState.fromRecipe(recipe) }
+  private fun initInfoUiState(recipe: RecipeWithChaptersStepsAndIngredients) {
+    viewModelScope.launch {
+      val categoriesWithSubcategories = recipeRepository.getCategoriesWithSubCategories()
+
+      _infoUiState.update {
+        InfoScreenUiState.fromRecipe(recipe).copy(categorySuggestions = categoriesWithSubcategories)
+      }
+    }
+  }
 
   fun initChapterUiState(chapter: ChapterWithStepsAndIngredients) =
     _chapterUiState.update { ChapterScreenUiState.fromChapter(chapter) }
@@ -251,13 +260,14 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     }
   }
 
-  fun setInfoFormState(state: InfoScreenUiState.InfoFormState) =
+  fun setInfoFormState(state: InfoScreenUiState.InfoFormState) {
     _infoUiState.update {
       it.copy(
         formState = state,
         unsavedChanges = true
       )
     }
+  }
 
   fun setChapterFormState(state: ChapterScreenUiState.ChapterFormState) =
     _chapterUiState.update {

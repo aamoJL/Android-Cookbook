@@ -107,3 +107,8 @@ data class StepWithIngredients(
   )
   val ingredients: List<Ingredient> = emptyList()
 )
+
+data class RecipeCategoryTuple(
+  @ColumnInfo(name = "category") val category: String,
+  @ColumnInfo(name = "subCategory") val subCategory: String
+)

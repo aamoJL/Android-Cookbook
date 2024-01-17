@@ -2,7 +2,6 @@ package com.aamo.cookbook.ui.components.form
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -17,14 +16,14 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormTextField(
   value: String,
   onValueChange: (String) -> Unit,
   label: String,
   modifier: Modifier = Modifier,
-  imeAction: ImeAction = ImeAction.Next
+  imeAction: ImeAction = ImeAction.Next,
+  trailingIcon: @Composable (() -> Unit)? = null
 ) {
   var textFieldValueState by remember {
     mutableStateOf(
@@ -58,12 +57,12 @@ fun FormTextField(
       keyboardType = KeyboardType.Text,
       imeAction = imeAction,
     ),
+    trailingIcon = trailingIcon,
     modifier = modifier.fillMaxWidth()
   )
 }
 
 @Suppress("unused")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormOutlinedTextField(
   value: String,
