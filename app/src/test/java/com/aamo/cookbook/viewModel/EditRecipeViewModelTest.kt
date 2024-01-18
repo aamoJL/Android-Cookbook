@@ -39,7 +39,9 @@ class EditRecipeViewModelTest {
   @Test
   fun initialState() = runTest {
     withNewRecipe().also { viewModel ->
-      val expected = EditRecipeViewModel.InfoScreenUiState()
+      val expected = EditRecipeViewModel.InfoScreenUiState(
+        categorySuggestions = repository.getCategoriesWithSubCategories()
+      )
       val actual = viewModel.infoUiState.value
 
       assertEquals(expected, actual)
@@ -56,6 +58,7 @@ class EditRecipeViewModelTest {
           servings = recipe.value.servings,
         ),
         chapters = recipe.chapters,
+        categorySuggestions = repository.getCategoriesWithSubCategories(),
         unsavedChanges = false
       )
       val result = viewModel.infoUiState.value

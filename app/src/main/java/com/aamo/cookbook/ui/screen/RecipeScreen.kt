@@ -54,9 +54,11 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.components.LabelledCheckBox
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
+import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
@@ -70,15 +72,18 @@ fun RecipeScreen(
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
   val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
+  val servingsState by viewModel.servingsState.collectAsStateWithLifecycle()
 
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
     chapterUiStates = chapterUiStates,
+    servingsState = servingsState,
     onBack = onBack,
-    onEditRecipe = onEditRecipe,
+    onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
     onProgressChange = { chapterId, stepId, value ->
       viewModel.updateProgress(chapterId, stepId, value)
     },
+    onServingsCountChange = { viewModel.setServingsCount(it) },
     modifier = modifier
   )
 }
@@ -88,10 +93,12 @@ fun RecipeScreen(
 fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
   chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  servingsState: RecipeScreenViewModel.ServingsState,
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
-  onEditRecipe: (id: Int) -> Unit = {},
-  onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit
+  onEditRecipe: () -> Unit = {},
+  onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit,
+  onServingsCountChange: (count: Int) -> Unit,
 ) {
 
   val pageCount by rememberSaveable(chapterUiStates) {
@@ -105,8 +112,8 @@ fun RecipeScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = summaryPageUiState.recipe.value.name, onBack = onBack) {
-        IconButton(onClick = { onEditRecipe(summaryPageUiState.recipe.value.id) }) {
+      BasicTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
+        IconButton(onClick = onEditRecipe) {
           Icon(
             imageVector = Icons.Filled.Edit,
             contentDescription = stringResource(R.string.description_edit_recipe)
@@ -132,13 +139,18 @@ fun RecipeScreenContent(
               .testTag(Tags.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
-              0 -> SummaryPage(uiState = summaryPageUiState)
+              0 -> SummaryPage(
+                uiState = summaryPageUiState,
+                servingsState = servingsState,
+                onServingsCountChange = onServingsCountChange,
+              )
               in (1..chapterUiStates.size) -> {
                 val chapterIndex = pageIndex - 1
                 val uiState = chapterUiStates.elementAt(chapterIndex)
 
                 ChapterPage(
                   uiState = uiState,
+                  servingsState = servingsState,
                   onProgressChange = { stepIndex, value ->
                     onProgressChange(chapterIndex, stepIndex, value)
                   }
@@ -287,48 +299,56 @@ private fun PageBase(
 
 @Composable
 private fun SummaryPage(
-  uiState: RecipeScreenViewModel.SummaryPageUiState
-) {
-  val recipe = uiState.recipe
-
-  PageBase(
-    title = recipe.value.name,
-    subtitle = "Annoksia: ${recipe.value.servings}"
+  uiState: RecipeScreenViewModel.SummaryPageUiState,
+  servingsState: RecipeScreenViewModel.ServingsState,
+  onServingsCountChange: (count: Int) -> Unit,
   ) {
-    recipe.chapters.forEach { chapter ->
+  PageBase(title = stringResource(R.string.page_title_ingredients)) {
+      CountInput(
+        value = servingsState.current,
+        label = when(servingsState.multiplier) {
+          1f -> stringResource(R.string.input_title_servings_without_multiplier)
+          else -> stringResource(
+            R.string.input_title_servings_with_multiplier,
+            servingsState.multiplier.toStringWithoutZero()
+          )
+        },
+        onValueChange = {
+          onServingsCountChange(it)
+        },
+        minValue = 1)
+    uiState.chaptersWithIngredients.forEach { chapterIngredientPair ->
       Column(modifier = Modifier.fillMaxWidth()) {
         Text(
-          text = chapter.value.name,
+          text = chapterIngredientPair.first,
           style = MaterialTheme.typography.titleMedium,
           modifier = Modifier.padding(vertical = 4.dp)
         )
         Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-          chapter.steps.forEach { step ->
+          chapterIngredientPair.second.forEach { ingredient ->
             Column(modifier = Modifier.padding(start = 16.dp)) {
-              step.ingredients.forEach { ingredient ->
-                Row {
-                  Text(
-                    text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.End,
-                    modifier = Modifier
-                      .defaultMinSize(minWidth = 40.dp)
-                      .weight(1f)
-                  )
-                  Text(
-                    text = ingredient.unit,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontStyle = FontStyle.Italic,
-                    modifier = Modifier
-                      .weight(1f)
-                      .padding(horizontal = 8.dp)
-                  )
-                  Text(
-                    text = ingredient.name,
-                    style = MaterialTheme.typography.bodyMedium,
-                    modifier = Modifier.weight(5f)
-                  )
-                }
+              Row {
+                Text(
+                  text = if (ingredient.amount == 0f) "" else (ingredient.amount * servingsState.multiplier).toFractionFormattedString(),
+                  style = MaterialTheme.typography.bodyMedium,
+                  textAlign = TextAlign.End,
+                  modifier = Modifier
+                    .defaultMinSize(minWidth = 40.dp)
+                    .weight(1f)
+                )
+                Text(
+                  text = ingredient.unit,
+                  style = MaterialTheme.typography.bodyMedium,
+                  fontStyle = FontStyle.Italic,
+                  modifier = Modifier
+                    .weight(1f)
+                    .padding(horizontal = 8.dp)
+                )
+                Text(
+                  text = ingredient.name,
+                  style = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier.weight(5f)
+                )
               }
             }
           }
@@ -348,6 +368,7 @@ private fun CompletedPage() {
 @Composable
 private fun ChapterPage(
   uiState: RecipeScreenViewModel.ChapterPageUiState,
+  servingsState: RecipeScreenViewModel.ServingsState,
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
 ) {
   PageBase(title = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}") {
@@ -357,6 +378,7 @@ private fun ChapterPage(
       StepCheckBox(
         step = step.value,
         ingredients = step.ingredients.filter { it.stepId == step.value.id },
+        servingsState = servingsState,
         checked = checked,
         modifier = Modifier.testTag(Tags.PROGRESS_CHECKBOX.name),
         onCheckedChange = { onProgressChange(index, it) })
@@ -368,6 +390,7 @@ private fun ChapterPage(
 private fun StepCheckBox(
   step: Step,
   ingredients: List<Ingredient>,
+  servingsState: RecipeScreenViewModel.ServingsState,
   checked: Boolean,
   onCheckedChange: (checked: Boolean) -> Unit,
   modifier: Modifier = Modifier
@@ -384,7 +407,7 @@ private fun StepCheckBox(
       for (ingredient in ingredients) {
         Row(modifier = Modifier) {
           Text(
-            text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+            text = if (ingredient.amount == 0f) "" else (ingredient.amount * servingsState.multiplier).toFractionFormattedString(),
             style = MaterialTheme.typography.bodyMedium,
             textAlign = TextAlign.End,
             modifier = Modifier

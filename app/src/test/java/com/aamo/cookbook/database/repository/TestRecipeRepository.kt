@@ -2,6 +2,7 @@ package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -31,6 +32,16 @@ class TestRecipeRepository : RecipeRepository {
     val index = recipes.indexOfFirst { it.value.id == recipe.id }
     if(index != -1){
       recipes.minus(recipes.elementAt(index))
+    }
+  }
+
+  override suspend fun getAllCategories(): List<String> {
+    return recipes.map { it.value.category }.distinct()
+  }
+
+  override suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple> {
+    return recipes.map {
+      RecipeCategoryTuple(it.value.category, it.value.subCategory)
     }
   }
 }

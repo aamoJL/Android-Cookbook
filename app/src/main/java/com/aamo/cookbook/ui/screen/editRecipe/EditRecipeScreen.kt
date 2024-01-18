@@ -1,7 +1,6 @@
 package com.aamo.cookbook.ui.screen.editRecipe
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -20,11 +19,6 @@ import androidx.compose.material.icons.filled.Done
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -38,14 +32,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.PopupProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
@@ -55,6 +46,7 @@ import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
+import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
@@ -328,58 +320,6 @@ private fun ChapterListItem(
         }
       }
     )
-  }
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun FormTextFieldWithOptions(
-  value: String,
-  label: String,
-  onValueChange: (String) -> Unit,
-  modifier: Modifier = Modifier,
-  imeAction: ImeAction = ImeAction.Next,
-  options: List<String> = emptyList(),
-) {
-  var expanded by remember { mutableStateOf(false) }
-  ExposedDropdownMenuBox(
-    expanded = expanded,
-    onExpandedChange = { expanded = !expanded },
-    modifier = modifier,
-  ) {
-    FormTextField(
-      // The `menuAnchor` modifier must be passed to the text field for correctness.
-      modifier = Modifier.menuAnchor(),
-      value = value,
-      onValueChange = onValueChange,
-      label = label,
-      imeAction = imeAction,
-      trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-    )
-    // filter options based on text field value
-    val filteringOptions = options.filter { it.contains(value, ignoreCase = true) }
-    if (filteringOptions.isNotEmpty()) {
-      DropdownMenu(
-        modifier = Modifier
-          .background(Color.White)
-          .exposedDropdownSize(true),
-        properties = PopupProperties(focusable = false),
-        expanded = expanded,
-        onDismissRequest = { expanded = false },
-      ) {
-        filteringOptions.forEach { selectionOption ->
-          DropdownMenuItem(
-            text = { Text(selectionOption) },
-            onClick = {
-              onValueChange(selectionOption)
-              expanded = false
-            },
-            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
-          )
-        }
-      }
-    }
   }
 }
 

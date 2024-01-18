@@ -12,6 +12,8 @@
     <string name="screen_title_existing_step">Muokkaa vaihetta</string>
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
     <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
+    // Page titles
+    <string name="page_title_ingredients">Ainesosat</string>
     // Form titles
     <string name="form_title_recipe">Reseptin tiedot</string>
     <string name="form_title_chapter">%1$s. Kappaleen tiedot</string>
@@ -48,4 +50,6 @@
     <string name="dialog_text_unsaved_default">Muutoksesi menetetään, jos palaat edelliselle sivulle.</string>
     <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
     <string name="description_delete_list_item">delete</string>
+    <string name="input_title_servings_without_multiplier">Annokset</string>
+    <string name="input_title_servings_with_multiplier">Annokset ( %1$s x )</string>
 </resources>
