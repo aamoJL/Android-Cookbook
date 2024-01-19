@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -17,12 +16,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormFloatField
 import com.aamo.cookbook.ui.components.form.FormTextField
+import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
@@ -45,7 +46,6 @@ fun EditRecipeChapterStepIngredientScreen(
   )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditRecipeChapterStepIngredientScreenContent(
   uiState: EditRecipeViewModel.IngredientScreenUiState,
@@ -128,7 +128,10 @@ private fun IngredientForm(
         value = formState.unit,
         onValueChange = { onStateChange(formState.copy(unit = it)) },
         label = stringResource(R.string.textfield_ingredient_unit),
-        imeAction = ImeAction.Done,
+        keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
+          capitalization =  KeyboardCapitalization.None,
+          imeAction = ImeAction.Done
+        ),
         modifier = Modifier.width(100.dp)
       )
     }

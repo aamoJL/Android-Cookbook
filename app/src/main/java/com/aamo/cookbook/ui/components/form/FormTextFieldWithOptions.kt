@@ -1,6 +1,7 @@
 package com.aamo.cookbook.ui.components.form
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -14,7 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.window.PopupProperties
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -24,7 +24,7 @@ fun FormTextFieldWithOptions(
   label: String,
   onValueChange: (String) -> Unit,
   modifier: Modifier = Modifier,
-  imeAction: ImeAction = ImeAction.Next,
+  keyboardOptions: KeyboardOptions = FormTextFieldDefaults.keyboardOptions,
   options: List<String> = emptyList(),
 ) {
   var expanded by remember { mutableStateOf(false) }
@@ -39,7 +39,7 @@ fun FormTextFieldWithOptions(
       value = value,
       onValueChange = onValueChange,
       label = label,
-      imeAction = imeAction,
+      keyboardOptions = keyboardOptions,
       trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
     )
     // filter options based on text field value

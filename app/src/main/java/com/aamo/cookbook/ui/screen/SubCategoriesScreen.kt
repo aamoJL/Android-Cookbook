@@ -29,7 +29,7 @@ fun SubCategoriesScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(
-        title = stringResource(R.string.screen_title_categories),
+        title = stringResource(R.string.screen_title_subcategories),
         onBack = onBack
       )
     }
@@ -66,7 +66,9 @@ private fun SubCategoryItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier.clickable(onClick = onClick).testTag(Tags.CATEGORY_ITEM.name)) {
+  Box(modifier = modifier
+    .clickable(onClick = onClick)
+    .testTag(Tags.CATEGORY_ITEM.name)) {
     Text(
       text = (if (subCategory != "") subCategory else stringResource(R.string.other_category)),
       style = MaterialTheme.typography.titleLarge,

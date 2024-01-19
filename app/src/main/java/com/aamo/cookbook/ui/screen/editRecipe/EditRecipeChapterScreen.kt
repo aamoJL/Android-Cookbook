@@ -37,6 +37,7 @@ import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
+import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
@@ -169,7 +170,9 @@ fun ChapterForm(
     FormTextField(
       value = uiState.name,
       onValueChange = { onFormStateChange(uiState.copy(name = it)) },
-      imeAction = ImeAction.Done,
+      keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
+        imeAction = ImeAction.Done
+      ),
       label = stringResource(R.string.textfield_chapter_name)
     )
   }

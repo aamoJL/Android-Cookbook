@@ -34,6 +34,7 @@ import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
+import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
@@ -169,7 +170,9 @@ private fun StepForm(
     FormTextField(
       value = uiState.description,
       onValueChange = { onStateChange(uiState.copy(description = it)) },
-      imeAction = ImeAction.Done,
+      keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
+        imeAction = ImeAction.Done
+      ),
       label = stringResource(R.string.textfield_step_description)
     )
   }

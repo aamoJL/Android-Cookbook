@@ -17,13 +17,24 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 
+class FormTextFieldDefaults {
+  companion object {
+    val keyboardOptions: KeyboardOptions = KeyboardOptions(
+      capitalization = KeyboardCapitalization.Sentences,
+      autoCorrect = true,
+      keyboardType = KeyboardType.Text,
+      imeAction = ImeAction.Next
+    )
+  }
+}
+
 @Composable
 fun FormTextField(
   value: String,
   onValueChange: (String) -> Unit,
   label: String,
   modifier: Modifier = Modifier,
-  imeAction: ImeAction = ImeAction.Next,
+  keyboardOptions: KeyboardOptions = FormTextFieldDefaults.keyboardOptions,
   trailingIcon: @Composable (() -> Unit)? = null
 ) {
   var textFieldValueState by remember {
@@ -54,11 +65,7 @@ fun FormTextField(
     },
     singleLine = true,
     label = { Text(text = label) },
-    keyboardOptions = KeyboardOptions.Default.copy(
-      capitalization = KeyboardCapitalization.Sentences,
-      keyboardType = KeyboardType.Text,
-      imeAction = imeAction,
-    ),
+    keyboardOptions = keyboardOptions,
     trailingIcon = trailingIcon,
     modifier = modifier.fillMaxWidth()
   )
@@ -71,7 +78,7 @@ fun FormOutlinedTextField(
   onValueChange: (String) -> Unit,
   label: String,
   modifier: Modifier = Modifier,
-  imeAction: ImeAction = ImeAction.Next
+  keyboardOptions: KeyboardOptions = FormTextFieldDefaults.keyboardOptions,
 ) {
   var textFieldValueState by remember {
     mutableStateOf(
@@ -101,11 +108,7 @@ fun FormOutlinedTextField(
     },
     singleLine = true,
     label = { Text(text = label) },
-    keyboardOptions = KeyboardOptions.Default.copy(
-      capitalization = KeyboardCapitalization.Sentences,
-      keyboardType = KeyboardType.Text,
-      imeAction = imeAction,
-    ),
+    keyboardOptions = keyboardOptions,
     modifier = modifier.fillMaxWidth()
   )
 }

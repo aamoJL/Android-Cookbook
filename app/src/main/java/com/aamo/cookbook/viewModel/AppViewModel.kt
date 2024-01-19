@@ -17,6 +17,9 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   private var _selectedSubCategory = MutableStateFlow("")
   val selectedSubCategory = _selectedSubCategory.asStateFlow()
 
+  suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int) : RecipeWithChaptersStepsAndIngredients? =
+    recipeRepository.getRecipeWithChaptersStepsAndIngredients(id)
+
   fun getRecipesByCategory(category: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
     list.filter { it.category == category }.sortedBy { it.name }
   }

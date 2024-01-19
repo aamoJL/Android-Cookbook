@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -20,6 +21,12 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.aamo.cookbook.model.Chapter
+import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
@@ -129,9 +136,44 @@ fun MainNavGraph(
         type = NavType.IntType
       })
     ) {
+      val context = LocalContext.current
+
       RecipeScreen(
         onBack = { navController.navigateUp() },
-        onEditRecipe = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) }
+        onEditRecipe = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) },
+        onCopyRecipe = { id ->
+          viewModel.viewModelScope.launch {
+            viewModel.getRecipeWithChaptersStepsAndIngredients(id)?.let { recipe ->
+              recipe.copy(
+                value = Recipe(
+                  name = context.getString(R.string.recipe_name_copy, recipe.value.name),
+                  category = recipe.value.category,
+                  subCategory = recipe.value.subCategory,
+                  servings = recipe.value.servings),
+                chapters = recipe.chapters.map { chapter ->
+                  ChapterWithStepsAndIngredients(
+                    value = Chapter(name = chapter.value.name),
+                    steps = chapter.steps.map { step ->
+                      StepWithIngredients(
+                        value = Step(description = step.value.description),
+                        ingredients = step.ingredients.map {
+                          Ingredient(name = it.name, amount = it.amount, unit = it.unit)
+                        }
+                      )
+                    }
+                  )
+                }
+              )
+            }?.also { recipe ->
+              viewModel.upsertRecipe(recipe).also { newId ->
+                if (newId > 0)
+                  navController.navigate(Screen.Recipe.getRouteWithArgument(newId.toString())) {
+                    popUpTo(Screen.Recipe.getRoute()) { inclusive = true }
+                  }
+              }
+            }
+          }
+        }
       )
     }
     this.editRecipeGraph(

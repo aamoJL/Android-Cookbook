@@ -52,4 +52,7 @@
     <string name="description_delete_list_item">delete</string>
     <string name="input_title_servings_without_multiplier">Annokset</string>
     <string name="input_title_servings_with_multiplier">Annokset ( %1$s x )</string>
+    <string name="description_copy_recipe">Kopioi resepti</string>
+    <string name="recipe_name_copy">%1$s - copy</string>
+    <string name="screen_title_subcategories">Valitse alakategoria</string>
 </resources>

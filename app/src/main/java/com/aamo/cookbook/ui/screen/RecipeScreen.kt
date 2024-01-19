@@ -26,7 +26,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,14 +39,18 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
@@ -68,6 +75,7 @@ fun RecipeScreen(
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onEditRecipe: (id: Int) -> Unit = {},
+  onCopyRecipe: (id: Int) -> Unit,
   viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
@@ -80,6 +88,7 @@ fun RecipeScreen(
     servingsState = servingsState,
     onBack = onBack,
     onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
+    onCopyRecipe = { onCopyRecipe(viewModel.recipe.value.id) },
     onProgressChange = { chapterId, stepId, value ->
       viewModel.updateProgress(chapterId, stepId, value)
     },
@@ -97,6 +106,7 @@ fun RecipeScreenContent(
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onEditRecipe: () -> Unit = {},
+  onCopyRecipe: () -> Unit = {},
   onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit,
   onServingsCountChange: (count: Int) -> Unit,
 ) {
@@ -109,15 +119,49 @@ fun RecipeScreenContent(
   }
   val pagerState = rememberPagerState(pageCount = { pageCount })
   val scope = rememberCoroutineScope()
+  var moreDropMenuState by remember { mutableStateOf(false) }
 
   Scaffold(
     topBar = {
       BasicTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
-        IconButton(onClick = onEditRecipe) {
-          Icon(
-            imageVector = Icons.Filled.Edit,
-            contentDescription = stringResource(R.string.description_edit_recipe)
-          )
+        Box(modifier = Modifier) {
+          IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
+            Icon(
+              imageVector = Icons.Filled.MoreVert,
+              contentDescription = "more"
+            )
+          }
+          DropdownMenu(
+            expanded = moreDropMenuState,
+            onDismissRequest = { moreDropMenuState = false }
+          ) {
+            DropdownMenuItem(
+              leadingIcon = {
+                Icon(
+                  imageVector = Icons.Filled.Edit,
+                  contentDescription = stringResource(R.string.description_edit_recipe)
+                )
+              },
+              text = { Text(text = stringResource(R.string.description_edit_recipe)) },
+              onClick = {
+                moreDropMenuState = false
+                onEditRecipe()
+              }
+            )
+            DropdownMenuItem(
+              leadingIcon = {
+                Icon(
+                  painter = painterResource(id = R.drawable.baseline_content_copy_24),
+                  contentDescription = stringResource(R.string.description_copy_recipe)
+                )
+              },
+              text = { Text(text = stringResource(R.string.description_copy_recipe)) },
+              onClick = {
+                moreDropMenuState = false
+                onCopyRecipe()
+              }
+            )
+          }
         }
       }
     }

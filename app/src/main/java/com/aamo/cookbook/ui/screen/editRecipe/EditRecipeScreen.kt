@@ -35,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -46,6 +47,7 @@ import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
+import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
@@ -214,6 +216,9 @@ private fun InfoForm(
         value = uiState.subCategory,
         onValueChange = { onStateChange(uiState.copy(subCategory = it)) },
         label = stringResource(R.string.textfield_recipe_subcategory),
+        keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
+          imeAction = ImeAction.Done
+        ),
         options = subCategorySuggestions
       )
     }
