@@ -2,7 +2,6 @@ package com.aamo.cookbook.ui.components.form
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -19,7 +18,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.utility.trimFirst
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormFloatField(
   value: Float?,
@@ -44,11 +42,11 @@ fun FormFloatField(
   var lastTextValue by remember { mutableStateOf(value?.toStringWithoutZero() ?: "") }
   var lastFloatValue by remember { mutableStateOf(value) }
 
-  LaunchedEffect(value != lastFloatValue){
+  LaunchedEffect(value){
     // This launched effect needs to be here, so the text value of the TextField will change
     // if the value changes from outside of this composable
     if(lastTextValue.toFloatOrNull() != value)
-      textFieldValueState = textFieldValueState.copy(text = value?.toStringWithoutZero() ?: "")
+      textFieldValueState = textFieldValueState.copy(text = value?.toString() ?: "")
   }
 
   TextField(
@@ -56,10 +54,8 @@ fun FormFloatField(
     onValueChange = { newState ->
       val text = newState.text
 
-      // Check if the text has no more than one non-digit chars
-      if ((text.trimFirst('-').filterNot { it.isDigit() }.length <= 1) && (text.trimFirst('-')
-          .trimFirst('.').isEmpty() || text.toFloatOrNull() != null)
-      ) {
+      val regex = "-?[0-9]*(\\.[0-9]*)?".toRegex()
+      if(text.matches(regex)){
         textFieldValueState = newState
 
         val newValue = text.toFloatOrNull()
@@ -79,7 +75,6 @@ fun FormFloatField(
 }
 
 @Suppress("unused")
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OutlinedFormFloatField(
   value: Float?,

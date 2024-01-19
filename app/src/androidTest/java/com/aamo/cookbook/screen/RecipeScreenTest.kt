@@ -27,6 +27,7 @@ import org.junit.Test
 class RecipeScreenTest {
   private val recipe = Mocker.mockRecipeList().first()
   private var chapterUiStates by mutableStateOf<List<RecipeScreenViewModel.ChapterPageUiState>>(emptyList())
+  private var servingsState by mutableStateOf(RecipeScreenViewModel.ServingsState(recipe.value.servings, recipe.value.servings))
   private var wasProgressChanged: Boolean = false
   private var wasClicked: Boolean = false
 
@@ -41,13 +42,20 @@ class RecipeScreenTest {
 
       CookbookTheme {
         RecipeScreenContent(
-          summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(recipe),
+          summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(
+            recipeName = recipe.value.name,
+            chaptersWithIngredients = recipe.chapters.map { chapter ->
+              Pair(chapter.value.name, chapter.steps.flatMap { it.ingredients })
+            }
+          ),
           chapterUiStates = chapterUiStates,
+          servingsState = servingsState,
           onProgressChange = { _, _, _ ->
             wasProgressChanged = true
           },
           onBack = { wasClicked = true },
-          onEditRecipe = { wasClicked = true }
+          onEditRecipe = { wasClicked = true },
+          onServingsCountChange = { servingsState = servingsState.copy(current = it) }
         )
       }
     }

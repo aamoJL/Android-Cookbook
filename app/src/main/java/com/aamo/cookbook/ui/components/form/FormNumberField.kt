@@ -18,7 +18,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.core.text.isDigitsOnly
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FormNumberField(
   value: Int?,

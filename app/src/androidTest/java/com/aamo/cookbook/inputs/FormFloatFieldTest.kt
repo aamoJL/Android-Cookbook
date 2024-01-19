@@ -12,7 +12,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
 import com.aamo.cookbook.ui.components.form.FormFloatField
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.toStringWithoutZero
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
 import org.junit.Before
@@ -66,7 +65,7 @@ class FormFloatFieldTest {
     val newValue = 20f
     value = newValue
 
-    getInput().assertTextContains(newValue.toStringWithoutZero())
+    getInput().assertTextContains(newValue.toString())
   }
 
   private fun getInput() = rule.onNodeWithTag("tag")

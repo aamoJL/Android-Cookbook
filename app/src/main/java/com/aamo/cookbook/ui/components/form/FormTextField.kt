@@ -13,6 +13,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 
@@ -53,7 +54,8 @@ fun FormTextField(
     },
     singleLine = true,
     label = { Text(text = label) },
-    keyboardOptions = KeyboardOptions(
+    keyboardOptions = KeyboardOptions.Default.copy(
+      capitalization = KeyboardCapitalization.Sentences,
       keyboardType = KeyboardType.Text,
       imeAction = imeAction,
     ),
@@ -99,7 +101,8 @@ fun FormOutlinedTextField(
     },
     singleLine = true,
     label = { Text(text = label) },
-    keyboardOptions = KeyboardOptions(
+    keyboardOptions = KeyboardOptions.Default.copy(
+      capitalization = KeyboardCapitalization.Sentences,
       keyboardType = KeyboardType.Text,
       imeAction = imeAction,
     ),
