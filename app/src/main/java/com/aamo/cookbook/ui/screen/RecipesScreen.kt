@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -25,18 +28,26 @@ import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.utility.Tags
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipesScreen(
   recipes: List<Recipe>,
   onSelectRecipe: (Recipe) -> Unit,
   onBack: () -> Unit,
-  modifier: Modifier = Modifier
+  onSearch: () -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Scaffold(
     topBar = {
       BasicTopAppBar(
         title = recipes.elementAtOrNull(0)?.category ?: stringResource(R.string.screen_title_error_recipes_not_found),
+        actions = {
+          IconButton(onClick = onSearch) {
+            Icon(
+              imageVector = Icons.Filled.Search,
+              contentDescription = stringResource(R.string.description_search)
+            )
+          }
+        },
         onBack = onBack)
     }
   ) {

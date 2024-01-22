@@ -7,7 +7,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -24,12 +28,21 @@ import com.aamo.cookbook.utility.Tags
 fun SubCategoriesScreen(
   subCategories: List<String>,
   onSelectSubCategory: (String) -> Unit = {},
-  onBack: () -> Unit,
+  onBack: () -> Unit = {},
+  onSearch: () -> Unit = {},
 ) {
   Scaffold(
     topBar = {
       BasicTopAppBar(
         title = stringResource(R.string.screen_title_subcategories),
+        actions = {
+          IconButton(onClick = onSearch) {
+            Icon(
+              imageVector = Icons.Filled.Search,
+              contentDescription = stringResource(R.string.description_search)
+            )
+          }
+        },
         onBack = onBack
       )
     }

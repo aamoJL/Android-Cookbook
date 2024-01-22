@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.aamo.cookbook.CookbookApplication
+import com.aamo.cookbook.ui.screen.RecipeSearchViewModel
 
 object ViewModelProvider {
   val Factory = viewModelFactory {
@@ -17,14 +18,19 @@ object ViewModelProvider {
         cookbookApplication().container.recipeRepository,
         createSavedStateHandle()
       )
-        .also { it.init() }
+        .apply { init() }
     }
     initializer {
       EditRecipeViewModel(
         cookbookApplication().container.recipeRepository,
         createSavedStateHandle()
       )
-        .also { it.init() }
+        .apply { init() }
+    }
+    initializer {
+      RecipeSearchViewModel(
+        cookbookApplication().container.recipeRepository
+      )
     }
   }
 }

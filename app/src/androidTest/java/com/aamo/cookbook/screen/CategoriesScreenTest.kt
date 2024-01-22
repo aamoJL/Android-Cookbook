@@ -34,7 +34,7 @@ class CategoriesScreenTest {
         CategoriesScreen(
           categories = categories,
           onSelectCategory = { wasSelected = it },
-          onAddRecipeClick = { wasClicked = true }
+          onAddRecipe = { wasClicked = true }
         )
       }
     }

@@ -38,7 +38,9 @@ class RecipesScreenTest {
         RecipesScreen(
           recipes = recipes,
           onSelectRecipe = {wasSelected = it},
-          onBack = { wasClicked = true })
+          onBack = { wasClicked = true },
+          onSearch = { wasClicked = true }
+        )
       }
     }
   }

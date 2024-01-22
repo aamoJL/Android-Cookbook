@@ -28,7 +28,7 @@ fun BasicTopAppBar(
     title = {
       Text(text = title, Modifier.testTag(Tags.SCREEN_TITLE.name))
     },
-    colors = TopAppBarDefaults.smallTopAppBarColors(
+    colors = TopAppBarDefaults.topAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       containerColor = MaterialTheme.colorScheme.primary,

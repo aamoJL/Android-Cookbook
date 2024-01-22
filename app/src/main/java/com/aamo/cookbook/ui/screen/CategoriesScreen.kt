@@ -9,9 +9,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -28,12 +30,25 @@ import com.aamo.cookbook.utility.Tags
 fun CategoriesScreen(
   categories: List<String>,
   onSelectCategory: (String) -> Unit = {},
-  onAddRecipeClick: () -> Unit = {},
+  onAddRecipe: () -> Unit = {},
+  onSearch: () -> Unit = {}
 ) {
   Scaffold(
-    topBar = { BasicTopAppBar(title = stringResource(R.string.screen_title_categories)) },
+    topBar = {
+      BasicTopAppBar(
+        title = stringResource(R.string.screen_title_categories),
+        actions = {
+          IconButton(onClick = onSearch) {
+            Icon(
+              imageVector = Icons.Filled.Search,
+              contentDescription = stringResource(R.string.description_search)
+            )
+          }
+        }
+      )
+    },
     floatingActionButton = {
-      FloatingActionButton(onClick = onAddRecipeClick) {
+      FloatingActionButton(onClick = onAddRecipe) {
         Icon(Icons.Filled.Add, stringResource(R.string.description_add_new_recipe))
       }
     }
@@ -70,7 +85,9 @@ private fun CategoryItem(
   onClick: () -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier.clickable(onClick = onClick).testTag(Tags.CATEGORY_ITEM.name)) {
+  Box(modifier = modifier
+    .clickable(onClick = onClick)
+    .testTag(Tags.CATEGORY_ITEM.name)) {
     Text(
       text = (if (category != "") category else stringResource(R.string.other_category)),
       style = MaterialTheme.typography.titleLarge,

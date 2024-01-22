@@ -29,6 +29,7 @@ import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeScreen
+import com.aamo.cookbook.ui.screen.RecipeSearchScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.screen.SubCategoriesScreen
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
@@ -47,7 +48,8 @@ enum class Screen(private val route: String, val argumentName: String = "") {
   SubCategories("subCategories"),
   Recipes("recipes"),
   Recipe("recipe/", "recipeId"),
-  EditRecipe("edit/recipe/", "recipeId");
+  EditRecipe("edit/recipe/", "recipeId"),
+  Search("search");
 
   fun getRoute(): String = when (argumentName) {
     "" -> route
@@ -98,7 +100,8 @@ fun MainNavGraph(
           viewModel.setSelectedCategory(it)
           navController.navigate(Screen.SubCategories.getRoute())
         },
-        onAddRecipeClick = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
+        onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
+        onSearch = {navController.navigate(Screen.Search.getRoute())})
     }
     composable(Screen.SubCategories.getRoute()) {
       val subCategories by viewModel.getSubCategories(viewModel.selectedCategory
@@ -111,7 +114,8 @@ fun MainNavGraph(
           viewModel.setSelectedSubCategory(it)
           navController.navigate(Screen.Recipes.getRoute())
         },
-        onBack = { navController.navigateUp() }
+        onBack = { navController.navigateUp() },
+        onSearch = {navController.navigate(Screen.Search.getRoute())}
       )
     }
     composable(Screen.Recipes.getRoute()) {
@@ -127,6 +131,12 @@ fun MainNavGraph(
         onSelectRecipe = { recipe ->
           navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
         },
+        onBack = { navController.navigateUp() },
+        onSearch = {navController.navigate(Screen.Search.getRoute())}
+      )
+    }
+    composable(Screen.Search.getRoute()) {
+      RecipeSearchScreen(
         onBack = { navController.navigateUp() }
       )
     }
