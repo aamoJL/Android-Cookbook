@@ -41,6 +41,7 @@
     <string name="textfield_ingredient_unit">Mitta</string>
     // Button labels
     <string name="button_text_save">Tallenna</string>
+    <string name="button_text_new">Uusi</string>
     // Dialog
     <string name="dialog_title_delete_recipe">Poista resepti?</string>
     <string name="dialog_text_delete_recipe">Haluatko varmasti poistaa reseptin?</string>
@@ -55,5 +56,5 @@
     <string name="description_copy_recipe">Kopioi resepti</string>
     <string name="recipe_name_copy">%1$s - copy</string>
     <string name="screen_title_subcategories">Valitse alakategoria</string>
-    <string name="description_search">Search</string>
+    <string name="description_search">Haku</string>
 </resources>

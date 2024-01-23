@@ -137,7 +137,10 @@ fun MainNavGraph(
     }
     composable(Screen.Search.getRoute()) {
       RecipeSearchScreen(
-        onBack = { navController.navigateUp() }
+        onBack = { navController.navigateUp() },
+        onSelect = { id ->
+          navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString()))
+        }
       )
     }
     composable(

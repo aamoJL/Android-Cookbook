@@ -1,30 +1,38 @@
 package com.aamo.cookbook.ui.screen
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Divider
-import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.ui.components.BasicTopAppBar
-import com.aamo.cookbook.utility.Tags
 
 @Composable
 fun CategoriesScreen(
@@ -33,66 +41,118 @@ fun CategoriesScreen(
   onAddRecipe: () -> Unit = {},
   onSearch: () -> Unit = {}
 ) {
-  Scaffold(
-    topBar = {
-      BasicTopAppBar(
-        title = stringResource(R.string.screen_title_categories),
-        actions = {
-          IconButton(onClick = onSearch) {
-            Icon(
-              imageVector = Icons.Filled.Search,
-              contentDescription = stringResource(R.string.description_search)
-            )
-          }
-        }
-      )
-    },
-    floatingActionButton = {
-      FloatingActionButton(onClick = onAddRecipe) {
-        Icon(Icons.Filled.Add, stringResource(R.string.description_add_new_recipe))
-      }
-    }
-  ) { innerPadding ->
-    Column(modifier = Modifier.padding(innerPadding)) {
-      CategoryList(
-        categories = categories,
-        onSelect = onSelectCategory
-      )
-    }
-  }
-}
-
-@Composable
-private fun CategoryList(categories: List<String>, onSelect: (String) -> Unit) {
-  Column {
-    Divider(color = MaterialTheme.colorScheme.secondary)
-    LazyColumn {
-      items(categories) { category ->
-        CategoryItem(
-          category = category,
-          onClick = { onSelect(category) },
-          modifier = Modifier.fillMaxWidth()
+  Surface(color = MaterialTheme.colorScheme.primary) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.weight(2f)
+      ) {
+        Text(
+          text = stringResource(R.string.app_name),
+          style = MaterialTheme.typography.headlineLarge,
         )
-        Divider(color = MaterialTheme.colorScheme.secondary)
+      }
+      Surface(
+        tonalElevation = 4.dp,
+        modifier = Modifier
+          .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
+          .fillMaxWidth()
+          .weight(4f)
+      ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+          MainButtons(
+            onSearch = onSearch,
+            onAddRecipe = onAddRecipe,
+            modifier = Modifier.padding(32.dp)
+          )
+          CategoryList(
+            categories = categories,
+            onSelect = onSelectCategory,
+          )
+        }
       }
     }
   }
 }
 
 @Composable
-private fun CategoryItem(
-  category: String,
+fun MainButton(
   onClick: () -> Unit,
+  icon: ImageVector,
+  text: String,
+  modifier: Modifier = Modifier,
+  buttonColors: ButtonColors = ButtonDefaults.buttonColors(
+    containerColor = MaterialTheme.colorScheme.primaryContainer,
+    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+  ),
+) {
+  ElevatedButton(
+    onClick = onClick,
+    shape = RoundedCornerShape(8.dp),
+    colors = buttonColors,
+    modifier = modifier
+  ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Icon(imageVector = icon, contentDescription = null)
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(text = text)
+    }
+  }
+}
+
+@Composable
+fun MainButtons(
+  onSearch: () -> Unit,
+  onAddRecipe: () -> Unit,
+  modifier: Modifier = Modifier
+){
+  Row(
+    horizontalArrangement = Arrangement.spacedBy(24.dp),
+    modifier = modifier
+  ) {
+    MainButton(
+      onClick = onSearch,
+      icon = Icons.Filled.Search,
+      text = stringResource(R.string.description_search),
+      modifier = Modifier.size(100.dp))
+    MainButton(
+      onClick = onAddRecipe,
+      icon = Icons.Filled.Add,
+      text = stringResource(R.string.button_text_new),
+      modifier = Modifier.size(100.dp)
+    )
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun CategoryList(
+  categories: List<String>,
+  onSelect: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier
-    .clickable(onClick = onClick)
-    .testTag(Tags.CATEGORY_ITEM.name)) {
+  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
     Text(
-      text = (if (category != "") category else stringResource(R.string.other_category)),
-      style = MaterialTheme.typography.titleLarge,
-      modifier = modifier.padding(20.dp, 40.dp, 20.dp, 40.dp)
+      text = stringResource(R.string.screen_title_categories),
+      style = MaterialTheme.typography.headlineMedium
     )
+    LazyColumn {
+      items(categories) { category ->
+        ElevatedCard(
+          colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+          ),
+          onClick = { onSelect(category) },
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 8.dp)
+        ) {
+          Text(text = category, textAlign = TextAlign.Center, modifier = Modifier
+            .padding(8.dp)
+            .fillMaxWidth())
+        }
+      }
+    }
   }
 }
 

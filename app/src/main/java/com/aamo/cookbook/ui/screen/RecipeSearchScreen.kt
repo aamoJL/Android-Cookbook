@@ -1,5 +1,6 @@
 package com.aamo.cookbook.ui.screen
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,41 +29,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
-import com.aamo.cookbook.database.repository.RecipeRepository
+import com.aamo.cookbook.viewModel.RecipeSearchViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
-
-class RecipeSearchViewModel(recipeRepository: RecipeRepository) : ViewModel() {
-  private var _recipesStream = recipeRepository.getAllRecipesStream()
-
-  private var _searchWord = MutableStateFlow("")
-  val searchWord = _searchWord.asStateFlow()
-
-  val validRecipes = combine(_recipesStream, _searchWord) { recipes , word ->
-      recipes.filter { it.name.startsWith(word) }
-  }.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.Eagerly,
-    initialValue = emptyList()
-  )
-
-  fun setSearchWord(value: String) {
-    _searchWord.update { value }
-  }
-}
 
 @Composable
 fun RecipeSearchScreen(
   viewModel: RecipeSearchViewModel = viewModel(factory = ViewModelProvider.Factory),
+  onSelect: (id: Int) -> Unit = {},
   onBack: () -> Unit = {},
 ) {
   val searchWord by viewModel.searchWord.collectAsState()
@@ -81,7 +56,8 @@ fun RecipeSearchScreen(
       LazyColumn {
         items(recipes) { recipe ->
            ListItem(
-             headlineContent = { Text(text = recipe.name) }
+             headlineContent = { Text(text = recipe.name) },
+             modifier = Modifier.clickable { onSelect(recipe.id) }
            )
         }
       }
