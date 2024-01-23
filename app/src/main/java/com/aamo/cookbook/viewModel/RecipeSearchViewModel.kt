@@ -17,7 +17,7 @@ class RecipeSearchViewModel(recipeRepository: RecipeRepository) : ViewModel() {
   val searchWord = _searchWord.asStateFlow()
 
   val validRecipes = combine(_recipesStream, _searchWord) { recipes, word ->
-    recipes.filter { it.name.startsWith(word) }
+    recipes.filter { it.name.startsWith(word, true) }
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.Eagerly,

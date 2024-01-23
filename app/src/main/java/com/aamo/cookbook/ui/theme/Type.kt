@@ -11,20 +11,16 @@ val Caveat = FontFamily(
 
 // Set of Material typography styles to start with
 val Typography = Typography(
-//  bodyLarge = Typography().bodyLarge.copy(
-//    fontFamily = Caveat,
-//  ),
-//  titleLarge = Typography().titleLarge.copy(
-//    fontFamily = Caveat,
-//  ),
-//  labelSmall = Typography().labelSmall.copy(
-//    fontFamily = Caveat,
-//  ),
+  // Headline
   headlineLarge = Typography().headlineLarge.copy(
     fontFamily = Caveat,
   ),
   headlineMedium = Typography().headlineMedium.copy(
     fontFamily = Caveat,
+  ),
+  // Title
+  titleMedium = Typography().titleMedium.copy(
+    fontFamily = Caveat
   )
 )
 

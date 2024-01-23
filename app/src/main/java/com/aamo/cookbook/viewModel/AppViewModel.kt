@@ -14,26 +14,19 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   private var _selectedCategory = MutableStateFlow("")
   val selectedCategory = _selectedCategory.asStateFlow()
 
-  private var _selectedSubCategory = MutableStateFlow("")
-  val selectedSubCategory = _selectedSubCategory.asStateFlow()
-
   suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int) : RecipeWithChaptersStepsAndIngredients? =
     recipeRepository.getRecipeWithChaptersStepsAndIngredients(id)
 
   fun getRecipesByCategory(category: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
-    list.filter { it.category == category }.sortedBy { it.name }
+    list.filter { it.category == category }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
   }
 
   fun getRecipesBySubCategory(category: String, subCategory: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
-    list.filter { it.category == category && it.subCategory == subCategory }.sortedBy { it.name }
+    list.filter { it.category == category && it.subCategory == subCategory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
   }
 
   fun getCategories(): Flow<List<String>> = recipeRepository.getAllRecipesStream().map { list ->
-    list.map { it.category }.distinct().sortedBy { it }
-  }
-
-  fun getSubCategories(category: String): Flow<List<String>> = recipeRepository.getAllRecipesStream().map { list ->
-    list.filter { it.category == category }.map { it.subCategory }.distinct().sortedBy { it }
+    list.map { it.category }.distinct().sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
   }
 
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
@@ -45,6 +38,4 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   }
 
   fun setSelectedCategory(value: String) = _selectedCategory.update { value }
-
-  fun setSelectedSubCategory(value: String) = _selectedSubCategory.update { value }
 }

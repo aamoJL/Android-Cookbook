@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
@@ -29,6 +30,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.viewModel.RecipeSearchViewModel
@@ -102,6 +105,10 @@ private fun SearchTopBar(
         },
         shape = RectangleShape,
         singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text
+        ),
         modifier = Modifier.focusRequester(focusRequester)
       )
     },

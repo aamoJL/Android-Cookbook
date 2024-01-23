@@ -57,4 +57,5 @@
     <string name="recipe_name_copy">%1$s - copy</string>
     <string name="screen_title_subcategories">Valitse alakategoria</string>
     <string name="description_search">Haku</string>
+    <string name="description_filter">Filter</string>
 </resources>
