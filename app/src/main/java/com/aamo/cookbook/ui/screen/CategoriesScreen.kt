@@ -16,10 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ElevatedCard
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -33,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.ui.theme.Handwritten
 
 @Composable
 fun CategoriesScreen(
@@ -49,11 +47,11 @@ fun CategoriesScreen(
       ) {
         Text(
           text = stringResource(R.string.app_name),
+          fontFamily = Handwritten,
           style = MaterialTheme.typography.headlineLarge,
         )
       }
       Surface(
-        tonalElevation = 4.dp,
         modifier = Modifier
           .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
           .fillMaxWidth()
@@ -124,7 +122,6 @@ fun MainButtons(
   }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun CategoryList(
   categories: List<String>,
@@ -134,22 +131,28 @@ private fun CategoryList(
   Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
     Text(
       text = stringResource(R.string.screen_title_categories),
+      fontFamily = Handwritten,
       style = MaterialTheme.typography.headlineMedium
     )
     LazyColumn {
       items(categories) { category ->
-        ElevatedCard(
-          colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+        ElevatedButton(
+          colors = ButtonDefaults.elevatedButtonColors(
+            containerColor = MaterialTheme.colorScheme.surface,
+            contentColor = MaterialTheme.colorScheme.onSurface
           ),
           onClick = { onSelect(category) },
           modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 8.dp)
         ) {
-          Text(text = category, textAlign = TextAlign.Center, modifier = Modifier
-            .padding(8.dp)
-            .fillMaxWidth())
+          Text(
+            text = category,
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+              .padding(8.dp)
+              .fillMaxWidth()
+          )
         }
       }
     }

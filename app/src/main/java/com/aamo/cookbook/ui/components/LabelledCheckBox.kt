@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -20,7 +19,7 @@ import androidx.compose.ui.unit.dp
 @Composable fun LabelledCheckBox(
   checked: Boolean,
   onCheckedChange: ((Boolean) -> Unit),
-  label: String,
+  label: @Composable () -> Unit,
   modifier: Modifier = Modifier,
   content: @Composable () -> Unit = {},
 ) {
@@ -40,11 +39,7 @@ import androidx.compose.ui.unit.dp
       )
       Spacer(Modifier.size(8.dp))
       Column {
-        Text(
-          text = label,
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.padding(bottom = 4.dp)
-        )
+        label()
         content()
       }
     }

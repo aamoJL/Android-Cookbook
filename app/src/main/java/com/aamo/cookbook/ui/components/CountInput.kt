@@ -26,6 +26,7 @@ fun CountInput(
   value: Int,
   label: String,
   onValueChange: (Int) -> Unit,
+  modifier: Modifier = Modifier,
   minValue: Int = Int.MIN_VALUE,
   maxValue: Int = Int.MAX_VALUE,
 ) {
@@ -38,8 +39,8 @@ fun CountInput(
     else -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f)
   }
 
-  Column {
-    Text(text = label, style = MaterialTheme.typography.labelLarge)
+  Column(modifier = modifier) {
+    Text(text = label, style = MaterialTheme.typography.labelMedium)
     Row(verticalAlignment = Alignment.CenterVertically) {
       Box(
         contentAlignment = Alignment.Center,
@@ -59,7 +60,8 @@ fun CountInput(
       }
       Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.defaultMinSize(minWidth = 48.dp)
+        modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 40.dp)
+          .background(MaterialTheme.colorScheme.surface)
       ) {
         Text(text = value.toString())
       }

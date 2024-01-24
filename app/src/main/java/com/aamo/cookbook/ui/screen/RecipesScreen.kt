@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 
 @Composable
@@ -143,6 +144,7 @@ private fun RecipeItem(recipe: Recipe, onClick: () -> Unit, modifier: Modifier =
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(4.dp)) {
           Text(
             text = recipe.name,
+            fontFamily = Handwritten,
             style = MaterialTheme.typography.titleMedium
           )
         }

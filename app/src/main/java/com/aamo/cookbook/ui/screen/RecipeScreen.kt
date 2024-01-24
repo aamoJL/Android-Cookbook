@@ -8,20 +8,16 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -63,6 +59,7 @@ import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.components.LabelledCheckBox
+import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.utility.toStringWithoutZero
@@ -110,7 +107,6 @@ fun RecipeScreenContent(
   onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit,
   onServingsCountChange: (count: Int) -> Unit,
 ) {
-
   val pageCount by rememberSaveable(chapterUiStates) {
     mutableIntStateOf(
       if (chapterUiStates.any { x -> x.progress.any { !it } }) chapterUiStates.size + 1
@@ -171,8 +167,8 @@ fun RecipeScreenContent(
         .fillMaxSize()
         .padding(paddingValues)
     ) {
-      Box {
-        Column(modifier = Modifier) {
+      Column {
+        Column(modifier = Modifier.weight(1f, true)) {
           HorizontalPager(
             pageSize = PageSize.Fill,
             state = pagerState,
@@ -208,7 +204,6 @@ fun RecipeScreenContent(
         Row(
           modifier = Modifier
             .fillMaxWidth()
-            .align(Alignment.BottomCenter)
             .padding(16.dp),
           horizontalArrangement = Arrangement.Center
         ) {
@@ -314,43 +309,25 @@ private fun PageIndicatorItem(
 }
 
 @Composable
-private fun PageBase(
-  title: String,
-  modifier: Modifier = Modifier,
-  subtitle: String = "",
-  content: @Composable () -> Unit = {}
-) {
-  Column(
-    modifier = modifier
-      .padding(8.dp)
-      .fillMaxSize()
-      .verticalScroll(rememberScrollState())
-  ) {
-    Text(
-      text = title,
-      style = MaterialTheme.typography.titleLarge,
-    )
-    if(subtitle.isNotEmpty()){
-      Text(
-        text = subtitle,
-        style = MaterialTheme.typography.bodySmall,
-      )
-    }
-    Spacer(modifier = Modifier.height(8.dp))
-    content()
-  }
-}
-
-@Composable
 private fun SummaryPage(
   uiState: RecipeScreenViewModel.SummaryPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
   onServingsCountChange: (count: Int) -> Unit,
   ) {
-  PageBase(title = stringResource(R.string.page_title_ingredients)) {
+  Column(modifier = Modifier
+    .fillMaxSize()
+    .padding(8.dp)
+  ) {
+    Row(verticalAlignment = Alignment.Top) {
+      Text(
+        text = stringResource(R.string.page_title_ingredients),
+        fontFamily = Handwritten,
+        style = MaterialTheme.typography.headlineLarge,
+        modifier = Modifier.weight(1f).padding(vertical = 4.dp)
+      )
       CountInput(
         value = servingsState.current,
-        label = when(servingsState.multiplier) {
+        label = when (servingsState.multiplier) {
           1f -> stringResource(R.string.input_title_servings_without_multiplier)
           else -> stringResource(
             R.string.input_title_servings_with_multiplier,
@@ -360,39 +337,64 @@ private fun SummaryPage(
         onValueChange = {
           onServingsCountChange(it)
         },
-        minValue = 1)
-    uiState.chaptersWithIngredients.forEach { chapterIngredientPair ->
-      Column(modifier = Modifier.fillMaxWidth()) {
-        Text(
-          text = chapterIngredientPair.first,
-          style = MaterialTheme.typography.titleMedium,
-          modifier = Modifier.padding(vertical = 4.dp)
-        )
-        Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-          chapterIngredientPair.second.forEach { ingredient ->
-            Column(modifier = Modifier.padding(start = 16.dp)) {
-              Row {
-                Text(
-                  text = if (ingredient.amount == 0f) "" else (ingredient.amount * servingsState.multiplier).toFractionFormattedString(),
-                  style = MaterialTheme.typography.bodyMedium,
-                  textAlign = TextAlign.End,
-                  modifier = Modifier
-                    .defaultMinSize(minWidth = 40.dp)
-                    .weight(1f)
-                )
-                Text(
-                  text = ingredient.unit,
-                  style = MaterialTheme.typography.bodyMedium,
-                  fontStyle = FontStyle.Italic,
-                  modifier = Modifier
-                    .weight(1f)
-                    .padding(horizontal = 8.dp)
-                )
-                Text(
-                  text = ingredient.name,
-                  style = MaterialTheme.typography.bodyMedium,
-                  modifier = Modifier.weight(5f)
-                )
+        minValue = 1,
+      )
+    }
+    IngredientList(
+      chaptersWithIngredients = uiState.chaptersWithIngredients,
+      servingsMultiplier = servingsState.multiplier,
+      modifier = Modifier
+    )
+  }
+}
+
+@Composable
+private fun IngredientList(
+  chaptersWithIngredients: List<Pair<String, List<Ingredient>>>,
+  servingsMultiplier: Float,
+  modifier: Modifier = Modifier,
+) {
+  Column(modifier = modifier.padding(horizontal = 8.dp)) {
+    chaptersWithIngredients.forEach { chapterIngredientPair ->
+      Box(modifier = Modifier.padding(vertical = 4.dp)) {
+        Column(modifier = Modifier.padding(vertical = 8.dp)) {
+          Text(
+            text = chapterIngredientPair.first,
+            style = MaterialTheme.typography.titleLarge,
+            fontFamily = Handwritten,
+            modifier = Modifier.padding(vertical = 4.dp)
+          )
+          Column(modifier = Modifier
+            .width(IntrinsicSize.Max)
+            .padding(horizontal = 8.dp)) {
+            chapterIngredientPair.second.forEach { ingredient ->
+              Column {
+                Row {
+                  Text(
+                    text = if (ingredient.amount == 0f) "" else (ingredient.amount * servingsMultiplier).toFractionFormattedString(),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = Handwritten,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier
+                      .weight(1f)
+                  )
+                  Text(
+                    text = ingredient.unit,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = Handwritten,
+                    textAlign = TextAlign.Start,
+                    modifier = Modifier
+                      .defaultMinSize(minWidth = 40.dp)
+                      .padding(horizontal = 8.dp)
+                  )
+                  Text(
+                    text = ingredient.name,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontFamily = Handwritten,
+                    modifier = Modifier
+                      .weight(3f, false)
+                  )
+                }
               }
             }
           }
@@ -406,7 +408,7 @@ private fun SummaryPage(
 private fun CompletedPage() {
   // TODO: completed page
   // Remember to change string to resources!
-  PageBase(title = "Valmis!")
+  Text(text = "Valmis!")
 }
 
 @Composable
@@ -415,7 +417,18 @@ private fun ChapterPage(
   servingsState: RecipeScreenViewModel.ServingsState,
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
 ) {
-  PageBase(title = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}") {
+  Column(modifier = Modifier
+    .padding(4.dp)
+    .fillMaxSize()) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
+      .fillMaxWidth()
+      .padding(8.dp)) {
+      Text(
+        text = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}",
+        fontFamily = Handwritten,
+        style = MaterialTheme.typography.headlineLarge,
+      )
+    }
     for ((index, step) in uiState.chapter.steps.withIndex()) {
       val checked = uiState.progress.elementAtOrElse(index) { false }
 
@@ -444,32 +457,42 @@ private fun StepCheckBox(
     onCheckedChange = {
       onCheckedChange(it)
     },
-    label = "${step.description}${if (ingredients.isEmpty()) '.' else ':'}",
+    label = {
+      Text(
+        text = "${step.description}${if (ingredients.isEmpty()) '.' else ':'}",
+        style = MaterialTheme.typography.titleLarge,
+        fontFamily = Handwritten,
+        modifier = Modifier.padding(bottom = 4.dp)
+      )
+    },
     modifier = modifier.fillMaxWidth()
   ) {
-    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+    Column(modifier = Modifier
+      .width(IntrinsicSize.Max)
+      .padding(start = 16.dp)) {
       for (ingredient in ingredients) {
         Row(modifier = Modifier) {
           Text(
             text = if (ingredient.amount == 0f) "" else (ingredient.amount * servingsState.multiplier).toFractionFormattedString(),
-            style = MaterialTheme.typography.bodyMedium,
-            textAlign = TextAlign.End,
-            modifier = Modifier
-              .defaultMinSize(minWidth = 40.dp)
-              .weight(1f)
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = Handwritten,
+            textAlign = TextAlign.Start,
+            modifier = Modifier.weight(1f)
           )
           Text(
             text = ingredient.unit,
-            style = MaterialTheme.typography.bodyMedium,
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = Handwritten,
             fontStyle = FontStyle.Italic,
             modifier = Modifier
-              .weight(1f)
+              .defaultMinSize(minWidth = 40.dp)
               .padding(horizontal = 8.dp)
           )
           Text(
             text = ingredient.name,
-            style = MaterialTheme.typography.bodyMedium,
-            modifier = Modifier.weight(5f)
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = Handwritten,
+            modifier = Modifier.weight(2f, false)
           )
         }
       }
