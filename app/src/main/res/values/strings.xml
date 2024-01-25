@@ -12,6 +12,7 @@
     <string name="screen_title_existing_step">Muokkaa vaihetta</string>
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
     <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
+    <string name="screen_title_subcategories">Valitse alakategoria</string>
     // Page titles
     <string name="page_title_ingredients">Ainesosat</string>
     // Form titles
@@ -29,6 +30,10 @@
     <string name="description_screen_back">Takaisin</string>
     <string name="description_edit_recipe">Muokkaa reseptiä</string>
     <string name="description_delete_recipe">Delete recipe</string>
+    <string name="description_search">Haku</string>
+    <string name="description_filter">Filter</string>
+    <string name="description_copy_recipe">Kopioi resepti</string>
+    <string name="description_delete_list_item">delete</string>
     // Textfield labels
     <string name="textfield_recipe_name">Nimi</string>
     <string name="textfield_recipe_servings">Annokset</string>
@@ -39,6 +44,8 @@
     <string name="textfield_ingredient_name">Nimi</string>
     <string name="textfield_ingredient_amount">Määrä</string>
     <string name="textfield_ingredient_unit">Mitta</string>
+    <string name="textfield_placeholder_search">Hae…</string>
+    <string name="input_title_servings">Annokset</string>
     // Button labels
     <string name="button_text_save">Tallenna</string>
     <string name="button_text_new">Uusi</string>
@@ -50,12 +57,6 @@
     <string name="dialog_title_unsaved_default">Tallentamattomia tietoja!</string>
     <string name="dialog_text_unsaved_default">Muutoksesi menetetään, jos palaat edelliselle sivulle.</string>
     <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
-    <string name="description_delete_list_item">delete</string>
-    <string name="input_title_servings_without_multiplier">Annokset</string>
-    <string name="input_title_servings_with_multiplier">Annokset ( %1$s x )</string>
-    <string name="description_copy_recipe">Kopioi resepti</string>
+    // Other
     <string name="recipe_name_copy">%1$s - copy</string>
-    <string name="screen_title_subcategories">Valitse alakategoria</string>
-    <string name="description_search">Haku</string>
-    <string name="description_filter">Filter</string>
 </resources>

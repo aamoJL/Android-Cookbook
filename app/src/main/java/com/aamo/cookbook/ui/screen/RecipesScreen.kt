@@ -1,12 +1,9 @@
 package com.aamo.cookbook.ui.screen
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -16,7 +13,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -29,9 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -39,7 +33,7 @@ import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.ui.components.BasicTopAppBar
-import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.utility.Tags
 
 @Composable
@@ -117,35 +111,10 @@ fun RecipesScreen(
         modifier = Modifier.padding(4.dp)
       ) {
         items(filteredRecipes) { recipe ->
-          RecipeItem(
+          RecipeCard(
             recipe = recipe,
             onClick = { onSelectRecipe(recipe) },
-            Modifier.fillMaxWidth()
-          )
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun RecipeItem(recipe: Recipe, onClick: () -> Unit, modifier: Modifier = Modifier) {
-  ElevatedCard(
-    shape = RectangleShape,
-    modifier = modifier
-      .clickable(onClick = onClick)
-      .height(200.dp)
-      .testTag(Tags.RECIPE_ITEM.name)
-  ) {
-    Column {
-      // TODO: Image
-      Spacer(modifier = Modifier.weight(1f, true))
-      Surface(color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxWidth()) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(4.dp)) {
-          Text(
-            text = recipe.name,
-            fontFamily = Handwritten,
-            style = MaterialTheme.typography.titleMedium
+            Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name)
           )
         }
       }

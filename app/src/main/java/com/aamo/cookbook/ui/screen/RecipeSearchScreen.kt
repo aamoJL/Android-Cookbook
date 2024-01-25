@@ -1,9 +1,11 @@
 package com.aamo.cookbook.ui.screen
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,7 +14,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -29,11 +30,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
+import com.aamo.cookbook.ui.components.RecipeCard
+import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.viewModel.RecipeSearchViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 
@@ -50,18 +55,26 @@ fun RecipeSearchScreen(
     topBar = {
       SearchTopBar(
         value = searchWord,
-        onValueChange = {viewModel.setSearchWord(it)},
+        onValueChange = { viewModel.setSearchWord(it) },
         onBack = onBack
       )
     }
   ) {
     Surface(Modifier.padding(it)) {
-      LazyColumn {
+      LazyVerticalGrid(
+        columns = GridCells.Fixed(2),
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = Modifier.padding(4.dp)
+      ) {
         items(recipes) { recipe ->
-           ListItem(
-             headlineContent = { Text(text = recipe.name) },
-             modifier = Modifier.clickable { onSelect(recipe.id) }
-           )
+          RecipeCard(
+            recipe = recipe,
+            onClick = { onSelect(recipe.id) },
+            Modifier
+              .fillMaxWidth()
+              .testTag(Tags.RECIPE_ITEM.name)
+          )
         }
       }
     }
@@ -83,32 +96,9 @@ private fun SearchTopBar(
 
   TopAppBar(
     title = {
-      TextField(
+      TopBarTextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text("Search...") },
-        leadingIcon = {
-          Icon(
-            imageVector = Icons.Filled.Search,
-            contentDescription = stringResource(R.string.description_search)
-          )
-        },
-        trailingIcon = {
-          if(value.isNotEmpty()){
-            IconButton(onClick = { onValueChange("") }) {
-              Icon(
-                imageVector = Icons.Filled.Clear,
-                contentDescription = "Clear"
-              )
-            }
-          }
-        },
-        shape = RectangleShape,
-        singleLine = true,
-        keyboardOptions = KeyboardOptions.Default.copy(
-          capitalization = KeyboardCapitalization.Sentences,
-          keyboardType = KeyboardType.Text
-        ),
         modifier = Modifier.focusRequester(focusRequester)
       )
     },
@@ -127,6 +117,40 @@ private fun SearchTopBar(
           contentDescription = stringResource(R.string.description_screen_back)
         )
       }
+    }
+  )
+}
+
+@Composable
+private fun TopBarTextField(
+  value: String,
+  onValueChange: (String) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  TextField(
+    value = value,
+    onValueChange = onValueChange,
+    placeholder = { Text(stringResource(R.string.textfield_placeholder_search)) },
+    leadingIcon = {
+      Icon(
+        imageVector = Icons.Filled.Search,
+        contentDescription = stringResource(R.string.description_search)
+      )
     },
+    trailingIcon = {
+      IconButton(onClick = {  }) {
+        Icon(
+          imageVector = Icons.Filled.Clear,
+          contentDescription = "Clear"
+        )
+      }
+    },
+    shape = RectangleShape,
+    singleLine = true,
+    keyboardOptions = KeyboardOptions.Default.copy(
+      capitalization = KeyboardCapitalization.Sentences,
+      keyboardType = KeyboardType.Text
+    ),
+    modifier = modifier
   )
 }
