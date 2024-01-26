@@ -4,6 +4,13 @@ import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -85,9 +92,11 @@ fun MainNavGraph(
 ) {
   NavHost(
     navController = navController,
-    startDestination = Screen.Categories.getRoute()
+    startDestination = Screen.Categories.getRoute(),
+    enterTransition = { fadeIn(animationSpec = tween(300, easing = LinearEasing)) },
+    exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }
   ) {
-    composable(Screen.Categories.getRoute()) {
+    composable(route = Screen.Categories.getRoute()) {
       val categories by viewModel.getCategories().collectAsState(initial = emptyList())
 
       CategoriesScreen(
@@ -97,10 +106,9 @@ fun MainNavGraph(
           navController.navigate(Screen.Recipes.getRoute())
         },
         onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
-        onSearch = {navController.navigate(Screen.Search.getRoute())})
+        onSearch = { navController.navigate(Screen.Search.getRoute()) })
     }
-    composable(Screen.Recipes.getRoute()) {
-
+    composable(route = Screen.Recipes.getRoute()) {
       val category by (viewModel.selectedCategory.collectAsStateWithLifecycle())
       val recipes by viewModel.getRecipesByCategory(category).collectAsStateWithLifecycle(
         initialValue = emptyList(),
@@ -112,10 +120,10 @@ fun MainNavGraph(
           navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
         },
         onBack = { navController.navigateUp() },
-        onSearch = {navController.navigate(Screen.Search.getRoute())}
+        onSearch = { navController.navigate(Screen.Search.getRoute()) }
       )
     }
-    composable(Screen.Search.getRoute()) {
+    composable(route = Screen.Search.getRoute()) {
       RecipeSearchScreen(
         onBack = { navController.navigateUp() },
         onSelect = { id ->
@@ -124,10 +132,26 @@ fun MainNavGraph(
       )
     }
     composable(
-      Screen.Recipe.getRoute(),
+      route = Screen.Recipe.getRoute(),
       arguments = listOf(navArgument(Screen.Recipe.argumentName) {
         type = NavType.IntType
-      })
+      }),
+      enterTransition = {
+        fadeIn(
+          animationSpec = tween(300, easing = LinearEasing)
+        ) + slideIntoContainer(
+          animationSpec = tween(300, easing = EaseIn),
+          towards = AnimatedContentTransitionScope.SlideDirection.Start
+        )
+      },
+      exitTransition = {
+        fadeOut(
+          animationSpec = tween(300, easing = LinearEasing)
+        ) + slideOutOfContainer(
+          animationSpec = tween(300, easing = EaseOut),
+          towards = AnimatedContentTransitionScope.SlideDirection.End
+        )
+      }
     ) {
       val context = LocalContext.current
 
@@ -142,7 +166,8 @@ fun MainNavGraph(
                   name = context.getString(R.string.recipe_name_copy, recipe.value.name),
                   category = recipe.value.category,
                   subCategory = recipe.value.subCategory,
-                  servings = recipe.value.servings),
+                  servings = recipe.value.servings
+                ),
                 chapters = recipe.chapters.map { chapter ->
                   ChapterWithStepsAndIngredients(
                     value = Chapter(name = chapter.value.name),
@@ -178,12 +203,11 @@ fun MainNavGraph(
           val id = viewModel.upsertRecipe(it)
           viewModel.setSelectedCategory(it.value.category)
 
-          if(navController.previousBackStackEntry?.destination?.route == Screen.Recipe.getRoute()){
+          if (navController.previousBackStackEntry?.destination?.route == Screen.Recipe.getRoute()) {
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
               popUpTo(Screen.Recipe.getRoute()) { inclusive = true }
             }
-          }
-          else{
+          } else {
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
               popUpTo(Screen.EditRecipe.getRoute()) { inclusive = true }
             }
