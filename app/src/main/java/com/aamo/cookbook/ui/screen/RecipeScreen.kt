@@ -428,8 +428,8 @@ private fun StepCheckBox(
         Card(
           shape = RoundedCornerShape(4.dp),
           colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer),
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
           modifier = Modifier.fillMaxWidth()
         ){
           IngredientLista(

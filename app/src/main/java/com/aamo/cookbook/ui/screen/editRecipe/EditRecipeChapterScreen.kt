@@ -1,6 +1,7 @@
 package com.aamo.cookbook.ui.screen.editRecipe
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -129,6 +130,7 @@ fun EditRecipeChapterScreenContent(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StepList(
   steps: List<StepWithIngredients>,
@@ -144,16 +146,18 @@ private fun StepList(
     LazyColumn {
       itemsIndexed(
         items = steps,
-        key = { _, step -> step.hashCode() }
+        key = { _, step -> step.value.copy(orderNumber = 0).hashCode() }
       ) {index , step ->
-        StepListItem(
-          step = step,
-          stepNumber = index + 1,
-          onClick = { onEditStep(step) },
-          onDismiss = { onDeleteStep(step) },
-          modifier = Modifier.padding(15.dp)
-        )
-        Divider()
+        Column(modifier = Modifier.animateItemPlacement()) {
+          StepListItem(
+            step = step,
+            stepNumber = index + 1,
+            onClick = { onEditStep(step) },
+            onDismiss = { onDeleteStep(step) },
+            modifier = Modifier.padding(15.dp)
+          )
+          Divider()
+        }
       }
     }
   }
