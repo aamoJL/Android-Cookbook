@@ -1,6 +1,7 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.Mocker
+import com.aamo.cookbook.model.FullFavoriteRecipe
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
@@ -14,7 +15,7 @@ class TestRecipeRepository : RecipeRepository {
 
   private var recipes = Data.recipes
 
-  override fun getAllRecipesStream(): Flow<List<Recipe>> {
+  override fun getAllRecipesFlow(): Flow<List<Recipe>> {
     return flow {
       emit(recipes.map { it.value })
     }
@@ -33,6 +34,22 @@ class TestRecipeRepository : RecipeRepository {
     if(index != -1){
       recipes.minus(recipes.elementAt(index))
     }
+  }
+
+  override fun getFavoriteRecipesFlow(): Flow<List<FullFavoriteRecipe>> {
+    TODO("Not yet implemented")
+  }
+
+  override suspend fun getFavoriteRecipe(recipeId: Int): FullFavoriteRecipe? {
+    TODO("Not yet implemented")
+  }
+
+  override suspend fun addRecipeToFavorites(recipeId: Int) {
+    TODO("Not yet implemented")
+  }
+
+  override suspend fun removeRecipeFromFavorites(recipeId: Int) {
+    TODO("Not yet implemented")
   }
 
   override suspend fun getAllCategories(): List<String> {

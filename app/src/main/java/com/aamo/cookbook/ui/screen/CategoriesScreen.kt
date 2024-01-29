@@ -2,17 +2,21 @@ package com.aamo.cookbook.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -37,7 +41,8 @@ fun CategoriesScreen(
   categories: List<String>,
   onSelectCategory: (String) -> Unit = {},
   onAddRecipe: () -> Unit = {},
-  onSearch: () -> Unit = {}
+  onSearch: () -> Unit = {},
+  onFavorites: () -> Unit = {}
 ) {
   Surface(color = MaterialTheme.colorScheme.primary) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -57,11 +62,15 @@ fun CategoriesScreen(
           .fillMaxWidth()
           .weight(4f)
       ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          modifier = Modifier.padding(horizontal = 16.dp)
+        ) {
           MainButtons(
             onSearch = onSearch,
             onAddRecipe = onAddRecipe,
-            modifier = Modifier.padding(32.dp)
+            onFavorites = onFavorites,
+            modifier = Modifier.padding(vertical = 32.dp)
           )
           CategoryList(
             categories = categories,
@@ -102,23 +111,28 @@ fun MainButton(
 fun MainButtons(
   onSearch: () -> Unit,
   onAddRecipe: () -> Unit,
+  onFavorites: () -> Unit,
   modifier: Modifier = Modifier
 ){
   Row(
-    horizontalArrangement = Arrangement.spacedBy(24.dp),
-    modifier = modifier
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    modifier = modifier.defaultMinSize(minHeight = 100.dp).height(IntrinsicSize.Max)
   ) {
     MainButton(
       onClick = onSearch,
       icon = Icons.Filled.Search,
       text = stringResource(R.string.description_search),
-      modifier = Modifier.size(100.dp))
+      modifier = Modifier.width(100.dp).fillMaxHeight())
+    MainButton(
+      onClick = onFavorites,
+      icon = Icons.Filled.Favorite,
+      text = stringResource(R.string.button_text_favorites),
+      modifier = Modifier.width(100.dp).fillMaxHeight())
     MainButton(
       onClick = onAddRecipe,
       icon = Icons.Filled.Add,
       text = stringResource(R.string.button_text_new),
-      modifier = Modifier.size(100.dp)
-    )
+      modifier = Modifier.width(100.dp).fillMaxHeight())
   }
 }
 
@@ -144,7 +158,7 @@ private fun CategoryList(
           onClick = { onSelect(category) },
           modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp)
+            .padding(vertical = 8.dp)
         ) {
           Text(
             text = category,

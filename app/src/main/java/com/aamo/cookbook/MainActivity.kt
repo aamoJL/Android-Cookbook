@@ -19,6 +19,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -52,7 +53,8 @@ enum class Screen(private val route: String, val argumentName: String = "") {
   Recipes("recipes"),
   Recipe("recipe/", "recipeId"),
   EditRecipe("edit/recipe/", "recipeId"),
-  Search("search");
+  Search("search"),
+  Favorites("favorites");
 
   fun getRoute(): String = when (argumentName) {
     "" -> route
@@ -106,21 +108,44 @@ fun MainNavGraph(
           navController.navigate(Screen.Recipes.getRoute())
         },
         onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
-        onSearch = { navController.navigate(Screen.Search.getRoute()) })
+        onSearch = { navController.navigate(Screen.Search.getRoute()) },
+        onFavorites = { navController.navigate(Screen.Favorites.getRoute()) }
+      )
     }
     composable(route = Screen.Recipes.getRoute()) {
-      val category by (viewModel.selectedCategory.collectAsStateWithLifecycle())
+      val category by viewModel.selectedCategory.collectAsStateWithLifecycle()
       val recipes by viewModel.getRecipesByCategory(category).collectAsStateWithLifecycle(
+        initialValue = emptyList(),
+      )
+      val favorites by viewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
 
       RecipesScreen(
+        title = category,
         recipes = recipes,
         onSelectRecipe = { recipe ->
           navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
         },
         onBack = { navController.navigateUp() },
-        onSearch = { navController.navigate(Screen.Search.getRoute()) }
+        onSearch = { navController.navigate(Screen.Search.getRoute()) },
+        favorites = favorites.map { it.id }
+      )
+    }
+    composable(route = Screen.Favorites.getRoute()) {
+      val favorites by viewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
+        initialValue = emptyList(),
+      )
+
+      RecipesScreen(
+        title = stringResource(R.string.button_text_favorites),
+        recipes = favorites,
+        onSelectRecipe = { recipe ->
+          navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
+        },
+        onBack = { navController.navigateUp() },
+        onSearch = { navController.navigate(Screen.Search.getRoute()) },
+        favorites = favorites.map { it.id }
       )
     }
     composable(route = Screen.Search.getRoute()) {

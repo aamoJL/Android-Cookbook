@@ -28,6 +28,9 @@ class RecipeScreenViewModel(
       val recipeId = savedStateHandle[Screen.Recipe.argumentName] ?: 0
       recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
         ?: RecipeWithChaptersStepsAndIngredients(Recipe())
+      _favoriteState.update {
+        recipeRepository.getFavoriteRecipe(recipe.value.id) != null
+      }
     }.invokeOnCompletion {
       _chapterPageUiStates.update {
         recipe.chapters.map { chapter ->
@@ -89,6 +92,9 @@ class RecipeScreenViewModel(
   private val _servingsState = MutableStateFlow(ServingsState())
   val servingsState = _servingsState.asStateFlow()
 
+  private val _favoriteState = MutableStateFlow(false)
+  val favoriteState = _favoriteState.asStateFlow()
+
   fun updateProgress(chapterIndex: Int, stepIndex: Int, value: Boolean) {
     _chapterPageUiStates.update { list ->
       list.mapIndexed { stateIndex, state ->
@@ -104,4 +110,13 @@ class RecipeScreenViewModel(
 
   fun setServingsCount(count: Int) =
     _servingsState.update { it.copy(current = max(1, count)) }
+
+  fun setFavoriteState(value: Boolean) {
+    viewModelScope.launch {
+      if(value) recipeRepository.addRecipeToFavorites(recipe.value.id)
+      else recipeRepository.removeRecipeFromFavorites(recipe.value.id)
+
+      _favoriteState.update { value }
+    }
+  }
 }

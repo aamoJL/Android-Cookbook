@@ -38,11 +38,13 @@ import com.aamo.cookbook.utility.Tags
 
 @Composable
 fun RecipesScreen(
+  title: String,
   recipes: List<Recipe>,
   onSelectRecipe: (Recipe) -> Unit,
   onBack: () -> Unit,
   onSearch: () -> Unit,
   modifier: Modifier = Modifier,
+  favorites: List<Int> = emptyList(),
 ) {
   val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.subCategory }.distinct()) }
   var filterValue by remember { mutableStateOf<String?>(null) }
@@ -54,7 +56,7 @@ fun RecipesScreen(
   Scaffold(
     topBar = {
       BasicTopAppBar(
-        title = recipes.elementAtOrNull(0)?.category ?: stringResource(R.string.screen_title_error_recipes_not_found),
+        title = title,
         actions = {
           IconButton(onClick = onSearch) {
             Icon(
@@ -66,38 +68,40 @@ fun RecipesScreen(
         onBack = onBack)
     },
     floatingActionButton = {
-      Box {
-        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
-          Icon(
-            painter = when(filterValue) {
-              null -> painterResource(R.drawable.baseline_filter_list_alt_24)
-              else -> painterResource(R.drawable.baseline_filter_alt_off_24)
-            },
-            contentDescription = stringResource(R.string.description_filter)
-          )
-        }
-        DropdownMenu(
-          expanded = filterPopUpOpen,
-          onDismissRequest = { filterPopUpOpen = false }
-        ) {
-          Column {
-            subCategories.forEach { subCategory ->
+      if(subCategories.dropWhile { it.isEmpty() }.isNotEmpty()){
+        Box {
+          FloatingActionButton(onClick = { filterPopUpOpen = true }) {
+            Icon(
+              painter = when(filterValue) {
+                null -> painterResource(R.drawable.baseline_filter_list_alt_24)
+                else -> painterResource(R.drawable.baseline_filter_alt_off_24)
+              },
+              contentDescription = stringResource(R.string.description_filter)
+            )
+          }
+          DropdownMenu(
+            expanded = filterPopUpOpen,
+            onDismissRequest = { filterPopUpOpen = false }
+          ) {
+            Column {
+              subCategories.forEach { subCategory ->
+                DropdownMenuItem(
+                  text = { Text(text = subCategory)},
+                  onClick = {
+                    filterPopUpOpen = false
+                    filterValue = subCategory
+                  })
+              }
+            }
+            if(filterValue != null){
+              Divider()
               DropdownMenuItem(
-                text = { Text(text = subCategory)},
+                text = { Text(text = "Reset", color = MaterialTheme.colorScheme.error)},
                 onClick = {
                   filterPopUpOpen = false
-                  filterValue = subCategory
+                  filterValue = null
                 })
             }
-          }
-          if(filterValue != null){
-            Divider()
-            DropdownMenuItem(
-              text = { Text(text = "Reset", color = MaterialTheme.colorScheme.error)},
-              onClick = {
-                filterPopUpOpen = false
-                filterValue = null
-              })
           }
         }
       }
@@ -114,7 +118,8 @@ fun RecipesScreen(
           RecipeCard(
             recipe = recipe,
             onClick = { onSelectRecipe(recipe) },
-            Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name)
+            Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
+            isFavorite = favorites.contains(recipe.id)
           )
         }
       }

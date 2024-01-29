@@ -59,4 +59,7 @@
     <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
     // Other
     <string name="recipe_name_copy">%1$s - copy</string>
+    <string name="button_text_favorites">Suosikit</string>
+    <string name="button_text_add_to_favorites">Lisää suosikkeihin</string>
+    <string name="button_text_remove_from_favorites">Poista suosikeista</string>
 </resources>

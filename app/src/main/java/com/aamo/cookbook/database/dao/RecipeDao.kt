@@ -2,10 +2,13 @@ package com.aamo.cookbook.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
+import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.aamo.cookbook.model.Chapter
+import com.aamo.cookbook.model.FavoriteRecipe
+import com.aamo.cookbook.model.FullFavoriteRecipe
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategoryTuple
@@ -96,7 +99,7 @@ interface RecipeDao {
   suspend fun deleteIngredient(ingredient: Ingredient)
 
   @Query("SELECT * FROM recipes ORDER BY name ASC")
-  fun getRecipes(): Flow<List<Recipe>>
+  fun getRecipesFlow(): Flow<List<Recipe>>
 
   @Transaction
   @Query("SELECT * FROM recipes WHERE id = :recipeId")
@@ -105,6 +108,20 @@ interface RecipeDao {
   @Query("SELECT DISTINCT category FROM recipes ")
   suspend fun getCategories(): List<String>
 
-  @Query("SELECT category, subCategory FROM recipes")
+  @Query("SELECT DISTINCT category, subCategory FROM recipes")
   suspend fun getCategoriesWithSubcategories(): List<RecipeCategoryTuple>
+
+  @Transaction
+  @Query("SELECT * FROM favoriteRecipes")
+  fun getFavoriteRecipesFlow(): Flow<List<FullFavoriteRecipe>>
+
+  @Insert
+  suspend fun addRecipeToFavorites(value: FavoriteRecipe)
+
+  @Delete
+  suspend fun removeRecipeFromFavorites(value: FavoriteRecipe)
+
+  @Transaction
+  @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
+  suspend fun getFavoriteRecipe(recipeId: Int): FullFavoriteRecipe?
 }

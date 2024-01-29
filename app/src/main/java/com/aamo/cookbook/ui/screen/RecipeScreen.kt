@@ -22,12 +22,14 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -74,18 +76,20 @@ import kotlinx.coroutines.launch
 fun RecipeScreen(
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
-  onEditRecipe: (id: Int) -> Unit = {},
+  onEditRecipe: (id: Int) -> Unit,
   onCopyRecipe: (id: Int) -> Unit,
   viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
   val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
   val servingsState by viewModel.servingsState.collectAsStateWithLifecycle()
+  val favoriteState by viewModel.favoriteState.collectAsStateWithLifecycle()
 
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
     chapterUiStates = chapterUiStates,
     servingsState = servingsState,
+    favoriteState = favoriteState,
     onBack = onBack,
     onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
     onCopyRecipe = { onCopyRecipe(viewModel.recipe.value.id) },
@@ -93,6 +97,7 @@ fun RecipeScreen(
       viewModel.updateProgress(chapterId, stepId, value)
     },
     onServingsCountChange = { viewModel.setServingsCount(it) },
+    onFavoriteChange = { viewModel.setFavoriteState(it) },
     modifier = modifier
   )
 }
@@ -103,12 +108,14 @@ fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
   chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
   servingsState: RecipeScreenViewModel.ServingsState,
+  favoriteState: Boolean,
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onEditRecipe: () -> Unit = {},
   onCopyRecipe: () -> Unit = {},
   onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit,
   onServingsCountChange: (count: Int) -> Unit,
+  onFavoriteChange: (Boolean) -> Unit,
 ) {
   val pageCount by rememberSaveable(chapterUiStates) {
     mutableIntStateOf(
@@ -158,6 +165,30 @@ fun RecipeScreenContent(
               onClick = {
                 moreDropMenuState = false
                 onCopyRecipe()
+              }
+            )
+            Divider()
+            DropdownMenuItem(
+              leadingIcon = {
+                if(favoriteState){
+                  Icon(painter = painterResource(R.drawable.baseline_heart_broken_24),
+                    contentDescription = null)
+                }
+                else{
+                  Icon(imageVector = Icons.Filled.Favorite,
+                    contentDescription = null)
+                }
+              },
+              text = {
+                if (favoriteState) {
+                  Text(text = stringResource(R.string.button_text_remove_from_favorites))
+                } else {
+                  Text(text = stringResource(R.string.button_text_add_to_favorites))
+                }
+              },
+              onClick = {
+                moreDropMenuState = false
+                onFavoriteChange(!favoriteState)
               }
             )
           }

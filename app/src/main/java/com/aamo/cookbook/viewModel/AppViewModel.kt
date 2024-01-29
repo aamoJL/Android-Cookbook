@@ -14,22 +14,35 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
   private var _selectedCategory = MutableStateFlow("")
   val selectedCategory = _selectedCategory.asStateFlow()
 
-  suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int) : RecipeWithChaptersStepsAndIngredients? =
+  suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients? =
     recipeRepository.getRecipeWithChaptersStepsAndIngredients(id)
 
-  fun getRecipesByCategory(category: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
-    list.filter { it.category == category }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
-  }
+  fun getRecipesByCategory(category: String): Flow<List<Recipe>> =
+    recipeRepository.getAllRecipesFlow().map { list ->
+      list.filter { it.category == category }
+        .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+    }
 
-  fun getRecipesBySubCategory(category: String, subCategory: String): Flow<List<Recipe>> = recipeRepository.getAllRecipesStream().map {  list ->
-    list.filter { it.category == category && it.subCategory == subCategory }.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
-  }
+  fun getRecipesBySubCategory(category: String, subCategory: String): Flow<List<Recipe>> =
+    recipeRepository.getAllRecipesFlow().map { list ->
+      list.filter { it.category == category && it.subCategory == subCategory }
+        .sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+    }
 
-  fun getCategories(): Flow<List<String>> = recipeRepository.getAllRecipesStream().map { list ->
+  fun getCategories(): Flow<List<String>> = recipeRepository.getAllRecipesFlow().map { list ->
     list.map { it.category }.distinct().sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
   }
 
-  suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
+  fun getFavoriteRecipes(): Flow<List<Recipe>> {
+    return recipeRepository.getFavoriteRecipesFlow().map { list ->
+      list.map { favoriteRecipe ->
+        favoriteRecipe.recipe
+      }.sortedWith(compareBy<Recipe, String>(String.CASE_INSENSITIVE_ORDER) { it.name }
+        .thenBy(String.CASE_INSENSITIVE_ORDER) { it.name })
+    }
+  }
+
+  suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {
     return recipeRepository.upsertRecipe(recipe)
   }
 

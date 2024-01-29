@@ -278,7 +278,7 @@ class RecipeDatabaseTest {
     }
     recipeDao.deleteRecipe(recipe)
 
-    assertNull(recipeDao.getRecipes().first().firstOrNull { it.id == recipe.id })
+    assertNull(recipeDao.getRecipesFlow().first().firstOrNull { it.id == recipe.id })
   }
 
   @Test
@@ -289,7 +289,7 @@ class RecipeDatabaseTest {
       recipeDao.upsertRecipe(Recipe(name = "name"))
     }
 
-    val actual = recipeDao.getRecipes().first().size
+    val actual = recipeDao.getRecipesFlow().first().size
     assertEquals(count, actual)
   }
 
