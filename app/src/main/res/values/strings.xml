@@ -64,4 +64,5 @@
     <string name="button_text_remove_from_favorites">Poista suosikeista</string>
     <string name="description_move_up">Siirrä ylös</string>
     <string name="description_move_down">Siirrä alas</string>
+    <string name="description_more_options">more</string>
 </resources>

@@ -27,14 +27,15 @@ class FloatExtensionsTest {
 
   @Test
   fun toFractionFormattedString_RoundToNearestFraction() {
-    assertEquals("0", 0.0f.toFractionFormattedString())
-    assertEquals("¼", 0.1f.toFractionFormattedString())
-    assertEquals("1 ½", 1.5f.toFractionFormattedString())
-    assertEquals("3 ¼", 3.25f.toFractionFormattedString())
-    assertEquals("¾", 0.75f.toFractionFormattedString())
-    assertEquals("½", 0.4f.toFractionFormattedString())
-    assertEquals("6", 6.0f.toFractionFormattedString())
-    assertEquals("1", .99f.toFractionFormattedString())
+    assertEquals("0", 0.0f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("¼", 0.1f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("1 ½", 1.5f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("3 ¼", 3.25f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("¾", 0.75f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("½", 0.4f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("6", 6.0f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("1", .99f.toFractionFormattedString(roundToNearestFraction = true))
+    assertEquals("1", 1f.toFractionFormattedString(roundToNearestFraction = true))
   }
 
   @Test

@@ -134,7 +134,7 @@ fun RecipeScreenContent(
           IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
             Icon(
               imageVector = Icons.Filled.MoreVert,
-              contentDescription = "more"
+              contentDescription = stringResource(R.string.description_more_options)
             )
           }
           DropdownMenu(

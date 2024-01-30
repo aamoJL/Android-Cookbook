@@ -18,8 +18,10 @@ import com.aamo.cookbook.ui.screen.RecipeScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
+import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -28,6 +30,7 @@ class RecipeScreenTest {
   private val recipe = Mocker.mockRecipeList().first()
   private var chapterUiStates by mutableStateOf<List<RecipeScreenViewModel.ChapterPageUiState>>(emptyList())
   private var servingsState by mutableStateOf(RecipeScreenViewModel.ServingsState(recipe.value.servings, recipe.value.servings))
+  private var favoriteState by mutableStateOf(false)
   private var wasProgressChanged: Boolean = false
   private var wasClicked: Boolean = false
 
@@ -50,11 +53,13 @@ class RecipeScreenTest {
           ),
           chapterUiStates = chapterUiStates,
           servingsState = servingsState,
+          favoriteState = favoriteState,
           onProgressChange = { _, _, _ ->
             wasProgressChanged = true
           },
           onBack = { wasClicked = true },
           onEditRecipe = { wasClicked = true },
+          onFavoriteChange = { favoriteState = it },
           onServingsCountChange = { servingsState = servingsState.copy(current = it) }
         )
       }
@@ -129,5 +134,22 @@ class RecipeScreenTest {
     }
 
     rule.onNodeWithText("Valmis!").assertExists()
+  }
+
+  @Test
+  fun onSetAsFavorite() {
+    rule.onNodeWithContentDescription(R.string.description_more_options).performClick()
+    rule.onNodeWithText(R.string.button_text_add_to_favorites).performClick()
+
+    assert(favoriteState)
+  }
+
+  @Test
+  fun onSetAsNonFavorite() {
+    favoriteState = true
+    rule.onNodeWithContentDescription(R.string.description_more_options).performClick()
+    rule.onNodeWithText(R.string.button_text_remove_from_favorites).performClick()
+
+    assertFalse(favoriteState)
   }
 }

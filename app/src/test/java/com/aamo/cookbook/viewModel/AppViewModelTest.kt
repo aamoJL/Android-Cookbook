@@ -67,4 +67,19 @@ class AppViewModelTest {
     val result = viewModel.selectedCategory.value
     assertEquals(expected, result)
   }
+
+  @Test
+  fun getRecipeWithChaptersStepsAndIngredients() = runTest {
+    val expected = TestRecipeRepository.Data.recipes.first { it.value.id == 1 }
+    val actual = viewModel.getRecipeWithChaptersStepsAndIngredients(1)
+    assertEquals(expected, actual)
+  }
+
+  @Test
+  fun getFavoriteRecipes() = runTest {
+    val expected = TestRecipeRepository.Data.favoriteRecipes
+      .map { f -> TestRecipeRepository.Data.recipes.first { it.value.id == f.recipeId }.value }
+    val actual = viewModel.getFavoriteRecipes().single()
+    assertEquals(expected, actual)
+  }
 }

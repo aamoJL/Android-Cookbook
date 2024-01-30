@@ -44,6 +44,13 @@ class RecipeScreenViewModelTest {
   }
 
   @Test
+  fun verifyInit_FavoriteState() {
+    val expected = TestRecipeRepository.Data.favoriteRecipes.firstOrNull { it.recipeId == viewModel.recipe.value.id } != null
+    val actual = viewModel.favoriteState.value
+    assertEquals(expected, actual)
+  }
+
+  @Test
   fun updateProgress() {
     val oldProgress = viewModel.chapterPageUiStates.value.map { it.progress }
     val chapterIndex = 0; val stepIndex = 0
@@ -54,6 +61,29 @@ class RecipeScreenViewModelTest {
     }.toMutableList()
     expected[chapterIndex][stepIndex] = true
     val actual = viewModel.chapterPageUiStates.value.map { it.progress }
+    assertEquals(expected, actual)
+  }
+
+  @Test
+  fun setFavoriteState() {
+    val initState = viewModel.favoriteState.value
+
+    val expected = !initState
+    viewModel.setFavoriteState(expected)
+    val actual = viewModel.favoriteState.value
+    assertEquals(expected, actual)
+  }
+
+  @Test
+  fun setServingsCount() {
+    val init = viewModel.servingsState.value.baseline
+    val current = viewModel.servingsState.value.current
+    assertEquals(init, current)
+
+    val expected = current + 1
+    viewModel.setServingsCount(expected)
+    val actual = viewModel.servingsState.value.current
+
     assertEquals(expected, actual)
   }
 }

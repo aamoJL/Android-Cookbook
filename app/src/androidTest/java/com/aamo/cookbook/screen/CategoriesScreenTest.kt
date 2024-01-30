@@ -77,7 +77,7 @@ class CategoriesScreenTest {
 
   @Test
   fun onRecipeAdd() {
-    rule.onNodeWithContentDescription(R.string.description_add_new_recipe).performClick()
+    rule.onNodeWithText(R.string.button_text_new).performClick()
 
     assert(wasClicked)
   }

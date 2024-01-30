@@ -18,7 +18,6 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
-import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import org.junit.Assert
 import org.junit.Before
@@ -154,7 +153,7 @@ class EditRecipeChapterStepIngredientScreenTest {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
       rule.onNodeWithText(R.string.textfield_ingredient_amount)
-        .assertTextContains(uiState.formState.amount!!.toStringWithoutZero())
+        .assertTextContains(uiState.formState.amount!!.toString())
       rule.onNodeWithText(R.string.textfield_ingredient_unit)
         .assertTextContains(uiState.formState.unit)
     }

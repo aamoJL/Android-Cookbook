@@ -30,11 +30,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.Tags
 
 @Composable
 fun CategoriesScreen(
@@ -159,6 +161,7 @@ private fun CategoryList(
           modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
+            .testTag(Tags.CATEGORY_ITEM.name)
         ) {
           Text(
             text = category,

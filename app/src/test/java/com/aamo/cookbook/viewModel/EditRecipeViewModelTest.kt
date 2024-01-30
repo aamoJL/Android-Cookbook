@@ -11,6 +11,7 @@ import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,6 +46,7 @@ class EditRecipeViewModelTest {
       val actual = viewModel.infoUiState.value
 
       assertEquals(expected, actual)
+      assertFalse(viewModel.infoUiState.value.canBeSaved)
     }
 
     withExistingRecipe().also { viewModel ->
@@ -63,6 +65,7 @@ class EditRecipeViewModelTest {
       )
       val result = viewModel.infoUiState.value
       assertEquals(expected, result)
+      assert(viewModel.infoUiState.value.canBeSaved)
     }
   }
 
@@ -84,6 +87,7 @@ class EditRecipeViewModelTest {
       val actual = viewModel.chapterUiState.value
 
       assertEquals(expected, actual)
+      assert(viewModel.chapterUiState.value.canBeSaved)
     }
   }
 
@@ -105,6 +109,7 @@ class EditRecipeViewModelTest {
       val result = viewModel.stepUiState.value
 
       assertEquals(expected, result)
+      assert(viewModel.stepUiState.value.canBeSaved)
     }
   }
 
@@ -128,6 +133,7 @@ class EditRecipeViewModelTest {
       val result = viewModel.ingredientUiState.value
 
       assertEquals(expected, result)
+      assert(viewModel.ingredientUiState.value.canBeSaved)
     }
   }
 
@@ -370,6 +376,115 @@ class EditRecipeViewModelTest {
       val expected = ingredients.drop(1)
       val actual = viewModel.stepUiState.value.ingredients
 
+      assertEquals(expected, actual)
+    }
+  }
+
+  @Test
+  fun chapterScreenUiState_toChapterWithStepsAndIngredients() {
+    withNewRecipe().also { viewModel ->
+      val chapter = TestRecipeRepository.Data
+        .recipes.first().chapters.first().let {
+          it.copy(value = it.value.copy(recipeId = 0))
+        }
+      viewModel.initChapterUiState(chapter)
+
+      val actual = viewModel.chapterUiState.value.toChapterWithStepsAndIngredients()
+      assertEquals(chapter, actual)
+    }
+  }
+
+  @Test
+  fun stepScreenUiState_toStepWithIngredients() {
+    withNewRecipe().also { viewModel ->
+      val step = TestRecipeRepository.Data
+        .recipes.first().chapters.first().steps.first().let {
+          it.copy(value = it.value.copy(chapterId = 0))
+        }
+      viewModel.initStepUiState(step)
+
+      val actual = viewModel.stepUiState.value.toStepWithIngredients()
+      assertEquals(step, actual)
+    }
+  }
+
+  @Test
+  fun ingredientScreenUiState_toIngredient() {
+    withNewRecipe().also { viewModel ->
+      val ingredient = TestRecipeRepository.Data
+        .recipes.first().chapters.first().steps.first().ingredients.first().copy(stepId = 0)
+      viewModel.initIngredientUiState(ingredient, 0)
+
+      val actual = viewModel.ingredientUiState.value.toIngredient()
+      assertEquals(ingredient, actual)
+    }
+  }
+
+  @Test
+  fun deleteChapter() {
+    withExistingRecipe().also { viewModel ->
+      val expected = viewModel.infoUiState.value.chapters.toMutableList().apply { removeAt(1) }
+        .mapIndexed { index, chapter -> chapter.copy(
+          value = chapter.value.copy(orderNumber = index + 1)) }
+      viewModel.deleteChapter(viewModel.infoUiState.value.chapters[1])
+      val actual = viewModel.infoUiState.value.chapters
+      assertEquals(expected, actual)
+    }
+  }
+
+  @Test
+  fun deleteStep() {
+    withExistingRecipe().also { viewModel ->
+      viewModel.initChapterUiState(viewModel.infoUiState.value.chapters.first())
+
+      val expected = viewModel.chapterUiState.value.steps.toMutableList().apply { removeAt(1) }
+        .mapIndexed { index, step -> step.copy(
+          value = step.value.copy(orderNumber = index + 1)) }
+      viewModel.deleteStep(viewModel.chapterUiState.value.steps[1])
+      val actual = viewModel.chapterUiState.value.steps
+      assertEquals(expected, actual)
+    }
+  }
+
+  @Test
+  fun swapChapterPositions() {
+    withExistingRecipe().also { viewModel ->
+      // swap indexes 1 and 2
+      val expected = viewModel.infoUiState.value.chapters.toMutableList().also { list ->
+        list[1] = list[2].also { list[2] = list[1] }
+      }
+      viewModel.swapChapterPositions(1,2)
+      val actual = viewModel.infoUiState.value.chapters
+      assertEquals(expected, actual)
+    }
+  }
+
+  @Test
+  fun swapStepPositions() {
+    withExistingRecipe().also { viewModel ->
+      viewModel.initChapterUiState(viewModel.infoUiState.value.chapters.first())
+
+      // swap indexes 1 and 2
+      val expected = viewModel.chapterUiState.value.steps.toMutableList().also { list ->
+        list[1] = list[2].also { list[2] = list[1] }
+      }
+      viewModel.swapStepPositions(1,2)
+      val actual = viewModel.chapterUiState.value.steps
+      assertEquals(expected, actual)
+    }
+  }
+
+  @Test
+  fun swapIngredientPositions() {
+    withExistingRecipe().also { viewModel ->
+      viewModel.initStepUiState(viewModel.infoUiState.value.chapters.first().steps.first())
+
+      // swap indexes 1 and 2
+      val expected = viewModel.stepUiState.value.ingredients.toMutableList().also { list ->
+        list[1] = list[2].also { list[2] = list[1] }
+      }
+      viewModel.swapIngredientPositions(1,2)
+      val actual = viewModel.stepUiState.value.ingredients
       assertEquals(expected, actual)
     }
   }

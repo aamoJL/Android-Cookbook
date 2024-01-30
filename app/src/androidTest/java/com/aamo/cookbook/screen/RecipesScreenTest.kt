@@ -36,6 +36,7 @@ class RecipesScreenTest {
     rule.setContent {
       CookbookTheme {
         RecipesScreen(
+          title = recipes.first().category,
           recipes = recipes,
           onSelectRecipe = {wasSelected = it},
           onBack = { wasClicked = true },

@@ -1,6 +1,7 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.Mocker
+import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.FullFavoriteRecipe
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategoryTuple
@@ -11,9 +12,14 @@ import kotlinx.coroutines.flow.flow
 class TestRecipeRepository : RecipeRepository {
   object Data {
     val recipes = Mocker.mockRecipeList()
+    val favoriteRecipes = listOf(
+      FavoriteRecipe(0, 1),
+      FavoriteRecipe(1, 5),
+    )
   }
 
   private var recipes = Data.recipes
+  private var favorites = Data.favoriteRecipes
 
   override fun getAllRecipesFlow(): Flow<List<Recipe>> {
     return flow {
@@ -31,25 +37,40 @@ class TestRecipeRepository : RecipeRepository {
 
   override suspend fun deleteRecipe(recipe: Recipe) {
     val index = recipes.indexOfFirst { it.value.id == recipe.id }
-    if(index != -1){
+    if (index != -1) {
       recipes.minus(recipes.elementAt(index))
     }
   }
 
   override fun getFavoriteRecipesFlow(): Flow<List<FullFavoriteRecipe>> {
-    TODO("Not yet implemented")
+    return flow {
+      emit(favorites.map { favorite ->
+        FullFavoriteRecipe(
+          favoriteRecipe = favorite,
+          recipe = recipes.first { recipe -> recipe.value.id == favorite.recipeId }.value
+        )
+      })
+    }
   }
 
   override suspend fun getFavoriteRecipe(recipeId: Int): FullFavoriteRecipe? {
-    TODO("Not yet implemented")
+    return favorites.firstOrNull { it.recipeId == recipeId }?.let { favorite ->
+      recipes.firstOrNull { it.value.id == recipeId }?.let { recipe ->
+        FullFavoriteRecipe(favorite, recipe.value)
+      }
+    }
   }
 
   override suspend fun addRecipeToFavorites(recipeId: Int) {
-    TODO("Not yet implemented")
+    favorites = favorites.toMutableList().apply {
+      recipes.first { it.value.id == recipeId }.also {
+        add(FavoriteRecipe(id = favorites.maxOf { f -> f.id } + 1, recipeId = it.value.id))
+      }
+    }
   }
 
   override suspend fun removeRecipeFromFavorites(recipeId: Int) {
-    TODO("Not yet implemented")
+    favorites = favorites.toMutableList().apply { remove(first { it.recipeId == recipeId }) }
   }
 
   override suspend fun getAllCategories(): List<String> {
