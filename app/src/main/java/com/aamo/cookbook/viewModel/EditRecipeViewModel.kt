@@ -347,4 +347,34 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
     return index != -1
   }
+
+  fun swapChapterPositions(from: Int, to: Int) {
+    val chapters = _infoUiState.value.chapters.toMutableList()
+
+    if(from in 0..chapters.size && to in 0..chapters.size) {
+      chapters[to] = chapters[from].also { chapters[from] = chapters[to] }
+    }
+
+    _infoUiState.update { s -> s.copy(chapters = chapters) }
+  }
+
+  fun swapStepPositions(from: Int, to: Int) {
+    val steps = _chapterUiState.value.steps.toMutableList()
+
+    if(from in 0..steps.size && to in 0..steps.size) {
+      steps[to] = steps[from].also { steps[from] = steps[to] }
+    }
+
+    _chapterUiState.update { s -> s.copy(steps = steps) }
+  }
+
+  fun swapIngredientPositions(from: Int, to: Int) {
+    val ingredients = _stepUiState.value.ingredients.toMutableList()
+
+    if(from in 0..ingredients.size && to in 0..ingredients.size) {
+      ingredients[to] = ingredients[from].also { ingredients[from] = ingredients[to] }
+    }
+
+    _stepUiState.update { s -> s.copy(ingredients = ingredients) }
+  }
 }

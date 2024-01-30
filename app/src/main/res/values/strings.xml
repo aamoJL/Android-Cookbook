@@ -62,4 +62,6 @@
     <string name="button_text_favorites">Suosikit</string>
     <string name="button_text_add_to_favorites">Lisää suosikkeihin</string>
     <string name="button_text_remove_from_favorites">Poista suosikeista</string>
+    <string name="description_move_up">Siirrä ylös</string>
+    <string name="description_move_down">Siirrä alas</string>
 </resources>

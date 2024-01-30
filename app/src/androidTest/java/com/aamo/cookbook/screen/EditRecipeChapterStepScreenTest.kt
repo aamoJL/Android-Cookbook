@@ -42,11 +42,11 @@ class EditRecipeChapterStepScreenTest {
       CookbookTheme {
         EditRecipeChapterStepScreenContent(
           uiState = uiState,
-          onFormStateChange = { uiState = uiState.copy(formState = it) },
-          onDeleteIngredient = { true.also { wasDismissed = true }},
-          onEditIngredient = { wasClicked = true },
-          onSubmitChanges = { wasClicked = true },
           onBack = { wasClicked = true },
+          onSubmitChanges = { wasClicked = true },
+          onEditIngredient = { wasClicked = true },
+          onDeleteIngredient = { true.also { wasDismissed = true }},
+          onFormStateChange = { uiState = uiState.copy(formState = it) },
         )
       }
     }

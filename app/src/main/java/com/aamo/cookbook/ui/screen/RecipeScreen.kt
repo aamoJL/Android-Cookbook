@@ -385,7 +385,7 @@ private fun SummaryPage(
               modifier = Modifier.padding(vertical = 4.dp)
             )
             Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-              IngredientLista(
+              IngredientList(
                 ingredients = chapterIngredientPair.second,
                 servingsMultiplier = servingsState.multiplier
               )
@@ -463,7 +463,7 @@ private fun StepCheckBox(
             contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
           modifier = Modifier.fillMaxWidth()
         ){
-          IngredientLista(
+          IngredientList(
             ingredients = ingredients,
             servingsMultiplier = servingsMultiplier,
             modifier = Modifier.padding(8.dp)
@@ -488,7 +488,7 @@ private fun StepCheckBox(
 }
 
 @Composable
-private fun IngredientLista(
+private fun IngredientList(
   ingredients: List<Ingredient>,
   servingsMultiplier: Float,
   modifier: Modifier = Modifier
@@ -505,7 +505,6 @@ private fun IngredientLista(
         )
       }
     }
-
     Column(
       modifier = Modifier
         .defaultMinSize(minWidth = 40.dp)
@@ -520,7 +519,6 @@ private fun IngredientLista(
         )
       }
     }
-
     Column {
       ingredients.forEach {
         Text(

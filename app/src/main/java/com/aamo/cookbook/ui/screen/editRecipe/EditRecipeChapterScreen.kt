@@ -7,13 +7,17 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -27,11 +31,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
@@ -62,6 +66,7 @@ fun EditRecipeChapterScreen(
     onEditStep = onEditStep,
     onSubmitChanges = onSubmitChanges,
     onBack = onBack,
+    onSwapSteps = { from, to -> viewModel.swapStepPositions(from, to) },
     modifier = modifier
   )
 }
@@ -75,6 +80,7 @@ fun EditRecipeChapterScreenContent(
   onDeleteStep: (StepWithIngredients) -> (Boolean) = { false },
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {},
+  onSwapSteps: (from: Int, to: Int) -> Unit = {_,_ -> }
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
@@ -124,7 +130,8 @@ fun EditRecipeChapterScreenContent(
       StepList(
         steps = uiState.steps,
         onEditStep = onEditStep,
-        onDeleteStep = onDeleteStep
+        onDeleteStep = onDeleteStep,
+        onSwap = onSwapSteps
       )
     }
   }
@@ -136,6 +143,7 @@ private fun StepList(
   steps: List<StepWithIngredients>,
   onEditStep: (StepWithIngredients?) -> Unit,
   modifier: Modifier = Modifier,
+  onSwap: (from: Int, to: Int) -> Unit,
   onDeleteStep: (StepWithIngredients) -> Boolean
 ) {
   FormList(
@@ -147,14 +155,19 @@ private fun StepList(
       itemsIndexed(
         items = steps,
         key = { _, step -> step.value.copy(orderNumber = 0).hashCode() }
-      ) {index , step ->
+      ) { index, step ->
         Column(modifier = Modifier.animateItemPlacement()) {
           StepListItem(
             step = step,
             stepNumber = index + 1,
             onClick = { onEditStep(step) },
             onDismiss = { onDeleteStep(step) },
-            modifier = Modifier.padding(15.dp)
+            onMoveUp = if (index != 0) {
+              { onSwap(index, index - 1) }
+            } else null,
+            onMoveDown = if (index != steps.size - 1) {
+              { onSwap(index, index + 1) }
+            } else null
           )
           Divider()
         }
@@ -188,52 +201,80 @@ fun StepListItem(
   stepNumber: Int,
   onClick: () -> Unit,
   onDismiss: () -> Boolean,
+  onMoveUp: (() -> Unit)?,
+  onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier,
 ) {
-  BasicDismissibleItem(dismissAction = onDismiss) {
+  BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
     ListItem(
-      modifier = Modifier
+      modifier = modifier
         .clickable { onClick() }
         .testTag(Tags.STEP_ITEM.name),
       headlineContent = {
-        Column(modifier = modifier.fillMaxWidth()) {
-          Text(
-            text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
-            style = MaterialTheme.typography.titleMedium,
-          )
-          Column(
-            modifier = Modifier
-              .padding(start = 8.dp)
-              .width(IntrinsicSize.Max)
-          ) {
-            for (ingredient in step.ingredients) {
-              Row {
-                Text(
-                  text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
-                  style = MaterialTheme.typography.bodySmall,
-                  textAlign = TextAlign.End,
-                  modifier = Modifier
-                    .defaultMinSize(minWidth = 40.dp)
-                    .weight(1f)
-                )
-                Text(
-                  text = ingredient.unit,
-                  style = MaterialTheme.typography.bodySmall,
-                  fontStyle = FontStyle.Italic,
-                  modifier = Modifier
-                    .padding(horizontal = 8.dp)
-                    .weight(1f)
-                )
-                Text(
-                  text = ingredient.name,
-                  style = MaterialTheme.typography.bodySmall,
-                  modifier = Modifier.weight(5f)
-                )
-              }
-            }
+        Text(
+          text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
+          style = MaterialTheme.typography.titleMedium,
+        )
+      },
+      supportingContent = {
+        IngredientList(
+          ingredients = step.ingredients,
+          modifier = Modifier.padding(start = 16.dp)
+        )
+      },
+      trailingContent = {
+        Column(modifier = Modifier) {
+          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+            Icon(
+              imageVector = Icons.Filled.KeyboardArrowUp,
+              contentDescription = stringResource(R.string.description_move_up)
+            )
+          }
+          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+            Icon(
+              imageVector = Icons.Filled.KeyboardArrowDown,
+              contentDescription = stringResource(R.string.description_move_down)
+            )
           }
         }
       }
     )
+  }
+}
+
+@Composable
+private fun IngredientList(
+  ingredients: List<Ingredient>,
+  modifier: Modifier = Modifier
+) {
+  Row(modifier = modifier) {
+    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+      ingredients.forEach {
+        Text(
+          text = if (it.amount == 0f) "" else it.amount.toFractionFormattedString(),
+          style = MaterialTheme.typography.bodySmall,
+          textAlign = TextAlign.End,
+          modifier = Modifier.fillMaxWidth()
+        )
+      }
+    }
+    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+      ingredients.forEach {
+        Text(
+          text = it.unit,
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier
+        )
+      }
+    }
+    Column {
+      ingredients.forEach {
+        Text(
+          text = it.name,
+          style = MaterialTheme.typography.bodySmall,
+          modifier = Modifier
+        )
+      }
+    }
   }
 }

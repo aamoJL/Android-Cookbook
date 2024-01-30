@@ -10,7 +10,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.Divider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -59,7 +64,8 @@ fun EditRecipeChapterStepScreen(
     onSubmitChanges = onSubmitChanges,
     onEditIngredient = onEditIngredient,
     onDeleteIngredient = { viewModel.deleteIngredient(it) },
-    onFormStateChange = { viewModel.setStepFormState(it) }
+    onFormStateChange = { viewModel.setStepFormState(it) },
+    onSwapIngredients = { from, to -> viewModel.swapIngredientPositions(from, to) }
   )
 }
 
@@ -71,7 +77,8 @@ fun EditRecipeChapterStepScreenContent(
   onSubmitChanges: () -> Unit = {},
   onEditIngredient: (Ingredient?) -> Unit = {},
   onDeleteIngredient: (Ingredient) -> Boolean = { false },
-  onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {}
+  onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {},
+  onSwapIngredients: (from: Int, to: Int) -> Unit = {_,_ -> }
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
@@ -125,40 +132,9 @@ fun EditRecipeChapterStepScreenContent(
       IngredientList(
         ingredients = uiState.ingredients,
         onEditIngredient = onEditIngredient,
-        onDeleteIngredient = onDeleteIngredient
+        onDeleteIngredient = onDeleteIngredient,
+        onSwap = onSwapIngredients
       )
-    }
-  }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun IngredientList(
-  ingredients: List<Ingredient>,
-  onEditIngredient: (Ingredient?) -> Unit,
-  onDeleteIngredient: (Ingredient) -> Boolean,
-  modifier: Modifier = Modifier
-) {
-  FormList(
-    title = stringResource(R.string.form_list_title_ingredients),
-    onAddClick = { onEditIngredient(null) },
-    modifier = modifier
-  ) {
-    LazyColumn {
-      itemsIndexed(
-        items = ingredients,
-        key = { _, ingredient -> ingredient.hashCode() },
-      ) { _, ingredient ->
-        Column(modifier = Modifier.animateItemPlacement()) {
-          IngredientListItem(
-            ingredient = ingredient,
-            onClick = { onEditIngredient(ingredient) },
-            onDismiss = { onDeleteIngredient(ingredient) },
-            modifier = Modifier.padding(vertical = 16.dp)
-          )
-          Divider()
-        }
-      }
     }
   }
 }
@@ -182,11 +158,52 @@ private fun StepForm(
   }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun IngredientList(
+  ingredients: List<Ingredient>,
+  onEditIngredient: (Ingredient?) -> Unit,
+  onDeleteIngredient: (Ingredient) -> Boolean,
+  onSwap: (from: Int, to: Int) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  FormList(
+    title = stringResource(R.string.form_list_title_ingredients),
+    onAddClick = { onEditIngredient(null) },
+    modifier = modifier
+  ) {
+    LazyColumn {
+      itemsIndexed(
+        items = ingredients,
+        key = { _, ingredient -> ingredient.hashCode() },
+      ) { index, ingredient ->
+        Column(modifier = Modifier.animateItemPlacement()) {
+          IngredientListItem(
+            ingredient = ingredient,
+            onClick = { onEditIngredient(ingredient) },
+            onDismiss = { onDeleteIngredient(ingredient) },
+            onMoveUp = if (index != 0) {
+              { onSwap(index, index - 1) }
+            } else null,
+            onMoveDown = if (index != ingredients.size - 1) {
+              { onSwap(index, index + 1) }
+            } else null,
+            modifier = Modifier.padding(vertical = 16.dp)
+          )
+          Divider()
+        }
+      }
+    }
+  }
+}
+
 @Composable
 private fun IngredientListItem(
   ingredient: Ingredient,
   onClick: () -> Unit,
   onDismiss: () -> (Boolean),
+  onMoveUp: (() -> Unit)?,
+  onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
@@ -214,6 +231,23 @@ private fun IngredientListItem(
             style = MaterialTheme.typography.titleMedium,
           )
         }
-      })
+      },
+      trailingContent = {
+        Column(modifier = Modifier) {
+          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+            Icon(
+              imageVector = Icons.Filled.KeyboardArrowUp,
+              contentDescription = stringResource(R.string.description_move_up)
+            )
+          }
+          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+            Icon(
+              imageVector = Icons.Filled.KeyboardArrowDown,
+              contentDescription = stringResource(R.string.description_move_down)
+            )
+          }
+        }
+      }
+    )
   }
 }

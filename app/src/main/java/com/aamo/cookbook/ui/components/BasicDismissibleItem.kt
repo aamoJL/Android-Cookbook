@@ -27,6 +27,7 @@ import com.aamo.cookbook.R
 @Composable
 fun BasicDismissibleItem(
   dismissAction: () -> (Boolean),
+  modifier: Modifier = Modifier,
   content: @Composable () -> Unit = {},
 ) {
   val dismissState = rememberDismissState(
@@ -38,14 +39,15 @@ fun BasicDismissibleItem(
     },
     positionalThreshold = { 150.dp.toPx() }
   )
+
   SwipeToDismiss(
     state = dismissState,
     directions = setOf(DismissDirection.StartToEnd),
-    modifier = Modifier,
+    modifier = modifier,
     background = { DismissBackground(dismissState) },
     dismissContent = {
       content()
-    }
+    },
   )
 }
 
