@@ -74,8 +74,8 @@ fun EditRecipeChapterStepIngredientScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = when (uiState.id) {
-        0 -> stringResource(R.string.screen_title_new_ingredient)
+      BasicTopAppBar(title = when (uiState.newIngredient) {
+        true -> stringResource(R.string.screen_title_new_ingredient)
         else -> stringResource(R.string.screen_title_existing_ingredient)
       }, onBack = {
         when(uiState.unsavedChanges){

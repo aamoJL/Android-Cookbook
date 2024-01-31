@@ -100,8 +100,8 @@ fun EditRecipeChapterScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = when (uiState.id) {
-        0 -> stringResource(R.string.screen_title_new_chapter)
+      BasicTopAppBar(title = when (uiState.newChapter) {
+        true -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
       }, onBack = {
         if (uiState.unsavedChanges) openUnsavedDialog = true

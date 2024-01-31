@@ -85,7 +85,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val formState: ChapterFormState = ChapterFormState(),
     val orderNumber: Int = 1,
     val steps: List<StepWithIngredients> = emptyList(),
-    val unsavedChanges: Boolean = false
+    val unsavedChanges: Boolean = false,
+    val newChapter: Boolean = true
   ) {
     data class ChapterFormState(
       val name: String = "",
@@ -106,7 +107,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             name = chapter.value.name
           ),
           orderNumber = chapter.value.orderNumber,
-          steps = chapter.steps
+          steps = chapter.steps,
+          newChapter = chapter.value.name.isEmpty()
         )
       }
     }
@@ -117,7 +119,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val formState: StepFormState = StepFormState(),
     val orderNumber: Int = 1,
     val ingredients: List<Ingredient> = emptyList(),
-    val unsavedChanges: Boolean = false
+    val unsavedChanges: Boolean = false,
+    val newStep: Boolean = true
   ) {
     data class StepFormState(
       val description: String = "",
@@ -138,6 +141,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
           ),
           orderNumber = step.value.orderNumber,
           ingredients = step.ingredients,
+          newStep = step.value.description.isEmpty()
         )
       }
     }
@@ -147,7 +151,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val id: Int = 0,
     val index: Int = -1,
     val formState: IngredientFormState = IngredientFormState(),
-    val unsavedChanges: Boolean = false
+    val unsavedChanges: Boolean = false,
+    val newIngredient: Boolean = true
   ) {
     data class IngredientFormState(
       val name: String = "",
@@ -171,6 +176,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             amount = ingredient.amount,
             unit = ingredient.unit
           ),
+          newIngredient = ingredient.name.isEmpty()
         )
       }
     }
