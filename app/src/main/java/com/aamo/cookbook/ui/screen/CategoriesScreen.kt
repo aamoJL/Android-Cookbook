@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -118,23 +117,23 @@ fun MainButtons(
 ){
   Row(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
-    modifier = modifier.defaultMinSize(minHeight = 100.dp).height(IntrinsicSize.Max)
+    modifier = modifier.defaultMinSize(minHeight = 110.dp).height(IntrinsicSize.Max)
   ) {
     MainButton(
       onClick = onSearch,
       icon = Icons.Filled.Search,
       text = stringResource(R.string.description_search),
-      modifier = Modifier.width(100.dp).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight())
     MainButton(
       onClick = onFavorites,
       icon = Icons.Filled.Favorite,
       text = stringResource(R.string.button_text_favorites),
-      modifier = Modifier.width(100.dp).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight())
     MainButton(
       onClick = onAddRecipe,
       icon = Icons.Filled.Add,
       text = stringResource(R.string.button_text_new),
-      modifier = Modifier.width(100.dp).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight())
   }
 }
 
