@@ -11,12 +11,19 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -73,14 +80,38 @@ class CookbookApplication : Application() {
   }
 }
 
+data class SnackbarProperties (
+  val message: String,
+  val actionLabel: String? = null,
+  val withDismissAction: Boolean = false,
+  val duration: SnackbarDuration = SnackbarDuration.Short
+)
+
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
     setContent {
       CookbookTheme {
+        val snackState = remember { SnackbarHostState() }
+        val snackScope = rememberCoroutineScope()
+
         // A surface container using the 'background' color from the theme
         Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          MainNavGraph()
+          Box {
+            MainNavGraph(
+              onShowSnackbar = { properties ->
+                snackScope.launch {
+                  snackState.showSnackbar(
+                    message = properties.message,
+                    actionLabel = properties.actionLabel,
+                    withDismissAction = properties.withDismissAction,
+                    duration = properties.duration
+                  )
+                }
+              }
+            )
+            SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
+          }
         }
       }
     }
@@ -89,9 +120,12 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainNavGraph(
-  viewModel : AppViewModel = viewModel(factory = ViewModelProvider.Factory),
-  navController : NavHostController = rememberNavController()
+  appViewModel : AppViewModel = viewModel(factory = ViewModelProvider.Factory),
+  navController : NavHostController = rememberNavController(),
+  onShowSnackbar: (SnackbarProperties) -> Unit = {}
 ) {
+  val context = LocalContext.current
+
   NavHost(
     navController = navController,
     startDestination = Screen.Categories.getRoute(),
@@ -99,12 +133,12 @@ fun MainNavGraph(
     exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }
   ) {
     composable(route = Screen.Categories.getRoute()) {
-      val categories by viewModel.getCategories().collectAsState(initial = emptyList())
+      val categories by appViewModel.getCategories().collectAsState(initial = emptyList())
 
       CategoriesScreen(
         categories = categories,
         onSelectCategory = {
-          viewModel.setSelectedCategory(it)
+          appViewModel.setSelectedCategory(it)
           navController.navigate(Screen.Recipes.getRoute())
         },
         onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
@@ -113,11 +147,11 @@ fun MainNavGraph(
       )
     }
     composable(route = Screen.Recipes.getRoute()) {
-      val category by viewModel.selectedCategory.collectAsStateWithLifecycle()
-      val recipes by viewModel.getRecipesByCategory(category).collectAsStateWithLifecycle(
+      val category by appViewModel.selectedCategory.collectAsStateWithLifecycle()
+      val recipes by appViewModel.getRecipesByCategory(category).collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
-      val favorites by viewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
+      val favorites by appViewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
 
@@ -133,7 +167,7 @@ fun MainNavGraph(
       )
     }
     composable(route = Screen.Favorites.getRoute()) {
-      val favorites by viewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
+      val favorites by appViewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
 
@@ -178,14 +212,12 @@ fun MainNavGraph(
         )
       }
     ) {
-      val context = LocalContext.current
-
       RecipeScreen(
         onBack = { navController.navigateUp() },
         onEditRecipe = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) },
         onCopyRecipe = { id ->
-          viewModel.viewModelScope.launch {
-            viewModel.getRecipeWithChaptersStepsAndIngredients(id)?.let { recipe ->
+          appViewModel.viewModelScope.launch {
+            appViewModel.getRecipeWithChaptersStepsAndIngredients(id)?.let { recipe ->
               recipe.copy(
                 value = Recipe(
                   name = context.getString(R.string.recipe_name_copy, recipe.value.name),
@@ -208,15 +240,18 @@ fun MainNavGraph(
                 }
               )
             }?.also { recipe ->
-              viewModel.upsertRecipe(recipe).also { newId ->
-                if (newId > 0)
+              appViewModel.upsertRecipe(recipe).also { newId ->
+                if (newId > 0) {
                   navController.navigate(Screen.Recipe.getRouteWithArgument(newId.toString())) {
                     popUpTo(Screen.Recipe.getRoute()) { inclusive = true }
                   }
+                  onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_copied_successfully)))
+                }
               }
             }
           }
-        }
+        },
+        onShowSnackbar = onShowSnackbar
       )
     }
     this.editRecipeGraph(
@@ -224,9 +259,9 @@ fun MainNavGraph(
       navController = navController,
       onBack = { navController.navigateUp() },
       onSubmitChanges = {
-        viewModel.viewModelScope.launch {
-          val id = viewModel.upsertRecipe(it)
-          viewModel.setSelectedCategory(it.value.category)
+        appViewModel.viewModelScope.launch {
+          val id = appViewModel.upsertRecipe(it)
+          appViewModel.setSelectedCategory(it.value.category)
 
           if (navController.previousBackStackEntry?.destination?.route == Screen.Recipe.getRoute()) {
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
@@ -237,16 +272,19 @@ fun MainNavGraph(
               popUpTo(Screen.EditRecipe.getRoute()) { inclusive = true }
             }
           }
+          onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_saved_successfully)))
         }
       },
       onDeleteRecipe = {
-        viewModel.viewModelScope.launch {
-          viewModel.deleteRecipe(it)
+        appViewModel.viewModelScope.launch {
+          appViewModel.deleteRecipe(it)
+
           navController.navigate(Screen.Categories.getRoute()) {
             popUpTo(Screen.Categories.getRoute()) { inclusive = true }
           }
+          onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_deleted_successfully)))
         }
-      }
+      },
     )
   }
 }

@@ -57,4 +57,9 @@
     <string name="dialog_title_unsaved_default">Unsaved changes!</string>
     <string name="dialog_text_unsaved_default">Changes will be lost, if you return to the previous screen.</string>
     <string name="dialog_confirm_unsaved_default">Don\'t save</string>
+    <string name="snackbar_recipe_deleted_successfully">Recipe deleted successfully.</string>
+    <string name="snackbar_recipe_copied_successfully">Recipe copied successfully.</string>
+    <string name="snackbar_recipe_added_to_favorites">Recipe added to favorites.</string>
+    <string name="snackbar_recipe_removed_from_favorites">Recipe removed from favorites.</string>
+    <string name="snackbar_recipe_saved_successfully">Recipe saved successfully.</string>
 </resources>

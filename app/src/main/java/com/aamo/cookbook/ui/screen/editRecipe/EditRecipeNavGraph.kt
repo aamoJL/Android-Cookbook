@@ -44,7 +44,7 @@ fun NavGraphBuilder.editRecipeGraph(
   navController: NavHostController,
   onSubmitChanges: (RecipeWithChaptersStepsAndIngredients) -> Unit = {},
   onDeleteRecipe: (Recipe) -> Unit = {},
-  onBack: () -> Unit = {}
+  onBack: () -> Unit = {},
 ) {
   navigation(
     route = screen.getRoute(),

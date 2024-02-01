@@ -57,4 +57,9 @@
     <string name="dialog_title_unsaved_default">Tallentamattomia tietoja!</string>
     <string name="dialog_text_unsaved_default">Muutoksesi menetetään, jos palaat edelliselle sivulle.</string>
     <string name="dialog_confirm_unsaved_default">Älä tallenna</string>
+    <string name="snackbar_recipe_deleted_successfully">Resepti poistettu onnistuneesti.</string>
+    <string name="snackbar_recipe_copied_successfully">Resepti kopioitu onnistuneesti.</string>
+    <string name="snackbar_recipe_added_to_favorites">Resepti lisätty suosikkeihin.</string>
+    <string name="snackbar_recipe_removed_from_favorites">Resepti poistettu suosikeista.</string>
+    <string name="snackbar_recipe_saved_successfully">Resepti tallennettu onnistuneesti.</string>
 </resources>

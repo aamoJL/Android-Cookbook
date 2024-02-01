@@ -1,9 +1,7 @@
 package com.aamo.cookbook.viewModel
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.aamo.cookbook.Screen
 import com.aamo.cookbook.database.repository.RecipeRepository
 import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
@@ -16,16 +14,14 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class RecipeScreenViewModel(
-  private val recipeRepository: RecipeRepository,
-  private val savedStateHandle: SavedStateHandle
+  private val recipeRepository: RecipeRepository
 ) : ViewModel() {
 
   /**
    * Initializer for this viewmodel used in [ViewModelProvider.Factory]
    */
-  fun init() {
+  fun init(recipeId: Int) {
     viewModelScope.launch {
-      val recipeId = savedStateHandle[Screen.Recipe.argumentName] ?: 0
       recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
         ?: RecipeWithChaptersStepsAndIngredients(Recipe())
       _favoriteState.update {

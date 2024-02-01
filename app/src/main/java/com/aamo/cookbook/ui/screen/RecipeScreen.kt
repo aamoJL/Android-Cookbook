@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -61,6 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
+import com.aamo.cookbook.SnackbarProperties
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.CountInput
@@ -78,12 +80,14 @@ fun RecipeScreen(
   onBack: () -> Unit = {},
   onEditRecipe: (id: Int) -> Unit,
   onCopyRecipe: (id: Int) -> Unit,
+  onShowSnackbar: (SnackbarProperties) -> Unit = {},
   viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
   val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
   val servingsState by viewModel.servingsState.collectAsStateWithLifecycle()
   val favoriteState by viewModel.favoriteState.collectAsStateWithLifecycle()
+  val context = LocalContext.current
 
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
@@ -97,7 +101,15 @@ fun RecipeScreen(
       viewModel.updateProgress(chapterId, stepId, value)
     },
     onServingsCountChange = { viewModel.setServingsCount(it) },
-    onFavoriteChange = { viewModel.setFavoriteState(it) },
+    onFavoriteChange = {
+      viewModel.setFavoriteState(it)
+      onShowSnackbar(
+        SnackbarProperties(
+          if (it) context.getString(R.string.snackbar_recipe_added_to_favorites)
+          else context.getString(R.string.snackbar_recipe_removed_from_favorites)
+        )
+      )
+    },
     modifier = modifier
   )
 }

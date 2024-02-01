@@ -29,7 +29,7 @@ class MainActivityTest {
       CookbookTheme {
         MainNavGraph(
           navController = navController,
-          viewModel = viewModel
+          appViewModel = viewModel
         )
       }
     }
