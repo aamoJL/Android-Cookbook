@@ -133,8 +133,8 @@ fun EditRecipeScreenPageContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = when (uiState.id) {
-        0 -> stringResource(R.string.screen_title_new_recipe)
+      BasicTopAppBar(title = when (uiState.isNewRecipe) {
+        true -> stringResource(R.string.screen_title_new_recipe)
         else -> stringResource(R.string.screen_title_existing_recipe)
       }, onBack = {
         if (uiState.unsavedChanges) openUnsavedDialog = true
@@ -294,10 +294,20 @@ private fun ChapterListItem(
       supportingContent = {
         Column(
           verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier.padding(start = 16.dp).width(IntrinsicSize.Max)
+          modifier = Modifier
+            .padding(start = 16.dp, top = 4.dp)
+            .width(IntrinsicSize.Max)
         ) {
-          for ((index, step) in chapter.steps.withIndex()) {
+          chapter.steps.forEachIndexed { index, step ->
             Column {
+              if(step.value.timerMinutes != null) {
+                Text(
+                  text = stringResource(
+                    R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
+                  ),
+                  style = MaterialTheme.typography.labelSmall
+                )
+              }
               Text(
                 text = "${index + 1}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
                 style = MaterialTheme.typography.bodyMedium

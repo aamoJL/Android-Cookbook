@@ -71,7 +71,10 @@ interface RecipeDao {
           .toInt()
           .let { if (it == -1) chapter.value.id else it }
 
-      chapter.steps.forEachIndexed { si, step ->
+      chapter.steps.forEachIndexed { si, s ->
+        val step =
+          if (s.value.timerMinutes == 0) s.copy(value = s.value.copy(timerMinutes = null)) else s
+
         val stepId =
           upsertStep(step.value.copy(orderNumber = si + 1, chapterId = chapterId))
             .toInt()

@@ -62,4 +62,7 @@
     <string name="snackbar_recipe_added_to_favorites">Recipe added to favorites.</string>
     <string name="snackbar_recipe_removed_from_favorites">Recipe removed from favorites.</string>
     <string name="snackbar_recipe_saved_successfully">Recipe saved successfully.</string>
+    <string name="description_set_timer">Set timer</string>
+    <string name="minutes_amount_abbreviation">%1$s m</string>
+    <string name="textfield_step_timer">(Timer (minutes))</string>
 </resources>

@@ -114,7 +114,7 @@ fun MainButtons(
   onAddRecipe: () -> Unit,
   onFavorites: () -> Unit,
   modifier: Modifier = Modifier
-){
+) {
   Row(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
     modifier = modifier.defaultMinSize(minHeight = 110.dp).height(IntrinsicSize.Max)
@@ -123,17 +123,20 @@ fun MainButtons(
       onClick = onSearch,
       icon = Icons.Filled.Search,
       text = stringResource(R.string.description_search),
-      modifier = Modifier.weight(1f).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight()
+    )
     MainButton(
       onClick = onFavorites,
       icon = Icons.Filled.Favorite,
       text = stringResource(R.string.button_text_favorites),
-      modifier = Modifier.weight(1f).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight()
+    )
     MainButton(
       onClick = onAddRecipe,
       icon = Icons.Filled.Add,
       text = stringResource(R.string.button_text_new),
-      modifier = Modifier.weight(1f).fillMaxHeight())
+      modifier = Modifier.weight(1f).fillMaxHeight()
+    )
   }
 }
 

@@ -100,7 +100,7 @@ fun EditRecipeChapterScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = when (uiState.newChapter) {
+      BasicTopAppBar(title = when (uiState.isNewChapter) {
         true -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
       }, onBack = {
@@ -221,6 +221,17 @@ fun StepListItem(
           ingredients = step.ingredients,
           modifier = Modifier.padding(start = 16.dp)
         )
+      },
+      overlineContent = step.value.timerMinutes?.let {
+        {
+          Text(
+            text = stringResource(
+              R.string.minutes_amount_abbreviation,
+              step.value.timerMinutes.toString()
+            ),
+            style = MaterialTheme.typography.labelSmall
+          )
+        }
       },
       trailingContent = {
         Column(modifier = Modifier) {

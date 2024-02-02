@@ -39,6 +39,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val categorySuggestions: List<RecipeCategoryTuple> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
+    val isNewRecipe: Boolean = id == 0
+
     data class InfoFormState(
       val name: String = "",
       val category: String = "",
@@ -86,8 +88,9 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val orderNumber: Int = 1,
     val steps: List<StepWithIngredients> = emptyList(),
     val unsavedChanges: Boolean = false,
-    val newChapter: Boolean = true
   ) {
+    val isNewChapter: Boolean = formState.name.isEmpty()
+
     data class ChapterFormState(
       val name: String = "",
     )
@@ -108,7 +111,6 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
           ),
           orderNumber = chapter.value.orderNumber,
           steps = chapter.steps,
-          newChapter = chapter.value.name.isEmpty()
         )
       }
     }
@@ -120,16 +122,22 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val orderNumber: Int = 1,
     val ingredients: List<Ingredient> = emptyList(),
     val unsavedChanges: Boolean = false,
-    val newStep: Boolean = true
   ) {
+    val isNewStep: Boolean = formState.description.isEmpty()
+
     data class StepFormState(
       val description: String = "",
+      val timerMinutes: Int? = null
     )
 
     val canBeSaved : Boolean
       get() = formState.description.isNotEmpty()
 
-    private fun toStep(): Step = Step(id, orderNumber, formState.description)
+    private fun toStep(): Step = Step(
+      id = id,
+      orderNumber = orderNumber,
+      description = formState.description,
+      timerMinutes = if(formState.timerMinutes == 0) null else formState.timerMinutes)
     fun toStepWithIngredients(): StepWithIngredients = StepWithIngredients(toStep(), ingredients)
 
     companion object {
@@ -138,10 +146,10 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
           id = step.value.id,
           formState = StepFormState(
             description = step.value.description,
+            timerMinutes = step.value.timerMinutes
           ),
           orderNumber = step.value.orderNumber,
           ingredients = step.ingredients,
-          newStep = step.value.description.isEmpty()
         )
       }
     }
@@ -152,8 +160,9 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val index: Int = -1,
     val formState: IngredientFormState = IngredientFormState(),
     val unsavedChanges: Boolean = false,
-    val newIngredient: Boolean = true
   ) {
+    val isNewIngredient: Boolean = formState.name.isEmpty()
+
     data class IngredientFormState(
       val name: String = "",
       val amount: Float? = null,
@@ -175,8 +184,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             name = ingredient.name,
             amount = ingredient.amount,
             unit = ingredient.unit
-          ),
-          newIngredient = ingredient.name.isEmpty()
+          )
         )
       }
     }
@@ -361,7 +369,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       chapters[to] = chapters[from].also { chapters[from] = chapters[to] }
     }
 
-    _infoUiState.update { s -> s.copy(chapters = chapters) }
+    _infoUiState.update { s -> s.copy(chapters = chapters, unsavedChanges = true) }
   }
 
   fun swapStepPositions(from: Int, to: Int) {
@@ -371,7 +379,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       steps[to] = steps[from].also { steps[from] = steps[to] }
     }
 
-    _chapterUiState.update { s -> s.copy(steps = steps) }
+    _chapterUiState.update { s -> s.copy(steps = steps, unsavedChanges = true) }
   }
 
   fun swapIngredientPositions(from: Int, to: Int) {
@@ -381,6 +389,6 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       ingredients[to] = ingredients[from].also { ingredients[from] = ingredients[to] }
     }
 
-    _stepUiState.update { s -> s.copy(ingredients = ingredients) }
+    _stepUiState.update { s -> s.copy(ingredients = ingredients, unsavedChanges = true) }
   }
 }

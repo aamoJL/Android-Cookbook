@@ -14,7 +14,7 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
-import com.aamo.cookbook.ui.screen.RecipeScreenContent
+import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription

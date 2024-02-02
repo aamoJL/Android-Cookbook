@@ -53,6 +53,7 @@ data class Step(
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "description") val description: String = "",
   @ColumnInfo(name = "chapterId") val chapterId: Int = 0,
+  @ColumnInfo(name = "timerMinutes") val timerMinutes: Int? = null,
 ){
   /**
    * Returns the description as a string that ends with ':' or '.',

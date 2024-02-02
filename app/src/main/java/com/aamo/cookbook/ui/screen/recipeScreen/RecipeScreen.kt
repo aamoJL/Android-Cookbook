@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.screen
+package com.aamo.cookbook.ui.screen.recipeScreen
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -18,7 +18,6 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
@@ -26,15 +25,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -56,7 +51,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -65,11 +59,9 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.SnackbarProperties
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.ui.components.BasicTopAppBar
-import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
-import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
@@ -239,7 +231,8 @@ fun RecipeScreenContent(
                   servingsState = servingsState,
                   onProgressChange = { stepIndex, value ->
                     onProgressChange(chapterIndex, stepIndex, value)
-                  }
+                  },
+                  timerTitle = summaryPageUiState.recipeName
                 )
               }
 
@@ -355,152 +348,7 @@ private fun PageIndicatorItem(
 }
 
 @Composable
-private fun SummaryPage(
-  uiState: RecipeScreenViewModel.SummaryPageUiState,
-  servingsState: RecipeScreenViewModel.ServingsState,
-  onServingsCountChange: (count: Int) -> Unit,
-  ) {
-  Column(modifier = Modifier
-    .fillMaxSize()
-    .padding(8.dp)
-  ) {
-    Row(verticalAlignment = Alignment.Bottom) {
-      Text(
-        text = stringResource(R.string.page_title_ingredients),
-        fontFamily = Handwritten,
-        style = MaterialTheme.typography.headlineLarge,
-        modifier = Modifier
-          .weight(1f)
-          .padding(vertical = 4.dp)
-      )
-      CountInput(
-        value = servingsState.current,
-        label = when (servingsState.multiplier) {
-          1f -> stringResource(R.string.input_title_servings)
-          else -> "${stringResource(R.string.input_title_servings)} (${servingsState.multiplier.toStringWithoutZero(1)}x)"
-        },
-        onValueChange = {
-          onServingsCountChange(it)
-        },
-        minValue = 1,
-      )
-    }
-
-    Column(modifier = Modifier) {
-      uiState.chaptersWithIngredients.forEach { chapterIngredientPair ->
-        Box(modifier = Modifier.padding(vertical = 4.dp)) {
-          Column(modifier = Modifier.padding(vertical = 8.dp)) {
-            Text(
-              text = chapterIngredientPair.first,
-              style = MaterialTheme.typography.titleLarge,
-              fontFamily = Handwritten,
-              modifier = Modifier.padding(vertical = 4.dp)
-            )
-            Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-              IngredientList(
-                ingredients = chapterIngredientPair.second,
-                servingsMultiplier = servingsState.multiplier
-              )
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-@Composable
-private fun CompletedPage() {
-  // TODO: completed page
-  // Remember to change string to resources!
-  Text(text = "Valmis!")
-}
-
-@Composable
-private fun ChapterPage(
-  uiState: RecipeScreenViewModel.ChapterPageUiState,
-  servingsState: RecipeScreenViewModel.ServingsState,
-  onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
-) {
-  Column(
-    modifier = Modifier
-      .padding(4.dp)
-      .fillMaxSize()
-  ) {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
-    ) {
-      Text(
-        text = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}",
-        fontFamily = Handwritten,
-        style = MaterialTheme.typography.headlineLarge,
-      )
-    }
-    for ((index, step) in uiState.chapter.steps.withIndex()) {
-      StepCheckBox(
-        headline = "${step.value.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
-        ingredients = step.ingredients.filter { it.stepId == step.value.id },
-        servingsMultiplier = servingsState.multiplier,
-        checked = uiState.progress.elementAtOrElse(index) { false },
-        onCheckedChange = { onProgressChange(index, it) })
-    }
-  }
-}
-
-@Composable
-private fun StepCheckBox(
-  headline: String,
-  ingredients: List<Ingredient>,
-  servingsMultiplier: Float,
-  checked: Boolean,
-  onCheckedChange: (checked: Boolean) -> Unit,
-  modifier: Modifier = Modifier
-) {
-  ListItem(
-    headlineContent = {
-      Text(
-        text = headline,
-        fontFamily = Handwritten,
-        fontWeight = FontWeight.Bold
-      )
-    },
-    supportingContent = if (ingredients.isNotEmpty()) {
-      {
-        Card(
-          shape = RoundedCornerShape(4.dp),
-          colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer),
-          modifier = Modifier.fillMaxWidth()
-        ){
-          IngredientList(
-            ingredients = ingredients,
-            servingsMultiplier = servingsMultiplier,
-            modifier = Modifier.padding(8.dp)
-          )
-        }
-      }
-    } else null,
-    leadingContent = {
-      Box(contentAlignment = Alignment.TopCenter, modifier = Modifier) {
-        Checkbox(checked = checked, onCheckedChange = null)
-      }
-    },
-    // OverlineContent needs to be { } if the supporting content is not null,
-    // otherwise the leadingContent will be aligned to center vertically.
-    overlineContent = if (ingredients.isNotEmpty()) {
-      { }
-    } else null,
-    modifier = modifier
-      .clickable { onCheckedChange(!checked) }
-      .testTag(Tags.PROGRESS_CHECKBOX.name)
-  )
-}
-
-@Composable
-private fun IngredientList(
+internal fun IngredientList(
   ingredients: List<Ingredient>,
   servingsMultiplier: Float,
   modifier: Modifier = Modifier

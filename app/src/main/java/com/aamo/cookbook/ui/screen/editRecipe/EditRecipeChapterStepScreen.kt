@@ -39,6 +39,7 @@ import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
+import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
@@ -100,7 +101,7 @@ fun EditRecipeChapterStepScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(when (uiState.newStep) {
+      BasicTopAppBar(when (uiState.isNewStep) {
         true -> stringResource(R.string.screen_title_new_step)
         else -> stringResource(R.string.screen_title_existing_step)
       }, onBack = {
@@ -154,6 +155,11 @@ private fun StepForm(
         imeAction = ImeAction.Done
       ),
       label = stringResource(R.string.textfield_step_description)
+    )
+    FormNumberField(
+      value = uiState.timerMinutes,
+      onValueChange = { onStateChange(uiState.copy(timerMinutes = it)) },
+      label = stringResource(R.string.textfield_step_timer)
     )
   }
 }

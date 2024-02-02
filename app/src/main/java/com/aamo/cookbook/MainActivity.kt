@@ -43,10 +43,10 @@ import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.screen.CategoriesScreen
-import com.aamo.cookbook.ui.screen.RecipeScreen
 import com.aamo.cookbook.ui.screen.RecipeSearchScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
+import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.viewModel.AppViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider

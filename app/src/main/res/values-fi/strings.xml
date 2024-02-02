@@ -62,4 +62,7 @@
     <string name="snackbar_recipe_added_to_favorites">Resepti lisätty suosikkeihin.</string>
     <string name="snackbar_recipe_removed_from_favorites">Resepti poistettu suosikeista.</string>
     <string name="snackbar_recipe_saved_successfully">Resepti tallennettu onnistuneesti.</string>
+    <string name="minutes_amount_abbreviation">%1$s m</string>
+    <string name="description_set_timer">Aseta ajastin</string>
+    <string name="textfield_step_timer">(Ajastin (minuuttia))</string>
 </resources>
