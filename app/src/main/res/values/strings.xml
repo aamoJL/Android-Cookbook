@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name" translatable="false">Cookbook</string>
     <string name="recipe_name_copy">%1$s - copy</string>
     <string name="other_category">Other</string>
     <string name="screen_title_categories">Choose a category</string>
