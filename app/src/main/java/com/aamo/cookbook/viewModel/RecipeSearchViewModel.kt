@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class RecipeSearchViewModel(recipeRepository: RecipeRepository) : ViewModel() {
-  private var _recipesStream = recipeRepository.getAllRecipesFlow()
+  private var _recipesStream = recipeRepository.getRecipesFlow()
 
   private var _searchWord = MutableStateFlow("")
   val searchWord = _searchWord.asStateFlow()

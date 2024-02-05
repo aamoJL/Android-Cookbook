@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.utility.Tags
@@ -39,18 +40,17 @@ import com.aamo.cookbook.utility.Tags
 @Composable
 fun RecipesScreen(
   title: String,
-  recipes: List<Recipe>,
+  recipes: List<RecipeWithFavoriteAndRating>,
   onSelectRecipe: (Recipe) -> Unit,
   onBack: () -> Unit,
   onSearch: () -> Unit,
   modifier: Modifier = Modifier,
-  favorites: List<Int> = emptyList(),
 ) {
-  val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.subCategory }.distinct()) }
+  val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.recipe.subCategory }.distinct()) }
   var filterValue by remember { mutableStateOf<String?>(null) }
   var filterPopUpOpen by remember { mutableStateOf(false) }
   val filteredRecipes by remember(filterValue, subCategories) { mutableStateOf(
-    if(filterValue == null) recipes else recipes.filter { it.subCategory == filterValue }
+    if(filterValue == null) recipes else recipes.filter { it.recipe.subCategory == filterValue }
   ) }
 
   Scaffold(
@@ -116,10 +116,11 @@ fun RecipesScreen(
       ) {
         items(filteredRecipes) { recipe ->
           RecipeCard(
-            recipe = recipe,
-            onClick = { onSelectRecipe(recipe) },
-            Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
-            isFavorite = favorites.contains(recipe.id)
+            recipe = recipe.recipe,
+            onClick = { onSelectRecipe(recipe.recipe) },
+            isFavorite = recipe.favorite != null,
+            rating = recipe.rating?.ratingOutOfFive ?: 0,
+            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
           )
         }
       }

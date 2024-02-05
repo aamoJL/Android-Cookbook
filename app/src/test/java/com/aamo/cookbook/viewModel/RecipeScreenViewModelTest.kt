@@ -1,8 +1,6 @@
 package com.aamo.cookbook.viewModel
 
-import androidx.lifecycle.SavedStateHandle
 import com.aamo.cookbook.MainDispatcherRule
-import com.aamo.cookbook.Screen
 import com.aamo.cookbook.database.repository.TestRecipeRepository
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -21,9 +19,8 @@ class RecipeScreenViewModelTest {
   @Before
   fun setup() = runTest {
     repository = TestRecipeRepository()
-    val savedState = SavedStateHandle(mapOf(Screen.Recipe.argumentName to recipeId))
-    viewModel = RecipeScreenViewModel(repository, savedState)
-    viewModel.init()
+    viewModel = RecipeScreenViewModel(repository)
+    viewModel.init(recipeId)
   }
 
   @Test

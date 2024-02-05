@@ -148,10 +148,7 @@ fun MainNavGraph(
     }
     composable(route = Screen.Recipes.getRoute()) {
       val category by appViewModel.selectedCategory.collectAsStateWithLifecycle()
-      val recipes by appViewModel.getRecipesByCategory(category).collectAsStateWithLifecycle(
-        initialValue = emptyList(),
-      )
-      val favorites by appViewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
+      val recipes by appViewModel.getRecipesWithFavoriteAndRatingByCategory(category).collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
 
@@ -163,11 +160,10 @@ fun MainNavGraph(
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        favorites = favorites.map { it.id }
       )
     }
     composable(route = Screen.Favorites.getRoute()) {
-      val favorites by appViewModel.getFavoriteRecipes().collectAsStateWithLifecycle(
+      val favorites by appViewModel.getRecipesWithFavoriteAndRatingByFavorite().collectAsStateWithLifecycle(
         initialValue = emptyList(),
       )
 
@@ -179,7 +175,6 @@ fun MainNavGraph(
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        favorites = favorites.map { it.id }
       )
     }
     composable(route = Screen.Search.getRoute()) {

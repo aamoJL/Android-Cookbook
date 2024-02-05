@@ -77,6 +77,7 @@ fun RecipeScreen(
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
   val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
+  val completedUiState by viewModel.completedPageUiStates.collectAsStateWithLifecycle()
   val servingsState by viewModel.servingsState.collectAsStateWithLifecycle()
   val favoriteState by viewModel.favoriteState.collectAsStateWithLifecycle()
   val context = LocalContext.current
@@ -84,6 +85,7 @@ fun RecipeScreen(
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
     chapterUiStates = chapterUiStates,
+    completedUiState = completedUiState,
     servingsState = servingsState,
     favoriteState = favoriteState,
     onBack = onBack,
@@ -102,6 +104,7 @@ fun RecipeScreen(
         )
       )
     },
+    onRatingChange = { viewModel.setRating(it) },
     modifier = modifier
   )
 }
@@ -111,6 +114,7 @@ fun RecipeScreen(
 fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
   chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  completedUiState: RecipeScreenViewModel.CompletedPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
   favoriteState: Boolean,
   modifier: Modifier = Modifier,
@@ -120,6 +124,7 @@ fun RecipeScreenContent(
   onProgressChange: (chapterIndex: Int, stepIndex: Int, value: Boolean) -> Unit,
   onServingsCountChange: (count: Int) -> Unit,
   onFavoriteChange: (Boolean) -> Unit,
+  onRatingChange: (Int) -> Unit,
 ) {
   val pageCount by rememberSaveable(chapterUiStates) {
     mutableIntStateOf(
@@ -236,7 +241,10 @@ fun RecipeScreenContent(
                 )
               }
 
-              else -> CompletedPage()
+              else -> CompletedPage(
+                uiState = completedUiState,
+                onRatingChange = onRatingChange
+              )
             }
           }
         }

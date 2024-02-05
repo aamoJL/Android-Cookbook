@@ -113,3 +113,19 @@ data class RecipeCategoryTuple(
   @ColumnInfo(name = "category") val category: String,
   @ColumnInfo(name = "subCategory") val subCategory: String
 )
+
+data class RecipeWithFavoriteAndRating(
+  @Embedded val recipe: Recipe,
+  @Relation(
+    entity = FavoriteRecipe::class,
+    parentColumn = "id",
+    entityColumn = "recipeId"
+  )
+  val favorite: FavoriteRecipe?,
+  @Relation(
+    entity = RecipeRating::class,
+    parentColumn = "id",
+    entityColumn = "recipeId"
+  )
+  val rating: RecipeRating?
+)

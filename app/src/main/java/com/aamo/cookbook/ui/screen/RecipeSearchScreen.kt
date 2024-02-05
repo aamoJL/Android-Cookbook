@@ -71,9 +71,7 @@ fun RecipeSearchScreen(
           RecipeCard(
             recipe = recipe,
             onClick = { onSelect(recipe.id) },
-            Modifier
-              .fillMaxWidth()
-              .testTag(Tags.RECIPE_ITEM.name)
+            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name)
           )
         }
       }

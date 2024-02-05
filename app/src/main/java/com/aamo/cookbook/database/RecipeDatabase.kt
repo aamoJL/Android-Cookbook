@@ -10,6 +10,7 @@ import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeRating
 import com.aamo.cookbook.model.Step
 
 @Database(
@@ -18,12 +19,14 @@ import com.aamo.cookbook.model.Step
     Chapter::class,
     Step::class,
     Ingredient::class,
-    FavoriteRecipe::class],
-  version = 3,
+    FavoriteRecipe::class,
+    RecipeRating::class],
+  version = 4,
   autoMigrations = [
     // Remember to update version, when adding migrations
     AutoMigration(from = 1, to = 2),
-    AutoMigration(from = 2, to = 3)]
+    AutoMigration(from = 2, to = 3),
+    AutoMigration(from = 3, to = 4)]
 )
 abstract class RecipeDatabase : RoomDatabase() {
   abstract fun recipeDao(): RecipeDao

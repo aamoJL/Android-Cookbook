@@ -12,7 +12,9 @@ import com.aamo.cookbook.model.FullFavoriteRecipe
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeCategoryTuple
+import com.aamo.cookbook.model.RecipeRating
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.model.Step
 import kotlinx.coroutines.flow.Flow
 
@@ -108,15 +110,11 @@ interface RecipeDao {
   @Query("SELECT * FROM recipes WHERE id = :recipeId")
   suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients?
 
-  @Query("SELECT DISTINCT category FROM recipes ")
-  suspend fun getCategories(): List<String>
-
   @Query("SELECT DISTINCT category, subCategory FROM recipes")
   suspend fun getCategoriesWithSubcategories(): List<RecipeCategoryTuple>
 
-  @Transaction
-  @Query("SELECT * FROM favoriteRecipes")
-  fun getFavoriteRecipesFlow(): Flow<List<FullFavoriteRecipe>>
+  @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
+  suspend fun getRecipeRatingById(recipeId: Int): RecipeRating?
 
   @Insert
   suspend fun addRecipeToFavorites(value: FavoriteRecipe)
@@ -126,5 +124,15 @@ interface RecipeDao {
 
   @Transaction
   @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
-  suspend fun getFavoriteRecipe(recipeId: Int): FullFavoriteRecipe?
+  suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
+
+  @Transaction
+  @Query("SELECT * FROM recipes ORDER BY name ASC")
+  fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithFavoriteAndRating>>
+
+  @Upsert
+  suspend fun upsertRecipeRating(recipeRating: RecipeRating)
+
+  @Delete
+  suspend fun deleteRecipeRating(recipeRating: RecipeRating)
 }

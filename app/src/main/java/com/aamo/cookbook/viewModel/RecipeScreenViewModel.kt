@@ -22,30 +22,38 @@ class RecipeScreenViewModel(
    */
   fun init(recipeId: Int) {
     viewModelScope.launch {
-      recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
-        ?: RecipeWithChaptersStepsAndIngredients(Recipe())
-      _favoriteState.update {
-        recipeRepository.getFavoriteRecipe(recipe.value.id) != null
-      }
-    }.invokeOnCompletion {
-      _chapterPageUiStates.update {
-        recipe.chapters.map { chapter ->
-          ChapterPageUiState.fromChapter(chapter)
+      launch {
+        val recipeWithFavoriteAndRating =
+          recipeRepository.getRecipeWithFavoriteAndRating(recipeId)
+        _favoriteState.update {
+          recipeWithFavoriteAndRating?.favorite != null
+        }
+        _completedPageUiState.update { s ->
+          s.copy(fiveStarRating = recipeWithFavoriteAndRating?.rating?.ratingOutOfFive ?: 0)
         }
       }
-      _summaryPageUiStates.update {
-        SummaryPageUiState(
-          recipeName = recipe.value.name,
-          chaptersWithIngredients = recipe.chapters.map { chapter ->
-            Pair(
-              chapter.value.name,
-              chapter.steps.flatMap { it.ingredients }
-            )
+      launch {
+        recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
+          ?: RecipeWithChaptersStepsAndIngredients(Recipe())
+        _chapterPageUiStates.update {
+          recipe.chapters.map { chapter ->
+            ChapterPageUiState.fromChapter(chapter)
           }
-        )
-      }
-      _servingsState.update {
-        ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
+        }
+        _summaryPageUiStates.update {
+          SummaryPageUiState(
+            recipeName = recipe.value.name,
+            chaptersWithIngredients = recipe.chapters.map { chapter ->
+              Pair(
+                chapter.value.name,
+                chapter.steps.flatMap { it.ingredients }
+              )
+            }
+          )
+        }
+        _servingsState.update {
+          ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
+        }
       }
     }
   }
@@ -69,6 +77,10 @@ class RecipeScreenViewModel(
     }
   }
 
+  data class CompletedPageUiState(
+    val fiveStarRating: Int = 0,
+  )
+
   data class ServingsState(
     val baseline: Int = 1,
     val current: Int = 1,
@@ -84,6 +96,9 @@ class RecipeScreenViewModel(
 
   private val _chapterPageUiStates = MutableStateFlow<List<ChapterPageUiState>>(emptyList())
   val chapterPageUiStates = _chapterPageUiStates.asStateFlow()
+
+  private val _completedPageUiState = MutableStateFlow(CompletedPageUiState())
+  val completedPageUiStates = _completedPageUiState.asStateFlow()
 
   private val _servingsState = MutableStateFlow(ServingsState())
   val servingsState = _servingsState.asStateFlow()
@@ -109,10 +124,25 @@ class RecipeScreenViewModel(
 
   fun setFavoriteState(value: Boolean) {
     viewModelScope.launch {
-      if(value) recipeRepository.addRecipeToFavorites(recipe.value.id)
+      if (value) recipeRepository.addRecipeToFavorites(recipe.value.id)
       else recipeRepository.removeRecipeFromFavorites(recipe.value.id)
 
       _favoriteState.update { value }
+    }
+  }
+
+  fun setRating(value: Int) {
+    if (value != _completedPageUiState.value.fiveStarRating) {
+      viewModelScope.launch {
+        recipeRepository.upsertRecipeRating(recipe.value.id, value)
+        _completedPageUiState.update { s -> s.copy(fiveStarRating = value) }
+      }
+    }
+    else {
+      viewModelScope.launch {
+        recipeRepository.deleteRecipeRating(recipe.value.id)
+        _completedPageUiState.update { s -> s.copy(fiveStarRating = 0) }
+      }
     }
   }
 }
