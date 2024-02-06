@@ -46,6 +46,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       val category: String = "",
       val subCategory: String = "",
       val servings: Int? = 1,
+      val note: String = ""
     )
 
     val canBeSaved: Boolean
@@ -59,7 +60,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
         name = formState.name,
         category = formState.category,
         subCategory = formState.subCategory,
-        servings = formState.servings ?: 1
+        servings = formState.servings ?: 1,
+        note = formState.note
       )
     }
 
@@ -75,6 +77,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             category = recipe.value.category,
             subCategory = recipe.value.subCategory,
             servings = recipe.value.servings,
+            note = recipe.value.note
           ),
           chapters = recipe.chapters
         )
@@ -93,12 +96,19 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
     data class ChapterFormState(
       val name: String = "",
+      val note: String = ""
     )
 
     val canBeSaved: Boolean
       get() = formState.name.isNotEmpty() && steps.isNotEmpty()
 
-    private fun toChapter(): Chapter = Chapter(id, orderNumber, formState.name)
+    private fun toChapter(): Chapter = Chapter(
+      id = id,
+      orderNumber = orderNumber,
+      name = formState.name,
+      note = formState.note
+    )
+
     fun toChapterWithStepsAndIngredients(): ChapterWithStepsAndIngredients =
       ChapterWithStepsAndIngredients(toChapter(), steps)
 
@@ -107,7 +117,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
         return ChapterScreenUiState(
           id = chapter.value.id,
           formState = ChapterFormState(
-            name = chapter.value.name
+            name = chapter.value.name,
+            note = chapter.value.note
           ),
           orderNumber = chapter.value.orderNumber,
           steps = chapter.steps,
@@ -127,7 +138,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
     data class StepFormState(
       val description: String = "",
-      val timerMinutes: Int? = null
+      val timerMinutes: Int? = null,
+      val note: String = ""
     )
 
     val canBeSaved : Boolean
@@ -137,7 +149,10 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       id = id,
       orderNumber = orderNumber,
       description = formState.description,
-      timerMinutes = if(formState.timerMinutes == 0) null else formState.timerMinutes)
+      timerMinutes = if(formState.timerMinutes == 0) null else formState.timerMinutes,
+      note = formState.note
+    )
+
     fun toStepWithIngredients(): StepWithIngredients = StepWithIngredients(toStep(), ingredients)
 
     companion object {
@@ -146,7 +161,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
           id = step.value.id,
           formState = StepFormState(
             description = step.value.description,
-            timerMinutes = step.value.timerMinutes
+            timerMinutes = step.value.timerMinutes,
+            note = step.value.note
           ),
           orderNumber = step.value.orderNumber,
           ingredients = step.ingredients,

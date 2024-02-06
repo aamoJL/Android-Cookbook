@@ -3,12 +3,15 @@ package com.aamo.cookbook.ui.screen.recipeScreen
 import android.content.Intent
 import android.provider.AlarmClock
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -28,6 +31,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.ui.components.NoteCard
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
@@ -44,10 +48,13 @@ internal fun ChapterPage(
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit,
   timerTitle: String = ""
 ) {
+  val scrollState = rememberScrollState()
+
   Column(
     modifier = Modifier
       .padding(4.dp)
       .fillMaxSize()
+      .verticalScroll(scrollState)
   ) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
@@ -59,8 +66,14 @@ internal fun ChapterPage(
         fontFamily = Handwritten,
         style = MaterialTheme.typography.headlineLarge,
       )
+      if(uiState.chapter.value.note.isNotEmpty()) {
+        NoteCard(
+          text = uiState.chapter.value.note,
+          modifier = Modifier.fillMaxWidth()
+        )
+      }
     }
-    for ((index, step) in uiState.chapter.steps.withIndex()) {
+    uiState.chapter.steps.forEachIndexed { index, step ->
       StepCheckBox(
         headline = "${step.value.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
         ingredients = step.ingredients.filter { it.stepId == step.value.id },
@@ -72,7 +85,8 @@ internal fun ChapterPage(
             timerTitle,
             step.value.timerMinutes
           )
-        }
+        },
+        note = step.value.note
       )
     }
   }
@@ -86,7 +100,8 @@ private fun StepCheckBox(
   checked: Boolean,
   onCheckedChange: (checked: Boolean) -> Unit,
   modifier: Modifier = Modifier,
-  timerProperties: CheckBoxTimerProperties? = null
+  timerProperties: CheckBoxTimerProperties? = null,
+  note: String = ""
 ) {
   val context = LocalContext.current
   ListItem(
@@ -99,19 +114,27 @@ private fun StepCheckBox(
     },
     supportingContent = if (ingredients.isNotEmpty()) {
       {
-        Card(
-          shape = RoundedCornerShape(4.dp),
-          colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-          ),
-          modifier = Modifier.fillMaxWidth()
-        ) {
-          IngredientList(
-            ingredients = ingredients,
-            servingsMultiplier = servingsMultiplier,
-            modifier = Modifier.padding(8.dp)
-          )
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          if(note.isNotEmpty()) {
+            NoteCard(
+              text = note,
+              modifier = Modifier.fillMaxWidth()
+            )
+          }
+          Card(
+            shape = RoundedCornerShape(4.dp),
+            colors = CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ),
+            modifier = Modifier.fillMaxWidth()
+          ) {
+            IngredientList(
+              ingredients = ingredients,
+              servingsMultiplier = servingsMultiplier,
+              modifier = Modifier.padding(8.dp)
+            )
+          }
         }
       }
     } else null,

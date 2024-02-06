@@ -46,6 +46,7 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
@@ -187,10 +188,15 @@ fun ChapterForm(
     FormTextField(
       value = uiState.name,
       onValueChange = { onFormStateChange(uiState.copy(name = it)) },
+      label = stringResource(R.string.textfield_chapter_name)
+    )
+    FormTextField(
+      value = uiState.note,
+      onValueChange = { onFormStateChange(uiState.copy(note = it))},
+      label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
       keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
         imeAction = ImeAction.Done
       ),
-      label = stringResource(R.string.textfield_chapter_name)
     )
   }
 }

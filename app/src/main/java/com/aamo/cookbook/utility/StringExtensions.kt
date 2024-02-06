@@ -24,3 +24,8 @@ fun String.trimFirst(vararg chars: Char, ignoreCase: Boolean = true): String {
   }
   return this
 }
+
+/**
+ * Returns the string formatted as a label for an optional input field
+ */
+fun String.asOptionalLabel(): String = "(${this})"

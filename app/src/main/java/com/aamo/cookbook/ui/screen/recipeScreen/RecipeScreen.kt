@@ -179,13 +179,16 @@ fun RecipeScreenContent(
             Divider()
             DropdownMenuItem(
               leadingIcon = {
-                if(favoriteState){
-                  Icon(painter = painterResource(R.drawable.baseline_heart_broken_24),
-                    contentDescription = null)
-                }
-                else{
-                  Icon(imageVector = Icons.Filled.Favorite,
-                    contentDescription = null)
+                if (favoriteState) {
+                  Icon(
+                    painter = painterResource(R.drawable.baseline_heart_broken_24),
+                    contentDescription = null
+                  )
+                } else {
+                  Icon(
+                    imageVector = Icons.Filled.Favorite,
+                    contentDescription = null
+                  )
                 }
               },
               text = {
@@ -205,11 +208,7 @@ fun RecipeScreenContent(
       }
     }
   ) { paddingValues ->
-    Surface(
-      modifier = modifier
-        .fillMaxSize()
-        .padding(paddingValues)
-    ) {
+    Surface(modifier = modifier.fillMaxSize().padding(paddingValues)) {
       Column {
         Column(modifier = Modifier.weight(1f, true)) {
           HorizontalPager(
@@ -227,6 +226,7 @@ fun RecipeScreenContent(
                 servingsState = servingsState,
                 onServingsCountChange = onServingsCountChange,
               )
+
               in (1..chapterUiStates.size) -> {
                 val chapterIndex = pageIndex - 1
                 val uiState = chapterUiStates.elementAt(chapterIndex)
@@ -249,9 +249,7 @@ fun RecipeScreenContent(
           }
         }
         Row(
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(16.dp),
+          modifier = Modifier.fillMaxWidth().padding(16.dp),
           horizontalArrangement = Arrangement.Center
         ) {
           val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
@@ -338,9 +336,7 @@ private fun PageIndicatorItem(
         imageVector = icon,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier
-          .size(24.dp)
-          .align(Alignment.Center)
+        modifier = Modifier.size(24.dp).align(Alignment.Center)
       )
     }
     if (selected) {
@@ -362,7 +358,7 @@ internal fun IngredientList(
   modifier: Modifier = Modifier
 ) {
   Row(modifier = modifier) {
-    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+    if(ingredients.any { it.amount != 0f }) Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       ingredients.forEach {
         Text(
           text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
@@ -373,7 +369,7 @@ internal fun IngredientList(
         )
       }
     }
-    Column(
+    if(ingredients.any { it.unit.isNotEmpty() }) Column(
       modifier = Modifier
         .defaultMinSize(minWidth = 40.dp)
         .padding(horizontal = 8.dp)

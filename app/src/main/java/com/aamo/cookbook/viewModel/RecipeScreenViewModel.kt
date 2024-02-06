@@ -43,6 +43,7 @@ class RecipeScreenViewModel(
         _summaryPageUiStates.update {
           SummaryPageUiState(
             recipeName = recipe.value.name,
+            recipeNote = recipe.value.note,
             chaptersWithIngredients = recipe.chapters.map { chapter ->
               Pair(
                 chapter.value.name,
@@ -60,18 +61,20 @@ class RecipeScreenViewModel(
 
   data class SummaryPageUiState(
     val recipeName: String = "",
+    val recipeNote: String = "",
     val chaptersWithIngredients: List<Pair<String, List<Ingredient>>> = emptyList()
   )
 
   data class ChapterPageUiState(
     val chapter: ChapterWithStepsAndIngredients,
-    val progress: List<Boolean>
+    val progress: List<Boolean>,
+    val chapterNote: String = "",
   ) {
     companion object {
       fun fromChapter(chapter: ChapterWithStepsAndIngredients): ChapterPageUiState {
         return ChapterPageUiState(
           chapter = chapter,
-          progress = chapter.steps.map { false }
+          progress = chapter.steps.map { false },
         )
       }
     }

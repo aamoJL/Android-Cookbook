@@ -37,7 +37,7 @@
     <string name="textfield_recipe_name">Name</string>
     <string name="textfield_recipe_servings">Servings</string>
     <string name="textfield_recipe_category">Category</string>
-    <string name="textfield_recipe_subcategory">(Subcategory)</string>
+    <string name="textfield_recipe_subcategory">Subcategory</string>
     <string name="textfield_chapter_name">Name</string>
     <string name="textfield_step_description">Description</string>
     <string name="textfield_ingredient_name">Name</string>
@@ -64,5 +64,6 @@
     <string name="snackbar_recipe_saved_successfully">Recipe saved successfully.</string>
     <string name="minutes_amount_abbreviation">%1$s m</string>
     <string name="description_set_timer">Set timer</string>
-    <string name="textfield_step_timer">(Timer (minutes))</string>
+    <string name="textfield_step_timer">Timer (minutes)</string>
+    <string name="textfield_label_note">Note</string>
 </resources>

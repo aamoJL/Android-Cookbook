@@ -12,8 +12,9 @@ data class Recipe(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "category") val category: String = "",
-  @ColumnInfo(name = "subCategory") val subCategory: String = "",
-  @ColumnInfo(name = "servings") val servings: Int = 1,
+  @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = "",
+  @ColumnInfo(name = "servings", defaultValue = "1") val servings: Int = 1,
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
 )
 
 @Entity(tableName = "recipeChapters",
@@ -34,6 +35,7 @@ data class Chapter(
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "recipeId") val recipeId: Int = 0,
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
 )
 
 @Entity(tableName = "chapterSteps",
@@ -53,7 +55,8 @@ data class Step(
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "description") val description: String = "",
   @ColumnInfo(name = "chapterId") val chapterId: Int = 0,
-  @ColumnInfo(name = "timerMinutes") val timerMinutes: Int? = null,
+  @ColumnInfo(name = "timerMinutes", defaultValue = "NULL") val timerMinutes: Int? = null,
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
 ){
   /**
    * Returns the description as a string that ends with ':' or '.',
@@ -74,8 +77,8 @@ data class Step(
 data class Ingredient(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
-  @ColumnInfo(name = "amount") val amount: Float = 0f,
-  @ColumnInfo(name = "unit") val unit: String = "",
+  @ColumnInfo(name = "amount", defaultValue = "0") val amount: Float = 0f,
+  @ColumnInfo(name = "unit", defaultValue = "") val unit: String = "",
   @ColumnInfo(name = "stepId") val stepId: Int = 0,
 )
 

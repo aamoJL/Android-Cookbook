@@ -45,6 +45,7 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
@@ -151,15 +152,20 @@ private fun StepForm(
     FormTextField(
       value = uiState.description,
       onValueChange = { onStateChange(uiState.copy(description = it)) },
-      keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
-        imeAction = ImeAction.Done
-      ),
       label = stringResource(R.string.textfield_step_description)
     )
     FormNumberField(
       value = uiState.timerMinutes,
       onValueChange = { onStateChange(uiState.copy(timerMinutes = it)) },
-      label = stringResource(R.string.textfield_step_timer)
+      label = stringResource(R.string.textfield_step_timer).asOptionalLabel()
+    )
+    FormTextField(
+      value = uiState.note,
+      onValueChange = { onStateChange(uiState.copy(note = it))},
+      label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
+      keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
+        imeAction = ImeAction.Done
+      ),
     )
   }
 }

@@ -37,7 +37,7 @@
     <string name="textfield_recipe_name">Nimi</string>
     <string name="textfield_recipe_servings">Annokset</string>
     <string name="textfield_recipe_category">Kategoria</string>
-    <string name="textfield_recipe_subcategory">(Alakategoria)</string>
+    <string name="textfield_recipe_subcategory">Alakategoria</string>
     <string name="textfield_chapter_name">Nimi</string>
     <string name="textfield_step_description">Kuvaus</string>
     <string name="textfield_ingredient_name">Nimi</string>
@@ -64,5 +64,6 @@
     <string name="snackbar_recipe_saved_successfully">Resepti tallennettu onnistuneesti.</string>
     <string name="minutes_amount_abbreviation">%1$s m</string>
     <string name="description_set_timer">Aseta ajastin</string>
-    <string name="textfield_step_timer">(Ajastin (minuuttia))</string>
+    <string name="textfield_step_timer">Ajastin (minuuttia)</string>
+    <string name="textfield_label_note">Huomautus</string>
 </resources>

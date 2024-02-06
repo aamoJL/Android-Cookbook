@@ -53,6 +53,7 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
@@ -220,11 +221,16 @@ private fun InfoForm(
       FormTextFieldWithOptions(
         value = uiState.subCategory,
         onValueChange = { onStateChange(uiState.copy(subCategory = it)) },
-        label = stringResource(R.string.textfield_recipe_subcategory),
+        label = stringResource(R.string.textfield_recipe_subcategory).asOptionalLabel(),
+        options = subCategorySuggestions
+      )
+      FormTextField(
+        value = uiState.note,
+        onValueChange = { onStateChange(uiState.copy(note = it))},
+        label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
         keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
           imeAction = ImeAction.Done
         ),
-        options = subCategorySuggestions
       )
     }
   }
