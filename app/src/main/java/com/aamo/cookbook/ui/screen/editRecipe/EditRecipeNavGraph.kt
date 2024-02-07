@@ -151,7 +151,8 @@ fun NavGraphBuilder.editRecipeGraph(
         onEditIngredient = { ingredient ->
           editRecipeViewModel.initIngredientUiState(
             ingredient = ingredient ?: Ingredient(),
-            index = editRecipeViewModel.stepUiState.value.ingredients.indexOf(ingredient)
+            index = editRecipeViewModel.stepUiState.value.ingredients
+              .indexOfFirst { pair -> pair.second == ingredient }
               .let { index ->
                 if (index == -1) editRecipeViewModel.stepUiState.value.ingredients.size
                 else index

@@ -49,6 +49,7 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @Composable
 fun EditRecipeChapterScreen(
@@ -141,11 +142,11 @@ fun EditRecipeChapterScreenContent(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun StepList(
-  steps: List<StepWithIngredients>,
+  steps: List<Pair<UUID, StepWithIngredients>>,
   onEditStep: (StepWithIngredients?) -> Unit,
   modifier: Modifier = Modifier,
   onSwap: (from: Int, to: Int) -> Unit,
-  onDeleteStep: (StepWithIngredients) -> Boolean
+  onDeleteStep: (StepWithIngredients) -> Boolean,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_steps),
@@ -155,14 +156,14 @@ private fun StepList(
     LazyColumn {
       itemsIndexed(
         items = steps,
-        key = { _, step -> step.value.copy(orderNumber = 0).hashCode() }
-      ) { index, step ->
+        key = { _, pair -> pair.first }
+      ) { index, pair ->
         Column(modifier = Modifier.animateItemPlacement()) {
           StepListItem(
-            step = step,
+            step = pair.second,
             stepNumber = index + 1,
-            onClick = { onEditStep(step) },
-            onDismiss = { onDeleteStep(step) },
+            onClick = { onEditStep(pair.second) },
+            onDismiss = { onDeleteStep(pair.second) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,

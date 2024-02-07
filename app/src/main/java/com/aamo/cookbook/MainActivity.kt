@@ -160,6 +160,7 @@ fun MainNavGraph(
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
+        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) }
       )
     }
     composable(route = Screen.Favorites.getRoute()) {
@@ -175,6 +176,7 @@ fun MainNavGraph(
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
+        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) }
       )
     }
     composable(route = Screen.Search.getRoute()) {

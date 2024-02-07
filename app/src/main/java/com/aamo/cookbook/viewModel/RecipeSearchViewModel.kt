@@ -11,13 +11,13 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 
 class RecipeSearchViewModel(recipeRepository: RecipeRepository) : ViewModel() {
-  private var _recipesStream = recipeRepository.getRecipesFlow()
+  private var _recipesStream = recipeRepository.getRecipesWithFavoriteAndRatingFlow()
 
   private var _searchWord = MutableStateFlow("")
   val searchWord = _searchWord.asStateFlow()
 
   val validRecipes = combine(_recipesStream, _searchWord) { recipes, word ->
-    recipes.filter { it.name.startsWith(word, true) }
+    recipes.filter { it.value.name.startsWith(word, true) }
   }.stateIn(
     scope = viewModelScope,
     started = SharingStarted.Eagerly,

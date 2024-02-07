@@ -69,9 +69,11 @@ fun RecipeSearchScreen(
       ) {
         items(recipes) { recipe ->
           RecipeCard(
-            recipe = recipe,
-            onClick = { onSelect(recipe.id) },
-            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name)
+            recipe = recipe.value,
+            onClick = { onSelect(recipe.value.id) },
+            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
+            isFavorite = recipe.favorite != null,
+            rating = recipe.rating?.ratingOutOfFive ?: 0
           )
         }
       }

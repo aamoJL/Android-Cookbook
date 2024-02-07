@@ -42,7 +42,7 @@ class TestRecipeRepository : RecipeRepository {
     return flow {
       emit(recipes.map { recipe ->
         RecipeWithFavoriteAndRating(
-          recipe = recipe.value,
+          value = recipe.value,
           favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
           rating = ratings.firstOrNull { it.recipeId == recipe.value.id }
         )
@@ -53,7 +53,7 @@ class TestRecipeRepository : RecipeRepository {
   override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithFavoriteAndRating? {
     return recipes.firstOrNull { it.value.id == recipeId }?.let { recipe ->
       RecipeWithFavoriteAndRating(
-        recipe = recipe.value,
+        value = recipe.value,
         favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
         rating = ratings.firstOrNull { it.recipeId == recipe.value.id }
       )

@@ -56,6 +56,7 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @Composable
 fun EditRecipeScreen(
@@ -239,11 +240,11 @@ private fun InfoForm(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun ChapterList(
-  chapters: List<ChapterWithStepsAndIngredients>,
+  chapters: List<Pair<UUID, ChapterWithStepsAndIngredients>>,
   onEditChapter: (ChapterWithStepsAndIngredients?) -> Unit,
-  onDeleteChapter: (ChapterWithStepsAndIngredients) -> (Boolean),
+  onDeleteChapter: (ChapterWithStepsAndIngredients) -> Boolean,
   onSwap: (from: Int, to: Int) -> Unit,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_chapters),
@@ -253,14 +254,14 @@ private fun ChapterList(
     LazyColumn {
       itemsIndexed(
         items = chapters,
-        key = { _, chapter -> chapter.value.copy(orderNumber = 0).hashCode() }
-      ) { index, chapter ->
+        key = { _, pair -> pair.first }
+      ) { index, pair ->
         Column(modifier = Modifier.animateItemPlacement()) {
           ChapterListItem(
-            chapter = chapter,
+            chapter = pair.second,
             chapterNumber = index + 1,
-            onClick = { onEditChapter(chapter) },
-            onDismiss = { onDeleteChapter(chapter) },
+            onClick = { onEditChapter(pair.second) },
+            onDismiss = { onDeleteChapter(pair.second) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,

@@ -48,6 +48,7 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import java.util.UUID
 
 @Composable
 fun EditRecipeChapterStepScreen(
@@ -173,7 +174,7 @@ private fun StepForm(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun IngredientList(
-  ingredients: List<Ingredient>,
+  ingredients: List<Pair<UUID, Ingredient>>,
   onEditIngredient: (Ingredient?) -> Unit,
   onDeleteIngredient: (Ingredient) -> Boolean,
   onSwap: (from: Int, to: Int) -> Unit,
@@ -187,13 +188,13 @@ private fun IngredientList(
     LazyColumn {
       itemsIndexed(
         items = ingredients,
-        key = { _, ingredient -> ingredient.hashCode() },
-      ) { index, ingredient ->
+        key = { _, pair -> pair.first },
+      ) { index, pair ->
         Column(modifier = Modifier.animateItemPlacement()) {
           IngredientListItem(
-            ingredient = ingredient,
-            onClick = { onEditIngredient(ingredient) },
-            onDismiss = { onDeleteIngredient(ingredient) },
+            ingredient = pair.second,
+            onClick = { onEditIngredient(pair.second) },
+            onDismiss = { onDeleteIngredient(pair.second) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,

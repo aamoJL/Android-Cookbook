@@ -118,7 +118,7 @@ data class RecipeCategoryTuple(
 )
 
 data class RecipeWithFavoriteAndRating(
-  @Embedded val recipe: Recipe,
+  @Embedded val value: Recipe,
   @Relation(
     entity = FavoriteRecipe::class,
     parentColumn = "id",

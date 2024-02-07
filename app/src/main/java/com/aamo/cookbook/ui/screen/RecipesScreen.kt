@@ -9,6 +9,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
@@ -44,13 +45,14 @@ fun RecipesScreen(
   onSelectRecipe: (Recipe) -> Unit,
   onBack: () -> Unit,
   onSearch: () -> Unit,
+  onAdd: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.recipe.subCategory }.distinct()) }
+  val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.value.subCategory }.distinct()) }
   var filterValue by remember { mutableStateOf<String?>(null) }
   var filterPopUpOpen by remember { mutableStateOf(false) }
   val filteredRecipes by remember(filterValue, subCategories) { mutableStateOf(
-    if(filterValue == null) recipes else recipes.filter { it.recipe.subCategory == filterValue }
+    if(filterValue == null) recipes else recipes.filter { it.value.subCategory == filterValue }
   ) }
 
   Scaffold(
@@ -62,6 +64,12 @@ fun RecipesScreen(
             Icon(
               imageVector = Icons.Filled.Search,
               contentDescription = stringResource(R.string.description_search)
+            )
+          }
+          IconButton(onClick = onAdd) {
+            Icon(
+              imageVector = Icons.Filled.Add,
+              contentDescription = stringResource(R.string.description_add_new_recipe)
             )
           }
         },
@@ -116,8 +124,8 @@ fun RecipesScreen(
       ) {
         items(filteredRecipes) { recipe ->
           RecipeCard(
-            recipe = recipe.recipe,
-            onClick = { onSelectRecipe(recipe.recipe) },
+            recipe = recipe.value,
+            onClick = { onSelectRecipe(recipe.value) },
             isFavorite = recipe.favorite != null,
             rating = recipe.rating?.ratingOutOfFive ?: 0,
             modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),

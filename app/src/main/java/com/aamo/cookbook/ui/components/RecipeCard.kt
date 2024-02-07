@@ -60,7 +60,7 @@ fun RecipeCard(
             rating = rating,
             modifier = Modifier
               .align(Alignment.BottomStart)
-              .padding(vertical = 4.dp)
+              .padding(vertical = 4.dp, horizontal = 4.dp)
           )
         }
       }

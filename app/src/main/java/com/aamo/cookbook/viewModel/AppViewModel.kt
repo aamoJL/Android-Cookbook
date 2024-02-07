@@ -24,7 +24,7 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
 
   fun getRecipesWithFavoriteAndRatingByCategory(category: String): Flow<List<RecipeWithFavoriteAndRating>> =
     recipeRepository.getRecipesWithFavoriteAndRatingFlow().map { list ->
-      list.filter { it.recipe.category == category }
+      list.filter { it.value.category == category }
     }
 
   fun getRecipesWithFavoriteAndRatingByFavorite(): Flow<List<RecipeWithFavoriteAndRating>> =

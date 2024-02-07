@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class EditRecipeViewModel(private val recipeRepository: RecipeRepository, private val savedStateHandle: SavedStateHandle) : ViewModel() {
 
@@ -32,10 +33,13 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     }
   }
 
+  /**
+   * @param chapters Pair of [UUID] and [ChapterWithStepsAndIngredients], the UUID is used as a list key
+   */
   data class InfoScreenUiState(
     val id: Int = 0,
     val formState: InfoFormState = InfoFormState(),
-    val chapters: List<ChapterWithStepsAndIngredients> = emptyList(),
+    val chapters: List<Pair<UUID, ChapterWithStepsAndIngredients>> = emptyList(),
     val categorySuggestions: List<RecipeCategoryTuple> = emptyList(),
     val unsavedChanges: Boolean = false
   ) {
@@ -66,7 +70,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     }
 
     fun toRecipeWithChaptersStepsAndIngredients(): RecipeWithChaptersStepsAndIngredients =
-      RecipeWithChaptersStepsAndIngredients(toRecipe(), chapters)
+      RecipeWithChaptersStepsAndIngredients(toRecipe(), chapters.map { it.second })
 
     companion object {
       fun fromRecipe(recipe: RecipeWithChaptersStepsAndIngredients): InfoScreenUiState {
@@ -79,17 +83,20 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             servings = recipe.value.servings,
             note = recipe.value.note
           ),
-          chapters = recipe.chapters
+          chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) }
         )
       }
     }
   }
 
+  /**
+   * @param steps Pair of [UUID] and [StepWithIngredients], the UUID is used as a list key
+   */
   data class ChapterScreenUiState(
     val id: Int = 0,
     val formState: ChapterFormState = ChapterFormState(),
     val orderNumber: Int = 1,
-    val steps: List<StepWithIngredients> = emptyList(),
+    val steps: List<Pair<UUID, StepWithIngredients>> = emptyList(),
     val unsavedChanges: Boolean = false,
   ) {
     val isNewChapter: Boolean = formState.name.isEmpty()
@@ -110,7 +117,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     )
 
     fun toChapterWithStepsAndIngredients(): ChapterWithStepsAndIngredients =
-      ChapterWithStepsAndIngredients(toChapter(), steps)
+      ChapterWithStepsAndIngredients(toChapter(), steps.map { it.second })
 
     companion object {
       fun fromChapter(chapter: ChapterWithStepsAndIngredients): ChapterScreenUiState {
@@ -121,17 +128,20 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             note = chapter.value.note
           ),
           orderNumber = chapter.value.orderNumber,
-          steps = chapter.steps,
+          steps = chapter.steps.map { Pair(UUID.randomUUID(), it) },
         )
       }
     }
   }
 
+  /**
+   * @param ingredients Pair of [UUID] and [Ingredient], the UUID is used as a list key
+   */
   data class StepScreenUiState(
     val id: Int = 0,
     val formState: StepFormState = StepFormState(),
     val orderNumber: Int = 1,
-    val ingredients: List<Ingredient> = emptyList(),
+    val ingredients: List<Pair<UUID, Ingredient>> = emptyList(),
     val unsavedChanges: Boolean = false,
   ) {
     val isNewStep: Boolean = formState.description.isEmpty()
@@ -153,7 +163,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
       note = formState.note
     )
 
-    fun toStepWithIngredients(): StepWithIngredients = StepWithIngredients(toStep(), ingredients)
+    fun toStepWithIngredients(): StepWithIngredients =
+      StepWithIngredients(toStep(), ingredients.map { it.second })
 
     companion object {
       fun fromStep(step: StepWithIngredients): StepScreenUiState {
@@ -165,7 +176,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             note = step.value.note
           ),
           orderNumber = step.value.orderNumber,
-          ingredients = step.ingredients,
+          ingredients = step.ingredients.map { Pair(UUID.randomUUID(), it) },
         )
       }
     }
@@ -239,12 +250,18 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
   fun addOrUpdateChapter(chapter: ChapterWithStepsAndIngredients) {
     val chapters = _infoUiState.value.chapters.toMutableList()
-    val index = chapters.indexOf(chapters.firstOrNull { it.value.orderNumber == chapter.value.orderNumber })
+    val index =
+      chapters.indexOf(chapters.firstOrNull { it.second.value.orderNumber == chapter.value.orderNumber })
 
     if (chapters.elementAtOrNull(index) != null) {
-      chapters[index] = chapter
+      chapters[index] = chapters[index].copy(second = chapter)
     } else {
-      chapters.add(chapter.copy(value = chapter.value.copy(orderNumber = chapters.size + 1)))
+      chapters.add(
+        Pair(
+          UUID.randomUUID(),
+          chapter.copy(value = chapter.value.copy(orderNumber = chapters.size + 1))
+        )
+      )
     }
 
     _infoUiState.update { s ->
@@ -257,12 +274,17 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
 
   fun addOrUpdateStep(step: StepWithIngredients) {
     val steps = _chapterUiState.value.steps.toMutableList()
-    val index = steps.indexOf(steps.firstOrNull { it.value.orderNumber == step.value.orderNumber })
+    val index =
+      steps.indexOf(steps.firstOrNull { it.second.value.orderNumber == step.value.orderNumber })
 
     if (steps.elementAtOrNull(index) != null) {
-      steps[index] = step
+      steps[index] = steps[index].copy(second = step)
     } else {
-      steps.add(step.copy(value = step.value.copy(orderNumber = steps.size + 1)))
+      steps.add(
+        Pair(
+          UUID.randomUUID(),
+          step.copy(value = step.value.copy(orderNumber = steps.size + 1)))
+        )
     }
 
     _chapterUiState.update { s ->
@@ -277,9 +299,9 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val ingredients = _stepUiState.value.ingredients.toMutableList()
 
     if (ingredients.elementAtOrNull(index) != null) {
-      ingredients[index] = ingredient
+      ingredients[index] = ingredients[index].copy(second = ingredient)
     } else {
-      ingredients.add(ingredient)
+      ingredients.add(Pair(UUID.randomUUID(), ingredient))
     }
 
     _stepUiState.update { s ->
@@ -326,56 +348,45 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
   }
 
   fun deleteChapter(chapter: ChapterWithStepsAndIngredients) : Boolean {
-    val index = _infoUiState.value.chapters.indexOf(chapter)
-
-    if(index != -1) {
+    return _infoUiState.value.chapters.firstOrNull { it.second == chapter }?.also { existing ->
       _infoUiState.update { state ->
         state.copy(
-          chapters = state.chapters.minus(chapter).let { list ->
-            list.mapIndexed { index, chapter ->
-              chapter.copy(value = chapter.value.copy(orderNumber = index + 1))
+          chapters = state.chapters.minus(existing).let { list ->
+            list.mapIndexed { index, pair ->
+              pair.copy(second = pair.second.copy(value = chapter.value.copy(orderNumber = index + 1)))
             }
           },
           unsavedChanges = true
         )
       }
-    }
-
-    return index != -1
+    } != null
   }
 
   fun deleteStep(step: StepWithIngredients) : Boolean {
-    val index = _chapterUiState.value.steps.indexOf(step)
-
-    if(index != -1) {
+    return _chapterUiState.value.steps.firstOrNull { it.second == step }?.also { existing ->
       _chapterUiState.update { state ->
         state.copy(
-          steps = state.steps.minus(step).let { list ->
-            list.mapIndexed { index, step ->
-              step.copy(value = step.value.copy(orderNumber = index + 1))
+          steps = state.steps.minus(existing).let { list ->
+            list.mapIndexed { index, pair ->
+              pair.copy(second = pair.second.copy(value = step.value.copy(orderNumber = index + 1)))
             }
           },
           unsavedChanges = true
         )
       }
-    }
-
-    return index != -1
+    } != null
   }
 
   fun deleteIngredient(ingredient: Ingredient): Boolean {
-    val index = _stepUiState.value.ingredients.indexOf(ingredient)
-
-    if(index != -1) {
-      _stepUiState.update { state ->
-        state.copy(
-          ingredients = state.ingredients.minus(ingredient),
-          unsavedChanges = true
-        )
-      }
-    }
-
-    return index != -1
+    return _stepUiState.value.ingredients.firstOrNull { it.second == ingredient }
+      ?.also { existing ->
+        _stepUiState.update { state ->
+          state.copy(
+            ingredients = state.ingredients.minus(existing),
+            unsavedChanges = true
+          )
+        }
+      } != null
   }
 
   fun swapChapterPositions(from: Int, to: Int) {
