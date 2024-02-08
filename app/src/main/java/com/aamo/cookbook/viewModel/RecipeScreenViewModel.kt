@@ -1,5 +1,6 @@
 package com.aamo.cookbook.viewModel
 
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aamo.cookbook.database.repository.RecipeRepository
@@ -55,6 +56,10 @@ class RecipeScreenViewModel(
         _servingsState.update {
           ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
         }
+        //TODO("photo state")
+//        _completedPageUiState.update { s ->
+//          s.copy(photoUri = getPhotoUri(recipe.value.photo))
+//        }
       }
     }
   }
@@ -82,6 +87,7 @@ class RecipeScreenViewModel(
 
   data class CompletedPageUiState(
     val fiveStarRating: Int = 0,
+    val photoUri: Uri = Uri.EMPTY
   )
 
   data class ServingsState(
@@ -147,5 +153,12 @@ class RecipeScreenViewModel(
         _completedPageUiState.update { s -> s.copy(fiveStarRating = 0) }
       }
     }
+  }
+
+  fun setPhoto(value: Uri) {
+    if(value == Uri.EMPTY){
+      //TODO("Delete old photo")
+    }
+    _completedPageUiState.update { s -> s.copy(photoUri = value) }
   }
 }

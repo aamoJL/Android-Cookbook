@@ -1,5 +1,6 @@
 package com.aamo.cookbook.ui.screen.recipeScreen
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -88,6 +89,7 @@ fun RecipeScreen(
     completedUiState = completedUiState,
     servingsState = servingsState,
     favoriteState = favoriteState,
+    modifier = modifier,
     onBack = onBack,
     onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
     onCopyRecipe = { onCopyRecipe(viewModel.recipe.value.id) },
@@ -105,7 +107,7 @@ fun RecipeScreen(
       )
     },
     onRatingChange = { viewModel.setRating(it) },
-    modifier = modifier
+    onPhotoChange = { viewModel.setPhoto(it) }
   )
 }
 
@@ -125,6 +127,7 @@ fun RecipeScreenContent(
   onServingsCountChange: (count: Int) -> Unit,
   onFavoriteChange: (Boolean) -> Unit,
   onRatingChange: (Int) -> Unit,
+  onPhotoChange: (Uri) -> Unit,
 ) {
   val pageCount by rememberSaveable(chapterUiStates) {
     mutableIntStateOf(
@@ -243,7 +246,8 @@ fun RecipeScreenContent(
 
               else -> CompletedPage(
                 uiState = completedUiState,
-                onRatingChange = onRatingChange
+                onRatingChange = onRatingChange,
+                onPhotoChange = onPhotoChange
               )
             }
           }

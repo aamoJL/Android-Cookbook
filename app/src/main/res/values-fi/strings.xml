@@ -66,4 +66,6 @@
     <string name="description_set_timer">Aseta ajastin</string>
     <string name="textfield_step_timer">Ajastin (minuuttia)</string>
     <string name="textfield_label_note">Huomautus</string>
+    <string name="description_take_a_photo">Ota kuva</string>
+    <string name="description_delete_photo">Poista kuva</string>
 </resources>

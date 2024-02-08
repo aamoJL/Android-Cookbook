@@ -48,6 +48,7 @@ android {
   }
   buildFeatures {
     compose = true
+    buildConfig = true
   }
   composeOptions {
     kotlinCompilerExtensionVersion = "1.5.7"
@@ -86,6 +87,18 @@ dependencies {
   annotationProcessor("androidx.room:room-compiler:2.6.1")
   ksp ("androidx.room:room-compiler:2.6.1")
   implementation("androidx.room:room-ktx:2.6.1")
+
+  implementation("io.coil-kt:coil-compose:2.5.0")
+  implementation("androidx.camera:camera-camera2:1.4.0-alpha04")
+  // If you want to additionally use the CameraX Lifecycle library
+  //implementation("androidx.camera:camera-lifecycle:1.4.0-alpha04")
+  // If you want to additionally use the CameraX View class
+  //implementation("androidx.camera:camera-view:1.4.0-alpha04")
+  // If you want to additionally add CameraX ML Kit Vision Integration
+  //implementation("androidx.camera:camera-mlkit-vision:1.4.0-alpha04")
+  // If you want to additionally use the CameraX Extensions library
+  //implementation("androidx.camera:camera-extensions:1.4.0-alpha04")
+
 
   testImplementation("junit:junit:4.13.2")
   testImplementation("org.junit.jupiter:junit-jupiter:5.8.1")

@@ -67,4 +67,6 @@
     <string name="minutes_amount_abbreviation">%1$s m</string>
     <string name="textfield_step_timer">Timer (minutes)</string>
     <string name="textfield_label_note">Note</string>
+    <string name="description_take_a_photo">Take a photo</string>
+    <string name="description_delete_photo">Delete photo</string>
 </resources>
