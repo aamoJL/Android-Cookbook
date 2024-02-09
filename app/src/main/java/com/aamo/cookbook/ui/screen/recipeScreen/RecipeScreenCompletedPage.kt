@@ -2,6 +2,7 @@ package com.aamo.cookbook.ui.screen.recipeScreen
 
 import android.content.Context
 import android.net.Uri
+import android.os.Environment
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -30,6 +31,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.BuildConfig
 import com.aamo.cookbook.R
@@ -66,10 +68,11 @@ internal fun CompletedPage(
         .weight(1f)
     ) {
       Card(modifier = Modifier.size(200.dp)){
-        if (uiState.photoUri.path?.isNotEmpty() == true) {
+        if (uiState.thumbnailFileName.isNotEmpty()) {
           Box(modifier = Modifier.fillMaxSize()) {
             Image(
-              painter = rememberAsyncImagePainter(model = uiState.photoUri),
+              painter = rememberAsyncImagePainter(
+                model = LocalContext.current.getImageUri(uiState.thumbnailFileName)),
               contentDescription = null,
               contentScale = ContentScale.Crop,
               modifier = Modifier.fillMaxSize()
@@ -151,9 +154,14 @@ private fun CameraButton(
 }
 
 private fun Context.createImageFile(): File {
+  val storageDir: File? = this.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
   return File.createTempFile(
     System.currentTimeMillis().toString(), /* prefix */
     ".jpg", /* suffix */
-    externalCacheDir /* directory */
-  ).apply { deleteOnExit() }
+    storageDir /* directory */
+  )
+}
+
+private fun Context.getImageUri(fileName: String) : Uri {
+  return File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName).toUri()
 }

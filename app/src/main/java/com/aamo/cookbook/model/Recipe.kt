@@ -15,6 +15,7 @@ data class Recipe(
   @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = "",
   @ColumnInfo(name = "servings", defaultValue = "1") val servings: Int = 1,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
+  @ColumnInfo(name = "thumbnailUri", defaultValue = "") val thumbnailUri: String = "",
 )
 
 @Entity(tableName = "recipeChapters",

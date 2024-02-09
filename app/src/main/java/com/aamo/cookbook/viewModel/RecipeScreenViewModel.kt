@@ -8,6 +8,7 @@ import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.service.IOServiceBase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -15,7 +16,8 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class RecipeScreenViewModel(
-  private val recipeRepository: RecipeRepository
+  private val recipeRepository: RecipeRepository,
+  private val ioService: IOServiceBase
 ) : ViewModel() {
 
   /**
@@ -34,8 +36,9 @@ class RecipeScreenViewModel(
         }
       }
       launch {
-        recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
+        val recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
           ?: RecipeWithChaptersStepsAndIngredients(Recipe())
+        _recipeId = recipe.value.id
         _chapterPageUiStates.update {
           recipe.chapters.map { chapter ->
             ChapterPageUiState.fromChapter(chapter)
@@ -56,10 +59,9 @@ class RecipeScreenViewModel(
         _servingsState.update {
           ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
         }
-        //TODO("photo state")
-//        _completedPageUiState.update { s ->
-//          s.copy(photoUri = getPhotoUri(recipe.value.photo))
-//        }
+        _completedPageUiState.update { s ->
+          s.copy(thumbnailFileName = recipe.value.thumbnailUri)
+        }
       }
     }
   }
@@ -87,7 +89,7 @@ class RecipeScreenViewModel(
 
   data class CompletedPageUiState(
     val fiveStarRating: Int = 0,
-    val photoUri: Uri = Uri.EMPTY
+    val thumbnailFileName: String = ""
   )
 
   data class ServingsState(
@@ -97,8 +99,8 @@ class RecipeScreenViewModel(
     val multiplier: Float = current.toFloat() / max(1, baseline).toFloat()
   }
 
-  var recipe: RecipeWithChaptersStepsAndIngredients =
-    RecipeWithChaptersStepsAndIngredients(Recipe())
+  private var _recipeId: Int = 0
+  val recipeId = _recipeId
 
   private val _summaryPageUiStates = MutableStateFlow(SummaryPageUiState())
   val summaryPageUiStates = _summaryPageUiStates.asStateFlow()
@@ -133,8 +135,8 @@ class RecipeScreenViewModel(
 
   fun setFavoriteState(value: Boolean) {
     viewModelScope.launch {
-      if (value) recipeRepository.addRecipeToFavorites(recipe.value.id)
-      else recipeRepository.removeRecipeFromFavorites(recipe.value.id)
+      if (value) recipeRepository.addRecipeToFavorites(_recipeId)
+      else recipeRepository.removeRecipeFromFavorites(_recipeId)
 
       _favoriteState.update { value }
     }
@@ -143,22 +145,32 @@ class RecipeScreenViewModel(
   fun setRating(value: Int) {
     if (value != _completedPageUiState.value.fiveStarRating) {
       viewModelScope.launch {
-        recipeRepository.upsertRecipeRating(recipe.value.id, value)
+        recipeRepository.upsertRecipeRating(_recipeId, value)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = value) }
       }
-    }
-    else {
+    } else {
       viewModelScope.launch {
-        recipeRepository.deleteRecipeRating(recipe.value.id)
+        recipeRepository.deleteRecipeRating(_recipeId)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = 0) }
       }
     }
   }
 
-  fun setPhoto(value: Uri) {
-    if(value == Uri.EMPTY){
-      //TODO("Delete old photo")
+  fun setThumbnail(uri: Uri) {
+    viewModelScope.launch {
+      val oldThumbnail = _completedPageUiState.value.thumbnailFileName
+      if (oldThumbnail.isNotEmpty()) {
+        ioService.deleteExternalFile(oldThumbnail)
+      }
+
+      val fileName = ioService.getFileNameFromUri(uri)
+
+      recipeRepository.getRecipeById(_recipeId)?.copy(thumbnailUri = fileName ?: "")?.also {
+        recipeRepository.upsertRecipe(it)
+        _completedPageUiState.update { s ->
+          s.copy(thumbnailFileName = it.thumbnailUri)
+        }
+      }
     }
-    _completedPageUiState.update { s -> s.copy(photoUri = value) }
   }
 }

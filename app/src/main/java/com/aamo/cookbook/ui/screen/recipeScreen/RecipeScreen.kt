@@ -91,8 +91,8 @@ fun RecipeScreen(
     favoriteState = favoriteState,
     modifier = modifier,
     onBack = onBack,
-    onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
-    onCopyRecipe = { onCopyRecipe(viewModel.recipe.value.id) },
+    onEditRecipe = { onEditRecipe(viewModel.recipeId) },
+    onCopyRecipe = { onCopyRecipe(viewModel.recipeId) },
     onProgressChange = { chapterId, stepId, value ->
       viewModel.updateProgress(chapterId, stepId, value)
     },
@@ -107,7 +107,7 @@ fun RecipeScreen(
       )
     },
     onRatingChange = { viewModel.setRating(it) },
-    onPhotoChange = { viewModel.setPhoto(it) }
+    onPhotoChange = { viewModel.setThumbnail(it) }
   )
 }
 

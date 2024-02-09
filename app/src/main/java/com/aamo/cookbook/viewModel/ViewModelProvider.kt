@@ -14,8 +14,10 @@ object ViewModelProvider {
       AppViewModel(cookbookApplication().container.recipeRepository)
     }
     initializer {
-      RecipeScreenViewModel(cookbookApplication().container.recipeRepository)
-        .apply { init(recipeId = createSavedStateHandle()[Screen.Recipe.argumentName] ?: 0) }
+      RecipeScreenViewModel(
+        recipeRepository = cookbookApplication().container.recipeRepository,
+        ioService = cookbookApplication().container.ioService
+      ).apply { init(recipeId = createSavedStateHandle()[Screen.Recipe.argumentName] ?: 0) }
     }
     initializer {
       EditRecipeViewModel(
