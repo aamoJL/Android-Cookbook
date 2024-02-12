@@ -91,7 +91,25 @@ data class RecipeWithChaptersStepsAndIngredients(
     entityColumn = "recipeId"
   )
   val chapters: List<ChapterWithStepsAndIngredients> = emptyList()
-)
+) {
+  fun copyAsNew(): RecipeWithChaptersStepsAndIngredients {
+    return this.copy(
+      value = value.copy(id = 0, thumbnailUri = ""),
+      chapters = chapters.map { c ->
+        c.copy(
+          value = c.value.copy(id = 0),
+          steps = c.steps.map { s ->
+            s.copy(
+              value = s.value.copy(id = 0),
+              ingredients = s.ingredients.map { i ->
+                i.copy(id = 0)
+              }
+            )
+          })
+      }
+    )
+  }
+}
 
 data class ChapterWithStepsAndIngredients(
   @Embedded val value: Chapter,

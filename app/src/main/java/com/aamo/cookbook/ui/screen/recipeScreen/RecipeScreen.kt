@@ -211,7 +211,9 @@ fun RecipeScreenContent(
       }
     }
   ) { paddingValues ->
-    Surface(modifier = modifier.fillMaxSize().padding(paddingValues)) {
+    Surface(modifier = modifier
+      .fillMaxSize()
+      .padding(paddingValues)) {
       Column {
         Column(modifier = Modifier.weight(1f, true)) {
           HorizontalPager(
@@ -247,13 +249,15 @@ fun RecipeScreenContent(
               else -> CompletedPage(
                 uiState = completedUiState,
                 onRatingChange = onRatingChange,
-                onPhotoChange = onPhotoChange
+                onThumbnailChange = onPhotoChange
               )
             }
           }
         }
         Row(
-          modifier = Modifier.fillMaxWidth().padding(16.dp),
+          modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp),
           horizontalArrangement = Arrangement.Center
         ) {
           val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
@@ -340,7 +344,9 @@ private fun PageIndicatorItem(
         imageVector = icon,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier.size(24.dp).align(Alignment.Center)
+        modifier = Modifier
+          .size(24.dp)
+          .align(Alignment.Center)
       )
     }
     if (selected) {
@@ -359,32 +365,37 @@ private fun PageIndicatorItem(
 internal fun IngredientList(
   ingredients: List<Ingredient>,
   servingsMultiplier: Float,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  fontFamily: androidx.compose.ui.text.font.FontFamily = Handwritten
 ) {
   Row(modifier = modifier) {
-    if(ingredients.any { it.amount != 0f }) Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-      ingredients.forEach {
-        Text(
-          text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
-          style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
-          textAlign = TextAlign.End,
-          modifier = Modifier.fillMaxWidth()
-        )
+    if(ingredients.any { it.amount != 0f }) {
+      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+        ingredients.forEach {
+          Text(
+            text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = fontFamily,
+            textAlign = TextAlign.End,
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
       }
     }
-    if(ingredients.any { it.unit.isNotEmpty() }) Column(
-      modifier = Modifier
-        .defaultMinSize(minWidth = 40.dp)
-        .padding(horizontal = 8.dp)
-    ) {
-      ingredients.forEach {
-        Text(
-          text = it.unit,
-          style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
-          modifier = Modifier
-        )
+    if(ingredients.any { it.unit.isNotEmpty() }) {
+      Column(
+        modifier = Modifier
+          .defaultMinSize(minWidth = 40.dp)
+          .padding(horizontal = 8.dp)
+      ) {
+        ingredients.forEach {
+          Text(
+            text = it.unit,
+            style = MaterialTheme.typography.titleMedium,
+            fontFamily = fontFamily,
+            modifier = Modifier
+          )
+        }
       }
     }
     Column {
@@ -392,7 +403,7 @@ internal fun IngredientList(
         Text(
           text = it.name,
           style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
+          fontFamily = fontFamily,
           modifier = Modifier
         )
       }

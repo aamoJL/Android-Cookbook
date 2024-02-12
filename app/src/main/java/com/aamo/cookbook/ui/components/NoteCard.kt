@@ -31,6 +31,7 @@ fun NoteCard(
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
   ),
 ) {
+  if(text.isEmpty()) return
   ElevatedCard(
     colors = colors,
     shape = CutCornerShape(bottomEnd = 15.dp)

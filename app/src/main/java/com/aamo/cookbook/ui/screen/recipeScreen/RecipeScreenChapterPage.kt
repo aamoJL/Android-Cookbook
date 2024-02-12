@@ -132,7 +132,7 @@ private fun StepCheckBox(
             IngredientList(
               ingredients = ingredients,
               servingsMultiplier = servingsMultiplier,
-              modifier = Modifier.padding(8.dp)
+              modifier = Modifier.padding(8.dp),
             )
           }
         }

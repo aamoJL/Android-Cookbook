@@ -41,6 +41,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
     val formState: InfoFormState = InfoFormState(),
     val chapters: List<Pair<UUID, ChapterWithStepsAndIngredients>> = emptyList(),
     val categorySuggestions: List<RecipeCategoryTuple> = emptyList(),
+    val thumbnailUri: String = "",
     val unsavedChanges: Boolean = false
   ) {
     val isNewRecipe: Boolean = id == 0
@@ -65,7 +66,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
         category = formState.category,
         subCategory = formState.subCategory,
         servings = formState.servings ?: 1,
-        note = formState.note
+        note = formState.note,
+        thumbnailUri = thumbnailUri
       )
     }
 
@@ -83,7 +85,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
             servings = recipe.value.servings,
             note = recipe.value.note
           ),
-          chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) }
+          chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) },
+          thumbnailUri = recipe.value.thumbnailUri
         )
       }
     }
