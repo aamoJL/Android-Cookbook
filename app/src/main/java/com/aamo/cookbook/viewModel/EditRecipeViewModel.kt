@@ -351,33 +351,35 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository, privat
   }
 
   fun deleteChapter(chapter: ChapterWithStepsAndIngredients) : Boolean {
-    return _infoUiState.value.chapters.firstOrNull { it.second == chapter }?.also { existing ->
-      _infoUiState.update { state ->
-        state.copy(
-          chapters = state.chapters.minus(existing).let { list ->
-            list.mapIndexed { index, pair ->
-              pair.copy(second = pair.second.copy(value = chapter.value.copy(orderNumber = index + 1)))
-            }
-          },
-          unsavedChanges = true
-        )
-      }
-    } != null
+    return _infoUiState.value.chapters
+      .firstOrNull { it.second.value.orderNumber == chapter.value.orderNumber }?.also { existing ->
+        _infoUiState.update { state ->
+          state.copy(
+            chapters = state.chapters.minus(existing).let { pairs ->
+              pairs.mapIndexed { index, pair ->
+                pair.copy(second = pair.second.copy(value = pair.second.value.copy(orderNumber = index + 1)))
+              }
+            },
+            unsavedChanges = true
+          )
+        }
+      } != null
   }
 
   fun deleteStep(step: StepWithIngredients) : Boolean {
-    return _chapterUiState.value.steps.firstOrNull { it.second == step }?.also { existing ->
-      _chapterUiState.update { state ->
-        state.copy(
-          steps = state.steps.minus(existing).let { list ->
-            list.mapIndexed { index, pair ->
-              pair.copy(second = pair.second.copy(value = step.value.copy(orderNumber = index + 1)))
-            }
-          },
-          unsavedChanges = true
-        )
-      }
-    } != null
+    return _chapterUiState.value.steps
+      .firstOrNull { it.second.value.orderNumber == step.value.orderNumber }?.also { existing ->
+        _chapterUiState.update { state ->
+          state.copy(
+            steps = state.steps.minus(existing).let { pairs ->
+              pairs.mapIndexed { index, pair ->
+                pair.copy(second = pair.second.copy(value = pair.second.value.copy(orderNumber = index + 1)))
+              }
+            },
+            unsavedChanges = true
+          )
+        }
+      } != null
   }
 
   fun deleteIngredient(ingredient: Ingredient): Boolean {

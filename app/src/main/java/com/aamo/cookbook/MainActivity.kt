@@ -2,6 +2,7 @@ package com.aamo.cookbook
 
 import android.app.Application
 import android.os.Bundle
+import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -36,6 +37,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeSearchScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
@@ -256,9 +258,10 @@ fun MainNavGraph(
         }
       },
       onDeleteRecipe = {
-        // TODO("Delete thumbnail file")
         appViewModel.viewModelScope.launch {
           appViewModel.deleteRecipe(it)
+          // Delete thumbnail file
+          IOService(context).deleteExternalFile(Environment.DIRECTORY_PICTURES, it.thumbnailUri)
 
           navController.navigate(Screen.Categories.getRoute()) {
             popUpTo(Screen.Categories.getRoute()) { inclusive = true }

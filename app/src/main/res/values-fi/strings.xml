@@ -69,4 +69,7 @@
     <string name="description_take_a_photo">Ota kuva</string>
     <string name="description_delete_photo">Poista kuva</string>
     <string name="text_rate_the_recipe">Arvostele resepti</string>
+    <string name="description_servings">Annokset</string>
+    <string name="description_decrease_value">Vähennä</string>
+    <string name="description_increase_value">Lisää</string>
 </resources>

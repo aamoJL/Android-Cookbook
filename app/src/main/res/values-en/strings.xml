@@ -69,4 +69,7 @@
     <string name="description_take_a_photo">Take a photo</string>
     <string name="description_delete_photo">Delete photo</string>
     <string name="text_rate_the_recipe">Rate the recipe</string>
+    <string name="description_servings">Servings</string>
+    <string name="description_decrease_value">Decrease value</string>
+    <string name="description_increase_value">Increase value</string>
 </resources>
