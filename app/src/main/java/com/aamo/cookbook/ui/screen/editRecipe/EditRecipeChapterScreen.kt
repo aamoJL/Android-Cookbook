@@ -54,7 +54,7 @@ import java.util.UUID
 @Composable
 fun EditRecipeChapterScreen(
   viewModel: EditRecipeViewModel,
-  onEditStep: (StepWithIngredients?) -> Unit,
+  onEditStep: (index: Int) -> Unit,
   onSubmitChanges: () -> Unit,
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
@@ -78,8 +78,8 @@ fun EditRecipeChapterScreenContent(
   uiState: EditRecipeViewModel.ChapterScreenUiState,
   modifier: Modifier = Modifier,
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit = {},
-  onEditStep: (StepWithIngredients?) -> Unit = {},
-  onDeleteStep: (StepWithIngredients) -> (Boolean) = { false },
+  onEditStep: (index: Int) -> Unit = {},
+  onDeleteStep: (index: Int) -> (Boolean) = { false },
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {},
   onSwapSteps: (from: Int, to: Int) -> Unit = {_,_ -> }
@@ -125,7 +125,7 @@ fun EditRecipeChapterScreenContent(
     ) {
       ChapterForm(
         uiState = uiState.formState,
-        orderNumber = uiState.orderNumber,
+        chapterNumber = uiState.index + 1,
         onFormStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
@@ -143,14 +143,14 @@ fun EditRecipeChapterScreenContent(
 @Composable
 private fun StepList(
   steps: List<Pair<UUID, StepWithIngredients>>,
-  onEditStep: (StepWithIngredients?) -> Unit,
+  onEditStep: (index: Int) -> Unit,
   modifier: Modifier = Modifier,
   onSwap: (from: Int, to: Int) -> Unit,
-  onDeleteStep: (StepWithIngredients) -> Boolean,
+  onDeleteStep: (index: Int) -> Boolean,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_steps),
-    onAddClick = { onEditStep(null) },
+    onAddClick = { onEditStep(-1) },
     modifier = modifier
   ) {
     LazyColumn {
@@ -162,8 +162,8 @@ private fun StepList(
           StepListItem(
             step = pair.second,
             stepNumber = index + 1,
-            onClick = { onEditStep(pair.second) },
-            onDismiss = { onDeleteStep(pair.second) },
+            onClick = { onEditStep(index) },
+            onDismiss = { onDeleteStep(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,
@@ -181,11 +181,11 @@ private fun StepList(
 @Composable
 fun ChapterForm(
   uiState: EditRecipeViewModel.ChapterScreenUiState.ChapterFormState,
-  orderNumber: Int,
+  chapterNumber: Int,
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  FormBase(title = stringResource(R.string.form_title_chapter, orderNumber), modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_chapter, chapterNumber), modifier = modifier) {
     FormTextField(
       value = uiState.name,
       onValueChange = { onFormStateChange(uiState.copy(name = it)) },

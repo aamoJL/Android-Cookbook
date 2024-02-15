@@ -1,5 +1,6 @@
 package com.aamo.cookbook.ui.screen.recipeScreen
 
+import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -51,6 +53,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -58,6 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.SnackbarProperties
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
@@ -84,13 +88,14 @@ fun RecipeScreen(
 
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
-    chapterUiStates = chapterUiStates,
-    completedUiState = completedUiState,
+    chapterPageUiStates = chapterUiStates,
+    completedPageUiState = completedUiState,
     servingsState = servingsState,
     favoriteState = favoriteState,
+    modifier = modifier,
     onBack = onBack,
-    onEditRecipe = { onEditRecipe(viewModel.recipe.value.id) },
-    onCopyRecipe = { onCopyRecipe(viewModel.recipe.value.id) },
+    onEditRecipe = { onEditRecipe(viewModel.recipeId) },
+    onCopyRecipe = { onCopyRecipe(viewModel.recipeId) },
     onProgressChange = { chapterId, stepId, value ->
       viewModel.updateProgress(chapterId, stepId, value)
     },
@@ -105,7 +110,11 @@ fun RecipeScreen(
       )
     },
     onRatingChange = { viewModel.setRating(it) },
-    modifier = modifier
+    onThumbnailChange = {
+      viewModel.setThumbnail(
+        IOService(context).getFileNameWithSuffixFromUri(it) ?: ""
+      )
+    }
   )
 }
 
@@ -113,8 +122,8 @@ fun RecipeScreen(
 @Composable
 fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
-  chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
-  completedUiState: RecipeScreenViewModel.CompletedPageUiState,
+  chapterPageUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  completedPageUiState: RecipeScreenViewModel.CompletedPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
   favoriteState: Boolean,
   modifier: Modifier = Modifier,
@@ -125,11 +134,12 @@ fun RecipeScreenContent(
   onServingsCountChange: (count: Int) -> Unit,
   onFavoriteChange: (Boolean) -> Unit,
   onRatingChange: (Int) -> Unit,
+  onThumbnailChange: (Uri) -> Unit,
 ) {
-  val pageCount by rememberSaveable(chapterUiStates) {
+  val pageCount by rememberSaveable(chapterPageUiStates) {
     mutableIntStateOf(
-      if (chapterUiStates.any { x -> x.progress.any { !it } }) chapterUiStates.size + 1
-      else chapterUiStates.size + 2
+      if (chapterPageUiStates.any { x -> x.progress.any { !it } }) chapterPageUiStates.size + 1
+      else chapterPageUiStates.size + 2
     )
   }
   val pagerState = rememberPagerState(pageCount = { pageCount })
@@ -208,7 +218,11 @@ fun RecipeScreenContent(
       }
     }
   ) { paddingValues ->
-    Surface(modifier = modifier.fillMaxSize().padding(paddingValues)) {
+    Surface(
+      modifier = modifier
+        .fillMaxSize()
+        .padding(paddingValues)
+    ) {
       Column {
         Column(modifier = Modifier.weight(1f, true)) {
           HorizontalPager(
@@ -227,9 +241,9 @@ fun RecipeScreenContent(
                 onServingsCountChange = onServingsCountChange,
               )
 
-              in (1..chapterUiStates.size) -> {
+              in (1..chapterPageUiStates.size) -> {
                 val chapterIndex = pageIndex - 1
-                val uiState = chapterUiStates.elementAt(chapterIndex)
+                val uiState = chapterPageUiStates.elementAt(chapterIndex)
 
                 ChapterPage(
                   uiState = uiState,
@@ -242,69 +256,78 @@ fun RecipeScreenContent(
               }
 
               else -> CompletedPage(
-                uiState = completedUiState,
-                onRatingChange = onRatingChange
+                uiState = completedPageUiState,
+                onRatingChange = onRatingChange,
+                onThumbnailChange = onThumbnailChange
               )
             }
           }
         }
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(16.dp),
-          horizontalArrangement = Arrangement.Center
-        ) {
-          val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
-            state.progress.any { !it }
+        Divider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f))
+        Pager(
+          chapterUiStates = chapterPageUiStates,
+          pagerState = pagerState,
+          onIndicatorClick = {
+            scope.launch {
+              pagerState.animateScrollToPage(it)
+            }
           }
-          val currentProgressPage = when (currentChapterIndex) {
-            -1 -> chapterUiStates.size + 1
-            else -> currentChapterIndex + 1
-          }
-          val lastPageEnabled = currentProgressPage == chapterUiStates.size + 1
-
-          PageIndicatorItem(
-            selected = pagerState.currentPage == 0,
-            onClick = {
-              scope.launch {
-                pagerState.animateScrollToPage(0)
-              }
-            },
-            color = MaterialTheme.colorScheme.tertiaryContainer,
-            icon = Icons.Outlined.Info
-          )
-
-          repeat(chapterUiStates.size) { index ->
-            val isTargetPage = currentChapterIndex == index
-            PageIndicatorItem(
-              selected = index + 1 == pagerState.currentPage,
-              onClick = {
-                scope.launch {
-                  pagerState.animateScrollToPage(index + 1)
-                }
-              },
-              isTargetPage = isTargetPage,
-              color = if (isTargetPage) MaterialTheme.colorScheme.inversePrimary else
-                MaterialTheme.colorScheme.secondaryContainer,
-              icon = if (chapterUiStates.elementAt(index).progress.all { it }
-              ) Icons.Filled.Done else null
-            )
-          }
-
-          PageIndicatorItem(
-            selected = pagerState.currentPage == chapterUiStates.size + 1,
-            enabled = lastPageEnabled,
-            onClick = {
-              scope.launch {
-                pagerState.animateScrollToPage(pagerState.pageCount - 1)
-              }
-            },
-            isTargetPage = currentProgressPage == chapterUiStates.size + 1,
-            color = if (lastPageEnabled) MaterialTheme.colorScheme.tertiaryContainer else
-              MaterialTheme.colorScheme.onSurface,
-            icon = if (lastPageEnabled) null else Icons.Filled.Lock
-          )
-        }
+        )
       }
     }
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun Pager(
+  chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  pagerState: PagerState,
+  onIndicatorClick: (page: Int) -> Unit,
+  modifier: Modifier = Modifier
+) {
+  Row(
+    modifier = modifier.fillMaxWidth(),
+    horizontalArrangement = Arrangement.Center
+  ) {
+    val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
+      state.progress.any { !it }
+    }
+    val currentProgressPage = when (currentChapterIndex) {
+      -1 -> chapterUiStates.size + 1
+      else -> currentChapterIndex + 1
+    }
+    val lastPageEnabled = currentProgressPage == chapterUiStates.size + 1
+
+    PageIndicatorItem(
+      selected = pagerState.currentPage == 0,
+      onClick = { onIndicatorClick(0) },
+      color = MaterialTheme.colorScheme.tertiaryContainer,
+      icon = Icons.Outlined.Info
+    )
+
+    repeat(chapterUiStates.size) { index ->
+      val isTargetPage = currentChapterIndex == index
+      PageIndicatorItem(
+        selected = index + 1 == pagerState.currentPage,
+        onClick = { onIndicatorClick(index + 1) },
+        isTargetPage = isTargetPage,
+        color = if (isTargetPage) MaterialTheme.colorScheme.inversePrimary else
+          MaterialTheme.colorScheme.secondaryContainer,
+        icon = if (chapterUiStates.elementAt(index).progress.all { it }
+        ) Icons.Filled.Done else null
+      )
+    }
+
+    PageIndicatorItem(
+      selected = pagerState.currentPage == chapterUiStates.size + 1,
+      enabled = lastPageEnabled,
+      onClick = { onIndicatorClick(pagerState.pageCount - 1) },
+      isTargetPage = currentProgressPage == chapterUiStates.size + 1,
+      color = if (lastPageEnabled) MaterialTheme.colorScheme.tertiaryContainer else
+        MaterialTheme.colorScheme.onSurface,
+      icon = if (lastPageEnabled) null else Icons.Filled.Lock
+    )
   }
 }
 
@@ -336,7 +359,9 @@ private fun PageIndicatorItem(
         imageVector = icon,
         contentDescription = null,
         tint = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier.size(24.dp).align(Alignment.Center)
+        modifier = Modifier
+          .size(24.dp)
+          .align(Alignment.Center)
       )
     }
     if (selected) {
@@ -355,40 +380,46 @@ private fun PageIndicatorItem(
 internal fun IngredientList(
   ingredients: List<Ingredient>,
   servingsMultiplier: Float,
-  modifier: Modifier = Modifier
+  modifier: Modifier = Modifier,
+  fontFamily: androidx.compose.ui.text.font.FontFamily = Handwritten,
+  textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
   Row(modifier = modifier) {
-    if(ingredients.any { it.amount != 0f }) Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-      ingredients.forEach {
-        Text(
-          text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
-          style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
-          textAlign = TextAlign.End,
-          modifier = Modifier.fillMaxWidth()
-        )
+    if(ingredients.any { it.amount != 0f }) {
+      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+        ingredients.forEach {
+          Text(
+            text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
+            style = textStyle,
+            fontFamily = fontFamily,
+            textAlign = TextAlign.End,
+            modifier = Modifier.fillMaxWidth()
+          )
+        }
       }
     }
-    if(ingredients.any { it.unit.isNotEmpty() }) Column(
-      modifier = Modifier
-        .defaultMinSize(minWidth = 40.dp)
-        .padding(horizontal = 8.dp)
-    ) {
-      ingredients.forEach {
-        Text(
-          text = it.unit,
-          style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
-          modifier = Modifier
-        )
+    if(ingredients.any { it.unit.isNotEmpty() }) {
+      Column(
+        modifier = Modifier
+          .defaultMinSize(minWidth = 40.dp)
+          .padding(horizontal = 8.dp)
+      ) {
+        ingredients.forEach {
+          Text(
+            text = it.unit,
+            style = textStyle,
+            fontFamily = fontFamily,
+            modifier = Modifier
+          )
+        }
       }
     }
     Column {
       ingredients.forEach {
         Text(
           text = it.name,
-          style = MaterialTheme.typography.titleMedium,
-          fontFamily = Handwritten,
+          style = textStyle,
+          fontFamily = fontFamily,
           modifier = Modifier
         )
       }

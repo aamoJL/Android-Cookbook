@@ -58,7 +58,8 @@ class EditRecipeChapterScreenTest {
    */
   private fun withNewChapter() {
     uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
-      chapter = ChapterWithStepsAndIngredients(Chapter())
+      chapter = ChapterWithStepsAndIngredients(Chapter()),
+      index = -1
     )
     wasClicked = false
     wasDismissed = false
@@ -68,8 +69,10 @@ class EditRecipeChapterScreenTest {
    * Sets ui state to represent an existing chapter
    */
   private fun withExistingChapter() {
+    val index = 0
     uiState = EditRecipeViewModel.ChapterScreenUiState.fromChapter(
-      chapter = Mocker.mockRecipeList().first().chapters.first()
+      chapter = Mocker.mockRecipeList().first().chapters[index],
+      index = index
     )
     wasClicked = false
     wasDismissed = false
@@ -197,6 +200,8 @@ class EditRecipeChapterScreenTest {
   fun onStepDeletion() {
     withExistingChapter().apply {
       rule.onAllNodesWithTag(Tags.STEP_ITEM.name)[0].performTouchInput { swipeRight() }
+
+      rule.mainClock.advanceTimeBy(1000)
 
       assert(wasDismissed)
     }

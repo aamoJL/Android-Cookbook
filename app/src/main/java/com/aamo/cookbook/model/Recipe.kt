@@ -15,6 +15,7 @@ data class Recipe(
   @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = "",
   @ColumnInfo(name = "servings", defaultValue = "1") val servings: Int = 1,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
+  @ColumnInfo(name = "thumbnailUri", defaultValue = "") val thumbnailUri: String = "",
 )
 
 @Entity(tableName = "recipeChapters",
@@ -32,7 +33,8 @@ data class Recipe(
  */
 data class Chapter(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
-  @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
+  @ColumnInfo(name = "orderNumber")
+  val orderNumber: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "recipeId") val recipeId: Int = 0,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
@@ -90,7 +92,25 @@ data class RecipeWithChaptersStepsAndIngredients(
     entityColumn = "recipeId"
   )
   val chapters: List<ChapterWithStepsAndIngredients> = emptyList()
-)
+) {
+  fun copyAsNew(): RecipeWithChaptersStepsAndIngredients {
+    return this.copy(
+      value = value.copy(id = 0, thumbnailUri = ""),
+      chapters = chapters.map { c ->
+        c.copy(
+          value = c.value.copy(id = 0),
+          steps = c.steps.map { s ->
+            s.copy(
+              value = s.value.copy(id = 0),
+              ingredients = s.ingredients.map { i ->
+                i.copy(id = 0)
+              }
+            )
+          })
+      }
+    )
+  }
+}
 
 data class ChapterWithStepsAndIngredients(
   @Embedded val value: Chapter,

@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.aamo.cookbook.R
 
 @Composable
@@ -26,13 +27,13 @@ fun FiveStarRating(
         if (value != null && value >= star) {
           Icon(
             imageVector = Icons.Filled.Star,
-            contentDescription = star.toString(),
+            contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
             tint = color
           )
         } else {
           Icon(
             painter = painterResource(R.drawable.outline_star_outline_24),
-            contentDescription = star.toString(),
+            contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
             tint = color
           )
         }

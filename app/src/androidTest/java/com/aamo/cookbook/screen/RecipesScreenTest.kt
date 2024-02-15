@@ -11,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
@@ -23,7 +24,11 @@ import org.junit.Test
 
 class RecipesScreenTest {
   private var recipes by mutableStateOf(List(5) {
-    Recipe(id = it, name = "recipe $it", category = "category", servings = it)
+    RecipeWithFavoriteAndRating(
+      value = Recipe(id = it, name = "recipe $it", category = "category", servings = it),
+      favorite = null,
+      rating = null
+    )
   })
   private var wasSelected: Recipe? = null
   private var wasClicked: Boolean = false
@@ -36,11 +41,12 @@ class RecipesScreenTest {
     rule.setContent {
       CookbookTheme {
         RecipesScreen(
-          title = recipes.first().category,
+          title = recipes.first().value.category,
           recipes = recipes,
           onSelectRecipe = {wasSelected = it},
           onBack = { wasClicked = true },
-          onSearch = { wasClicked = true }
+          onSearch = { wasClicked = true },
+          onAdd = { wasClicked = true }
         )
       }
     }
@@ -48,7 +54,7 @@ class RecipesScreenTest {
 
   @Test
   fun pageTitle_equals() {
-    rule.onNodeWithText(recipes.first().category).assertExists()
+    rule.onNodeWithText(recipes.first().value.category).assertExists()
   }
 
   @Test
@@ -67,7 +73,7 @@ class RecipesScreenTest {
   fun recipes_areVisible() {
     val nodes = rule.onAllNodesWithTag(Tags.RECIPE_ITEM.name).apply {
       fetchSemanticsNodes().forEachIndexed { i, _ ->
-        get(i).assertTextContains(recipes[i].name)
+        get(i).assertTextContains(recipes[i].value.name)
       }
     }
 
@@ -82,7 +88,7 @@ class RecipesScreenTest {
       get(selectionIndex).performClick()
     }
 
-    val expected = recipes[selectionIndex]
+    val expected = recipes[selectionIndex].value
     val actual = wasSelected
 
     assertEquals(expected, actual)

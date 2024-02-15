@@ -18,15 +18,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 
 @Composable
 fun CountInput(
   value: Int,
-  label: String,
-  onValueChange: (Int) -> Unit,
   modifier: Modifier = Modifier,
+  label: String = "",
+  onValueChange: (Int) -> Unit,
   minValue: Int = Int.MIN_VALUE,
   maxValue: Int = Int.MAX_VALUE,
 ) {
@@ -40,7 +41,7 @@ fun CountInput(
   }
 
   Column(modifier = modifier) {
-    Text(text = label, style = MaterialTheme.typography.labelMedium)
+    if(label.isNotEmpty()) Text(text = label, style = MaterialTheme.typography.labelMedium)
     Row(verticalAlignment = Alignment.CenterVertically) {
       Box(
         contentAlignment = Alignment.Center,
@@ -55,12 +56,13 @@ fun CountInput(
       ) {
         Icon(
           painter = painterResource(id = R.drawable.baseline_remove_24),
-          contentDescription = "Decrease value",
+          contentDescription = stringResource(R.string.description_decrease_value),
         )
       }
       Box(
         contentAlignment = Alignment.Center,
-        modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 40.dp)
+        modifier = Modifier
+          .defaultMinSize(minWidth = 48.dp, minHeight = 40.dp)
           .background(MaterialTheme.colorScheme.surface)
       ) {
         Text(text = value.toString())
@@ -78,7 +80,7 @@ fun CountInput(
       ) {
         Icon(
           imageVector = Icons.Filled.Add,
-          contentDescription = "Increase value",
+          contentDescription = stringResource(R.string.description_increase_value),
         )
       }
     }

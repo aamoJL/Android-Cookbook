@@ -1,5 +1,8 @@
 package com.aamo.cookbook.ui.components
 
+import android.os.Environment
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Favorite
@@ -21,12 +25,16 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.theme.Handwritten
 import kotlin.math.max
 
@@ -47,21 +55,36 @@ fun RecipeCard(
     Column(modifier = Modifier.fillMaxSize()) {
       Box(modifier = Modifier
         .weight(1f, true)
-        .fillMaxSize()) {
-        if (isFavorite) {
-          FavoriteIcon(
-            modifier = Modifier
-              .align(Alignment.BottomEnd)
-              .padding(vertical = 8.dp, horizontal = 8.dp)
-          )
-        }
-        if (rating != 0) {
-          StarRating(
-            rating = rating,
-            modifier = Modifier
-              .align(Alignment.BottomStart)
-              .padding(vertical = 4.dp, horizontal = 4.dp)
-          )
+        .fillMaxSize()
+      ) {
+        Thumbnail(
+          fileName = recipe.thumbnailUri,
+          modifier = Modifier.fillMaxSize())
+        Box(
+          modifier = Modifier
+            .align(Alignment.BottomStart)
+            .padding(4.dp)
+            .fillMaxWidth()
+        ) {
+          if (isFavorite) {
+            FavoriteIcon(
+              modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = .8f))
+                .padding(2.dp)
+            )
+          }
+          if (rating != 0) {
+            StarRating(
+              rating = rating,
+              modifier = Modifier
+                .align(Alignment.BottomStart)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = .8f))
+                .padding(horizontal = 4.dp)
+            )
+          }
         }
       }
       Surface(
@@ -84,20 +107,46 @@ fun RecipeCard(
 }
 
 @Composable
-private fun FavoriteIcon(
-  modifier: Modifier = Modifier,
-  color: Color = MaterialTheme.colorScheme.primary
+private fun Thumbnail(
+  fileName: String,
+  modifier: Modifier = Modifier
 ) {
+  Box(modifier = modifier) {
+    if (fileName.isNotEmpty()) {
+      Image(
+        painter = rememberAsyncImagePainter(
+          model = IOService(LocalContext.current)
+            .getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName)
+        ),
+        contentDescription = null,
+        contentScale = ContentScale.Crop,
+        modifier = Modifier.fillMaxSize()
+      )
+    } else {
+      Icon(
+        painter = painterResource(R.drawable.baseline_no_photography_24),
+        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .3f),
+        contentDescription = null,
+        modifier = Modifier.align(Alignment.Center)
+      )
+    }
+  }
+}
+
+@Composable
+private fun FavoriteIcon(modifier: Modifier = Modifier) {
   Box(modifier) {
     Icon(
       imageVector = Icons.Outlined.Favorite,
       contentDescription = null,
-      tint = color.copy(alpha = .2f),
+      tint = MaterialTheme.colorScheme.tertiaryContainer,
+      modifier = Modifier.size(16.dp)
     )
     Icon(
       imageVector = Icons.Outlined.FavoriteBorder,
       contentDescription = null,
-      tint = color,
+      tint = MaterialTheme.colorScheme.tertiary,
+      modifier = Modifier.size(16.dp)
     )
   }
 }
@@ -105,15 +154,14 @@ private fun FavoriteIcon(
 @Composable
 private fun StarRating(
   rating: Int,
-  modifier: Modifier = Modifier,
-  color: Color = MaterialTheme.colorScheme.primary
+  modifier: Modifier = Modifier
 ) {
   Row(modifier = modifier) {
     repeat(rating) {
       Icon(
         imageVector = Icons.Filled.Star,
         contentDescription = null,
-        tint = color,
+        tint = MaterialTheme.colorScheme.primary,
         modifier = Modifier.size(16.dp)
       )
     }
@@ -122,13 +170,13 @@ private fun StarRating(
         Icon(
           imageVector = Icons.Filled.Star,
           contentDescription = null,
-          tint = color.copy(alpha = .2f),
+          tint = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
         Icon(
           painter = painterResource(R.drawable.outline_star_outline_24),
           contentDescription = null,
-          tint = color.copy(alpha = .2f),
+          tint = MaterialTheme.colorScheme.primary.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
       }

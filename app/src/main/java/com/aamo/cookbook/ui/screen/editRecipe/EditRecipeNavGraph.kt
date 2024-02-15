@@ -19,13 +19,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.aamo.cookbook.Screen
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.utility.sharedViewModel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
@@ -69,23 +64,16 @@ fun NavGraphBuilder.editRecipeGraph(
 
       EditRecipeScreen(
         viewModel = editRecipeViewModel,
-        onEditChapter = { chapter ->
-          editRecipeViewModel.initChapterUiState(
-            chapter = chapter ?: ChapterWithStepsAndIngredients(
-              Chapter(orderNumber = editRecipeViewModel.infoUiState.value.chapters.size + 1)
-            )
-          )
+        onEditChapter = { index ->
+          editRecipeViewModel.initChapterUiState(index)
           navController.navigate(EditRecipeScreenPage.EditChapter.route) {
             launchSingleTop = true
           }
         },
         onSubmitChanges = {
-          onSubmitChanges(
-            editRecipeViewModel.infoUiState.value
-              .toRecipeWithChaptersStepsAndIngredients()
-          )
+          onSubmitChanges(editRecipeViewModel.toRecipeWithChaptersStepsAndIngredients())
         },
-        onDelete = { onDeleteRecipe(editRecipeViewModel.infoUiState.value.toRecipe()) },
+        onDelete = { onDeleteRecipe(editRecipeViewModel.toRecipeWithChaptersStepsAndIngredients().value) },
         onBack = onBack
       )
     }
@@ -107,21 +95,14 @@ fun NavGraphBuilder.editRecipeGraph(
 
       EditRecipeChapterScreen(
         viewModel = editRecipeViewModel,
-        onEditStep = { step ->
-          editRecipeViewModel.initStepUiState(
-            step = step
-              ?: StepWithIngredients(
-                Step(orderNumber = editRecipeViewModel.chapterUiState.value.steps.size + 1)
-              )
-          )
+        onEditStep = { index ->
+          editRecipeViewModel.initStepUiState(index)
           navController.navigate(route = EditRecipeScreenPage.EditStep.route) {
             launchSingleTop = true
           }
         },
         onSubmitChanges = {
-          editRecipeViewModel.addOrUpdateChapter(
-            chapter = editRecipeViewModel.chapterUiState.value.toChapterWithStepsAndIngredients()
-          )
+          editRecipeViewModel.applyChapterChanges()
           navController.navigate(route = EditRecipeScreenPage.EditInfo.route) {
             popUpTo(EditRecipeScreenPage.EditChapter.route) { inclusive = true }
             launchSingleTop = true
@@ -142,30 +123,20 @@ fun NavGraphBuilder.editRecipeGraph(
           primaryExitTransition()
         else this.secondaryExitTransition()
       }
-      ) {
+    ) {
       val editRecipeViewModel =
         it.sharedViewModel<EditRecipeViewModel>(navController = navController)
 
       EditRecipeChapterStepScreen(
         viewModel = editRecipeViewModel,
-        onEditIngredient = { ingredient ->
-          editRecipeViewModel.initIngredientUiState(
-            ingredient = ingredient ?: Ingredient(),
-            index = editRecipeViewModel.stepUiState.value.ingredients
-              .indexOfFirst { pair -> pair.second == ingredient }
-              .let { index ->
-                if (index == -1) editRecipeViewModel.stepUiState.value.ingredients.size
-                else index
-              }
-          )
+        onEditIngredient = { index ->
+          editRecipeViewModel.initIngredientUiState(index)
           navController.navigate(route = EditRecipeScreenPage.EditIngredient.route) {
             launchSingleTop = true
           }
         },
         onSubmitChanges = {
-          editRecipeViewModel.addOrUpdateStep(
-            editRecipeViewModel.stepUiState.value.toStepWithIngredients()
-          )
+          editRecipeViewModel.applyStepChanges()
           navController.navigate(route = EditRecipeScreenPage.EditChapter.route) {
             popUpTo(EditRecipeScreenPage.EditStep.route) { inclusive = true }
             launchSingleTop = true
@@ -185,10 +156,7 @@ fun NavGraphBuilder.editRecipeGraph(
       EditRecipeChapterStepIngredientScreen(
         viewModel = editRecipeViewModel,
         onSubmitChanges = {
-          editRecipeViewModel.addOrUpdateIngredient(
-            ingredient = editRecipeViewModel.ingredientUiState.value.toIngredient(),
-            index = editRecipeViewModel.ingredientUiState.value.index
-          )
+          editRecipeViewModel.applyIngredientChanges()
           navController.navigate(route = EditRecipeScreenPage.EditStep.route) {
             popUpTo(EditRecipeScreenPage.EditIngredient.route) { inclusive = true }
             launchSingleTop = true
@@ -199,6 +167,7 @@ fun NavGraphBuilder.editRecipeGraph(
   }
 }
 
+//region [Animation stuff]
 private fun AnimatedContentTransitionScope<NavBackStackEntry>.primaryEnterTransition(): EnterTransition {
   return fadeIn(
     animationSpec = tween(300, easing = LinearEasing)
@@ -234,3 +203,4 @@ private fun AnimatedContentTransitionScope<NavBackStackEntry>.secondaryExitTrans
     towards = AnimatedContentTransitionScope.SlideDirection.End
   )
 }
+//endregion

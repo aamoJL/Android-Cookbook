@@ -66,4 +66,11 @@
     <string name="description_set_timer">Aseta ajastin</string>
     <string name="textfield_step_timer">Ajastin (minuuttia)</string>
     <string name="textfield_label_note">Huomautus</string>
+    <string name="description_take_a_photo">Ota kuva</string>
+    <string name="description_delete_photo">Poista kuva</string>
+    <string name="text_rate_the_recipe">Arvostele resepti</string>
+    <string name="description_servings">Annokset</string>
+    <string name="description_decrease_value">Vähennä</string>
+    <string name="description_increase_value">Lisää</string>
+    <string name="description_star_rating_star_icon">%1$s tähteä</string>
 </resources>

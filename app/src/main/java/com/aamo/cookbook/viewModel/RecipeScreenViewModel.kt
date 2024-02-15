@@ -1,5 +1,6 @@
 package com.aamo.cookbook.viewModel
 
+import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.aamo.cookbook.database.repository.RecipeRepository
@@ -7,6 +8,7 @@ import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.service.IOServiceBase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -14,13 +16,16 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class RecipeScreenViewModel(
-  private val recipeRepository: RecipeRepository
+  private val recipeRepository: RecipeRepository,
+  private val ioService: IOServiceBase
 ) : ViewModel() {
 
   /**
    * Initializer for this viewmodel used in [ViewModelProvider.Factory]
    */
   fun init(recipeId: Int) {
+    this.recipeId = recipeId
+
     viewModelScope.launch {
       launch {
         val recipeWithFavoriteAndRating =
@@ -33,7 +38,7 @@ class RecipeScreenViewModel(
         }
       }
       launch {
-        recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
+        val recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
           ?: RecipeWithChaptersStepsAndIngredients(Recipe())
         _chapterPageUiStates.update {
           recipe.chapters.map { chapter ->
@@ -44,6 +49,7 @@ class RecipeScreenViewModel(
           SummaryPageUiState(
             recipeName = recipe.value.name,
             recipeNote = recipe.value.note,
+            recipeThumbnail = recipe.value.thumbnailUri,
             chaptersWithIngredients = recipe.chapters.map { chapter ->
               Pair(
                 chapter.value.name,
@@ -55,6 +61,9 @@ class RecipeScreenViewModel(
         _servingsState.update {
           ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
         }
+        _completedPageUiState.update { s ->
+          s.copy(recipeThumbnail = recipe.value.thumbnailUri)
+        }
       }
     }
   }
@@ -62,6 +71,7 @@ class RecipeScreenViewModel(
   data class SummaryPageUiState(
     val recipeName: String = "",
     val recipeNote: String = "",
+    val recipeThumbnail: String = "",
     val chaptersWithIngredients: List<Pair<String, List<Ingredient>>> = emptyList()
   )
 
@@ -82,6 +92,7 @@ class RecipeScreenViewModel(
 
   data class CompletedPageUiState(
     val fiveStarRating: Int = 0,
+    val recipeThumbnail: String = ""
   )
 
   data class ServingsState(
@@ -91,8 +102,8 @@ class RecipeScreenViewModel(
     val multiplier: Float = current.toFloat() / max(1, baseline).toFloat()
   }
 
-  var recipe: RecipeWithChaptersStepsAndIngredients =
-    RecipeWithChaptersStepsAndIngredients(Recipe())
+  var recipeId: Int = 0
+    private set
 
   private val _summaryPageUiStates = MutableStateFlow(SummaryPageUiState())
   val summaryPageUiStates = _summaryPageUiStates.asStateFlow()
@@ -127,8 +138,8 @@ class RecipeScreenViewModel(
 
   fun setFavoriteState(value: Boolean) {
     viewModelScope.launch {
-      if (value) recipeRepository.addRecipeToFavorites(recipe.value.id)
-      else recipeRepository.removeRecipeFromFavorites(recipe.value.id)
+      if (value) recipeRepository.addRecipeToFavorites(recipeId)
+      else recipeRepository.removeRecipeFromFavorites(recipeId)
 
       _favoriteState.update { value }
     }
@@ -137,14 +148,29 @@ class RecipeScreenViewModel(
   fun setRating(value: Int) {
     if (value != _completedPageUiState.value.fiveStarRating) {
       viewModelScope.launch {
-        recipeRepository.upsertRecipeRating(recipe.value.id, value)
+        recipeRepository.upsertRecipeRating(recipeId, value)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = value) }
       }
-    }
-    else {
+    } else {
       viewModelScope.launch {
-        recipeRepository.deleteRecipeRating(recipe.value.id)
+        recipeRepository.deleteRecipeRating(recipeId)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = 0) }
+      }
+    }
+  }
+
+  fun setThumbnail(fileName: String) {
+    viewModelScope.launch {
+      _completedPageUiState.value.recipeThumbnail.also { oldThumbnail ->
+        if (oldThumbnail.isNotEmpty()) {
+          ioService.deleteExternalFile(Environment.DIRECTORY_PICTURES, oldThumbnail)
+        }
+      }
+
+      recipeRepository.getRecipeById(recipeId)?.copy(thumbnailUri = fileName)?.also {
+        recipeRepository.upsertRecipe(it)
+        _completedPageUiState.update { s -> s.copy(recipeThumbnail = it.thumbnailUri) }
+        _summaryPageUiStates.update { s -> s.copy(recipeThumbnail = it.thumbnailUri) }
       }
     }
   }

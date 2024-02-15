@@ -2,6 +2,7 @@ package com.aamo.cookbook.viewModel
 
 import com.aamo.cookbook.MainDispatcherRule
 import com.aamo.cookbook.database.repository.TestRecipeRepository
+import com.aamo.cookbook.service.TestIOService
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -19,14 +20,14 @@ class RecipeScreenViewModelTest {
   @Before
   fun setup() = runTest {
     repository = TestRecipeRepository()
-    viewModel = RecipeScreenViewModel(repository)
+    viewModel = RecipeScreenViewModel(repository, TestIOService())
     viewModel.init(recipeId)
   }
 
   @Test
   fun verifyInit_Recipe() = runTest {
-    val expected = repository.getRecipeWithChaptersStepsAndIngredients(recipeId)
-    val actual = viewModel.recipe
+    val expected = repository.getRecipeWithChaptersStepsAndIngredients(recipeId)?.value?.name
+    val actual = viewModel.summaryPageUiStates.value.recipeName
 
     assertEquals(expected, actual)
   }
@@ -42,7 +43,8 @@ class RecipeScreenViewModelTest {
 
   @Test
   fun verifyInit_FavoriteState() {
-    val expected = TestRecipeRepository.Data.favoriteRecipes.firstOrNull { it.recipeId == viewModel.recipe.value.id } != null
+    val expected =
+      TestRecipeRepository.Data.favoriteRecipes.firstOrNull { it.recipeId == recipeId } != null
     val actual = viewModel.favoriteState.value
     assertEquals(expected, actual)
   }
@@ -50,7 +52,8 @@ class RecipeScreenViewModelTest {
   @Test
   fun updateProgress() {
     val oldProgress = viewModel.chapterPageUiStates.value.map { it.progress }
-    val chapterIndex = 0; val stepIndex = 0
+    val chapterIndex = 0
+    val stepIndex = 0
     viewModel.updateProgress(chapterIndex, stepIndex, true)
 
     val expected = oldProgress.map {

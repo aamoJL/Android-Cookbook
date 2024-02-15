@@ -12,12 +12,14 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
 interface RecipeRepository {
+  suspend fun getRecipeById(recipeId: Int): Recipe?
   fun getRecipesFlow(): Flow<List<Recipe>>
   suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple>
   suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients?
   fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithFavoriteAndRating>>
   suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithFavoriteAndRating?
   suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
+  suspend fun upsertRecipe(recipe: Recipe) : Int
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int
   suspend fun deleteRecipe(recipe: Recipe)
   suspend fun addRecipeToFavorites(recipeId: Int)
@@ -27,6 +29,9 @@ interface RecipeRepository {
 }
 
 class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeRepository {
+  override suspend fun getRecipeById(recipeId: Int): Recipe? = recipeDao.getRecipesFlow().first()
+    .firstOrNull { it.id == recipeId }
+
   override fun getRecipesFlow(): Flow<List<Recipe>> = recipeDao.getRecipesFlow()
 
   override suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple> =
@@ -43,6 +48,8 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
 
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =
     recipeDao.getFavoriteRecipeById(recipeId)
+
+  override suspend fun upsertRecipe(recipe: Recipe) : Int = recipeDao.upsertRecipe(recipe).toInt()
 
   override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int =
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)

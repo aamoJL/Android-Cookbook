@@ -1,5 +1,9 @@
 package com.aamo.cookbook.ui.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -16,39 +20,64 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismiss
 import androidx.compose.material3.rememberDismissState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicDismissibleItem(
   dismissAction: () -> (Boolean),
   modifier: Modifier = Modifier,
+  animationDuration: Int = 500,
   content: @Composable () -> Unit = {},
 ) {
+  var isRemoved by remember { mutableStateOf(false) }
   val dismissState = rememberDismissState(
-    confirmValueChange = {
-      when(it){
-        DismissValue.DismissedToEnd -> { dismissAction()}
+    confirmValueChange = { value ->
+      when (value) {
+        DismissValue.DismissedToEnd -> {
+          isRemoved = true; true
+        }
+
         else -> false
       }
     },
     positionalThreshold = { 150.dp.toPx() }
   )
 
-  SwipeToDismiss(
-    state = dismissState,
-    directions = setOf(DismissDirection.StartToEnd),
-    modifier = modifier,
-    background = { DismissBackground(dismissState) },
-    dismissContent = {
-      content()
-    },
-  )
+  LaunchedEffect(isRemoved) {
+    if (isRemoved) {
+      delay(animationDuration.toLong()).also { dismissAction() }
+    }
+  }
+
+  AnimatedVisibility(
+    visible = !isRemoved,
+    exit = shrinkVertically(
+      animationSpec = tween(durationMillis = animationDuration),
+      shrinkTowards = Alignment.Top
+    ) + fadeOut()
+  ) {
+    SwipeToDismiss(
+      state = dismissState,
+      directions = setOf(DismissDirection.StartToEnd),
+      modifier = modifier,
+      background = { DismissBackground(dismissState) },
+      dismissContent = {
+        content()
+      },
+    )
+  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

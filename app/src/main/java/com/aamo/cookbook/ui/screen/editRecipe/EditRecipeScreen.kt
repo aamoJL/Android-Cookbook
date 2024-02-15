@@ -62,7 +62,7 @@ import java.util.UUID
 fun EditRecipeScreen(
   viewModel: EditRecipeViewModel,
   modifier: Modifier = Modifier,
-  onEditChapter: (ChapterWithStepsAndIngredients?) -> Unit = {},
+  onEditChapter: (index: Int) -> Unit = {},
   onSubmitChanges: () -> Unit = {},
   onDelete: () -> Unit = {},
   onBack: () -> Unit = {}
@@ -87,8 +87,8 @@ fun EditRecipeScreenPageContent(
   uiState: EditRecipeViewModel.InfoScreenUiState,
   modifier: Modifier = Modifier,
   onFormStateChange: (EditRecipeViewModel.InfoScreenUiState.InfoFormState) -> Unit = {},
-  onEditChapter: (ChapterWithStepsAndIngredients?) -> Unit = {},
-  onDeleteChapter: (ChapterWithStepsAndIngredients) -> Boolean = { false },
+  onEditChapter: (index: Int) -> Unit = {},
+  onDeleteChapter: (index: Int) -> Boolean = { false },
   onSubmitChanges: () -> Unit = {},
   onDelete: () -> Unit = {},
   onBack: () -> Unit = {},
@@ -142,7 +142,7 @@ fun EditRecipeScreenPageContent(
         if (uiState.unsavedChanges) openUnsavedDialog = true
         else onBack()
       }, actions = {
-        if (uiState.id != 0) {
+        if (!uiState.isNewRecipe) {
           IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
               imageVector = Icons.Filled.Delete,
@@ -241,14 +241,14 @@ private fun InfoForm(
 @Composable
 private fun ChapterList(
   chapters: List<Pair<UUID, ChapterWithStepsAndIngredients>>,
-  onEditChapter: (ChapterWithStepsAndIngredients?) -> Unit,
-  onDeleteChapter: (ChapterWithStepsAndIngredients) -> Boolean,
+  onEditChapter: (index: Int) -> Unit,
+  onDeleteChapter: (index: Int) -> Boolean,
   onSwap: (from: Int, to: Int) -> Unit,
   modifier: Modifier = Modifier,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_chapters),
-    onAddClick = { onEditChapter(null) },
+    onAddClick = { onEditChapter(-1) },
     modifier = modifier
   ) {
     LazyColumn {
@@ -260,8 +260,8 @@ private fun ChapterList(
           ChapterListItem(
             chapter = pair.second,
             chapterNumber = index + 1,
-            onClick = { onEditChapter(pair.second) },
-            onDismiss = { onDeleteChapter(pair.second) },
+            onClick = { onEditChapter(index) },
+            onDismiss = { onDeleteChapter(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,
