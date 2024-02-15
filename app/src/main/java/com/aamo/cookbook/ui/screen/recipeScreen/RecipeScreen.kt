@@ -87,8 +87,8 @@ fun RecipeScreen(
 
   RecipeScreenContent(
     summaryPageUiState = summaryUiState,
-    chapterUiStates = chapterUiStates,
-    completedUiState = completedUiState,
+    chapterPageUiStates = chapterUiStates,
+    completedPageUiState = completedUiState,
     servingsState = servingsState,
     favoriteState = favoriteState,
     modifier = modifier,
@@ -117,8 +117,8 @@ fun RecipeScreen(
 @Composable
 fun RecipeScreenContent(
   summaryPageUiState: RecipeScreenViewModel.SummaryPageUiState,
-  chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
-  completedUiState: RecipeScreenViewModel.CompletedPageUiState,
+  chapterPageUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
+  completedPageUiState: RecipeScreenViewModel.CompletedPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
   favoriteState: Boolean,
   modifier: Modifier = Modifier,
@@ -131,10 +131,10 @@ fun RecipeScreenContent(
   onRatingChange: (Int) -> Unit,
   onPhotoChange: (Uri) -> Unit,
 ) {
-  val pageCount by rememberSaveable(chapterUiStates) {
+  val pageCount by rememberSaveable(chapterPageUiStates) {
     mutableIntStateOf(
-      if (chapterUiStates.any { x -> x.progress.any { !it } }) chapterUiStates.size + 1
-      else chapterUiStates.size + 2
+      if (chapterPageUiStates.any { x -> x.progress.any { !it } }) chapterPageUiStates.size + 1
+      else chapterPageUiStates.size + 2
     )
   }
   val pagerState = rememberPagerState(pageCount = { pageCount })
@@ -236,9 +236,9 @@ fun RecipeScreenContent(
                 onServingsCountChange = onServingsCountChange,
               )
 
-              in (1..chapterUiStates.size) -> {
+              in (1..chapterPageUiStates.size) -> {
                 val chapterIndex = pageIndex - 1
-                val uiState = chapterUiStates.elementAt(chapterIndex)
+                val uiState = chapterPageUiStates.elementAt(chapterIndex)
 
                 ChapterPage(
                   uiState = uiState,
@@ -251,7 +251,7 @@ fun RecipeScreenContent(
               }
 
               else -> CompletedPage(
-                uiState = completedUiState,
+                uiState = completedPageUiState,
                 onRatingChange = onRatingChange,
                 onThumbnailChange = onPhotoChange
               )
@@ -260,7 +260,7 @@ fun RecipeScreenContent(
         }
         Divider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f))
         Pager(
-          chapterUiStates = chapterUiStates,
+          chapterUiStates = chapterPageUiStates,
           pagerState = pagerState,
           onIndicatorClick = {
             scope.launch {

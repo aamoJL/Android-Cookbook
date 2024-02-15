@@ -12,12 +12,15 @@ import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
 class BasicDismissibleItemTest {
+  private val tag = "tag"
+  private val animationDuration = 500
   private var wasDismissed = false
 
   @get:Rule
@@ -29,9 +32,10 @@ class BasicDismissibleItemTest {
       CookbookTheme {
         BasicDismissibleItem(
           dismissAction = { true.also { wasDismissed = true } },
+          animationDuration = animationDuration
         ){
           ListItem(
-            modifier = Modifier.testTag("tag"),
+            modifier = Modifier.testTag(tag),
             headlineContent = {
             Text(text = "test item")
           })
@@ -41,18 +45,22 @@ class BasicDismissibleItemTest {
   }
 
   @Test
-  fun swipe_Left() {
+  fun swipe_Left() = runTest {
     getInput().performTouchInput { swipeLeft() }
+
+    rule.mainClock.advanceTimeBy(animationDuration.toLong())
 
     assertFalse(wasDismissed)
   }
 
   @Test
-  fun swipe_Right() {
+  fun swipe_Right() = runTest {
     getInput().performTouchInput { swipeRight() }
+
+    rule.mainClock.advanceTimeBy(animationDuration.toLong())
 
     assert(wasDismissed)
   }
 
-  private fun getInput() = rule.onNodeWithTag("tag")
+  private fun getInput() = rule.onNodeWithTag(tag)
 }

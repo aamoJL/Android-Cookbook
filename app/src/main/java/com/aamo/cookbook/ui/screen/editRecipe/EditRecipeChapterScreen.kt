@@ -50,11 +50,12 @@ import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
+import kotlin.math.min
 
 @Composable
 fun EditRecipeChapterScreen(
   viewModel: EditRecipeViewModel,
-  onEditStep: (StepWithIngredients?) -> Unit,
+  onEditStep: (index: Int) -> Unit,
   onSubmitChanges: () -> Unit,
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
@@ -78,8 +79,8 @@ fun EditRecipeChapterScreenContent(
   uiState: EditRecipeViewModel.ChapterScreenUiState,
   modifier: Modifier = Modifier,
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit = {},
-  onEditStep: (StepWithIngredients?) -> Unit = {},
-  onDeleteStep: (StepWithIngredients) -> (Boolean) = { false },
+  onEditStep: (index: Int) -> Unit = {},
+  onDeleteStep: (index: Int) -> (Boolean) = { false },
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {},
   onSwapSteps: (from: Int, to: Int) -> Unit = {_,_ -> }
@@ -125,7 +126,7 @@ fun EditRecipeChapterScreenContent(
     ) {
       ChapterForm(
         uiState = uiState.formState,
-        orderNumber = uiState.orderNumber,
+        orderNumber = min(1, uiState.index + 1),
         onFormStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
@@ -143,14 +144,14 @@ fun EditRecipeChapterScreenContent(
 @Composable
 private fun StepList(
   steps: List<Pair<UUID, StepWithIngredients>>,
-  onEditStep: (StepWithIngredients?) -> Unit,
+  onEditStep: (index: Int) -> Unit,
   modifier: Modifier = Modifier,
   onSwap: (from: Int, to: Int) -> Unit,
-  onDeleteStep: (StepWithIngredients) -> Boolean,
+  onDeleteStep: (index: Int) -> Boolean,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_steps),
-    onAddClick = { onEditStep(null) },
+    onAddClick = { onEditStep(-1) },
     modifier = modifier
   ) {
     LazyColumn {
@@ -162,8 +163,8 @@ private fun StepList(
           StepListItem(
             step = pair.second,
             stepNumber = index + 1,
-            onClick = { onEditStep(pair.second) },
-            onDismiss = { onDeleteStep(pair.second) },
+            onClick = { onEditStep(index) },
+            onDismiss = { onDeleteStep(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,

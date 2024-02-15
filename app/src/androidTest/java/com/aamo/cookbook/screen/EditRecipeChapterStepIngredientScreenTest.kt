@@ -7,6 +7,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -16,6 +17,7 @@ import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeChapterStepIngredientScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
@@ -143,18 +145,18 @@ class EditRecipeChapterStepIngredientScreenTest {
     withNewIngredient().apply {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
-      rule.onNodeWithText(R.string.textfield_ingredient_amount)
+      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel())
         .assertTextContains("")
-      rule.onNodeWithText(R.string.textfield_ingredient_unit)
+      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel())
         .assertTextContains(uiState.formState.unit)
     }
 
     withExistingIngredient().apply {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
-      rule.onNodeWithText(R.string.textfield_ingredient_amount)
+      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel())
         .assertTextContains(uiState.formState.amount!!.toString())
-      rule.onNodeWithText(R.string.textfield_ingredient_unit)
+      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel())
         .assertTextContains(uiState.formState.unit)
     }
   }
@@ -172,12 +174,12 @@ class EditRecipeChapterStepIngredientScreenTest {
       performTextInput(expected.name)
     }
 
-    rule.onNodeWithText(R.string.textfield_ingredient_amount).apply {
+    rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()).apply {
       performTextClearance()
       performTextInput(expected.amount.toString())
     }
 
-    rule.onNodeWithText(R.string.textfield_ingredient_unit).apply {
+    rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()).apply {
       performTextClearance()
       performTextInput(expected.unit)
     }

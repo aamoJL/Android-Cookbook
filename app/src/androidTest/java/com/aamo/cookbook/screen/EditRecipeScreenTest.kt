@@ -8,6 +8,7 @@ import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
@@ -20,9 +21,11 @@ import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeScreenPageContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Before
@@ -235,7 +238,9 @@ class EditRecipeScreenTest {
       rule.onNodeWithText(R.string.textfield_recipe_category)
         .assertTextContains(uiState.formState.category)
 
-      rule.onNodeWithText(R.string.textfield_recipe_subcategory)
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+      )
         .assertTextContains(uiState.formState.subCategory)
 
       rule.onNodeWithText(R.string.textfield_recipe_servings)
@@ -249,7 +254,9 @@ class EditRecipeScreenTest {
       rule.onNodeWithText(R.string.textfield_recipe_category)
         .assertTextContains(uiState.formState.category)
 
-      rule.onNodeWithText(R.string.textfield_recipe_subcategory)
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+      )
         .assertTextContains(uiState.formState.subCategory)
 
       rule.onNodeWithText(R.string.textfield_recipe_servings)
@@ -276,7 +283,9 @@ class EditRecipeScreenTest {
       performTextInput(expected.category)
     }
 
-    rule.onNodeWithText(R.string.textfield_recipe_subcategory).apply {
+    rule.onNodeWithText(
+      rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+    ).apply {
       performTextClearance()
       performTextInput(expected.subCategory)
     }
@@ -290,9 +299,11 @@ class EditRecipeScreenTest {
   }
 
   @Test
-  fun onChapterDeletion() {
+  fun onChapterDeletion() = runTest {
     withExistingRecipe().apply {
       rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name)[0].performTouchInput { swipeRight() }
+
+      rule.mainClock.advanceTimeBy(1000)
 
       assert(wasDismissed)
     }

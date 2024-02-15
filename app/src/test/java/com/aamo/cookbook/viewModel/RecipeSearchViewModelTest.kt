@@ -31,18 +31,18 @@ class RecipeSearchViewModelTest {
   @Test
   fun verifyInitValidRecipes() {
     val expected = TestRecipeRepository.Data.recipes.map { it.value }
-    val actual = viewModel.validRecipes.value
+    val actual = viewModel.validRecipes.value.map { it.value }
     assertEquals(expected, actual)
   }
 
   @Test
   fun setSearchWord() {
-    val expected = viewModel.validRecipes.value.first().name
+    val expected = viewModel.validRecipes.value.first().value.name
 
     viewModel.setSearchWord(expected)
     assertEquals(1, viewModel.validRecipes.value.size)
 
-    val actual = viewModel.validRecipes.value.first().name
+    val actual = viewModel.validRecipes.value.first().value.name
     assertEquals(expected, actual)
   }
 }

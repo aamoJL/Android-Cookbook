@@ -27,6 +27,9 @@ class TestRecipeRepository : RecipeRepository {
   private var recipes = Data.recipes
   private var favorites = Data.favoriteRecipes
   private var ratings = Data.recipeRatings
+  override suspend fun getRecipeById(recipeId: Int): Recipe? {
+    return recipes.firstOrNull { it.value.id == recipeId }?.value
+  }
 
   override fun getRecipesFlow(): Flow<List<Recipe>> {
     return flow {
@@ -77,6 +80,19 @@ class TestRecipeRepository : RecipeRepository {
         FullFavoriteRecipe(favorite, recipe.value)
       }
     }
+  }
+
+  override suspend fun upsertRecipe(recipe: Recipe): Int {
+    val index = recipes.indexOfFirst { it.value == recipe }
+
+    if (index == -1) {
+      recipes = recipes.toMutableList().apply { add(RecipeWithChaptersStepsAndIngredients(recipe)) }
+    } else {
+      recipes = recipes.toMutableList().apply {
+        this[index] = this[index].copy(value = recipe)
+      }
+    }
+    return if (index == -1) 0 else 1
   }
 
   override suspend fun addRecipeToFavorites(recipeId: Int) {

@@ -20,11 +20,8 @@ object ViewModelProvider {
       ).apply { init(recipeId = createSavedStateHandle()[Screen.Recipe.argumentName] ?: 0) }
     }
     initializer {
-      EditRecipeViewModel(
-        cookbookApplication().container.recipeRepository,
-        createSavedStateHandle()
-      )
-        .apply { init() }
+      EditRecipeViewModel(cookbookApplication().container.recipeRepository)
+        .apply { init(recipeId = createSavedStateHandle()[Screen.Recipe.argumentName] ?: 0) }
     }
     initializer {
       RecipeSearchViewModel(

@@ -49,12 +49,13 @@ import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
+import kotlin.math.min
 
 @Composable
 fun EditRecipeChapterStepScreen(
   viewModel: EditRecipeViewModel,
   modifier: Modifier = Modifier,
-  onEditIngredient: (Ingredient?) -> Unit = {},
+  onEditIngredient: (index: Int) -> Unit = {},
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {}
 ) {
@@ -78,8 +79,8 @@ fun EditRecipeChapterStepScreenContent(
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onSubmitChanges: () -> Unit = {},
-  onEditIngredient: (Ingredient?) -> Unit = {},
-  onDeleteIngredient: (Ingredient) -> Boolean = { false },
+  onEditIngredient: (index: Int) -> Unit = {},
+  onDeleteIngredient: (index: Int) -> Boolean = { false },
   onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {},
   onSwapIngredients: (from: Int, to: Int) -> Unit = {_,_ -> }
 ) {
@@ -128,7 +129,7 @@ fun EditRecipeChapterStepScreenContent(
     ) {
       StepForm(
         uiState = uiState.formState,
-        orderNumber = uiState.orderNumber,
+        orderNumber = min(1, uiState.index + 1),
         onStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
@@ -175,14 +176,14 @@ private fun StepForm(
 @Composable
 private fun IngredientList(
   ingredients: List<Pair<UUID, Ingredient>>,
-  onEditIngredient: (Ingredient?) -> Unit,
-  onDeleteIngredient: (Ingredient) -> Boolean,
+  onEditIngredient: (index: Int) -> Unit,
+  onDeleteIngredient: (index: Int) -> Boolean,
   onSwap: (from: Int, to: Int) -> Unit,
   modifier: Modifier = Modifier
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_ingredients),
-    onAddClick = { onEditIngredient(null) },
+    onAddClick = { onEditIngredient(-1) },
     modifier = modifier
   ) {
     LazyColumn {
@@ -193,8 +194,8 @@ private fun IngredientList(
         Column(modifier = Modifier.animateItemPlacement()) {
           IngredientListItem(
             ingredient = pair.second,
-            onClick = { onEditIngredient(pair.second) },
-            onDismiss = { onDeleteIngredient(pair.second) },
+            onClick = { onEditIngredient(index) },
+            onDismiss = { onDeleteIngredient(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             } else null,

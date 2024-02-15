@@ -23,6 +23,7 @@ import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
+import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -57,7 +58,8 @@ class EditRecipeChapterStepScreenTest {
    */
   private fun withNewStep() {
     uiState = EditRecipeViewModel.StepScreenUiState.fromStep(
-      step = StepWithIngredients(Step())
+      step = StepWithIngredients(Step()),
+      index = 0
     )
     wasClicked = false
     wasDismissed = false
@@ -67,8 +69,10 @@ class EditRecipeChapterStepScreenTest {
    * Sets ui state to represent an existing step
    */
   private fun withExistingStep() {
+    val index = 0
     uiState = EditRecipeViewModel.StepScreenUiState.fromStep(
-      step = Mocker.mockRecipeList().first().chapters.first().steps.first()
+      step = Mocker.mockRecipeList().first().chapters.first().steps[index],
+      index = index
     )
     wasClicked = false
     wasDismissed = false
@@ -193,9 +197,11 @@ class EditRecipeChapterStepScreenTest {
   }
 
   @Test
-  fun onIngredientDeletion() {
+  fun onIngredientDeletion() = runTest {
     withExistingStep().apply {
       rule.onAllNodesWithTag(Tags.INGREDIENT_ITEM.name)[0].performTouchInput { swipeRight() }
+
+      rule.mainClock.advanceTimeBy(1000)
 
       assert(wasDismissed)
     }

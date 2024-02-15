@@ -33,7 +33,8 @@ data class Recipe(
  */
 data class Chapter(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
-  @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
+  @ColumnInfo(name = "orderNumber")
+  val orderNumber: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "recipeId") val recipeId: Int = 0,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",

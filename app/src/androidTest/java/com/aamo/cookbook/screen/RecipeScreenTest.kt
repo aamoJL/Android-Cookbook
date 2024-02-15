@@ -51,7 +51,8 @@ class RecipeScreenTest {
               Pair(chapter.value.name, chapter.steps.flatMap { it.ingredients })
             }
           ),
-          chapterUiStates = chapterUiStates,
+          chapterPageUiStates = chapterUiStates,
+          completedPageUiState = RecipeScreenViewModel.CompletedPageUiState(),
           servingsState = servingsState,
           favoriteState = favoriteState,
           onProgressChange = { _, _, _ ->
@@ -60,7 +61,10 @@ class RecipeScreenTest {
           onBack = { wasClicked = true },
           onEditRecipe = { wasClicked = true },
           onFavoriteChange = { favoriteState = it },
-          onServingsCountChange = { servingsState = servingsState.copy(current = it) }
+          onServingsCountChange = { servingsState = servingsState.copy(current = it) },
+          onPhotoChange = { },
+          onRatingChange = { },
+          onCopyRecipe = { },
         )
       }
     }
@@ -118,7 +122,7 @@ class RecipeScreenTest {
         .performTouchInput { swipeLeft() }
     }
 
-    rule.onNodeWithText("Valmis!").assertDoesNotExist()
+    rule.onNodeWithText(R.string.text_rate_the_recipe).assertDoesNotExist()
   }
 
   @Test
@@ -133,7 +137,7 @@ class RecipeScreenTest {
         .performTouchInput { swipeLeft() }
     }
 
-    rule.onNodeWithText("Valmis!").assertExists()
+    rule.onNodeWithText(R.string.text_rate_the_recipe).assertExists()
   }
 
   @Test
