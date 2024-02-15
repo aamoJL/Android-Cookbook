@@ -219,7 +219,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
         ChapterScreenUiState.fromChapter(
           chapter = chapterPair?.second
             ?: ChapterWithStepsAndIngredients(Chapter()),
-          index = chapterPair?.let { index } ?: -1
+          index = chapterPair?.let { index } ?: _infoUiState.value.chapters.size
         )
       }
     }
@@ -229,7 +229,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       _stepUiState.update {
         StepScreenUiState.fromStep(
           step = stepPair?.second ?: StepWithIngredients(Step()),
-          index = stepPair?.let { index } ?: -1
+          index = stepPair?.let { index } ?: _chapterUiState.value.steps.size
         )
       }
     }
@@ -239,7 +239,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       _ingredientUiState.update {
         IngredientScreenUiState.fromIngredient(
           ingredient = ingredientPair?.second ?: Ingredient(),
-          index = ingredientPair?.let { index } ?: -1
+          index = ingredientPair?.let { index } ?: _stepUiState.value.ingredients.size
         )
       }
     }

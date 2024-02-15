@@ -72,4 +72,5 @@
     <string name="description_servings">Servings</string>
     <string name="description_decrease_value">Decrease value</string>
     <string name="description_increase_value">Increase value</string>
+    <string name="description_star_rating_star_icon">%1$s star</string>
 </resources>

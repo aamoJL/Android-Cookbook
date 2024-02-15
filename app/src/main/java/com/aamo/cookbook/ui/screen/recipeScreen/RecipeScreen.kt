@@ -61,6 +61,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.SnackbarProperties
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
@@ -109,7 +110,11 @@ fun RecipeScreen(
       )
     },
     onRatingChange = { viewModel.setRating(it) },
-    onPhotoChange = { viewModel.setThumbnail(it) }
+    onThumbnailChange = {
+      viewModel.setThumbnail(
+        IOService(context).getFileNameWithSuffixFromUri(it) ?: ""
+      )
+    }
   )
 }
 
@@ -129,7 +134,7 @@ fun RecipeScreenContent(
   onServingsCountChange: (count: Int) -> Unit,
   onFavoriteChange: (Boolean) -> Unit,
   onRatingChange: (Int) -> Unit,
-  onPhotoChange: (Uri) -> Unit,
+  onThumbnailChange: (Uri) -> Unit,
 ) {
   val pageCount by rememberSaveable(chapterPageUiStates) {
     mutableIntStateOf(
@@ -253,7 +258,7 @@ fun RecipeScreenContent(
               else -> CompletedPage(
                 uiState = completedPageUiState,
                 onRatingChange = onRatingChange,
-                onThumbnailChange = onPhotoChange
+                onThumbnailChange = onThumbnailChange
               )
             }
           }

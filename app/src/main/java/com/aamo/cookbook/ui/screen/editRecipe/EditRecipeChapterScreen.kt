@@ -50,7 +50,6 @@ import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
-import kotlin.math.min
 
 @Composable
 fun EditRecipeChapterScreen(
@@ -126,7 +125,7 @@ fun EditRecipeChapterScreenContent(
     ) {
       ChapterForm(
         uiState = uiState.formState,
-        orderNumber = min(1, uiState.index + 1),
+        chapterNumber = uiState.index + 1,
         onFormStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
@@ -182,11 +181,11 @@ private fun StepList(
 @Composable
 fun ChapterForm(
   uiState: EditRecipeViewModel.ChapterScreenUiState.ChapterFormState,
-  orderNumber: Int,
+  chapterNumber: Int,
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  FormBase(title = stringResource(R.string.form_title_chapter, orderNumber), modifier = modifier) {
+  FormBase(title = stringResource(R.string.form_title_chapter, chapterNumber), modifier = modifier) {
     FormTextField(
       value = uiState.name,
       onValueChange = { onFormStateChange(uiState.copy(name = it)) },

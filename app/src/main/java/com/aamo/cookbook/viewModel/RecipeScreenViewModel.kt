@@ -1,6 +1,5 @@
 package com.aamo.cookbook.viewModel
 
-import android.net.Uri
 import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -63,7 +62,7 @@ class RecipeScreenViewModel(
           ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
         }
         _completedPageUiState.update { s ->
-          s.copy(thumbnailFileName = recipe.value.thumbnailUri)
+          s.copy(recipeThumbnail = recipe.value.thumbnailUri)
         }
       }
     }
@@ -93,7 +92,7 @@ class RecipeScreenViewModel(
 
   data class CompletedPageUiState(
     val fiveStarRating: Int = 0,
-    val thumbnailFileName: String = ""
+    val recipeThumbnail: String = ""
   )
 
   data class ServingsState(
@@ -160,20 +159,19 @@ class RecipeScreenViewModel(
     }
   }
 
-  fun setThumbnail(uri: Uri) {
+  fun setThumbnail(fileName: String) {
     viewModelScope.launch {
-      val oldThumbnail = _completedPageUiState.value.thumbnailFileName
-      if (oldThumbnail.isNotEmpty()) {
-        ioService.deleteExternalFile(Environment.DIRECTORY_PICTURES, oldThumbnail)
+      _completedPageUiState.value.recipeThumbnail.also { oldThumbnail ->
+        if (oldThumbnail.isNotEmpty()) {
+          ioService.deleteExternalFile(Environment.DIRECTORY_PICTURES, oldThumbnail)
+        }
       }
 
-      recipeRepository.getRecipeById(recipeId)
-        ?.copy(thumbnailUri = ioService.getFileNameWithSuffixFromUri(uri) ?: "")
-        ?.also {
-          recipeRepository.upsertRecipe(it)
-          _completedPageUiState.update { s -> s.copy(thumbnailFileName = it.thumbnailUri) }
-          _summaryPageUiStates.update { s -> s.copy(recipeThumbnail = it.thumbnailUri) }
-        }
+      recipeRepository.getRecipeById(recipeId)?.copy(thumbnailUri = fileName)?.also {
+        recipeRepository.upsertRecipe(it)
+        _completedPageUiState.update { s -> s.copy(recipeThumbnail = it.thumbnailUri) }
+        _summaryPageUiStates.update { s -> s.copy(recipeThumbnail = it.thumbnailUri) }
+      }
     }
   }
 }

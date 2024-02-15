@@ -60,7 +60,7 @@ internal fun CompletedPage(
       modifier = Modifier.fillMaxWidth()
     ) {
       ThumbnailPicker(
-        fileName = uiState.thumbnailFileName,
+        fileName = uiState.recipeThumbnail,
         onThumbnailChange = onThumbnailChange,
         modifier = Modifier.size(200.dp)
       )

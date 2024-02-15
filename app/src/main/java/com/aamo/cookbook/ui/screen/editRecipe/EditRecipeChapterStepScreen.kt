@@ -49,7 +49,6 @@ import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
-import kotlin.math.min
 
 @Composable
 fun EditRecipeChapterStepScreen(
@@ -129,7 +128,7 @@ fun EditRecipeChapterStepScreenContent(
     ) {
       StepForm(
         uiState = uiState.formState,
-        orderNumber = min(1, uiState.index + 1),
+        orderNumber = uiState.index + 1,
         onStateChange = onFormStateChange
       )
       Spacer(modifier = Modifier.padding(8.dp))
