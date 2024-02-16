@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.components.BasicTopAppBar
@@ -26,6 +27,7 @@ import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
@@ -136,5 +138,25 @@ private fun IngredientForm(
         modifier = Modifier.width(100.dp)
       )
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    EditRecipeChapterStepIngredientScreenContent(
+      uiState = EditRecipeViewModel.IngredientScreenUiState(
+        formState = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(name = "Name")
+      )
+    )
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewUnsavedDialog() {
+  CookbookTheme {
+    UnsavedDialog(onDismiss = {}) {}
   }
 }

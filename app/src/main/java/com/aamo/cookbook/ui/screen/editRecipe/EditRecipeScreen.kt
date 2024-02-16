@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -38,11 +37,15 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aamo.cookbook.R
+import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -52,6 +55,7 @@ import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
@@ -105,26 +109,12 @@ fun EditRecipeScreenPageContent(
         onBack()
       })
   } else if (openDeleteDialog) {
-    AlertDialog(
-      title = { Text(text = stringResource(R.string.dialog_title_delete_recipe)) },
-      text = { Text(text = stringResource(R.string.dialog_text_delete_recipe)) },
-      onDismissRequest = { openDeleteDialog = false },
-      confirmButton = {
-        TextButton(
-          onClick = {
-            openDeleteDialog = false
-            onDelete()
-          },
-          colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-        ) {
-          Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
-        }
-      },
-      dismissButton = {
-        TextButton(onClick = { openDeleteDialog = false }) {
-          Text(text = stringResource(R.string.dialog_dismiss_default))
-        }
-      },
+    DeleteDialog(
+      onDismiss = { openDeleteDialog = false },
+      onConfirm = {
+        openDeleteDialog = false
+        onDelete()
+      }
     )
   }
 
@@ -160,6 +150,7 @@ fun EditRecipeScreenPageContent(
     }
   ) {
     Column(
+      verticalArrangement = Arrangement.spacedBy(16.dp),
       modifier = modifier
         .padding(it)
         .padding(8.dp)
@@ -172,7 +163,6 @@ fun EditRecipeScreenPageContent(
         subCategorySuggestions = uiState.categorySuggestions.filter { tuple -> tuple.category == uiState.formState.category && tuple.subCategory.isNotEmpty() }
           .map { filtered -> filtered.subCategory }.distinct()
       )
-      Spacer(modifier = Modifier.padding(8.dp))
       ChapterList(
         chapters = uiState.chapters,
         onEditChapter = onEditChapter,
@@ -270,7 +260,7 @@ private fun ChapterList(
             } else null,
             modifier = Modifier.fillMaxWidth()
           )
-          Divider()
+          if (index != chapters.size - 1) Divider()
         }
       }
     }
@@ -307,7 +297,7 @@ private fun ChapterListItem(
         ) {
           chapter.steps.forEachIndexed { index, step ->
             Column {
-              if(step.value.timerMinutes != null) {
+              if (step.value.timerMinutes != null) {
                 Text(
                   text = stringResource(
                     R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
@@ -384,3 +374,83 @@ private fun IngredientList(
   }
 }
 
+@Composable
+private fun DeleteDialog(
+  onDismiss: () -> Unit,
+  onConfirm: () -> Unit,
+){
+  AlertDialog(
+    title = { Text(text = stringResource(R.string.dialog_title_delete_recipe)) },
+    text = { Text(text = stringResource(R.string.dialog_text_delete_recipe)) },
+    onDismissRequest = onDismiss,
+    confirmButton = {
+      TextButton(
+        onClick = onConfirm,
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+      ) {
+        Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
+      }
+    },
+    dismissButton = {
+      TextButton(onClick = onDismiss) {
+        Text(text = stringResource(R.string.dialog_dismiss_default))
+      }
+    },
+  )
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    EditRecipeScreenPageContent(
+      uiState = EditRecipeViewModel.InfoScreenUiState(
+        formState = EditRecipeViewModel.InfoScreenUiState.InfoFormState(name = "Name"),
+        chapters = listOf(
+          Pair(
+            UUID.randomUUID(), ChapterWithStepsAndIngredients(
+              value = Chapter(name = "Chapter 1"),
+              steps = listOf(
+                StepWithIngredients(
+                  value = Step(description = "Description..."),
+                  ingredients = listOf(
+                    Ingredient(name = "Ingredient", amount = 250f, unit = "g")
+                  )
+                )
+              )
+            )
+          ),
+          Pair(
+            UUID.randomUUID(), ChapterWithStepsAndIngredients(
+              value = Chapter(name = "Chapter 2"),
+              steps = listOf(
+                StepWithIngredients(
+                  value = Step(description = "Description..."),
+                  ingredients = listOf(
+                    Ingredient(name = "Ingredient", amount = 250f, unit = "g")
+                  )
+                )
+              )
+            )
+          )
+        )
+      )
+    )
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewDeleteDialog() {
+  CookbookTheme {
+    DeleteDialog({}, {})
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewUnsavedDialog() {
+  CookbookTheme {
+    UnsavedDialog(onDismiss = {}) {}
+  }
+}

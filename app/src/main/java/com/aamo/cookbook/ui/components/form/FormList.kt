@@ -16,8 +16,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.ui.theme.CookbookTheme
 
 @Composable
 fun FormList(
@@ -47,10 +49,24 @@ fun ListTitleBar(title: String, onAddClick: () -> Unit, modifier: Modifier = Mod
         style = MaterialTheme.typography.titleLarge
       )
       OutlinedIconButton(
-        onClick = { onAddClick() },
+        onClick = { onAddClick() }
       ) {
-        Icon(Icons.Filled.Add, stringResource(R.string.description_form_add_new_item))
+        Icon(
+          imageVector = Icons.Filled.Add,
+          contentDescription = stringResource(R.string.description_form_add_new_item),
+          tint = MaterialTheme.colorScheme.primary
+        )
       }
+    }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    FormList(title = "Title", onAddClick = {}) {
+      Text(text = "Content")
     }
   }
 }

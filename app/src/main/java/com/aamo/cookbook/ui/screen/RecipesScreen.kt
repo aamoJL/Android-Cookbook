@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -30,12 +31,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeRating
 import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.RecipeCard
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 
 @Composable
@@ -128,10 +133,36 @@ fun RecipesScreen(
             onClick = { onSelectRecipe(recipe.value) },
             isFavorite = recipe.favorite != null,
             rating = recipe.rating?.ratingOutOfFive ?: 0,
-            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(200.dp)
+              .testTag(Tags.RECIPE_ITEM.name),
           )
         }
       }
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    RecipesScreen(
+      title = "Title",
+      recipes = listOf(
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
+        RecipeWithFavoriteAndRating(
+          Recipe(name = "Resepti 1"),
+          null,
+          RecipeRating(ratingOutOfFive = 3, recipeId = 0)
+        ),
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
+      ),
+      onSelectRecipe = {},
+      onBack = {},
+      onSearch = {},
+      onAdd = {})
   }
 }

@@ -33,9 +33,11 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
@@ -45,6 +47,7 @@ import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
@@ -171,7 +174,7 @@ private fun StepList(
               { onSwap(index, index + 1) }
             } else null
           )
-          Divider()
+          if (index != steps.size - 1) Divider()
         }
       }
     }
@@ -294,5 +297,43 @@ private fun IngredientList(
         )
       }
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    EditRecipeChapterScreenContent(
+      uiState = EditRecipeViewModel.ChapterScreenUiState(
+        formState = EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(name = "Name"),
+        steps = listOf(
+          Pair(
+            UUID.randomUUID(), StepWithIngredients(
+              value = Step(description = "Description..."),
+              ingredients = listOf(
+                Ingredient(name = "Ingredient", amount = 250f, unit = "g")
+              )
+            )
+          ),
+          Pair(
+            UUID.randomUUID(), StepWithIngredients(
+              value = Step(description = "Description..."),
+              ingredients = listOf(
+                Ingredient(name = "Ingredient", amount = 250f, unit = "g")
+              )
+            )
+          )
+        )
+      )
+    )
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewUnsavedDialog() {
+  CookbookTheme {
+    UnsavedDialog(onDismiss = {}) {}
   }
 }

@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -30,11 +29,13 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.service.IOService
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import kotlin.math.max
 
@@ -48,9 +49,7 @@ fun RecipeCard(
 ) {
   ElevatedCard(
     shape = RectangleShape,
-    modifier = modifier
-      .clickable(onClick = onClick)
-      .height(200.dp)
+    modifier = modifier.then(Modifier.clickable(onClick = onClick))
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
       Box(modifier = Modifier
@@ -82,13 +81,13 @@ fun RecipeCard(
                 .align(Alignment.BottomStart)
                 .clip(CircleShape)
                 .background(MaterialTheme.colorScheme.surface.copy(alpha = .8f))
-                .padding(horizontal = 4.dp)
+                .padding(2.dp)
             )
           }
         }
       }
       Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
+        color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier.fillMaxWidth()
       ) {
         Column(
@@ -111,7 +110,7 @@ private fun Thumbnail(
   fileName: String,
   modifier: Modifier = Modifier
 ) {
-  Box(modifier = modifier) {
+  Surface(modifier = modifier) {
     if (fileName.isNotEmpty()) {
       Image(
         painter = rememberAsyncImagePainter(
@@ -123,12 +122,14 @@ private fun Thumbnail(
         modifier = Modifier.fillMaxSize()
       )
     } else {
-      Icon(
-        painter = painterResource(R.drawable.baseline_no_photography_24),
-        tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .3f),
-        contentDescription = null,
-        modifier = Modifier.align(Alignment.Center)
-      )
+      Box {
+        Icon(
+          painter = painterResource(R.drawable.baseline_no_photography_24),
+          tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .3f),
+          contentDescription = null,
+          modifier = Modifier.align(Alignment.Center)
+        )
+      }
     }
   }
 }
@@ -161,7 +162,7 @@ private fun StarRating(
       Icon(
         imageVector = Icons.Filled.Star,
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
+        tint = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.size(16.dp)
       )
     }
@@ -170,16 +171,28 @@ private fun StarRating(
         Icon(
           imageVector = Icons.Filled.Star,
           contentDescription = null,
-          tint = MaterialTheme.colorScheme.primaryContainer.copy(alpha = .2f),
+          tint = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
         Icon(
           painter = painterResource(R.drawable.outline_star_outline_24),
           contentDescription = null,
-          tint = MaterialTheme.colorScheme.primary.copy(alpha = .2f),
+          tint = MaterialTheme.colorScheme.secondary.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
       }
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    RecipeCard(
+      recipe = Recipe(name = "Recipe 1"),
+      isFavorite = true,
+      rating = 3,
+      onClick = { })
   }
 }
