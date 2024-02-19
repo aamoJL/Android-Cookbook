@@ -74,7 +74,7 @@ class EditRecipeViewModelTest {
     withExistingRecipe().apply { initChapterUiState(-1) }.also { viewModel ->
       assertTrue(viewModel.chapterUiState.value.isNewChapter)
       assertFalse(viewModel.chapterUiState.value.canBeSaved)
-      assertEquals(-1, viewModel.chapterUiState.value.index)
+      assertEquals(viewModel.infoUiState.value.chapters.size, viewModel.chapterUiState.value.index)
       assertEquals(
         EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(),
         viewModel.chapterUiState.value.formState
@@ -108,7 +108,7 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertTrue(viewModel.stepUiState.value.isNewStep)
       assertFalse(viewModel.stepUiState.value.canBeSaved)
-      assertEquals(-1, viewModel.stepUiState.value.index)
+      assertEquals(viewModel.chapterUiState.value.steps.size, viewModel.stepUiState.value.index)
       assertEquals(
         EditRecipeViewModel.StepScreenUiState.StepFormState(),
         viewModel.stepUiState.value.formState
@@ -148,7 +148,7 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertTrue(viewModel.ingredientUiState.value.isNewIngredient)
       assertFalse(viewModel.ingredientUiState.value.canBeSaved)
-      assertEquals(-1, viewModel.ingredientUiState.value.index)
+      assertEquals(viewModel.stepUiState.value.ingredients.size, viewModel.ingredientUiState.value.index)
       assertEquals(
         EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(),
         viewModel.ingredientUiState.value.formState
