@@ -18,7 +18,10 @@ import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemColors
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -28,10 +31,17 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.model.Chapter
+import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.ui.components.NoteCard
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
@@ -46,48 +56,49 @@ internal fun ChapterPage(
   uiState: RecipeScreenViewModel.ChapterPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
   onProgressChange: (stepIndex: Int, value: Boolean) -> Unit,
-  timerTitle: String = ""
+  recipeName: String = ""
 ) {
   val scrollState = rememberScrollState()
 
-  Column(
-    modifier = Modifier
-      .padding(4.dp)
-      .fillMaxSize()
-      .verticalScroll(scrollState)
-  ) {
+  Surface {
     Column(
-      horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
-        .fillMaxWidth()
-        .padding(8.dp)
+      modifier = Modifier
+        .fillMaxSize()
+        .verticalScroll(scrollState)
     ) {
       Text(
         text = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}",
         fontFamily = Handwritten,
         style = MaterialTheme.typography.headlineLarge,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
       )
-      if(uiState.chapter.value.note.isNotEmpty()) {
-        NoteCard(
-          text = uiState.chapter.value.note,
-          modifier = Modifier.fillMaxWidth()
-        )
-      }
-    }
-    uiState.chapter.steps.forEachIndexed { index, step ->
-      StepCheckBox(
-        headline = "${step.value.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
-        ingredients = step.ingredients.filter { it.stepId == step.value.id },
-        servingsMultiplier = servingsState.multiplier,
-        checked = uiState.progress.elementAtOrElse(index) { false },
-        onCheckedChange = { onProgressChange(index, it) },
-        timerProperties = step.value.timerMinutes?.let {
-          CheckBoxTimerProperties(
-            timerTitle,
-            step.value.timerMinutes
+      if (uiState.chapter.value.note.isNotEmpty()) {
+        Box(modifier = Modifier.padding(8.dp)) {
+          NoteCard(
+            text = uiState.chapter.value.note,
+            modifier = Modifier.fillMaxWidth()
           )
-        },
-        note = step.value.note
-      )
+        }
+      }
+      Column {
+        uiState.chapter.steps.forEachIndexed { index, step ->
+          StepCheckBox(
+            headline = "${step.value.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
+            ingredients = step.ingredients.filter { it.stepId == step.value.id },
+            servingsMultiplier = servingsState.multiplier,
+            checked = uiState.progress.elementAtOrElse(index) { false },
+            onCheckedChange = { onProgressChange(index, it) },
+            timerProperties = step.value.timerMinutes?.let { minutes ->
+              CheckBoxTimerProperties(
+                title = "${recipeName}: ${step.value.description}",
+                minutes = minutes
+              )
+            },
+            note = step.value.note,
+          )
+        }
+      }
     }
   }
 }
@@ -101,10 +112,12 @@ private fun StepCheckBox(
   onCheckedChange: (checked: Boolean) -> Unit,
   modifier: Modifier = Modifier,
   timerProperties: CheckBoxTimerProperties? = null,
-  note: String = ""
+  note: String = "",
+  colors: ListItemColors = ListItemDefaults.colors()
 ) {
   val context = LocalContext.current
   ListItem(
+    colors = colors,
     headlineContent = {
       Text(
         text = headline,
@@ -176,4 +189,50 @@ private fun StepCheckBox(
       .clickable { onCheckedChange(!checked) }
       .testTag(Tags.PROGRESS_CHECKBOX.name)
   )
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    ChapterPage(
+      uiState = RecipeScreenViewModel.ChapterPageUiState(
+        chapter = ChapterWithStepsAndIngredients(
+          value = Chapter(name = "Chapter 1", note = "Chapter note."),
+          steps = listOf(
+            StepWithIngredients(
+              value = Step(
+                description = "Description",
+                note = "Step note",
+                timerMinutes = 20
+              ),
+              ingredients = listOf(
+                Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
+                Ingredient(name = "Ingredient 2", amount = 0f, unit = "")
+              )
+            ),
+            StepWithIngredients(
+              value = Step(
+                description = "This is a step with a long description",
+                note = "Step note.",
+                timerMinutes = 20
+              ),
+              ingredients = listOf(
+                Ingredient(name = "Ingredient 1", amount = 0f, unit = ""),
+              )
+            ),
+            StepWithIngredients(
+              value = Step(
+                description = "This is a step with a long description",
+                timerMinutes = 20
+              )
+            )
+          )
+        ),
+        progress = listOf(false),
+        chapterNote = "Chapter note"
+      ),
+      servingsState = RecipeScreenViewModel.ServingsState(),
+      onProgressChange = { _, _ -> })
+  }
 }

@@ -2,8 +2,6 @@ package com.aamo.cookbook.ui.screen.recipeScreen
 
 import android.net.Uri
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -36,6 +34,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -55,14 +54,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.SnackbarProperties
+import com.aamo.cookbook.model.Chapter
+import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.toFractionFormattedString
@@ -251,7 +254,7 @@ fun RecipeScreenContent(
                   onProgressChange = { stepIndex, value ->
                     onProgressChange(chapterIndex, stepIndex, value)
                   },
-                  timerTitle = summaryPageUiState.recipeName
+                  recipeName = summaryPageUiState.recipeName
                 )
               }
 
@@ -263,7 +266,7 @@ fun RecipeScreenContent(
             }
           }
         }
-        Divider(color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = .8f))
+        Divider()
         Pager(
           chapterUiStates = chapterPageUiStates,
           pagerState = pagerState,
@@ -312,8 +315,11 @@ private fun Pager(
         selected = index + 1 == pagerState.currentPage,
         onClick = { onIndicatorClick(index + 1) },
         isTargetPage = isTargetPage,
-        color = if (isTargetPage) MaterialTheme.colorScheme.inversePrimary else
-          MaterialTheme.colorScheme.secondaryContainer,
+        color = when {
+          currentChapterIndex == index -> MaterialTheme.colorScheme.primaryContainer
+          currentChapterIndex > index || currentChapterIndex == -1 -> MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+          else -> MaterialTheme.colorScheme.secondaryContainer
+        },
         icon = if (chapterUiStates.elementAt(index).progress.all { it }
         ) Icons.Filled.Done else null
       )
@@ -324,8 +330,8 @@ private fun Pager(
       enabled = lastPageEnabled,
       onClick = { onIndicatorClick(pagerState.pageCount - 1) },
       isTargetPage = currentProgressPage == chapterUiStates.size + 1,
-      color = if (lastPageEnabled) MaterialTheme.colorScheme.tertiaryContainer else
-        MaterialTheme.colorScheme.onSurface,
+      color = if (lastPageEnabled) MaterialTheme.colorScheme.primaryContainer else
+        MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
       icon = if (lastPageEnabled) null else Icons.Filled.Lock
     )
   }
@@ -341,37 +347,34 @@ private fun PageIndicatorItem(
   color: Color = MaterialTheme.colorScheme.secondaryContainer,
   icon: ImageVector? = null
 ) {
-  Box(
+  Surface(
+    color = color,
+    onClick = onClick,
+    enabled = enabled,
     modifier = modifier
       .padding(10.dp)
       .clip(CircleShape)
-      .background(color)
-      .clickable(enabled = enabled) {
-        onClick()
-      }
       .size(
         width = if (isTargetPage) 48.dp else 32.dp,
         height = 32.dp
       )
   ) {
-    if (icon != null) {
-      Icon(
-        imageVector = icon,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.onPrimary,
-        modifier = Modifier
-          .size(24.dp)
-          .align(Alignment.Center)
-      )
-    }
-    if (selected) {
-      Box(
-        modifier = Modifier
-          .clip(CircleShape)
-          .background(MaterialTheme.colorScheme.onPrimary)
-          .size(16.dp)
-          .align(Alignment.Center)
-      ) {}
+    Box(contentAlignment = Alignment.Center) {
+      if (icon != null) {
+        Icon(
+          imageVector = icon,
+          contentDescription = null,
+          modifier = Modifier.size(20.dp)
+        )
+      }
+      if (selected) {
+        Surface(
+          color = MaterialTheme.colorScheme.surface,
+          modifier = Modifier
+            .clip(CircleShape)
+            .size(18.dp)
+        ) {}
+      }
     }
   }
 }
@@ -424,5 +427,46 @@ internal fun IngredientList(
         )
       }
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    RecipeScreenContent(
+      summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(
+        recipeName = "Recipe 1",
+        recipeNote = "Recipe note.",
+        chaptersWithIngredients = listOf(
+          Pair(
+            "Chapter 1", listOf(
+              Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
+              Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
+            )
+          ),
+          Pair(
+            "Chapter 2", listOf(
+              Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
+              Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
+            )
+          )
+        )
+      ),
+      chapterPageUiStates = listOf(
+        RecipeScreenViewModel.ChapterPageUiState(
+          chapter = ChapterWithStepsAndIngredients(Chapter()),
+          progress = listOf(false)
+        )
+      ),
+      completedPageUiState = RecipeScreenViewModel.CompletedPageUiState(),
+      servingsState = RecipeScreenViewModel.ServingsState(),
+      favoriteState = true,
+      onProgressChange = { _, _, _ -> },
+      onServingsCountChange = {},
+      onFavoriteChange = {},
+      onRatingChange = {},
+      onThumbnailChange = {}
+    )
   }
 }

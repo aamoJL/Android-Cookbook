@@ -23,14 +23,22 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
 import coil.compose.rememberAsyncImagePainter
@@ -38,6 +46,7 @@ import com.aamo.cookbook.BuildConfig
 import com.aamo.cookbook.R
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.FiveStarRating
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import java.io.File
 import java.util.Objects
@@ -48,30 +57,32 @@ internal fun CompletedPage(
   onRatingChange: (Int) -> Unit,
   onThumbnailChange: (Uri) -> Unit,
 ) {
-  Column(
-    modifier = Modifier
-      .fillMaxSize()
-      .padding(8.dp)
-  ) {
-    Spacer(modifier = Modifier.height(100.dp))
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center,
-      modifier = Modifier.fillMaxWidth()
+  Surface {
+    Column(
+      modifier = Modifier
+        .fillMaxSize()
+        .padding(8.dp)
     ) {
-      ThumbnailPicker(
-        fileName = uiState.recipeThumbnail,
-        onThumbnailChange = onThumbnailChange,
-        modifier = Modifier.size(200.dp)
-      )
-    }
-    Spacer(modifier = Modifier.height(100.dp))
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.Center,
-      modifier = Modifier.fillMaxWidth()
-    ) {
-      StarRating(rating = uiState.fiveStarRating, onRatingChange = onRatingChange)
+      Spacer(modifier = Modifier.height(100.dp))
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        ThumbnailPicker(
+          fileName = uiState.recipeThumbnail,
+          onThumbnailChange = onThumbnailChange,
+          modifier = Modifier.size(200.dp)
+        )
+      }
+      Spacer(modifier = Modifier.height(100.dp))
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.Center,
+        modifier = Modifier.fillMaxWidth()
+      ) {
+        StarRating(rating = uiState.fiveStarRating, onRatingChange = onRatingChange)
+      }
     }
   }
 }
@@ -145,21 +156,40 @@ private fun CameraButton(
   onCapture: (Uri) -> Unit,
   modifier: Modifier = Modifier
 ) {
+  var fileUri by remember { mutableStateOf(Uri.EMPTY) }
   val context = LocalContext.current
-  val file = context.createImageFile()
-  val uri = FileProvider.getUriForFile(
-    Objects.requireNonNull(context),
-    "${BuildConfig.APPLICATION_ID}.provider",
-    file
-  )
+
   val cameraLauncher = rememberLauncherForActivityResult(
     contract = ActivityResultContracts.TakePicture(),
     onResult = { success ->
-      if (success) onCapture(uri)
+      if (success) onCapture(fileUri)
     }
   )
 
-  IconButton(onClick = { cameraLauncher.launch(uri) }, modifier = modifier) {
+  fun Context.createImageFile(): File {
+    val storageDir: File? = IOService(this).getExternalFileDir(Environment.DIRECTORY_PICTURES)
+    return File.createTempFile(
+      System.currentTimeMillis().toString(), /* prefix */
+      ".jpg", /* suffix */
+      storageDir /* directory */
+    )
+  }
+
+  fun getFileUri(): Uri {
+    return FileProvider.getUriForFile(
+      Objects.requireNonNull(context),
+      "${BuildConfig.APPLICATION_ID}.provider",
+      context.createImageFile()
+    )
+  }
+
+  IconButton(
+    onClick = {
+      fileUri = getFileUri()
+      cameraLauncher.launch(fileUri)
+    },
+    modifier = modifier
+  ) {
     Icon(
       painter = painterResource(R.drawable.baseline_add_a_photo_24),
       contentDescription = stringResource(R.string.description_take_a_photo)
@@ -167,11 +197,22 @@ private fun CameraButton(
   }
 }
 
-private fun Context.createImageFile(): File {
-  val storageDir: File? = IOService(this).getExternalFileDir(Environment.DIRECTORY_PICTURES)
-  return File.createTempFile(
-    System.currentTimeMillis().toString(), /* prefix */
-    ".jpg", /* suffix */
-    storageDir /* directory */
-  )
+@PreviewLightDark
+@Composable
+private fun Preview(
+  @PreviewParameter(RecipeThumbnailPreviewProvider::class) thumbnailUri: String
+) {
+  CookbookTheme {
+    CompletedPage(
+      uiState = RecipeScreenViewModel.CompletedPageUiState(
+        fiveStarRating = 3,
+        recipeThumbnail = thumbnailUri
+      ),
+      onRatingChange = {},
+      onThumbnailChange = {})
+  }
+}
+
+private class RecipeThumbnailPreviewProvider: PreviewParameterProvider<String> {
+  override val values = sequenceOf("testUri.jpg", "")
 }

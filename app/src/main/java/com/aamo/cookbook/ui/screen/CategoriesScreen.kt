@@ -20,7 +20,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
@@ -66,7 +65,7 @@ fun CategoriesScreen(
         shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = Modifier
           .fillMaxWidth()
-          .weight(4f)
+          .weight(5f)
       ) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
@@ -81,17 +80,13 @@ fun CategoriesScreen(
           Text(
             text = stringResource(R.string.screen_title_categories),
             fontFamily = Handwritten,
-            style = MaterialTheme.typography.headlineMedium,
-            modifier = Modifier.padding(top = 16.dp)
+            style = MaterialTheme.typography.headlineMedium
           )
           ElevatedCard(
-            elevation = CardDefaults.elevatedCardElevation(
-              defaultElevation = 4.dp
-            ),
             shape = RoundedCornerShape(16.dp),
             modifier = Modifier
               .weight(1f)
-              .padding(16.dp)
+              .padding(8.dp)
           ) {
             CategoryList(
               categories = categories,
@@ -189,9 +184,6 @@ private fun CategoryList(
         colors = ButtonDefaults.elevatedButtonColors(
           containerColor = MaterialTheme.colorScheme.primary,
           contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        elevation = ButtonDefaults.elevatedButtonElevation(
-          defaultElevation = 1.dp
         ),
         onClick = { onSelect(category) },
         modifier = Modifier
