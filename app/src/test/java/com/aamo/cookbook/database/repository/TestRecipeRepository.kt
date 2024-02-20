@@ -63,7 +63,7 @@ class TestRecipeRepository : RecipeRepository {
     }
   }
 
-  override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {
+  override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int {
     return recipe.value.id
   }
 

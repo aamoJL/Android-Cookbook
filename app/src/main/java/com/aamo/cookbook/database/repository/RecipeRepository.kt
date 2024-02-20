@@ -20,7 +20,7 @@ interface RecipeRepository {
   suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithFavoriteAndRating?
   suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
   suspend fun upsertRecipe(recipe: Recipe) : Int
-  suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients) : Int
+  suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients) : Int
   suspend fun deleteRecipe(recipe: Recipe)
   suspend fun addRecipeToFavorites(recipeId: Int)
   suspend fun removeRecipeFromFavorites(recipeId: Int)
@@ -49,9 +49,9 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =
     recipeDao.getFavoriteRecipeById(recipeId)
 
-  override suspend fun upsertRecipe(recipe: Recipe) : Int = recipeDao.upsertRecipe(recipe).toInt()
+  override suspend fun upsertRecipe(recipe: Recipe): Int = recipeDao.upsertRecipe(recipe).toInt()
 
-  override suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int =
+  override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int =
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
 
   override suspend fun deleteRecipe(recipe: Recipe) = recipeDao.deleteRecipe(recipe)
@@ -59,7 +59,7 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
   override suspend fun addRecipeToFavorites(recipeId: Int) =
     recipeDao.addRecipeToFavorites(FavoriteRecipe(recipeId = recipeId))
 
-  override suspend fun removeRecipeFromFavorites(recipeId: Int){
+  override suspend fun removeRecipeFromFavorites(recipeId: Int) {
     getFavoriteRecipeById(recipeId)?.also {
       recipeDao.removeRecipeFromFavorites(it.favoriteRecipe)
     }

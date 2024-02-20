@@ -9,12 +9,14 @@ import com.aamo.cookbook.model.Chapter
 import com.aamo.cookbook.model.Ingredient
 import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.utility.swap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.fail
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -78,6 +80,102 @@ class RecipeDatabaseTest {
 
     val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.value
     assertEquals(recipe, actual)
+  }
+
+  @Test
+  fun upsertRecipeWithChaptersStepsAndIngredients_New() = runTest {
+    val newRecipe = Mocker.mockRecipeList().first().copyAsNew()
+    val recipeId = recipeDao.upsertRecipeWithChaptersStepsAndIngredients(newRecipe)
+
+    recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { actual ->
+      assertEquals(newRecipe.value.copy(id = recipeId), actual.value)
+      assert(actual.chapters.isNotEmpty())
+
+      actual.chapters.forEachIndexed { ci, chapter ->
+        assertEquals(
+          newRecipe.chapters[ci].value.copy(
+            id = assertNotEquals(0, chapter.value.id).let { chapter.value.id },
+            recipeId = recipeId,
+            orderNumber = ci + 1
+          ),
+          chapter.value
+        )
+        assert(chapter.steps.isNotEmpty())
+
+        chapter.steps.forEachIndexed { si, step ->
+          assertEquals(
+            newRecipe.chapters[ci].steps[si].value.copy(
+              id = assertNotEquals(0, step.value.id).let { step.value.id },
+              chapterId = chapter.value.id,
+              orderNumber = si + 1
+            ),
+            step.value
+          )
+          assert(step.ingredients.isNotEmpty())
+
+          step.ingredients.forEachIndexed { ii, ingredient ->
+            assertEquals(
+              newRecipe.chapters[ci].steps[si].ingredients[ii].copy(
+                id = assertNotEquals(0, ingredient.id).let { ingredient.id },
+                stepId = step.value.id
+              ),
+              ingredient
+            )
+          }
+        }
+      }
+    } ?: fail("Recipe was not found")
+  }
+
+  @Test
+  fun upsertRecipeWithChaptersStepsAndIngredients_Existing() = runTest {
+    val recipeId = recipeDao.upsertRecipeWithChaptersStepsAndIngredients(
+      Mocker.mockRecipeList().first().copyAsNew()
+    )
+
+    recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { existing ->
+      val expected = existing.copy(
+        value = existing.value.copy(
+          name = "Updated name"
+        )
+      )
+
+      recipeDao.upsertRecipeWithChaptersStepsAndIngredients(expected)
+      val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)
+
+      assertEquals(expected, actual)
+    } ?: fail("Recipe was not found")
+  }
+
+  @Test
+  fun upsertRecipeWithChaptersStepsAndIngredients_Existing_Reordered() = runTest {
+    val recipeId = recipeDao.upsertRecipeWithChaptersStepsAndIngredients(
+      Mocker.mockRecipeList().first().copyAsNew()
+    )
+
+    recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { existing ->
+      val swappedRecipe = existing.copy(
+        chapters = existing.chapters.toMutableList().apply {
+          this.swap(0, 1)
+        }
+      )
+      assertEquals(1, swappedRecipe.chapters[1].value.orderNumber)
+      assertEquals(2, swappedRecipe.chapters[0].value.orderNumber)
+
+      recipeDao.upsertRecipeWithChaptersStepsAndIngredients(swappedRecipe)
+
+      val expected = swappedRecipe.copy(
+        chapters = swappedRecipe.chapters.mapIndexed { index, chapter ->
+          chapter.copy(
+            value = chapter.value.copy(orderNumber = index + 1)
+          )
+        }
+      )
+
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { actual ->
+        assertEquals(expected, actual)
+      } ?: fail("Recipe was not found")
+    } ?: fail("Recipe was not found")
   }
 
   @Test
