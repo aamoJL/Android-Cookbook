@@ -1,6 +1,7 @@
 package com.aamo.cookbook.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -27,13 +29,14 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.Tags
 
@@ -47,8 +50,8 @@ fun CategoriesScreen(
 ) {
   Surface(color = MaterialTheme.colorScheme.primary) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Row(
-        verticalAlignment = Alignment.CenterVertically,
+      Box(
+        contentAlignment = Alignment.Center,
         modifier = Modifier.weight(2f)
       ) {
         Text(
@@ -58,25 +61,39 @@ fun CategoriesScreen(
         )
       }
       Surface(
+        tonalElevation = 1.dp,
+        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
         modifier = Modifier
-          .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
           .fillMaxWidth()
-          .weight(4f)
+          .weight(5f)
       ) {
         Column(
           horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.padding(horizontal = 16.dp)
+          modifier = Modifier
         ) {
           MainButtons(
             onSearch = onSearch,
             onAddRecipe = onAddRecipe,
             onFavorites = onFavorites,
-            modifier = Modifier.padding(vertical = 32.dp)
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 36.dp)
           )
-          CategoryList(
-            categories = categories,
-            onSelect = onSelectCategory,
+          Text(
+            text = stringResource(R.string.screen_title_categories),
+            fontFamily = Handwritten,
+            style = MaterialTheme.typography.headlineMedium
           )
+          ElevatedCard(
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier
+              .weight(1f)
+              .padding(8.dp)
+          ) {
+            CategoryList(
+              categories = categories,
+              onSelect = onSelectCategory,
+              modifier = Modifier.padding(8.dp)
+            )
+          }
         }
       }
     }
@@ -90,8 +107,8 @@ fun MainButton(
   text: String,
   modifier: Modifier = Modifier,
   buttonColors: ButtonColors = ButtonDefaults.buttonColors(
-    containerColor = MaterialTheme.colorScheme.primaryContainer,
-    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
   ),
 ) {
   ElevatedButton(
@@ -117,25 +134,35 @@ fun MainButtons(
 ) {
   Row(
     horizontalArrangement = Arrangement.spacedBy(8.dp),
-    modifier = modifier.defaultMinSize(minHeight = 110.dp).height(IntrinsicSize.Max)
+    modifier = modifier.then(
+      Modifier
+        .defaultMinSize(minHeight = 110.dp)
+        .height(IntrinsicSize.Max)
+    )
   ) {
     MainButton(
       onClick = onSearch,
       icon = Icons.Filled.Search,
       text = stringResource(R.string.description_search),
-      modifier = Modifier.weight(1f).fillMaxHeight()
+      modifier = Modifier
+        .weight(1f)
+        .fillMaxHeight()
     )
     MainButton(
       onClick = onFavorites,
       icon = Icons.Filled.Favorite,
       text = stringResource(R.string.button_text_favorites),
-      modifier = Modifier.weight(1f).fillMaxHeight()
+      modifier = Modifier
+        .weight(1f)
+        .fillMaxHeight()
     )
     MainButton(
       onClick = onAddRecipe,
       icon = Icons.Filled.Add,
       text = stringResource(R.string.button_text_new),
-      modifier = Modifier.weight(1f).fillMaxHeight()
+      modifier = Modifier
+        .weight(1f)
+        .fillMaxHeight()
     )
   }
 }
@@ -146,35 +173,42 @@ private fun CategoryList(
   onSelect: (String) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = modifier) {
-    Text(
-      text = stringResource(R.string.screen_title_categories),
-      fontFamily = Handwritten,
-      style = MaterialTheme.typography.headlineMedium
-    )
-    LazyColumn {
-      items(categories) { category ->
-        ElevatedButton(
-          colors = ButtonDefaults.elevatedButtonColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-            contentColor = MaterialTheme.colorScheme.onSurface
-          ),
-          onClick = { onSelect(category) },
+  LazyColumn(
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    userScrollEnabled = true,
+    modifier = modifier,
+  ) {
+    items(categories) { category ->
+      ElevatedButton(
+        shape = RoundedCornerShape(16.dp),
+        colors = ButtonDefaults.elevatedButtonColors(
+          containerColor = MaterialTheme.colorScheme.primary,
+          contentColor = MaterialTheme.colorScheme.onPrimary
+        ),
+        onClick = { onSelect(category) },
+        modifier = Modifier
+          .fillMaxWidth()
+          .testTag(Tags.CATEGORY_ITEM.name)
+      ) {
+        Text(
+          text = category,
+          textAlign = TextAlign.Center,
           modifier = Modifier
-            .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .testTag(Tags.CATEGORY_ITEM.name)
-        ) {
-          Text(
-            text = category,
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-              .padding(8.dp)
-              .fillMaxWidth()
-          )
-        }
+            .fillMaxWidth()
+        )
       }
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview(){
+  CookbookTheme {
+    CategoriesScreen(categories = listOf(
+      "Category 1", "Category 2"
+    ))
   }
 }
 

@@ -32,6 +32,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.model.Ingredient
@@ -44,6 +45,7 @@ import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.toFractionFormattedString
@@ -203,7 +205,7 @@ private fun IngredientList(
             } else null,
             modifier = Modifier.padding(vertical = 16.dp)
           )
-          Divider()
+          if(index != ingredients.size - 1) Divider()
         }
       }
     }
@@ -262,5 +264,29 @@ private fun IngredientListItem(
         }
       }
     )
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    EditRecipeChapterStepScreenContent(
+      uiState = EditRecipeViewModel.StepScreenUiState(
+        formState = EditRecipeViewModel.StepScreenUiState.StepFormState(description = "Description"),
+        ingredients = listOf(
+          Pair(UUID.randomUUID(), Ingredient(name = "Ingredient", amount = 250f, unit = "g")),
+          Pair(UUID.randomUUID(), Ingredient(name = "Ingredient", amount = 250f, unit = "g"))
+        )
+      )
+    )
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun PreviewUnsavedDialog() {
+  CookbookTheme {
+    UnsavedDialog(onDismiss = {}) {}
   }
 }

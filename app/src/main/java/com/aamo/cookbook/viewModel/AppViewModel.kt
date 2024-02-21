@@ -33,7 +33,7 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
     }
 
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {
-    return recipeRepository.upsertRecipe(recipe)
+    return recipeRepository.upsertRecipeWithChaptersStepsAndIngredients(recipe)
   }
 
   suspend fun deleteRecipe(recipe: Recipe) {

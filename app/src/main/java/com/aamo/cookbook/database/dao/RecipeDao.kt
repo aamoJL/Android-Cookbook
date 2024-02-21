@@ -35,6 +35,7 @@ interface RecipeDao {
   /**
    * Adds or updates the given [recipe] to the database
    * The items' order numbers will be changed to according to the list indexing
+   * @return Upserted recipes Id, whether the recipe was added or updated.
    */
   @Transaction
   suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients) : Int {
@@ -64,6 +65,8 @@ interface RecipeDao {
       }
     }
 
+    // Upsert function will return -1 if the function updates an existing item,
+    // so the value have to be set to the recipes id instead on the returned value
     val recipeId = upsertRecipe(recipe.value).toInt()
       .let { if (it == -1) recipe.value.id else it }
 
@@ -108,7 +111,30 @@ interface RecipeDao {
 
   @Transaction
   @Query("SELECT * FROM recipes WHERE id = :recipeId")
-  suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients?
+  @Deprecated(
+    message = "This function returns unsorted recipe",
+    replaceWith = ReplaceWith("getRecipeWithChaptersStepsAndIngredients(recipeId)"))
+  suspend fun getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId: Int): RecipeWithChaptersStepsAndIngredients?
+
+  /**
+   * Returns recipes with chapters and steps sorted by order number, and ingredients sorted by with name
+   */
+  suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients? {
+    @Suppress("DEPRECATION")
+    return getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId)?.let { recipe ->
+      recipe.copy(
+        chapters = recipe.chapters.sortedBy { it.value.orderNumber }.map { chapter ->
+          chapter.copy(
+            steps = chapter.steps.sortedBy { it.value.orderNumber }.map { step ->
+              step.copy(
+                ingredients = step.ingredients.sortedBy { it.name }
+              )
+            }
+          )
+        }
+      )
+    }
+  }
 
   @Query("SELECT DISTINCT category, subCategory FROM recipes")
   suspend fun getCategoriesWithSubcategories(): List<RecipeCategoryTuple>

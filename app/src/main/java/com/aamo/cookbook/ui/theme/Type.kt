@@ -7,7 +7,6 @@ import androidx.compose.ui.text.font.FontWeight
 import com.aamo.cookbook.R
 
 val Handwritten = FontFamily(
-  //Font(R.font.caveat)
   Font(R.font.kalam, weight = FontWeight.Medium),
   Font(R.font.kalam_bold, weight = FontWeight.Bold)
 )

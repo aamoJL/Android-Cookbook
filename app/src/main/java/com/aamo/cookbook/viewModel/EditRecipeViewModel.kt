@@ -11,6 +11,7 @@ import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.model.Step
 import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.utility.swap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -409,7 +410,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       s.copy(
         chapters = _infoUiState.value.chapters.toMutableList().apply {
           if (from in 0..this.size && to in 0..this.size) {
-            this[to] = this[from].also { this[from] = this[to] }
+            this.swap(from, to)
           }
         },
         unsavedChanges = true
@@ -422,7 +423,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       s.copy(
         steps = _chapterUiState.value.steps.toMutableList().apply {
           if (from in 0..this.size && to in 0..this.size) {
-            this[to] = this[from].also { this[from] = this[to] }
+            this.swap(from, to)
           }
         },
         unsavedChanges = true
@@ -435,7 +436,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       s.copy(
         ingredients = _stepUiState.value.ingredients.toMutableList().apply {
           if (from in 0..this.size && to in 0..this.size) {
-            this[to] = this[from].also { this[from] = this[to] }
+            this.swap(from, to)
           }
         },
         unsavedChanges = true

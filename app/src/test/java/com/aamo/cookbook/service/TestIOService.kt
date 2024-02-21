@@ -12,6 +12,6 @@ class TestIOService : IOServiceBase() {
   }
 
   override fun getExternalFileUri(subFolder: String?, fileName: String): Uri {
-    TODO("Not yet implemented")
+    throw NotImplementedError()
   }
 }

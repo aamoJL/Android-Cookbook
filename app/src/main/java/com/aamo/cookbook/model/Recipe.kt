@@ -127,7 +127,7 @@ data class StepWithIngredients(
   @Relation(
     entity = Ingredient::class,
     parentColumn = "id",
-    entityColumn = "stepId"
+    entityColumn = "stepId",
   )
   val ingredients: List<Ingredient> = emptyList()
 )

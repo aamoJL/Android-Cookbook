@@ -2,6 +2,7 @@ package com.aamo.cookbook.ui.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -34,10 +35,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
+import com.aamo.cookbook.model.FavoriteRecipe
+import com.aamo.cookbook.model.Recipe
+import com.aamo.cookbook.model.RecipeRating
+import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.components.RecipeCard
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.viewModel.RecipeSearchViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
@@ -51,11 +58,28 @@ fun RecipeSearchScreen(
   val searchWord by viewModel.searchWord.collectAsState()
   val recipes by viewModel.validRecipes.collectAsState()
 
+  RecipeSearchScreenContent(
+    onSelect = onSelect,
+    onBack = onBack,
+    searchWord = searchWord,
+    setSearchWord = { viewModel.setSearchWord(it) },
+    recipes = recipes
+  )
+}
+
+@Composable
+fun RecipeSearchScreenContent(
+  recipes: List<RecipeWithFavoriteAndRating>,
+  searchWord: String = "",
+  onSelect: (id: Int) -> Unit = {},
+  onBack: () -> Unit = {},
+  setSearchWord: (String) -> Unit = {},
+) {
   Scaffold(
     topBar = {
       SearchTopBar(
         value = searchWord,
-        onValueChange = { viewModel.setSearchWord(it) },
+        onValueChange = { setSearchWord(it) },
         onBack = onBack
       )
     }
@@ -71,7 +95,10 @@ fun RecipeSearchScreen(
           RecipeCard(
             recipe = recipe.value,
             onClick = { onSelect(recipe.value.id) },
-            modifier = Modifier.fillMaxWidth().testTag(Tags.RECIPE_ITEM.name),
+            modifier = Modifier
+              .fillMaxWidth()
+              .height(200.dp)
+              .testTag(Tags.RECIPE_ITEM.name),
             isFavorite = recipe.favorite != null,
             rating = recipe.rating?.ratingOutOfFive ?: 0
           )
@@ -153,4 +180,23 @@ private fun TopBarTextField(
     ),
     modifier = modifier
   )
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    RecipeSearchScreenContent(
+      recipes = listOf(
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
+        RecipeWithFavoriteAndRating(
+          Recipe(name = "Resepti 1"),
+          null,
+          RecipeRating(ratingOutOfFive = 3, recipeId = 0)
+        ),
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
+        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
+      )
+    )
+  }
 }

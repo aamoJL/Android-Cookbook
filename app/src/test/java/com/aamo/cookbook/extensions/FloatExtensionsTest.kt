@@ -1,4 +1,4 @@
-package com.aamo.cookbook
+package com.aamo.cookbook.extensions
 
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.utility.toStringWithoutZero
@@ -6,7 +6,6 @@ import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
 class FloatExtensionsTest {
-
   @Test
   fun toStringWithoutZero() {
     val one = listOf(

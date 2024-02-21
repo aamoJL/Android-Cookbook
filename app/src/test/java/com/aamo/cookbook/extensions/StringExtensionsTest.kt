@@ -1,4 +1,4 @@
-package com.aamo.cookbook
+package com.aamo.cookbook.extensions
 
 import com.aamo.cookbook.utility.toUUIDorNull
 import com.aamo.cookbook.utility.trimFirst

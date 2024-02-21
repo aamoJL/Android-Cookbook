@@ -89,6 +89,7 @@ dependencies {
   implementation("androidx.room:room-ktx:2.6.1")
   implementation("io.coil-kt:coil-compose:2.5.0")
   implementation("androidx.camera:camera-camera2:1.4.0-alpha04")
+  implementation("androidx.compose.ui:ui-tooling-preview:1.6.1")
 
 
   testImplementation("junit:junit:4.13.2")
