@@ -254,7 +254,6 @@ fun RecipeScreenContent(
                   onProgressChange = { stepIndex, value ->
                     onProgressChange(chapterIndex, stepIndex, value)
                   },
-                  recipeName = summaryPageUiState.recipeName
                 )
               }
 

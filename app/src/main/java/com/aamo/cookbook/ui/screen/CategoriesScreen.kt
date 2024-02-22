@@ -87,6 +87,7 @@ fun CategoriesScreen(
             modifier = Modifier
               .weight(1f)
               .padding(8.dp)
+              .fillMaxWidth()
           ) {
             CategoryList(
               categories = categories,

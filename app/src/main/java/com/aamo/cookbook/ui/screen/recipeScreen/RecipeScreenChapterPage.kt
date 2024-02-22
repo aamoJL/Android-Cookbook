@@ -55,8 +55,7 @@ data class CheckBoxTimerProperties(
 internal fun ChapterPage(
   uiState: RecipeScreenViewModel.ChapterPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
-  onProgressChange: (stepIndex: Int, value: Boolean) -> Unit,
-  recipeName: String = ""
+  onProgressChange: (stepIndex: Int, value: Boolean) -> Unit
 ) {
   val scrollState = rememberScrollState()
 
@@ -91,7 +90,7 @@ internal fun ChapterPage(
             onCheckedChange = { onProgressChange(index, it) },
             timerProperties = step.value.timerMinutes?.let { minutes ->
               CheckBoxTimerProperties(
-                title = "${recipeName}: ${step.value.description}",
+                title = step.value.description,
                 minutes = minutes
               )
             },
