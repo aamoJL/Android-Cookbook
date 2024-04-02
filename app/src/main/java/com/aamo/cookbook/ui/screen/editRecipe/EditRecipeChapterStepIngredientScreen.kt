@@ -125,7 +125,7 @@ private fun IngredientForm(
         value = if (formState.amount == 0f) null else formState.amount,
         onValueChange = { onStateChange(formState.copy(amount = it)) },
         label = stringResource(R.string.textfield_ingredient_amount).asOptionalLabel(),
-        modifier = Modifier.weight(1f, true)
+        modifier = Modifier.weight(1f, true),
       )
       FormTextField(
         value = formState.unit,

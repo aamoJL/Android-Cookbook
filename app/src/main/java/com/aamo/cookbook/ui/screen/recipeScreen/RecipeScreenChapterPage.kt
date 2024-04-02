@@ -124,32 +124,35 @@ private fun StepCheckBox(
         fontWeight = FontWeight.Bold
       )
     },
-    supportingContent = if (ingredients.isNotEmpty()) {
-      {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          if(note.isNotEmpty()) {
-            NoteCard(
-              text = note,
-              modifier = Modifier.fillMaxWidth()
-            )
-          }
-          Card(
-            shape = RoundedCornerShape(4.dp),
-            colors = CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.primaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ),
-            modifier = Modifier.fillMaxWidth()
-          ) {
-            IngredientList(
-              ingredients = ingredients,
-              servingsMultiplier = servingsMultiplier,
-              modifier = Modifier.padding(8.dp),
-            )
+    supportingContent =
+      if (ingredients.isNotEmpty() || note.isNotEmpty()) {
+        {
+          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            if(note.isNotEmpty()) {
+              NoteCard(
+                text = note,
+                modifier = Modifier.fillMaxWidth()
+              )
+            }
+            if(ingredients.isNotEmpty()){
+              Card(
+                shape = RoundedCornerShape(4.dp),
+                colors = CardDefaults.cardColors(
+                  containerColor = MaterialTheme.colorScheme.primaryContainer,
+                  contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ),
+                modifier = Modifier.fillMaxWidth()
+              ) {
+                IngredientList(
+                  ingredients = ingredients,
+                  servingsMultiplier = servingsMultiplier,
+                  modifier = Modifier.padding(8.dp),
+                )
+              }
+            }
           }
         }
-      }
-    } else null,
+      } else null,
     leadingContent = {
       Box(contentAlignment = Alignment.TopCenter, modifier = Modifier) {
         Checkbox(checked = checked, onCheckedChange = null)
@@ -157,9 +160,7 @@ private fun StepCheckBox(
     },
     // OverlineContent needs to be { } if the supporting content is not null,
     // otherwise the leadingContent will be aligned to center vertically.
-    overlineContent = if (ingredients.isNotEmpty()) {
-      { }
-    } else null,
+    overlineContent = {},
     trailingContent = if (timerProperties != null) {
       {
         IconButton(onClick = {
@@ -197,7 +198,7 @@ private fun Preview() {
     ChapterPage(
       uiState = RecipeScreenViewModel.ChapterPageUiState(
         chapter = ChapterWithStepsAndIngredients(
-          value = Chapter(name = "Chapter 1", note = "Chapter note."),
+          value = Chapter(orderNumber = 1, name = "Chapter 1", note = "Chapter note."),
           steps = listOf(
             StepWithIngredients(
               value = Step(
@@ -224,6 +225,17 @@ private fun Preview() {
               value = Step(
                 description = "This is a step with a long description",
                 timerMinutes = 20
+              )
+            ),
+            StepWithIngredients(
+              value = Step(
+                description = "Step with note, without ingredients",
+                note = "Note"
+              )
+            ),
+            StepWithIngredients(
+              value = Step(
+                description = "Short desc"
               )
             )
           )

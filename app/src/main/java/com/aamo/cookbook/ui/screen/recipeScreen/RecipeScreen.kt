@@ -1,6 +1,10 @@
 package com.aamo.cookbook.ui.screen.recipeScreen
 
+import android.content.ActivityNotFoundException
+import android.content.ComponentName
+import android.content.Intent
 import android.net.Uri
+import android.provider.AlarmClock
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -25,6 +29,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -34,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -148,10 +154,47 @@ fun RecipeScreenContent(
   val pagerState = rememberPagerState(pageCount = { pageCount })
   val scope = rememberCoroutineScope()
   var moreDropMenuState by remember { mutableStateOf(false) }
+  val context = LocalContext.current
+  var openCalculatorNotFoundDialog by remember { mutableStateOf(false) }
+
+  if (openCalculatorNotFoundDialog) {
+    CalculatorNotFoundDialog(onConfirm = {openCalculatorNotFoundDialog = false})
+  }
 
   Scaffold(
     topBar = {
       BasicTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
+        IconButton(onClick = {
+          try {
+            context.startActivity(
+              Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALCULATOR)
+                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
+          }
+          catch (e: ActivityNotFoundException){
+            try {
+              // Samsung phones
+              context.startActivity(
+                Intent(Intent.ACTION_MAIN)
+                  .addCategory(Intent.CATEGORY_LAUNCHER)
+                  .setComponent(ComponentName("com.sec.android.app.popupcalculator", "com.sec.android.app.popupcalculator.Calculator"))
+                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+              )
+            }
+            catch (e: ActivityNotFoundException) { openCalculatorNotFoundDialog = true }
+          }
+        }) {
+          Icon(
+            painterResource(R.drawable.baseline_calculate_24),
+            contentDescription = stringResource(R.string.description_calculator)
+          )
+        }
+        IconButton(onClick = { context.startActivity(Intent(AlarmClock.ACTION_SHOW_TIMERS)) }) {
+          Icon(
+            painterResource(R.drawable.baseline_alarm_24),
+            contentDescription = stringResource(R.string.description_timer)
+          )
+        }
         Box(modifier = Modifier) {
           IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
             Icon(
@@ -468,4 +511,22 @@ private fun Preview() {
       onThumbnailChange = {}
     )
   }
+}
+
+@Composable
+private fun CalculatorNotFoundDialog(
+  onConfirm: () -> Unit,
+) {
+  AlertDialog(
+    title = { Text(text = stringResource(R.string.dialog_title_app_not_found)) },
+    text = { Text(text = stringResource(R.string.dialog_text_calculator_app_was_not_found)) },
+    onDismissRequest = onConfirm,
+    confirmButton = {
+      TextButton(
+        onClick = onConfirm,
+      ) {
+        Text(text = stringResource(R.string.dialog_confirm_default))
+      }
+    },
+  )
 }

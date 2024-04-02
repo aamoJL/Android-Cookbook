@@ -18,8 +18,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 
 @Composable
@@ -54,5 +56,13 @@ fun NoteCard(
           .background(LocalContentColor.current.copy(alpha = .4f))
       )
     }
+  }
+}
+
+@PreviewLightDark
+@Composable
+private fun Preview(){
+  CookbookTheme {
+    NoteCard(text = "Ashioho hio shiods isdhoiosh dioshdoi")
   }
 }
