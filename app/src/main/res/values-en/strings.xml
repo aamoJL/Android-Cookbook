@@ -73,4 +73,9 @@
     <string name="description_decrease_value">Decrease value</string>
     <string name="description_increase_value">Increase value</string>
     <string name="description_star_rating_star_icon">%1$s star</string>
+    <string name="description_timer">Timer</string>
+    <string name="description_calculator">Calculator</string>
+    <string name="dialog_title_app_not_found">App not found.</string>
+    <string name="dialog_text_calculator_app_was_not_found">Calculator app was not found.</string>
+    <string name="dialog_confirm_default">OK</string>
 </resources>

@@ -73,4 +73,9 @@
     <string name="description_decrease_value">Vähennä</string>
     <string name="description_increase_value">Lisää</string>
     <string name="description_star_rating_star_icon">%1$s tähteä</string>
+    <string name="description_timer">Ajastin</string>
+    <string name="description_calculator">Laskin</string>
+    <string name="dialog_title_app_not_found">Sovellusta ei löytynyt.</string>
+    <string name="dialog_text_calculator_app_was_not_found">Laskinta ei löytynyt.</string>
+    <string name="dialog_confirm_default">OK</string>
 </resources>
