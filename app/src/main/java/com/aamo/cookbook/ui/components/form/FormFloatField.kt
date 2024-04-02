@@ -13,10 +13,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import com.aamo.cookbook.utility.toStringWithoutZero
 import com.aamo.cookbook.utility.trimFirst
+
+class FormFloatFieldDefaults {
+  companion object {
+    val keyboardOptions: KeyboardOptions = KeyboardOptions(
+      keyboardType = KeyboardType.Number,
+      imeAction = ImeAction.Next
+    )
+  }
+}
 
 @Composable
 fun FormFloatField(
@@ -24,6 +34,7 @@ fun FormFloatField(
   modifier: Modifier = Modifier,
   onValueChange: (Float?) -> Unit,
   label: String,
+  keyboardOptions: KeyboardOptions = FormFloatFieldDefaults.keyboardOptions
 ) {
   var textFieldValueState by remember {
     mutableStateOf(
@@ -69,7 +80,7 @@ fun FormFloatField(
     },
     singleLine = true,
     label = { Text(text = label) },
-    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+    keyboardOptions = keyboardOptions,
     modifier = modifier.fillMaxWidth()
   )
 }
