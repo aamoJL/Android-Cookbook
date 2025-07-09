@@ -42,7 +42,7 @@ abstract class RecipeDatabase : RoomDatabase() {
     fun getDatabase(context: Context): RecipeDatabase {
       return Instance ?: synchronized(this) {
         Room.databaseBuilder(context, RecipeDatabase::class.java, DATABASE_NAME)
-      }.build()
+      }.build().also { Instance = it }
     }
   }
 }

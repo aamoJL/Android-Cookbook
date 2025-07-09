@@ -26,8 +26,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Divider
@@ -43,7 +43,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -145,13 +144,8 @@ fun RecipeScreenContent(
   onRatingChange: (Int) -> Unit,
   onThumbnailChange: (Uri) -> Unit,
 ) {
-  val pageCount by rememberSaveable(chapterPageUiStates) {
-    mutableIntStateOf(
-      if (chapterPageUiStates.any { x -> x.progress.any { !it } }) chapterPageUiStates.size + 1
-      else chapterPageUiStates.size + 2
-    )
-  }
-  val pagerState = rememberPagerState(pageCount = { pageCount })
+  val pageCount = rememberSaveable(chapterPageUiStates) { chapterPageUiStates.size + 2 }
+  val pagerState = rememberPagerState(pageCount = { pageCount }, initialPage = 1)
   val scope = rememberCoroutineScope()
   var moreDropMenuState by remember { mutableStateOf(false) }
   val context = LocalContext.current
@@ -171,7 +165,7 @@ fun RecipeScreenContent(
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
           }
-          catch (e: ActivityNotFoundException){
+          catch (_: ActivityNotFoundException){
             try {
               // Samsung phones
               context.startActivity(
@@ -181,7 +175,7 @@ fun RecipeScreenContent(
                   .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
               )
             }
-            catch (e: ActivityNotFoundException) { openCalculatorNotFoundDialog = true }
+            catch (_: ActivityNotFoundException) { openCalculatorNotFoundDialog = true }
           }
         }) {
           Icon(
@@ -281,14 +275,19 @@ fun RecipeScreenContent(
               .testTag(Tags.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
-              0 -> SummaryPage(
+              0 -> CompletedPage(
+                uiState = completedPageUiState,
+                onRatingChange = onRatingChange,
+                onThumbnailChange = onThumbnailChange
+              )
+              1 -> SummaryPage(
                 uiState = summaryPageUiState,
                 servingsState = servingsState,
                 onServingsCountChange = onServingsCountChange,
               )
 
-              in (1..chapterPageUiStates.size) -> {
-                val chapterIndex = pageIndex - 1
+              in (2..chapterPageUiStates.size + 1) -> {
+                val chapterIndex = pageIndex - 2
                 val uiState = chapterPageUiStates.elementAt(chapterIndex)
 
                 ChapterPage(
@@ -300,11 +299,7 @@ fun RecipeScreenContent(
                 )
               }
 
-              else -> CompletedPage(
-                uiState = completedPageUiState,
-                onRatingChange = onRatingChange,
-                onThumbnailChange = onThumbnailChange
-              )
+              else -> {}
             }
           }
         }
@@ -338,15 +333,17 @@ private fun Pager(
     val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
       state.progress.any { !it }
     }
-    val currentProgressPage = when (currentChapterIndex) {
-      -1 -> chapterUiStates.size + 1
-      else -> currentChapterIndex + 1
-    }
-    val lastPageEnabled = currentProgressPage == chapterUiStates.size + 1
 
     PageIndicatorItem(
       selected = pagerState.currentPage == 0,
       onClick = { onIndicatorClick(0) },
+      color = MaterialTheme.colorScheme.tertiaryContainer,
+      icon = Icons.Filled.Settings
+    )
+
+    PageIndicatorItem(
+      selected = pagerState.currentPage == 1,
+      onClick = { onIndicatorClick(1) },
       color = MaterialTheme.colorScheme.tertiaryContainer,
       icon = Icons.Outlined.Info
     )
@@ -354,8 +351,8 @@ private fun Pager(
     repeat(chapterUiStates.size) { index ->
       val isTargetPage = currentChapterIndex == index
       PageIndicatorItem(
-        selected = index + 1 == pagerState.currentPage,
-        onClick = { onIndicatorClick(index + 1) },
+        selected = index + 2 == pagerState.currentPage,
+        onClick = { onIndicatorClick(index + 2) },
         isTargetPage = isTargetPage,
         color = when {
           currentChapterIndex == index -> MaterialTheme.colorScheme.primaryContainer
@@ -366,16 +363,6 @@ private fun Pager(
         ) Icons.Filled.Done else null
       )
     }
-
-    PageIndicatorItem(
-      selected = pagerState.currentPage == chapterUiStates.size + 1,
-      enabled = lastPageEnabled,
-      onClick = { onIndicatorClick(pagerState.pageCount - 1) },
-      isTargetPage = currentProgressPage == chapterUiStates.size + 1,
-      color = if (lastPageEnabled) MaterialTheme.colorScheme.primaryContainer else
-        MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp),
-      icon = if (lastPageEnabled) null else Icons.Filled.Lock
-    )
   }
 }
 
