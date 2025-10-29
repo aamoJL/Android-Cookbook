@@ -1,11 +1,14 @@
 @file:Suppress("HardCodedStringLiteral")
 
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.room)
   alias(libs.plugins.google.devtools.ksp)
+  alias(libs.plugins.serialization)
 }
 
 android {
@@ -44,8 +47,10 @@ android {
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17
   }
-  kotlinOptions {
-    jvmTarget = "17"
+  kotlin {
+    compilerOptions {
+      jvmTarget = JvmTarget.JVM_17
+    }
   }
   buildFeatures {
     compose = true
@@ -59,8 +64,7 @@ android {
   sourceSets {
     getByName("androidTest").assets.srcDir("$projectDir/schemas")
   }
-  androidResources {
-    @Suppress("UnstableApiUsage")
+  @Suppress("UnstableApiUsage") androidResources {
     generateLocaleConfig = true
   }
   room {
@@ -81,7 +85,9 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.coil.compose)
   implementation(libs.androidx.camera.camera2)
-  ksp (libs.androidx.room.compiler)
+  // JSON serialization library, works with the Kotlin serialization plugin
+  implementation(libs.kotlinx.serialization.json)
+  ksp(libs.androidx.room.compiler)
 
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)

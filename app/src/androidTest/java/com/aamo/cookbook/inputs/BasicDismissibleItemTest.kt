@@ -23,22 +23,17 @@ class BasicDismissibleItemTest {
   private val animationDuration = 500
   private var wasDismissed = false
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setup() {
     rule.setContent {
       CookbookTheme {
-        BasicDismissibleItem(
-          dismissAction = { true.also { wasDismissed = true } },
-          animationDuration = animationDuration
-        ){
+        BasicDismissibleItem(dismissAction = { true.also { wasDismissed = true } }) {
           ListItem(
-            modifier = Modifier.testTag(tag),
-            headlineContent = {
-            Text(text = "test item")
-          })
+            modifier = Modifier.testTag(tag), headlineContent = {
+              Text(text = "test item")
+            })
         }
       }
     }

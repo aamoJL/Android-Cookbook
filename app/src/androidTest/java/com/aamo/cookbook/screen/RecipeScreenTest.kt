@@ -17,6 +17,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeRight
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.net.toFile
 import androidx.test.platform.app.InstrumentationRegistry
@@ -47,8 +48,7 @@ class RecipeScreenTest {
   private var completedPageUiState by mutableStateOf(RecipeScreenViewModel.CompletedPageUiState())
   private var servingsState by mutableStateOf(
     RecipeScreenViewModel.ServingsState(
-      recipe.value.servings,
-      recipe.value.servings
+      recipe.value.servings, recipe.value.servings
     )
   )
   private var favoriteState by mutableStateOf(false)
@@ -144,17 +144,18 @@ class RecipeScreenTest {
 
   @Test
   fun onProgress_incomplete() {
-    val chapterCount = recipe.chapters.size
+    recipe.chapters.size
 
-    // Swipe to next page
+    // Swipe to first chapter page
     rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
 
     // Check only one checkbox
     rule.onAllNodesWithTag(Tags.PROGRESS_CHECKBOX.name)[0].performClick()
 
-    // Swipe to last page
-    repeat(chapterCount) {
-      rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
+    // Swipe to settings page
+    rule.onNodeWithTag(Tags.PAGER.name).apply {
+      performTouchInput { swipeLeft() } // Info
+      performTouchInput { swipeLeft() } // Settings
     }
 
     rule.onNodeWithText(R.string.text_rate_the_recipe).assertDoesNotExist()
@@ -162,7 +163,7 @@ class RecipeScreenTest {
 
   @Test
   fun onProgress_completed() {
-    toCompletedPage()
+    toSettingsPage()
     rule.onNodeWithText(R.string.text_rate_the_recipe).assertExists()
   }
 
@@ -185,7 +186,7 @@ class RecipeScreenTest {
 
   @Test
   fun onTakeThumbnailPhoto() {
-    toCompletedPage()
+    toSettingsPage()
     rule.onNodeWithContentDescription(R.string.description_take_a_photo).performClick()
 
     val ioService = IOService(InstrumentationRegistry.getInstrumentation().targetContext)
@@ -200,7 +201,7 @@ class RecipeScreenTest {
 
   @Test
   fun onDeleteThumbnailPhoto() {
-    toCompletedPage()
+    toSettingsPage()
     rule.onNodeWithContentDescription(R.string.description_take_a_photo).performClick()
 
     val ioService = IOService(InstrumentationRegistry.getInstrumentation().targetContext)
@@ -217,7 +218,7 @@ class RecipeScreenTest {
   fun onStarRating() {
     val rating = 3
 
-    toCompletedPage()
+    toSettingsPage()
     rule.onNodeWithContentDescription(
       rule.activity.getString(
         R.string.description_star_rating_star_icon, rating.toString()
@@ -227,17 +228,12 @@ class RecipeScreenTest {
     assertEquals(rating, ratingState)
   }
 
-  /**
-   * Completes the recipe progress and swipes the pages to the completed page
-   */
-  private fun toCompletedPage() {
-    chapterUiStates = chapterUiStates.map {
-      it.copy(progress = it.progress.map { true })
-    }
+  private fun toSettingsPage() {
+//    chapterUiStates = chapterUiStates.map {
+//      it.copy(progress = it.progress.map { true })
+//    }
 
-    // Swipe to last page
-    repeat(chapterUiStates.size + 1) {
-      rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
-    }
+    // Swipe to settings page
+    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeRight() }
   }
 }
