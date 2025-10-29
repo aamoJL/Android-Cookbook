@@ -14,10 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
@@ -29,8 +25,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -51,8 +48,7 @@ fun CategoriesScreen(
   Surface(color = MaterialTheme.colorScheme.primary) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
       Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.weight(2f)
+        contentAlignment = Alignment.Center, modifier = Modifier.weight(2f)
       ) {
         Text(
           text = stringResource(R.string.app_name),
@@ -68,8 +64,7 @@ fun CategoriesScreen(
           .weight(5f)
       ) {
         Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier
+          horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier
         ) {
           MainButtons(
             onSearch = onSearch,
@@ -104,7 +99,7 @@ fun CategoriesScreen(
 @Composable
 fun MainButton(
   onClick: () -> Unit,
-  icon: ImageVector,
+  icon: Painter,
   text: String,
   modifier: Modifier = Modifier,
   buttonColors: ButtonColors = ButtonDefaults.buttonColors(
@@ -113,13 +108,10 @@ fun MainButton(
   ),
 ) {
   ElevatedButton(
-    onClick = onClick,
-    shape = RoundedCornerShape(8.dp),
-    colors = buttonColors,
-    modifier = modifier
+    onClick = onClick, shape = RoundedCornerShape(8.dp), colors = buttonColors, modifier = modifier
   ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Icon(imageVector = icon, contentDescription = null)
+      Icon(painter = icon, contentDescription = null)
       Spacer(modifier = Modifier.height(4.dp))
       Text(text = text)
     }
@@ -134,8 +126,7 @@ fun MainButtons(
   modifier: Modifier = Modifier
 ) {
   Row(
-    horizontalArrangement = Arrangement.spacedBy(8.dp),
-    modifier = modifier.then(
+    horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier.then(
       Modifier
         .defaultMinSize(minHeight = 110.dp)
         .height(IntrinsicSize.Max)
@@ -143,7 +134,7 @@ fun MainButtons(
   ) {
     MainButton(
       onClick = onSearch,
-      icon = Icons.Filled.Search,
+      icon = painterResource(R.drawable.rounded_search_24),
       text = stringResource(R.string.description_search),
       modifier = Modifier
         .weight(1f)
@@ -151,7 +142,7 @@ fun MainButtons(
     )
     MainButton(
       onClick = onFavorites,
-      icon = Icons.Filled.Favorite,
+      icon = painterResource(R.drawable.rounded_bookmark_24),
       text = stringResource(R.string.button_text_favorites),
       modifier = Modifier
         .weight(1f)
@@ -159,7 +150,7 @@ fun MainButtons(
     )
     MainButton(
       onClick = onAddRecipe,
-      icon = Icons.Filled.Add,
+      icon = painterResource(R.drawable.rounded_add_24),
       text = stringResource(R.string.button_text_new),
       modifier = Modifier
         .weight(1f)
@@ -170,9 +161,7 @@ fun MainButtons(
 
 @Composable
 private fun CategoryList(
-  categories: List<String>,
-  onSelect: (String) -> Unit,
-  modifier: Modifier = Modifier
+  categories: List<String>, onSelect: (String) -> Unit, modifier: Modifier = Modifier
 ) {
   LazyColumn(
     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -205,12 +194,12 @@ private fun CategoryList(
 
 @PreviewLightDark
 @Composable
-private fun Preview(){
+private fun Preview() {
   CookbookTheme {
-    CategoriesScreen(categories = listOf(
-      "Category 1", "Category 2"
-    ))
+    CategoriesScreen(
+      categories = listOf(
+        "Category 1", "Category 2"
+      )
+    )
   }
 }
-
-

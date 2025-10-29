@@ -16,8 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -89,37 +87,36 @@ internal fun CompletedPage(
 
 @Composable
 private fun ThumbnailPicker(
-  fileName: String,
-  onThumbnailChange: (Uri) -> Unit,
-  modifier: Modifier = Modifier
-){
+  fileName: String, onThumbnailChange: (Uri) -> Unit, modifier: Modifier = Modifier
+) {
   Card(modifier = modifier) {
     if (fileName.isNotEmpty()) {
       Box(modifier = Modifier.fillMaxSize()) {
         Image(
           painter = rememberAsyncImagePainter(
-            model = IOService(LocalContext.current)
-              .getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName)
+            model = IOService(LocalContext.current).getExternalFileUri(
+                Environment.DIRECTORY_PICTURES,
+                fileName
+              )
           ),
           contentDescription = null,
           contentScale = ContentScale.Crop,
           modifier = Modifier.fillMaxSize()
         )
         IconButton(
-          onClick = { onThumbnailChange(Uri.EMPTY) },
-          colors = IconButtonDefaults.iconButtonColors(
+          onClick = { onThumbnailChange(Uri.EMPTY) }, colors = IconButtonDefaults.iconButtonColors(
             contentColor = MaterialTheme.colorScheme.error,
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .8f),
-          ),
-          modifier = Modifier.align(Alignment.BottomEnd)
+          ), modifier = Modifier.align(Alignment.BottomEnd)
         ) {
           Icon(
-            imageVector = Icons.Filled.Delete,
+            painter = painterResource(R.drawable.rounded_delete_24),
             contentDescription = stringResource(R.string.description_delete_photo),
           )
         }
       }
-    } else {
+    }
+    else {
       Box(modifier = Modifier.fillMaxSize()) {
         CameraButton(
           onCapture = { onThumbnailChange(it) },
@@ -134,18 +131,15 @@ private fun ThumbnailPicker(
 
 @Composable
 private fun StarRating(
-  rating: Int,
-  onRatingChange: (Int) -> Unit
+  rating: Int, onRatingChange: (Int) -> Unit
 ) {
   Card {
     Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      modifier = Modifier.padding(8.dp)
+      horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)
     ) {
       Text(text = stringResource(R.string.text_rate_the_recipe))
       FiveStarRating(
-        value = rating,
-        onValueChange = onRatingChange
+        value = rating, onValueChange = onRatingChange
       )
     }
   }
@@ -153,18 +147,15 @@ private fun StarRating(
 
 @Composable
 private fun CameraButton(
-  onCapture: (Uri) -> Unit,
-  modifier: Modifier = Modifier
+  onCapture: (Uri) -> Unit, modifier: Modifier = Modifier
 ) {
   var fileUri by remember { mutableStateOf(Uri.EMPTY) }
   val context = LocalContext.current
 
   val cameraLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.TakePicture(),
-    onResult = { success ->
+    contract = ActivityResultContracts.TakePicture(), onResult = { success ->
       if (success) onCapture(fileUri)
-    }
-  )
+    })
 
   fun Context.createImageFile(): File {
     val storageDir: File? = IOService(this).getExternalFileDir(Environment.DIRECTORY_PICTURES)
@@ -187,8 +178,7 @@ private fun CameraButton(
     onClick = {
       fileUri = getFileUri()
       cameraLauncher.launch(fileUri)
-    },
-    modifier = modifier
+    }, modifier = modifier
   ) {
     Icon(
       painter = painterResource(R.drawable.baseline_add_a_photo_24),
@@ -205,14 +195,11 @@ private fun Preview(
   CookbookTheme {
     CompletedPage(
       uiState = RecipeScreenViewModel.CompletedPageUiState(
-        fiveStarRating = 3,
-        recipeThumbnail = thumbnailUri
-      ),
-      onRatingChange = {},
-      onThumbnailChange = {})
+      fiveStarRating = 3, recipeThumbnail = thumbnailUri
+    ), onRatingChange = {}, onThumbnailChange = {})
   }
 }
 
-private class RecipeThumbnailPreviewProvider: PreviewParameterProvider<String> {
+private class RecipeThumbnailPreviewProvider : PreviewParameterProvider<String> {
   override val values = sequenceOf("testUri.jpg", "")
 }

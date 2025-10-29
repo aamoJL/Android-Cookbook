@@ -12,14 +12,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -34,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -96,26 +92,22 @@ fun EditRecipeScreenPageContent(
   onSubmitChanges: () -> Unit = {},
   onDelete: () -> Unit = {},
   onBack: () -> Unit = {},
-  onSwapChapters: (from: Int, to: Int) -> Unit = {_,_ -> }
+  onSwapChapters: (from: Int, to: Int) -> Unit = { _, _ -> }
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
   var openDeleteDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(
-      onDismiss = { openUnsavedDialog = false },
-      onConfirm = {
-        openUnsavedDialog = false
-        onBack()
-      })
-  } else if (openDeleteDialog) {
-    DeleteDialog(
-      onDismiss = { openDeleteDialog = false },
-      onConfirm = {
-        openDeleteDialog = false
-        onDelete()
-      }
-    )
+    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+      openUnsavedDialog = false
+      onBack()
+    })
+  }
+  else if (openDeleteDialog) {
+    DeleteDialog(onDismiss = { openDeleteDialog = false }, onConfirm = {
+      openDeleteDialog = false
+      onDelete()
+    })
   }
 
   BackHandler(true) {
@@ -125,7 +117,8 @@ fun EditRecipeScreenPageContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = when (uiState.isNewRecipe) {
+      BasicTopAppBar(
+        title = when (uiState.isNewRecipe) {
         true -> stringResource(R.string.screen_title_new_recipe)
         else -> stringResource(R.string.screen_title_existing_recipe)
       }, onBack = {
@@ -135,20 +128,19 @@ fun EditRecipeScreenPageContent(
         if (!uiState.isNewRecipe) {
           IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
-              imageVector = Icons.Filled.Delete,
+              painter = painterResource(R.drawable.rounded_delete_24),
               contentDescription = stringResource(R.string.description_delete_recipe)
             )
           }
         }
         IconButton(onClick = onSubmitChanges, enabled = uiState.canBeSaved) {
           Icon(
-            imageVector = Icons.Filled.Done,
+            painter = painterResource(R.drawable.rounded_check_24),
             contentDescription = stringResource(R.string.description_save_recipe)
           )
         }
       })
-    }
-  ) {
+    }) {
     Column(
       verticalArrangement = Arrangement.spacedBy(16.dp),
       modifier = modifier
@@ -183,8 +175,7 @@ private fun InfoForm(
 ) {
   FormBase(title = stringResource(R.string.form_title_recipe), modifier = modifier) {
     Row(
-      horizontalArrangement = Arrangement.spacedBy(8.dp),
-      modifier = Modifier.fillMaxWidth()
+      horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()
     ) {
       FormTextField(
         value = uiState.name,
@@ -200,8 +191,7 @@ private fun InfoForm(
       )
     }
     Column(
-      verticalArrangement = Arrangement.spacedBy(5.dp),
-      modifier = Modifier.fillMaxWidth()
+      verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()
     ) {
       FormTextFieldWithOptions(
         value = uiState.category,
@@ -217,7 +207,7 @@ private fun InfoForm(
       )
       FormTextField(
         value = uiState.note,
-        onValueChange = { onStateChange(uiState.copy(note = it))},
+        onValueChange = { onStateChange(uiState.copy(note = it)) },
         label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
         keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
           imeAction = ImeAction.Done
@@ -243,10 +233,8 @@ private fun ChapterList(
   ) {
     LazyColumn {
       itemsIndexed(
-        items = chapters,
-        key = { _, pair -> pair.first }
-      ) { index, pair ->
-        Column(modifier = Modifier.animateItemPlacement()) {
+        items = chapters, key = { _, pair -> pair.first }) { index, pair ->
+        Column {
           ChapterListItem(
             chapter = pair.second,
             chapterNumber = index + 1,
@@ -254,13 +242,17 @@ private fun ChapterList(
             onDismiss = { onDeleteChapter(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
-            } else null,
+            }
+            else null,
             onMoveDown = if (index != chapters.size - 1) {
               { onSwap(index, index + 1) }
-            } else null,
-            modifier = Modifier.fillMaxWidth()
-          )
-          if (index != chapters.size - 1) Divider()
+            }
+            else null,
+            modifier = Modifier.fillMaxWidth())
+
+          if (index != chapters.size - 1) {
+            HorizontalDivider()
+          }
         }
       }
     }
@@ -272,7 +264,7 @@ private fun ChapterListItem(
   chapter: ChapterWithStepsAndIngredients,
   chapterNumber: Int,
   onClick: () -> Unit,
-  onDismiss: () -> (Boolean),
+  onDismiss: () -> Unit,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
@@ -301,8 +293,7 @@ private fun ChapterListItem(
                 Text(
                   text = stringResource(
                     R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
-                  ),
-                  style = MaterialTheme.typography.labelSmall
+                  ), style = MaterialTheme.typography.labelSmall
                 )
               }
               Text(
@@ -310,8 +301,7 @@ private fun ChapterListItem(
                 style = MaterialTheme.typography.bodyMedium
               )
               IngredientList(
-                ingredients = step.ingredients,
-                modifier = Modifier.padding(start = 16.dp)
+                ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
               )
             }
           }
@@ -321,26 +311,24 @@ private fun ChapterListItem(
         Column(modifier = Modifier) {
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowUp,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
               contentDescription = stringResource(R.string.description_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowDown,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
               contentDescription = stringResource(R.string.description_move_down)
             )
           }
         }
-      }
-    )
+      })
   }
 }
 
 @Composable
 private fun IngredientList(
-  ingredients: List<Ingredient>,
-  modifier: Modifier = Modifier
+  ingredients: List<Ingredient>, modifier: Modifier = Modifier
 ) {
   Row(modifier = modifier) {
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
@@ -356,18 +344,14 @@ private fun IngredientList(
     Column(modifier = Modifier.padding(horizontal = 8.dp)) {
       ingredients.forEach {
         Text(
-          text = it.unit,
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier
+          text = it.unit, style = MaterialTheme.typography.bodySmall, modifier = Modifier
         )
       }
     }
     Column {
       ingredients.forEach {
         Text(
-          text = it.name,
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier
+          text = it.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier
         )
       }
     }
@@ -378,7 +362,7 @@ private fun IngredientList(
 private fun DeleteDialog(
   onDismiss: () -> Unit,
   onConfirm: () -> Unit,
-){
+) {
   AlertDialog(
     title = { Text(text = stringResource(R.string.dialog_title_delete_recipe)) },
     text = { Text(text = stringResource(R.string.dialog_text_delete_recipe)) },
@@ -399,6 +383,7 @@ private fun DeleteDialog(
   )
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
@@ -409,24 +394,19 @@ private fun Preview() {
         chapters = listOf(
           Pair(
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
-              value = Chapter(name = "Chapter 1"),
-              steps = listOf(
+              value = Chapter(name = "Chapter 1"), steps = listOf(
                 StepWithIngredients(
-                  value = Step(description = "Description..."),
-                  ingredients = listOf(
+                  value = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
                   )
                 )
               )
             )
-          ),
-          Pair(
+          ), Pair(
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
-              value = Chapter(name = "Chapter 2"),
-              steps = listOf(
+              value = Chapter(name = "Chapter 2"), steps = listOf(
                 StepWithIngredients(
-                  value = Step(description = "Description..."),
-                  ingredients = listOf(
+                  value = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
                   )
                 )

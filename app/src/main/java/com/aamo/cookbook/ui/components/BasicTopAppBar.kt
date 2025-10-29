@@ -1,8 +1,6 @@
 package com.aamo.cookbook.ui.components
 
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -13,6 +11,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.aamo.cookbook.R
 import com.aamo.cookbook.utility.Tags
@@ -27,22 +26,22 @@ fun BasicTopAppBar(
   TopAppBar(
     title = {
       Text(text = title, Modifier.testTag(Tags.SCREEN_TITLE.name))
-    },
-    colors = TopAppBarDefaults.topAppBarColors(
+    }, colors = TopAppBarDefaults.topAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       containerColor = MaterialTheme.colorScheme.primary,
       titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-    ),
-    navigationIcon = {
+    ), navigationIcon = {
       if (onBack != null) {
         IconButton(onClick = {
           onBack()
         }) {
-          Icon(Icons.Filled.ArrowBack, contentDescription = stringResource(R.string.description_screen_back))
+          Icon(
+            painter = painterResource(R.drawable.rounded_arrow_back_24),
+            contentDescription = stringResource(R.string.description_screen_back)
+          )
         }
       }
-    },
-    actions = actions
+    }, actions = actions
   )
 }

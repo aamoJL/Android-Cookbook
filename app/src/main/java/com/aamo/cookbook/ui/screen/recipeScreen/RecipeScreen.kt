@@ -22,17 +22,10 @@ import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Done
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -52,7 +45,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
@@ -99,7 +92,7 @@ fun RecipeScreen(
     chapterPageUiStates = chapterUiStates,
     completedPageUiState = completedUiState,
     servingsState = servingsState,
-    favoriteState = favoriteState,
+    bookmarked = favoriteState,
     modifier = modifier,
     onBack = onBack,
     onEditRecipe = { onEditRecipe(viewModel.recipeId) },
@@ -122,8 +115,7 @@ fun RecipeScreen(
       viewModel.setThumbnail(
         IOService(context).getFileNameWithSuffixFromUri(it) ?: ""
       )
-    }
-  )
+    })
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -133,7 +125,7 @@ fun RecipeScreenContent(
   chapterPageUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
   completedPageUiState: RecipeScreenViewModel.CompletedPageUiState,
   servingsState: RecipeScreenViewModel.ServingsState,
-  favoriteState: Boolean,
+  bookmarked: Boolean,
   modifier: Modifier = Modifier,
   onBack: () -> Unit = {},
   onEditRecipe: () -> Unit = {},
@@ -152,7 +144,7 @@ fun RecipeScreenContent(
   var openCalculatorNotFoundDialog by remember { mutableStateOf(false) }
 
   if (openCalculatorNotFoundDialog) {
-    CalculatorNotFoundDialog(onConfirm = {openCalculatorNotFoundDialog = false})
+    CalculatorNotFoundDialog(onConfirm = { openCalculatorNotFoundDialog = false })
   }
 
   Scaffold(
@@ -165,17 +157,21 @@ fun RecipeScreenContent(
                 .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
           }
-          catch (_: ActivityNotFoundException){
+          catch (_: ActivityNotFoundException) {
             try {
               // Samsung phones
               context.startActivity(
-                Intent(Intent.ACTION_MAIN)
-                  .addCategory(Intent.CATEGORY_LAUNCHER)
-                  .setComponent(ComponentName("com.sec.android.app.popupcalculator", "com.sec.android.app.popupcalculator.Calculator"))
-                  .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(
+                  ComponentName(
+                    "com.sec.android.app.popupcalculator",
+                    "com.sec.android.app.popupcalculator.Calculator"
+                  )
+                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
               )
             }
-            catch (_: ActivityNotFoundException) { openCalculatorNotFoundDialog = true }
+            catch (_: ActivityNotFoundException) {
+              openCalculatorNotFoundDialog = true
+            }
           }
         }) {
           Icon(
@@ -192,72 +188,65 @@ fun RecipeScreenContent(
         Box(modifier = Modifier) {
           IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
             Icon(
-              imageVector = Icons.Filled.MoreVert,
+              painter = painterResource(R.drawable.rounded_more_vert_24),
               contentDescription = stringResource(R.string.description_more_options)
             )
           }
           DropdownMenu(
-            expanded = moreDropMenuState,
-            onDismissRequest = { moreDropMenuState = false }
-          ) {
+            expanded = moreDropMenuState, onDismissRequest = { moreDropMenuState = false }) {
             DropdownMenuItem(
               leadingIcon = {
-                Icon(
-                  imageVector = Icons.Filled.Edit,
-                  contentDescription = stringResource(R.string.description_edit_recipe)
-                )
-              },
+              Icon(
+                painter = painterResource(R.drawable.rounded_edit_24),
+                contentDescription = stringResource(R.string.description_edit_recipe)
+              )
+            },
               text = { Text(text = stringResource(R.string.description_edit_recipe)) },
               onClick = {
                 moreDropMenuState = false
                 onEditRecipe()
-              }
-            )
+              })
             DropdownMenuItem(
               leadingIcon = {
-                Icon(
-                  painter = painterResource(id = R.drawable.baseline_content_copy_24),
-                  contentDescription = stringResource(R.string.description_copy_recipe)
-                )
-              },
+              Icon(
+                painter = painterResource(id = R.drawable.baseline_content_copy_24),
+                contentDescription = stringResource(R.string.description_copy_recipe)
+              )
+            },
               text = { Text(text = stringResource(R.string.description_copy_recipe)) },
               onClick = {
                 moreDropMenuState = false
                 onCopyRecipe()
+              })
+            HorizontalDivider()
+            DropdownMenuItem(leadingIcon = {
+              if (bookmarked) {
+                Icon(
+                  painter = painterResource(R.drawable.rounded_bookmark_remove_24),
+                  contentDescription = null
+                )
               }
-            )
-            Divider()
-            DropdownMenuItem(
-              leadingIcon = {
-                if (favoriteState) {
-                  Icon(
-                    painter = painterResource(R.drawable.baseline_heart_broken_24),
-                    contentDescription = null
-                  )
-                } else {
-                  Icon(
-                    imageVector = Icons.Filled.Favorite,
-                    contentDescription = null
-                  )
-                }
-              },
-              text = {
-                if (favoriteState) {
-                  Text(text = stringResource(R.string.button_text_remove_from_favorites))
-                } else {
-                  Text(text = stringResource(R.string.button_text_add_to_favorites))
-                }
-              },
-              onClick = {
-                moreDropMenuState = false
-                onFavoriteChange(!favoriteState)
+              else {
+                Icon(
+                  painter = painterResource(R.drawable.rounded_bookmark_24),
+                  contentDescription = null
+                )
               }
-            )
+            }, text = {
+              if (bookmarked) {
+                Text(text = stringResource(R.string.button_text_remove_from_favorites))
+              }
+              else {
+                Text(text = stringResource(R.string.button_text_add_to_favorites))
+              }
+            }, onClick = {
+              moreDropMenuState = false
+              onFavoriteChange(!bookmarked)
+            })
           }
         }
       }
-    }
-  ) { paddingValues ->
+    }) { paddingValues ->
     Surface(
       modifier = modifier
         .fillMaxSize()
@@ -280,6 +269,7 @@ fun RecipeScreenContent(
                 onRatingChange = onRatingChange,
                 onThumbnailChange = onThumbnailChange
               )
+
               1 -> SummaryPage(
                 uiState = summaryPageUiState,
                 servingsState = servingsState,
@@ -303,16 +293,13 @@ fun RecipeScreenContent(
             }
           }
         }
-        Divider()
+        HorizontalDivider()
         Pager(
-          chapterUiStates = chapterPageUiStates,
-          pagerState = pagerState,
-          onIndicatorClick = {
+          chapterUiStates = chapterPageUiStates, pagerState = pagerState, onIndicatorClick = {
             scope.launch {
               pagerState.animateScrollToPage(it)
             }
-          }
-        )
+          })
       }
     }
   }
@@ -327,8 +314,7 @@ private fun Pager(
   modifier: Modifier = Modifier
 ) {
   Row(
-    modifier = modifier.fillMaxWidth(),
-    horizontalArrangement = Arrangement.Center
+    modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
   ) {
     val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
       state.progress.any { !it }
@@ -338,14 +324,14 @@ private fun Pager(
       selected = pagerState.currentPage == 0,
       onClick = { onIndicatorClick(0) },
       color = MaterialTheme.colorScheme.tertiaryContainer,
-      icon = Icons.Filled.Settings
+      icon = painterResource(R.drawable.rounded_settings_24),
     )
 
     PageIndicatorItem(
       selected = pagerState.currentPage == 1,
       onClick = { onIndicatorClick(1) },
       color = MaterialTheme.colorScheme.tertiaryContainer,
-      icon = Icons.Outlined.Info
+      icon = painterResource(R.drawable.rounded_info_24),
     )
 
     repeat(chapterUiStates.size) { index ->
@@ -356,11 +342,13 @@ private fun Pager(
         isTargetPage = isTargetPage,
         color = when {
           currentChapterIndex == index -> MaterialTheme.colorScheme.primaryContainer
-          currentChapterIndex > index || currentChapterIndex == -1 -> MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+          currentChapterIndex > index || currentChapterIndex == -1 -> MaterialTheme.colorScheme.surfaceColorAtElevation(
+            8.dp
+          )
+
           else -> MaterialTheme.colorScheme.secondaryContainer
         },
-        icon = if (chapterUiStates.elementAt(index).progress.all { it }
-        ) Icons.Filled.Done else null
+        icon = if (chapterUiStates.elementAt(index).progress.all { it }) painterResource(R.drawable.rounded_check_24) else null
       )
     }
   }
@@ -374,7 +362,7 @@ private fun PageIndicatorItem(
   isTargetPage: Boolean = false,
   enabled: Boolean = true,
   color: Color = MaterialTheme.colorScheme.secondaryContainer,
-  icon: ImageVector? = null
+  icon: Painter? = null
 ) {
   Surface(
     color = color,
@@ -384,17 +372,12 @@ private fun PageIndicatorItem(
       .padding(10.dp)
       .clip(CircleShape)
       .size(
-        width = if (isTargetPage) 48.dp else 32.dp,
-        height = 32.dp
+        width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp
       )
   ) {
     Box(contentAlignment = Alignment.Center) {
       if (icon != null) {
-        Icon(
-          imageVector = icon,
-          contentDescription = null,
-          modifier = Modifier.size(20.dp)
-        )
+        Icon(painter = icon, contentDescription = null, modifier = Modifier.size(20.dp))
       }
       if (selected) {
         Surface(
@@ -417,7 +400,7 @@ internal fun IngredientList(
   textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
   Row(modifier = modifier) {
-    if(ingredients.any { it.amount != 0f }) {
+    if (ingredients.any { it.amount != 0f }) {
       Column(modifier = Modifier.width(IntrinsicSize.Max)) {
         ingredients.forEach {
           Text(
@@ -430,7 +413,7 @@ internal fun IngredientList(
         }
       }
     }
-    if(ingredients.any { it.unit.isNotEmpty() }) {
+    if (ingredients.any { it.unit.isNotEmpty() }) {
       Column(
         modifier = Modifier
           .defaultMinSize(minWidth = 40.dp)
@@ -438,10 +421,7 @@ internal fun IngredientList(
       ) {
         ingredients.forEach {
           Text(
-            text = it.unit,
-            style = textStyle,
-            fontFamily = fontFamily,
-            modifier = Modifier
+            text = it.unit, style = textStyle, fontFamily = fontFamily, modifier = Modifier
           )
         }
       }
@@ -449,10 +429,7 @@ internal fun IngredientList(
     Column {
       ingredients.forEach {
         Text(
-          text = it.name,
-          style = textStyle,
-          fontFamily = fontFamily,
-          modifier = Modifier
+          text = it.name, style = textStyle, fontFamily = fontFamily, modifier = Modifier
         )
       }
     }
@@ -465,16 +442,13 @@ private fun Preview() {
   CookbookTheme {
     RecipeScreenContent(
       summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(
-        recipeName = "Recipe 1",
-        recipeNote = "Recipe note.",
-        chaptersWithIngredients = listOf(
+        recipeName = "Recipe 1", recipeNote = "Recipe note.", chaptersWithIngredients = listOf(
           Pair(
             "Chapter 1", listOf(
               Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
               Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
             )
-          ),
-          Pair(
+          ), Pair(
             "Chapter 2", listOf(
               Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
               Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
@@ -484,19 +458,17 @@ private fun Preview() {
       ),
       chapterPageUiStates = listOf(
         RecipeScreenViewModel.ChapterPageUiState(
-          chapter = ChapterWithStepsAndIngredients(Chapter()),
-          progress = listOf(false)
+          chapter = ChapterWithStepsAndIngredients(Chapter()), progress = listOf(false)
         )
       ),
       completedPageUiState = RecipeScreenViewModel.CompletedPageUiState(),
       servingsState = RecipeScreenViewModel.ServingsState(),
-      favoriteState = true,
+      bookmarked = true,
       onProgressChange = { _, _, _ -> },
       onServingsCountChange = {},
       onFavoriteChange = {},
       onRatingChange = {},
-      onThumbnailChange = {}
-    )
+      onThumbnailChange = {})
   }
 }
 

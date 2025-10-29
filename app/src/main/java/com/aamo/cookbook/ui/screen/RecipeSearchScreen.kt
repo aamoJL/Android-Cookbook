@@ -8,10 +8,6 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +28,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -78,12 +75,9 @@ fun RecipeSearchScreenContent(
   Scaffold(
     topBar = {
       SearchTopBar(
-        value = searchWord,
-        onValueChange = { setSearchWord(it) },
-        onBack = onBack
+        value = searchWord, onValueChange = { setSearchWord(it) }, onBack = onBack
       )
-    }
-  ) {
+    }) {
     Surface(Modifier.padding(it)) {
       LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -111,13 +105,11 @@ fun RecipeSearchScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchTopBar(
-  value: String,
-  onValueChange: (String) -> Unit,
-  onBack: () -> Unit
+  value: String, onValueChange: (String) -> Unit, onBack: () -> Unit
 ) {
   val focusRequester = remember { FocusRequester() }
 
-  LaunchedEffect(true){
+  LaunchedEffect(true) {
     focusRequester.requestFocus()
   }
 
@@ -128,31 +120,26 @@ private fun SearchTopBar(
         onValueChange = onValueChange,
         modifier = Modifier.focusRequester(focusRequester)
       )
-    },
-    colors = TopAppBarDefaults.topAppBarColors(
+    }, colors = TopAppBarDefaults.topAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       containerColor = MaterialTheme.colorScheme.primary,
       titleContentColor = MaterialTheme.colorScheme.primaryContainer,
-    ),
-    navigationIcon = {
+    ), navigationIcon = {
       IconButton(onClick = {
         onBack()
       }) {
         Icon(
-          Icons.Filled.ArrowBack,
+          painter = painterResource(R.drawable.rounded_arrow_back_24),
           contentDescription = stringResource(R.string.description_screen_back)
         )
       }
-    }
-  )
+    })
 }
 
 @Composable
 private fun TopBarTextField(
-  value: String,
-  onValueChange: (String) -> Unit,
-  modifier: Modifier = Modifier
+  value: String, onValueChange: (String) -> Unit, modifier: Modifier = Modifier
 ) {
   TextField(
     value = value,
@@ -160,28 +147,27 @@ private fun TopBarTextField(
     placeholder = { Text(stringResource(R.string.textfield_placeholder_search)) },
     leadingIcon = {
       Icon(
-        imageVector = Icons.Filled.Search,
+        painter = painterResource(R.drawable.rounded_search_24),
         contentDescription = stringResource(R.string.description_search)
       )
     },
     trailingIcon = {
-      IconButton(onClick = {  }) {
+      IconButton(onClick = { }) {
         Icon(
-          imageVector = Icons.Filled.Clear,
-          contentDescription = "Clear"
+          painter = painterResource(R.drawable.round_clear_24), contentDescription = "Clear"
         )
       }
     },
     shape = RectangleShape,
     singleLine = true,
     keyboardOptions = KeyboardOptions.Default.copy(
-      capitalization = KeyboardCapitalization.Sentences,
-      keyboardType = KeyboardType.Text
+      capitalization = KeyboardCapitalization.Sentences, keyboardType = KeyboardType.Text
     ),
     modifier = modifier
   )
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
@@ -190,9 +176,7 @@ private fun Preview() {
       recipes = listOf(
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
         RecipeWithFavoriteAndRating(
-          Recipe(name = "Resepti 1"),
-          null,
-          RecipeRating(ratingOutOfFive = 3, recipeId = 0)
+          Recipe(name = "Resepti 1"), null, RecipeRating(ratingOutOfFive = 3, recipeId = 0)
         ),
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)

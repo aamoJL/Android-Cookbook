@@ -41,17 +41,23 @@ import org.junit.Test
 
 class RecipeScreenTest {
   private val recipe = Mocker.mockRecipeList().first()
-  private var chapterUiStates by mutableStateOf<List<RecipeScreenViewModel.ChapterPageUiState>>(emptyList())
+  private var chapterUiStates by mutableStateOf<List<RecipeScreenViewModel.ChapterPageUiState>>(
+    emptyList()
+  )
   private var completedPageUiState by mutableStateOf(RecipeScreenViewModel.CompletedPageUiState())
-  private var servingsState by mutableStateOf(RecipeScreenViewModel.ServingsState(recipe.value.servings, recipe.value.servings))
+  private var servingsState by mutableStateOf(
+    RecipeScreenViewModel.ServingsState(
+      recipe.value.servings,
+      recipe.value.servings
+    )
+  )
   private var favoriteState by mutableStateOf(false)
   private var wasProgressChanged: Boolean = false
   private var wasClicked: Boolean = false
   private var photoTaken: Uri? = null
   private var ratingState by mutableStateOf(0)
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setup() {
@@ -79,12 +85,11 @@ class RecipeScreenTest {
               recipeName = recipe.value.name,
               chaptersWithIngredients = recipe.chapters.map { chapter ->
                 Pair(chapter.value.name, chapter.steps.flatMap { it.ingredients })
-              }
-            ),
+              }),
             chapterPageUiStates = chapterUiStates,
             completedPageUiState = completedPageUiState,
             servingsState = servingsState,
-            favoriteState = favoriteState,
+            bookmarked = favoriteState,
             onProgressChange = { _, _, _ ->
               wasProgressChanged = true
             },
@@ -130,8 +135,7 @@ class RecipeScreenTest {
 
   @Test
   fun changeProgress() = runTest {
-    rule.onNodeWithTag(Tags.PAGER.name)
-      .performTouchInput { swipeLeft() }
+    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
 
     rule.onAllNodesWithTag(Tags.PROGRESS_CHECKBOX.name)[0].performClick()
 
@@ -143,16 +147,14 @@ class RecipeScreenTest {
     val chapterCount = recipe.chapters.size
 
     // Swipe to next page
-    rule.onNodeWithTag(Tags.PAGER.name)
-      .performTouchInput { swipeLeft() }
+    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
 
     // Check only one checkbox
     rule.onAllNodesWithTag(Tags.PROGRESS_CHECKBOX.name)[0].performClick()
 
     // Swipe to last page
-    repeat(chapterCount){
-      rule.onNodeWithTag(Tags.PAGER.name)
-        .performTouchInput { swipeLeft() }
+    repeat(chapterCount) {
+      rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
     }
 
     rule.onNodeWithText(R.string.text_rate_the_recipe).assertDoesNotExist()
@@ -191,7 +193,9 @@ class RecipeScreenTest {
 
     assertNotNull(photoTaken)
     assertTrue(fileName.isNotEmpty())
-    assertTrue(ioService.getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName).toFile().exists())
+    assertTrue(
+      ioService.getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName).toFile().exists()
+    )
   }
 
   @Test
@@ -216,8 +220,7 @@ class RecipeScreenTest {
     toCompletedPage()
     rule.onNodeWithContentDescription(
       rule.activity.getString(
-        R.string.description_star_rating_star_icon,
-        rating.toString()
+        R.string.description_star_rating_star_icon, rating.toString()
       )
     ).performClick()
 
@@ -227,15 +230,14 @@ class RecipeScreenTest {
   /**
    * Completes the recipe progress and swipes the pages to the completed page
    */
-  private fun toCompletedPage(){
+  private fun toCompletedPage() {
     chapterUiStates = chapterUiStates.map {
       it.copy(progress = it.progress.map { true })
     }
 
     // Swipe to last page
-    repeat(chapterUiStates.size + 1){
-      rule.onNodeWithTag(Tags.PAGER.name)
-        .performTouchInput { swipeLeft() }
+    repeat(chapterUiStates.size + 1) {
+      rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
     }
   }
 }

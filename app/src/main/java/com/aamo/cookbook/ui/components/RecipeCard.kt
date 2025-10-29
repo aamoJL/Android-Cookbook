@@ -12,10 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -48,17 +44,17 @@ fun RecipeCard(
   rating: Int = 0
 ) {
   ElevatedCard(
-    shape = RectangleShape,
-    modifier = modifier.then(Modifier.clickable(onClick = onClick))
+    shape = RectangleShape, modifier = modifier.then(Modifier.clickable(onClick = onClick))
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      Box(modifier = Modifier
-        .weight(1f, true)
-        .fillMaxSize()
+      Box(
+        modifier = Modifier
+          .weight(1f, true)
+          .fillMaxSize()
       ) {
         Thumbnail(
-          fileName = recipe.thumbnailUri,
-          modifier = Modifier.fillMaxSize())
+          fileName = recipe.thumbnailUri, modifier = Modifier.fillMaxSize()
+        )
         Box(
           modifier = Modifier
             .align(Alignment.BottomStart)
@@ -66,7 +62,7 @@ fun RecipeCard(
             .fillMaxWidth()
         ) {
           if (isFavorite) {
-            FavoriteIcon(
+            BookmarkIcon(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .clip(CircleShape)
@@ -87,12 +83,10 @@ fun RecipeCard(
         }
       }
       Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        modifier = Modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()
       ) {
         Column(
-          horizontalAlignment = Alignment.CenterHorizontally,
-          modifier = Modifier.padding(4.dp)
+          horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(4.dp)
         ) {
           Text(
             text = recipe.name,
@@ -107,21 +101,22 @@ fun RecipeCard(
 
 @Composable
 private fun Thumbnail(
-  fileName: String,
-  modifier: Modifier = Modifier
+  fileName: String, modifier: Modifier = Modifier
 ) {
   Surface(modifier = modifier) {
     if (fileName.isNotEmpty()) {
       Image(
         painter = rememberAsyncImagePainter(
-          model = IOService(LocalContext.current)
-            .getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName)
+          model = IOService(LocalContext.current).getExternalFileUri(
+            Environment.DIRECTORY_PICTURES, fileName
+          )
         ),
         contentDescription = null,
         contentScale = ContentScale.Crop,
         modifier = Modifier.fillMaxSize()
       )
-    } else {
+    }
+    else {
       Box {
         Icon(
           painter = painterResource(R.drawable.baseline_no_photography_24),
@@ -135,16 +130,16 @@ private fun Thumbnail(
 }
 
 @Composable
-private fun FavoriteIcon(modifier: Modifier = Modifier) {
+private fun BookmarkIcon(modifier: Modifier = Modifier) {
   Box(modifier) {
     Icon(
-      imageVector = Icons.Outlined.Favorite,
+      painter = painterResource(R.drawable.bookmark_24px),
       contentDescription = null,
       tint = MaterialTheme.colorScheme.tertiaryContainer,
       modifier = Modifier.size(16.dp)
     )
     Icon(
-      imageVector = Icons.Outlined.FavoriteBorder,
+      painter = painterResource(R.drawable.rounded_bookmark_24),
       contentDescription = null,
       tint = MaterialTheme.colorScheme.tertiary,
       modifier = Modifier.size(16.dp)
@@ -154,28 +149,27 @@ private fun FavoriteIcon(modifier: Modifier = Modifier) {
 
 @Composable
 private fun StarRating(
-  rating: Int,
-  modifier: Modifier = Modifier
+  rating: Int, modifier: Modifier = Modifier
 ) {
   Row(modifier = modifier) {
     repeat(rating) {
       Icon(
-        imageVector = Icons.Filled.Star,
+        painter = painterResource(R.drawable.round_star_outline_24),
         contentDescription = null,
         tint = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.size(16.dp)
       )
     }
     repeat(max(0, 5 - rating)) {
-      Box(modifier = Modifier){
+      Box(modifier = Modifier) {
         Icon(
-          imageVector = Icons.Filled.Star,
+          painter = painterResource(R.drawable.round_star_rate_24),
           contentDescription = null,
           tint = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
         Icon(
-          painter = painterResource(R.drawable.outline_star_outline_24),
+          painter = painterResource(R.drawable.round_star_outline_24),
           contentDescription = null,
           tint = MaterialTheme.colorScheme.secondary.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
@@ -190,9 +184,6 @@ private fun StarRating(
 private fun Preview() {
   CookbookTheme {
     RecipeCard(
-      recipe = Recipe(name = "Recipe 1"),
-      isFavorite = true,
-      rating = 3,
-      onClick = { })
+      recipe = Recipe(name = "Recipe 1"), isFavorite = true, rating = 3, onClick = { })
   }
 }

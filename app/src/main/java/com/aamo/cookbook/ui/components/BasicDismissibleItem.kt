@@ -1,92 +1,54 @@
 package com.aamo.cookbook.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material3.DismissDirection
-import androidx.compose.material3.DismissState
-import androidx.compose.material3.DismissValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SwipeToDismiss
-import androidx.compose.material3.rememberDismissState
+import androidx.compose.material3.SwipeToDismissBox
+import androidx.compose.material3.SwipeToDismissBoxState
+import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicDismissibleItem(
-  dismissAction: () -> (Boolean),
+  dismissAction: () -> Unit,
   modifier: Modifier = Modifier,
-  animationDuration: Int = 500,
-  content: @Composable () -> Unit = {},
+  content: @Composable (RowScope.() -> Unit),
 ) {
-  var isRemoved by remember { mutableStateOf(false) }
-  val dismissState = rememberDismissState(
-    confirmValueChange = { value ->
-      when (value) {
-        DismissValue.DismissedToEnd -> {
-          isRemoved = true; true
-        }
+  val positionalThreshold = with(LocalDensity.current) { 150.dp.toPx() }
+  val dismissState = rememberSwipeToDismissBoxState(positionalThreshold = { positionalThreshold })
 
-        else -> false
-      }
-    },
-    positionalThreshold = { 150.dp.toPx() }
+  SwipeToDismissBox(
+    state = dismissState,
+    backgroundContent = { DismissBackground(dismissState) },
+    onDismiss = { dir -> if (dir == SwipeToDismissBoxValue.StartToEnd) dismissAction() },
+    content = content,
+    modifier = modifier
   )
-
-  LaunchedEffect(isRemoved) {
-    if (isRemoved) {
-      delay(animationDuration.toLong()).also { dismissAction() }
-    }
-  }
-
-  AnimatedVisibility(
-    visible = !isRemoved,
-    exit = shrinkVertically(
-      animationSpec = tween(durationMillis = animationDuration),
-      shrinkTowards = Alignment.Top
-    ) + fadeOut()
-  ) {
-    SwipeToDismiss(
-      state = dismissState,
-      directions = setOf(DismissDirection.StartToEnd),
-      modifier = modifier,
-      background = { DismissBackground(dismissState) },
-      dismissContent = {
-        content()
-      },
-    )
-  }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DismissBackground(dismissState: DismissState) {
+fun DismissBackground(dismissState: SwipeToDismissBoxState) {
   val color = when (dismissState.dismissDirection) {
-    DismissDirection.StartToEnd -> MaterialTheme.colorScheme.errorContainer
-    DismissDirection.EndToStart -> MaterialTheme.colorScheme.primaryContainer
-    null -> Color.Transparent
+    SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.errorContainer
+    SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.primaryContainer
+    else -> Color.Transparent
   }
 
   val direction = dismissState.dismissDirection
@@ -99,10 +61,9 @@ fun DismissBackground(dismissState: DismissState) {
     verticalAlignment = Alignment.CenterVertically,
     horizontalArrangement = Arrangement.SpaceBetween
   ) {
-    if (direction == DismissDirection.StartToEnd)
-      Icon(
-        Icons.Default.Delete,
-        contentDescription = stringResource(R.string.description_delete_list_item)
-      )
+    if (direction == SwipeToDismissBoxValue.StartToEnd) Icon(
+      painter = painterResource(R.drawable.rounded_delete_sweep_24),
+      contentDescription = stringResource(R.string.description_delete_list_item)
+    )
   }
 }

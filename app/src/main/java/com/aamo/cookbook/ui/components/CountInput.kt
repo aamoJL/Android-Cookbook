@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -54,8 +52,7 @@ fun CountInput(
             .clip(RoundedCornerShape(topStart = 8.dp, bottomStart = 8.dp))
             .background(decreaseContainerColor)
             .clickable(
-              onClick = { onValueChange(value - 1) },
-              enabled = value > minValue
+              onClick = { onValueChange(value - 1) }, enabled = value > minValue
             )
         ) {
           Box(contentAlignment = Alignment.Center) {
@@ -77,13 +74,12 @@ fun CountInput(
             .size(40.dp)
             .clip(RoundedCornerShape(topEnd = 8.dp, bottomEnd = 8.dp))
             .clickable(
-              onClick = { onValueChange(value + 1) },
-              enabled = value < maxValue
+              onClick = { onValueChange(value + 1) }, enabled = value < maxValue
             )
         ) {
           Box(contentAlignment = Alignment.Center) {
             Icon(
-              imageVector = Icons.Filled.Add,
+              painter = painterResource(R.drawable.rounded_add_24),
               contentDescription = stringResource(R.string.description_increase_value),
             )
           }

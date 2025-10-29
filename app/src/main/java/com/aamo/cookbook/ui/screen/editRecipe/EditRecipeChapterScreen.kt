@@ -12,10 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -30,6 +27,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
@@ -85,17 +83,15 @@ fun EditRecipeChapterScreenContent(
   onDeleteStep: (index: Int) -> (Boolean) = { false },
   onSubmitChanges: () -> Unit = {},
   onBack: () -> Unit = {},
-  onSwapSteps: (from: Int, to: Int) -> Unit = {_,_ -> }
+  onSwapSteps: (from: Int, to: Int) -> Unit = { _, _ -> }
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(
-      onDismiss = { openUnsavedDialog = false },
-      onConfirm = {
-        openUnsavedDialog = false
-        onBack()
-      })
+    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+      openUnsavedDialog = false
+      onBack()
+    })
   }
 
   BackHandler(true) {
@@ -103,24 +99,22 @@ fun EditRecipeChapterScreenContent(
     else onBack()
   }
 
-  Scaffold(
-    topBar = {
-      BasicTopAppBar(title = when (uiState.isNewChapter) {
+  Scaffold(topBar = {
+    BasicTopAppBar(
+      title = when (uiState.isNewChapter) {
         true -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
       }, onBack = {
         if (uiState.unsavedChanges) openUnsavedDialog = true
         else onBack()
       })
-    },
-    bottomBar = {
-      SaveButton(
-        enabled = uiState.canBeSaved,
-        onClick = { onSubmitChanges() },
-        modifier = Modifier.padding(8.dp)
-      )
-    }
-  ) {
+  }, bottomBar = {
+    SaveButton(
+      enabled = uiState.canBeSaved,
+      onClick = { onSubmitChanges() },
+      modifier = Modifier.padding(8.dp)
+    )
+  }) {
     Column(
       modifier = modifier
         .padding(it)
@@ -158,10 +152,8 @@ private fun StepList(
   ) {
     LazyColumn {
       itemsIndexed(
-        items = steps,
-        key = { _, pair -> pair.first }
-      ) { index, pair ->
-        Column(modifier = Modifier.animateItemPlacement()) {
+        items = steps, key = { _, pair -> pair.first }) { index, pair ->
+        Column {
           StepListItem(
             step = pair.second,
             stepNumber = index + 1,
@@ -169,12 +161,15 @@ private fun StepList(
             onDismiss = { onDeleteStep(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
-            } else null,
+            }
+            else null,
             onMoveDown = if (index != steps.size - 1) {
               { onSwap(index, index + 1) }
-            } else null
-          )
-          if (index != steps.size - 1) Divider()
+            }
+            else null)
+
+          if (index != steps.size - 1)
+            HorizontalDivider()
         }
       }
     }
@@ -188,7 +183,9 @@ fun ChapterForm(
   onFormStateChange: (EditRecipeViewModel.ChapterScreenUiState.ChapterFormState) -> Unit,
   modifier: Modifier = Modifier
 ) {
-  FormBase(title = stringResource(R.string.form_title_chapter, chapterNumber), modifier = modifier) {
+  FormBase(
+    title = stringResource(R.string.form_title_chapter, chapterNumber), modifier = modifier
+  ) {
     FormTextField(
       value = uiState.name,
       onValueChange = { onFormStateChange(uiState.copy(name = it)) },
@@ -196,7 +193,7 @@ fun ChapterForm(
     )
     FormTextField(
       value = uiState.note,
-      onValueChange = { onFormStateChange(uiState.copy(note = it))},
+      onValueChange = { onFormStateChange(uiState.copy(note = it)) },
       label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
       keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
         imeAction = ImeAction.Done
@@ -210,12 +207,12 @@ fun StepListItem(
   step: StepWithIngredients,
   stepNumber: Int,
   onClick: () -> Unit,
-  onDismiss: () -> Boolean,
+  onDismiss: () -> Unit,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier,
 ) {
-  BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
+  BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
       modifier = modifier
         .clickable { onClick() }
@@ -228,18 +225,15 @@ fun StepListItem(
       },
       supportingContent = {
         IngredientList(
-          ingredients = step.ingredients,
-          modifier = Modifier.padding(start = 16.dp)
+          ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
         )
       },
       overlineContent = step.value.timerMinutes?.let {
         {
           Text(
             text = stringResource(
-              R.string.minutes_amount_abbreviation,
-              step.value.timerMinutes.toString()
-            ),
-            style = MaterialTheme.typography.labelSmall
+              R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
+            ), style = MaterialTheme.typography.labelSmall
           )
         }
       },
@@ -247,26 +241,24 @@ fun StepListItem(
         Column(modifier = Modifier) {
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowUp,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
               contentDescription = stringResource(R.string.description_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowDown,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
               contentDescription = stringResource(R.string.description_move_down)
             )
           }
         }
-      }
-    )
+      })
   }
 }
 
 @Composable
 private fun IngredientList(
-  ingredients: List<Ingredient>,
-  modifier: Modifier = Modifier
+  ingredients: List<Ingredient>, modifier: Modifier = Modifier
 ) {
   Row(modifier = modifier) {
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
@@ -282,24 +274,21 @@ private fun IngredientList(
     Column(modifier = Modifier.padding(horizontal = 8.dp)) {
       ingredients.forEach {
         Text(
-          text = it.unit,
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier
+          text = it.unit, style = MaterialTheme.typography.bodySmall, modifier = Modifier
         )
       }
     }
     Column {
       ingredients.forEach {
         Text(
-          text = it.name,
-          style = MaterialTheme.typography.bodySmall,
-          modifier = Modifier
+          text = it.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier
         )
       }
     }
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
@@ -310,16 +299,13 @@ private fun Preview() {
         steps = listOf(
           Pair(
             UUID.randomUUID(), StepWithIngredients(
-              value = Step(description = "Description..."),
-              ingredients = listOf(
+              value = Step(description = "Description..."), ingredients = listOf(
                 Ingredient(name = "Ingredient", amount = 250f, unit = "g")
               )
             )
-          ),
-          Pair(
+          ), Pair(
             UUID.randomUUID(), StepWithIngredients(
-              value = Step(description = "Description..."),
-              ingredients = listOf(
+              value = Step(description = "Description..."), ingredients = listOf(
                 Ingredient(name = "Ingredient", amount = 250f, unit = "g")
               )
             )

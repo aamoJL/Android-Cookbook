@@ -10,10 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
@@ -28,6 +25,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
@@ -70,8 +68,7 @@ fun EditRecipeChapterStepScreen(
     onEditIngredient = onEditIngredient,
     onDeleteIngredient = { viewModel.deleteIngredient(it) },
     onFormStateChange = { viewModel.setStepFormState(it) },
-    onSwapIngredients = { from, to -> viewModel.swapIngredientPositions(from, to) }
-  )
+    onSwapIngredients = { from, to -> viewModel.swapIngredientPositions(from, to) })
 }
 
 @Composable
@@ -83,17 +80,15 @@ fun EditRecipeChapterStepScreenContent(
   onEditIngredient: (index: Int) -> Unit = {},
   onDeleteIngredient: (index: Int) -> Boolean = { false },
   onFormStateChange: (EditRecipeViewModel.StepScreenUiState.StepFormState) -> Unit = {},
-  onSwapIngredients: (from: Int, to: Int) -> Unit = {_,_ -> }
+  onSwapIngredients: (from: Int, to: Int) -> Unit = { _, _ -> }
 ) {
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(
-      onDismiss = { openUnsavedDialog = false },
-      onConfirm = {
-        openUnsavedDialog = false
-        onBack()
-      })
+    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+      openUnsavedDialog = false
+      onBack()
+    })
   }
 
   BackHandler(true) {
@@ -103,9 +98,9 @@ fun EditRecipeChapterStepScreenContent(
     }
   }
 
-  Scaffold(
-    topBar = {
-      BasicTopAppBar(when (uiState.isNewStep) {
+  Scaffold(topBar = {
+    BasicTopAppBar(
+      when (uiState.isNewStep) {
         true -> stringResource(R.string.screen_title_new_step)
         else -> stringResource(R.string.screen_title_existing_step)
       }, onBack = {
@@ -114,15 +109,13 @@ fun EditRecipeChapterStepScreenContent(
           false -> onBack()
         }
       })
-    },
-    bottomBar = {
-      SaveButton(
-        enabled = uiState.canBeSaved,
-        onClick = { onSubmitChanges() },
-        modifier = Modifier.padding(8.dp)
-      )
-    }
-  ) {
+  }, bottomBar = {
+    SaveButton(
+      enabled = uiState.canBeSaved,
+      onClick = { onSubmitChanges() },
+      modifier = Modifier.padding(8.dp)
+    )
+  }) {
     Column(
       modifier = modifier
         .padding(it)
@@ -164,7 +157,7 @@ private fun StepForm(
     )
     FormTextField(
       value = uiState.note,
-      onValueChange = { onStateChange(uiState.copy(note = it))},
+      onValueChange = { onStateChange(uiState.copy(note = it)) },
       label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
       keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
         imeAction = ImeAction.Done
@@ -192,20 +185,24 @@ private fun IngredientList(
         items = ingredients,
         key = { _, pair -> pair.first },
       ) { index, pair ->
-        Column(modifier = Modifier.animateItemPlacement()) {
+        Column {
           IngredientListItem(
             ingredient = pair.second,
             onClick = { onEditIngredient(index) },
             onDismiss = { onDeleteIngredient(index) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
-            } else null,
+            }
+            else null,
             onMoveDown = if (index != ingredients.size - 1) {
               { onSwap(index, index + 1) }
-            } else null,
-            modifier = Modifier.padding(vertical = 16.dp)
-          )
-          if(index != ingredients.size - 1) Divider()
+            }
+            else null,
+            modifier = Modifier.padding(vertical = 16.dp))
+
+          if (index != ingredients.size - 1) {
+            HorizontalDivider()
+          }
         }
       }
     }
@@ -216,7 +213,7 @@ private fun IngredientList(
 private fun IngredientListItem(
   ingredient: Ingredient,
   onClick: () -> Unit,
-  onDismiss: () -> (Boolean),
+  onDismiss: () -> Unit,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
@@ -251,22 +248,22 @@ private fun IngredientListItem(
         Column(modifier = Modifier) {
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowUp,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
               contentDescription = stringResource(R.string.description_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
-              imageVector = Icons.Filled.KeyboardArrowDown,
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
               contentDescription = stringResource(R.string.description_move_down)
             )
           }
         }
-      }
-    )
+      })
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {

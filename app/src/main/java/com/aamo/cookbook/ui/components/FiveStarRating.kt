@@ -1,8 +1,6 @@
 package com.aamo.cookbook.ui.components
 
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -26,13 +24,14 @@ fun FiveStarRating(
       IconButton(onClick = { onValueChange(star) }) {
         if (value != null && value >= star) {
           Icon(
-            imageVector = Icons.Filled.Star,
+            painter = painterResource(R.drawable.round_star_rate_24),
             contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
             tint = color
           )
-        } else {
+        }
+        else {
           Icon(
-            painter = painterResource(R.drawable.outline_star_outline_24),
+            painter = painterResource(R.drawable.round_star_outline_24),
             contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
             tint = color
           )

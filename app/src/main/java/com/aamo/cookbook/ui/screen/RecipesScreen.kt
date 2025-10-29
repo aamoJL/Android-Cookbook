@@ -9,13 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,73 +50,72 @@ fun RecipesScreen(
   onAdd: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  val subCategories by remember(recipes) { mutableStateOf(recipes.map { it.value.subCategory }.distinct()) }
+  val subCategories by remember(recipes) {
+    mutableStateOf(recipes.map { it.value.subCategory }.distinct())
+  }
   var filterValue by remember { mutableStateOf<String?>(null) }
   var filterPopUpOpen by remember { mutableStateOf(false) }
-  val filteredRecipes by remember(filterValue, subCategories) { mutableStateOf(
-    if(filterValue == null) recipes else recipes.filter { it.value.subCategory == filterValue }
-  ) }
+  val filteredRecipes by remember(filterValue, subCategories) {
+    mutableStateOf(
+      if (filterValue == null) recipes else recipes.filter { it.value.subCategory == filterValue })
+  }
 
-  Scaffold(
-    topBar = {
-      BasicTopAppBar(
-        title = title,
-        actions = {
-          IconButton(onClick = onSearch) {
-            Icon(
-              imageVector = Icons.Filled.Search,
-              contentDescription = stringResource(R.string.description_search)
-            )
+  Scaffold(topBar = {
+    BasicTopAppBar(
+      title = title, actions = {
+        IconButton(onClick = onSearch) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_search_24),
+            contentDescription = stringResource(R.string.description_search)
+          )
+        }
+        IconButton(onClick = onAdd) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_add_24),
+            contentDescription = stringResource(R.string.description_add_new_recipe)
+          )
+        }
+      }, onBack = onBack
+    )
+  }, floatingActionButton = {
+    if (subCategories.dropWhile { it.isEmpty() }.isNotEmpty()) {
+      Box {
+        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
+          Icon(
+            painter = when (filterValue) {
+              null -> painterResource(R.drawable.baseline_filter_list_alt_24)
+              else -> painterResource(R.drawable.baseline_filter_alt_off_24)
+            }, contentDescription = stringResource(R.string.description_filter)
+          )
+        }
+        DropdownMenu(
+          expanded = filterPopUpOpen, onDismissRequest = { filterPopUpOpen = false }) {
+          Column {
+            subCategories.forEach { subCategory ->
+              DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
+                filterPopUpOpen = false
+                filterValue = subCategory
+              })
+            }
           }
-          IconButton(onClick = onAdd) {
-            Icon(
-              imageVector = Icons.Filled.Add,
-              contentDescription = stringResource(R.string.description_add_new_recipe)
-            )
-          }
-        },
-        onBack = onBack)
-    },
-    floatingActionButton = {
-      if(subCategories.dropWhile { it.isEmpty() }.isNotEmpty()){
-        Box {
-          FloatingActionButton(onClick = { filterPopUpOpen = true }) {
-            Icon(
-              painter = when(filterValue) {
-                null -> painterResource(R.drawable.baseline_filter_list_alt_24)
-                else -> painterResource(R.drawable.baseline_filter_alt_off_24)
+          if (filterValue != null) {
+            HorizontalDivider()
+            DropdownMenuItem(
+              text = {
+                Text(
+                  text = "Reset",
+                  color = MaterialTheme.colorScheme.error
+                )
               },
-              contentDescription = stringResource(R.string.description_filter)
-            )
-          }
-          DropdownMenu(
-            expanded = filterPopUpOpen,
-            onDismissRequest = { filterPopUpOpen = false }
-          ) {
-            Column {
-              subCategories.forEach { subCategory ->
-                DropdownMenuItem(
-                  text = { Text(text = subCategory)},
-                  onClick = {
-                    filterPopUpOpen = false
-                    filterValue = subCategory
-                  })
-              }
-            }
-            if(filterValue != null){
-              Divider()
-              DropdownMenuItem(
-                text = { Text(text = "Reset", color = MaterialTheme.colorScheme.error)},
-                onClick = {
-                  filterPopUpOpen = false
-                  filterValue = null
-                })
-            }
+              onClick = {
+                filterPopUpOpen = false
+                filterValue = null
+              })
           }
         }
       }
     }
-  ) {
+  }) {
     Surface(modifier = modifier.padding(it)) {
       LazyVerticalGrid(
         columns = GridCells.Fixed(2),
@@ -149,20 +145,13 @@ fun RecipesScreen(
 private fun Preview() {
   CookbookTheme {
     RecipesScreen(
-      title = "Title",
-      recipes = listOf(
+      title = "Title", recipes = listOf(
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
         RecipeWithFavoriteAndRating(
-          Recipe(name = "Resepti 1"),
-          null,
-          RecipeRating(ratingOutOfFive = 3, recipeId = 0)
+          Recipe(name = "Resepti 1"), null, RecipeRating(ratingOutOfFive = 3, recipeId = 0)
         ),
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
         RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
-      ),
-      onSelectRecipe = {},
-      onBack = {},
-      onSearch = {},
-      onAdd = {})
+      ), onSelectRecipe = {}, onBack = {}, onSearch = {}, onAdd = {})
   }
 }
