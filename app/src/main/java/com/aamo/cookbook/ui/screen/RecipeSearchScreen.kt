@@ -37,8 +37,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
-import com.aamo.cookbook.model.FavoriteRecipe
+import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
+import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -66,7 +66,7 @@ fun RecipeSearchScreen(
 
 @Composable
 fun RecipeSearchScreenContent(
-  recipes: List<RecipeWithFavoriteAndRating>,
+  recipes: List<RecipeWithBookmarkAndRating>,
   searchWord: String = "",
   onSelect: (id: Int) -> Unit = {},
   onBack: () -> Unit = {},
@@ -87,13 +87,13 @@ fun RecipeSearchScreenContent(
       ) {
         items(recipes) { recipe ->
           RecipeCard(
-            recipe = recipe.value,
-            onClick = { onSelect(recipe.value.id) },
+            recipe = recipe.recipe,
+            onClick = { onSelect(recipe.recipe.id) },
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
               .testTag(UITag.RECIPE_ITEM.name),
-            isFavorite = recipe.favorite != null,
+            isBookmarked = recipe.bookmark != null,
             rating = recipe.rating?.ratingOutOfFive ?: 0
           )
         }
@@ -174,12 +174,12 @@ private fun Preview() {
   CookbookTheme {
     RecipeSearchScreenContent(
       recipes = listOf(
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
-        RecipeWithFavoriteAndRating(
+        RecipeWithBookmarkAndRating(Recipe(name = "Resepti 1"), RecipeBookmark(recipeId = 0), null),
+        RecipeWithBookmarkAndRating(
           Recipe(name = "Resepti 1"), null, RecipeRating(ratingOutOfFive = 3, recipeId = 0)
         ),
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
+        RecipeWithBookmarkAndRating(Recipe(name = "Resepti 1"), null, null),
+        RecipeWithBookmarkAndRating(Recipe(name = "Resepti 1"), RecipeBookmark(recipeId = 0), null)
       )
     )
   }

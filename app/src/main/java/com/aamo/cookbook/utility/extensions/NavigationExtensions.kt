@@ -1,4 +1,4 @@
-package com.aamo.cookbook.utility
+package com.aamo.cookbook.utility.extensions
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -10,7 +10,8 @@ import com.aamo.cookbook.viewModel.ViewModelProvider
 
 @Composable
 inline fun <reified T : ViewModel> NavBackStackEntry.sharedViewModel(navController: NavHostController): T {
-  val navGraphRoute = destination.parent?.route ?: return viewModel(factory = ViewModelProvider.Factory)
+  val navGraphRoute =
+    destination.parent?.route ?: return viewModel(factory = ViewModelProvider.Factory)
   val parentEntry = remember(this) {
     navController.getBackStackEntry(navGraphRoute)
   }

@@ -9,7 +9,7 @@ import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.utility.swap
+import com.aamo.cookbook.utility.extensions.swap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.After
@@ -30,20 +30,21 @@ class RecipeDatabaseTest {
   @Before
   fun setupDatabase() {
     database = Room.inMemoryDatabaseBuilder(
-      context = ApplicationProvider.getApplicationContext(),
-      klass = RecipeDatabase::class.java
+      context = ApplicationProvider.getApplicationContext(), klass = RecipeDatabase::class.java
     ).build()
     recipeDao = database.recipeDao()
   }
 
   @After
   @Throws(IOException::class)
-  fun closeDatabase() { database.close() }
+  fun closeDatabase() {
+    database.close()
+  }
 
   @Test
   @Throws(IOException::class)
   fun upsertRecipe_New() = runTest {
-    var recipe = Recipe(name = "new recipe",  category = "new category")
+    var recipe = Recipe(name = "new recipe", category = "new category")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
       recipe = recipe.copy(id = it)
@@ -58,7 +59,7 @@ class RecipeDatabaseTest {
   @Test
   @Throws(IOException::class)
   fun upsertRecipe_NewWithId() = runTest {
-    var recipe = Recipe(id = 2, name = "new recipe",  category = "new category")
+    var recipe = Recipe(id = 2, name = "new recipe", category = "new category")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
       recipe = recipe.copy(id = it)
@@ -71,7 +72,7 @@ class RecipeDatabaseTest {
   @Test
   @Throws(IOException::class)
   fun upsertRecipe_Existing() = runTest {
-    var recipe = Recipe(name = "new recipe",  category = "new category")
+    var recipe = Recipe(name = "new recipe", category = "new category")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
       recipe = recipe.copy(id = it, name = "updated recipe", category = "updated category")
@@ -97,8 +98,7 @@ class RecipeDatabaseTest {
             id = assertNotEquals(0, chapter.value.id).let { chapter.value.id },
             recipeId = recipeId,
             orderNumber = ci + 1
-          ),
-          chapter.value
+          ), chapter.value
         )
         assert(chapter.steps.isNotEmpty())
 
@@ -108,18 +108,15 @@ class RecipeDatabaseTest {
               id = assertNotEquals(0, step.value.id).let { step.value.id },
               chapterId = chapter.value.id,
               orderNumber = si + 1
-            ),
-            step.value
+            ), step.value
           )
           assert(step.ingredients.isNotEmpty())
 
           step.ingredients.forEachIndexed { ii, ingredient ->
             assertEquals(
               newRecipe.chapters[ci].steps[si].ingredients[ii].copy(
-                id = assertNotEquals(0, ingredient.id).let { ingredient.id },
-                stepId = step.value.id
-              ),
-              ingredient
+                id = assertNotEquals(0, ingredient.id).let { ingredient.id }, stepId = step.value.id
+              ), ingredient
             )
           }
         }
@@ -157,8 +154,7 @@ class RecipeDatabaseTest {
       val swappedRecipe = existing.copy(
         chapters = existing.chapters.toMutableList().apply {
           this.swap(0, 1)
-        }
-      )
+        })
       assertEquals(1, swappedRecipe.chapters[1].value.orderNumber)
       assertEquals(2, swappedRecipe.chapters[0].value.orderNumber)
 
@@ -169,8 +165,7 @@ class RecipeDatabaseTest {
           chapter.copy(
             value = chapter.value.copy(orderNumber = index + 1)
           )
-        }
-      )
+        })
 
       recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { actual ->
         assertEquals(expected, actual)
@@ -181,7 +176,7 @@ class RecipeDatabaseTest {
   @Test
   @Throws(IOException::class)
   fun upsertChapter_New() = runTest {
-    var recipe = Recipe(name = "new recipe",  category = "new category")
+    var recipe = Recipe(name = "new recipe", category = "new category")
     var chapter = Chapter(name = "new chapter")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
@@ -195,15 +190,14 @@ class RecipeDatabaseTest {
     assert(chapter.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.value
     assertEquals(chapter, actual)
   }
 
   @Test
   @Throws(IOException::class)
   fun upsertChapter_Existing() = runTest {
-    var recipe = Recipe(name = "new recipe",  category = "new category")
+    var recipe = Recipe(name = "new recipe", category = "new category")
     var chapter = Chapter(name = "new chapter")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
@@ -216,8 +210,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.value
     assertEquals(chapter, actual)
   }
 
@@ -243,9 +236,7 @@ class RecipeDatabaseTest {
     assert(step.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.steps
-        ?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
     assertEquals(step, actual)
   }
 
@@ -270,9 +261,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.steps
-        ?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
     assertEquals(step, actual)
   }
 
@@ -303,10 +292,7 @@ class RecipeDatabaseTest {
     assert(ingredient.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.steps
-        ?.firstOrNull { it.value.id == step.id }?.ingredients
-        ?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -337,10 +323,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters
-        ?.firstOrNull { it.value.id == chapter.id }?.steps
-        ?.firstOrNull { it.value.id == step.id }?.ingredients
-        ?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -352,8 +335,8 @@ class RecipeDatabaseTest {
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe).also {
       // Assign id and remove the first chapter
       recipe = recipe.copy(
-        value = recipe.value.copy(id = it),
-        chapters = recipe.chapters.drop(1))
+        value = recipe.value.copy(id = it), chapters = recipe.chapters.drop(1)
+      )
     }
 
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
@@ -369,7 +352,7 @@ class RecipeDatabaseTest {
   @Test
   @Throws(IOException::class)
   fun deleteRecipe() = runTest {
-    var recipe = Recipe(name = "new recipe",  category = "new category")
+    var recipe = Recipe(name = "new recipe", category = "new category")
 
     recipeDao.upsertRecipe(recipe).toInt().also {
       recipe = recipe.copy(id = it)
@@ -383,7 +366,7 @@ class RecipeDatabaseTest {
   @Throws(IOException::class)
   fun getRecipes() = runTest {
     val count = 3
-    repeat(count){
+    repeat(count) {
       recipeDao.upsertRecipe(Recipe(name = "name"))
     }
 

@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.aamo.cookbook.features.recipe.list.RecipesByCategoryScreen
+import com.aamo.cookbook.features.recipe.list.recipeListPage
 
 @Composable
 fun HomePage() {
@@ -26,17 +28,20 @@ fun HomePage() {
         onOpenSearch = { TODO() },
         onOpenRecipeForm = { TODO() },
         onOpenBookmarks = { TODO() },
-        onOpenRecipesByCategory = { TODO() })
+        onOpenRecipesByCategory = {
+          navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
+        })
+      recipeListPage(
+        onOpenRecipe = { TODO() },
+        onOpenSearch = { TODO() },
+        onOpenRecipeForm = { TODO() },
+        onBack = { navController.navigateUp() })
     }
   }
 }
 
 // TODO: remove
 
-//        onSelectCategory = {
-//          appViewModel.setSelectedCategory(it)
-//          navController.navigate(Screen.Recipes.getRoute())
-//        },
 //        onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
 //        onSearch = { navController.navigate(Screen.Search.getRoute()) },
 //        onFavorites = { navController.navigate(Screen.Favorites.getRoute()) })

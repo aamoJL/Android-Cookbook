@@ -16,7 +16,7 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeChapterStepIngredientScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
 import com.aamo.cookbook.utility.tags.UITag

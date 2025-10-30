@@ -89,13 +89,13 @@ fun NavGraphBuilder.homeScreen(
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: HomeScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow(dao) })
+        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow { dao.getCategoriesFlow() } })
       }
     })
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
 
     LoadingScreen(enabled = viewmodel.isLoading) {
-      HomeScreen(
+      Screen(
         categories = categories,
         onSearch = onOpenSearch,
         onNewRecipe = onOpenRecipeForm,
@@ -107,7 +107,7 @@ fun NavGraphBuilder.homeScreen(
 }
 
 @Composable
-fun HomeScreen(
+private fun Screen(
   categories: List<String>,
   onSearch: () -> Unit,
   onNewRecipe: () -> Unit,
@@ -268,7 +268,7 @@ private fun CategoryList(
 @Composable
 private fun Preview() {
   CookbookTheme {
-    HomeScreen(
+    Screen(
       categories = listOf("Category 1", "Category 2"),
       onSearch = {},
       onNewRecipe = {},

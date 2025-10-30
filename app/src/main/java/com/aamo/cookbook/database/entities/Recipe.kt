@@ -6,7 +6,7 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.aamo.cookbook.model.FavoriteRecipe
+import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 
 // TODO: rename plurals to singular
@@ -126,10 +126,10 @@ data class RecipeCategoryTuple(
   @ColumnInfo(name = "subCategory") val subCategory: String
 )
 
-data class RecipeWithFavoriteAndRating(
-  @Embedded val value: Recipe, @Relation(
-    entity = FavoriteRecipe::class, parentColumn = "id", entityColumn = "recipeId"
-  ) val favorite: FavoriteRecipe?, @Relation(
+data class RecipeWithBookmarkAndRating(
+  @Embedded val recipe: Recipe, @Relation(
+    entity = RecipeBookmark::class, parentColumn = "id", entityColumn = "recipeId"
+  ) val bookmark: RecipeBookmark?, @Relation(
     entity = RecipeRating::class, parentColumn = "id", entityColumn = "recipeId"
   ) val rating: RecipeRating?
 )

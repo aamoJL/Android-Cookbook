@@ -1,6 +1,6 @@
 package com.aamo.cookbook.extensions
 
-import com.aamo.cookbook.utility.swap
+import com.aamo.cookbook.utility.extensions.swap
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

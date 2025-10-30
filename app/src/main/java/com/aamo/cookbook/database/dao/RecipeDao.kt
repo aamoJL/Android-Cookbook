@@ -12,11 +12,11 @@ import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.FullFavoriteRecipe
+import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 import kotlinx.coroutines.flow.Flow
 
@@ -25,6 +25,10 @@ interface RecipeDao {
   // region GET
   @Query("SELECT DISTINCT category FROM recipes")
   fun getCategoriesFlow(): Flow<List<String>>
+
+  @Transaction
+  @Query("SELECT * FROM recipes ORDER BY name ASC")
+  fun getRecipesWithAndRatingAndBookmarkFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
   // -------- //
 
@@ -62,10 +66,6 @@ interface RecipeDao {
   @Transaction
   @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
   suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
-
-  @Transaction
-  @Query("SELECT * FROM recipes ORDER BY name ASC")
-  fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithFavoriteAndRating>>
   // endregion
 
   // region UPSERT
@@ -159,12 +159,12 @@ interface RecipeDao {
   suspend fun deleteIngredient(ingredient: Ingredient)
 
   @Delete
-  suspend fun removeRecipeFromFavorites(value: FavoriteRecipe)
+  suspend fun removeRecipeFromFavorites(value: RecipeBookmark)
 
   @Delete
   suspend fun deleteRecipeRating(recipeRating: RecipeRating)
   // endregion
 
   @Insert
-  suspend fun addRecipeToFavorites(value: FavoriteRecipe)
+  suspend fun addRecipeToFavorites(value: RecipeBookmark)
 }

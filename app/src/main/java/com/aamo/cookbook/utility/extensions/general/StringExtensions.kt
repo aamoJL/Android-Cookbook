@@ -1,6 +1,8 @@
-package com.aamo.cookbook.utility
+package com.aamo.cookbook.utility.extensions.general
 
 import java.util.UUID
+
+@Suppress("SameReturnValue") val String.Companion.EMPTY: String get() = ""
 
 /**
  * Returns the string as a [UUID] if possible, otherwise returns null
@@ -8,7 +10,8 @@ import java.util.UUID
 fun String.toUUIDorNull(): UUID? {
   return try {
     UUID.fromString(this)
-  } catch (e: IllegalArgumentException) {
+  }
+  catch (e: IllegalArgumentException) {
     null
   }
 }
@@ -16,13 +19,11 @@ fun String.toUUIDorNull(): UUID? {
 /**
  * Returns a string having leading character of the given chars removed.
  */
-fun String.trimFirst(vararg chars: Char, ignoreCase: Boolean = true): String {
-  chars.forEach {
-    if (this.startsWith(it, ignoreCase)) {
-      return this.drop(1)
-    }
-  }
-  return this
+fun String.trimFirst(vararg chars: Char): String {
+  return this.firstOrNull()?.let {
+    if (chars.contains(it)) this.drop(1)
+    else this
+  } ?: this
 }
 
 /**

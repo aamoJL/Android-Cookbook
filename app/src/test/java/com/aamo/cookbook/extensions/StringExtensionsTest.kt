@@ -1,7 +1,7 @@
 package com.aamo.cookbook.extensions
 
-import com.aamo.cookbook.utility.toUUIDorNull
-import com.aamo.cookbook.utility.trimFirst
+import com.aamo.cookbook.utility.extensions.general.toUUIDorNull
+import com.aamo.cookbook.utility.extensions.general.trimFirst
 import org.junit.Test
 import java.util.UUID
 

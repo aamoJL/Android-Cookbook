@@ -28,7 +28,7 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 
 @Composable
@@ -45,8 +45,7 @@ fun EditRecipeChapterStepIngredientScreen(
     modifier = modifier,
     onBack = onBack,
     onSubmitChanges = onSubmitChanges,
-    onFormStateChange = { viewModel.setIngredientFormState(it) }
-  )
+    onFormStateChange = { viewModel.setIngredientFormState(it) })
 }
 
 @Composable
@@ -60,49 +59,44 @@ fun EditRecipeChapterStepIngredientScreenContent(
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(
-      onDismiss = { openUnsavedDialog = false },
-      onConfirm = {
-        openUnsavedDialog = false
-        onBack()
-      })
+    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+      openUnsavedDialog = false
+      onBack()
+    })
   }
 
   BackHandler(true) {
-    when(uiState.unsavedChanges){
+    when (uiState.unsavedChanges) {
       true -> openUnsavedDialog = true
       false -> onBack()
     }
   }
 
-  Scaffold(
-    topBar = {
-      BasicTopAppBar(title = when (uiState.isNewIngredient) {
+  Scaffold(topBar = {
+    BasicTopAppBar(
+      title = when (uiState.isNewIngredient) {
         true -> stringResource(R.string.screen_title_new_ingredient)
         else -> stringResource(R.string.screen_title_existing_ingredient)
       }, onBack = {
-        when(uiState.unsavedChanges){
+        when (uiState.unsavedChanges) {
           true -> openUnsavedDialog = true
           false -> onBack()
         }
       })
-    },
-    bottomBar = {
-      SaveButton(
-        enabled = uiState.canBeSaved,
-        onClick = { onSubmitChanges() },
-        modifier = Modifier.padding(8.dp)
-      )
-    }
-  ) {
+  }, bottomBar = {
+    SaveButton(
+      enabled = uiState.canBeSaved,
+      onClick = { onSubmitChanges() },
+      modifier = Modifier.padding(8.dp)
+    )
+  }) {
     Column(
       modifier = modifier
         .padding(it)
         .padding(8.dp)
     ) {
       IngredientForm(
-        formState = uiState.formState,
-        onStateChange = onFormStateChange
+        formState = uiState.formState, onStateChange = onFormStateChange
       )
     }
   }
@@ -132,8 +126,7 @@ private fun IngredientForm(
         onValueChange = { onStateChange(formState.copy(unit = it)) },
         label = stringResource(R.string.textfield_ingredient_unit).asOptionalLabel(),
         keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
-          capitalization =  KeyboardCapitalization.None,
-          imeAction = ImeAction.Done
+          capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done
         ),
         modifier = Modifier.width(100.dp)
       )

@@ -8,24 +8,22 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.aamo.cookbook.database.entities.Recipe
 
-@Entity(tableName = "favoriteRecipes",
-  foreignKeys = [ForeignKey(
+@Entity(
+  tableName = "favoriteRecipes", foreignKeys = [ForeignKey(
     entity = Recipe::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("recipeId"),
     onDelete = ForeignKey.CASCADE
-  )])
-data class FavoriteRecipe(
+  )]
+)
+data class RecipeBookmark(
   @PrimaryKey(autoGenerate = true) val id: Int = 0,
   @ColumnInfo(name = "recipeId") val recipeId: Int,
 )
 
 data class FullFavoriteRecipe(
-  @Embedded val favoriteRecipe: FavoriteRecipe,
+  @Embedded val favoriteRecipe: RecipeBookmark,
   @Relation(
-    entity = Recipe::class,
-    parentColumn = "recipeId",
-    entityColumn = "id"
-  )
-  val recipe: Recipe,
+    entity = Recipe::class, parentColumn = "recipeId", entityColumn = "id"
+  ) val recipe: Recipe,
 )

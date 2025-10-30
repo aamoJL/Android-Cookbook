@@ -40,7 +40,7 @@ fun RecipeCard(
   recipe: Recipe,
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
-  isFavorite: Boolean = false,
+  isBookmarked: Boolean = false,
   rating: Int = 0
 ) {
   ElevatedCard(
@@ -61,7 +61,7 @@ fun RecipeCard(
             .padding(4.dp)
             .fillMaxWidth()
         ) {
-          if (isFavorite) {
+          if (isBookmarked) {
             BookmarkIcon(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
@@ -179,11 +179,12 @@ private fun StarRating(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
   CookbookTheme {
     RecipeCard(
-      recipe = Recipe(name = "Recipe 1"), isFavorite = true, rating = 3, onClick = { })
+      recipe = Recipe(name = "Recipe 1"), isBookmarked = true, rating = 3, onClick = { })
   }
 }

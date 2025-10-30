@@ -2,8 +2,8 @@ package com.aamo.cookbook.viewModel
 
 import androidx.lifecycle.ViewModel
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.database.repository.RecipeRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,14 +22,14 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
     list.map { it.category }.distinct().sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it })
   }
 
-  fun getRecipesWithFavoriteAndRatingByCategory(category: String): Flow<List<RecipeWithFavoriteAndRating>> =
+  fun getRecipesWithFavoriteAndRatingByCategory(category: String): Flow<List<RecipeWithBookmarkAndRating>> =
     recipeRepository.getRecipesWithFavoriteAndRatingFlow().map { list ->
-      list.filter { it.value.category == category }
+      list.filter { it.recipe.category == category }
     }
 
-  fun getRecipesWithFavoriteAndRatingByFavorite(): Flow<List<RecipeWithFavoriteAndRating>> =
+  fun getRecipesWithFavoriteAndRatingByFavorite(): Flow<List<RecipeWithBookmarkAndRating>> =
     recipeRepository.getRecipesWithFavoriteAndRatingFlow().map { list ->
-      list.filter { it.favorite != null }
+      list.filter { it.bookmark != null }
     }
 
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {

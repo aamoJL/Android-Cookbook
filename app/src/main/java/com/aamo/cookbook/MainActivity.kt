@@ -16,14 +16,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -35,7 +32,6 @@ import androidx.navigation.navArgument
 import com.aamo.cookbook.features.home.HomePage
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.screen.RecipeSearchScreen
-import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -123,37 +119,37 @@ fun MainNavGraph(
     exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }) {
     composable(route = Screen.Categories.getRoute()) {}
     composable(route = Screen.Recipes.getRoute()) {
-      val category by appViewModel.selectedCategory.collectAsStateWithLifecycle()
-      val recipes by appViewModel.getRecipesWithFavoriteAndRatingByCategory(category)
-        .collectAsStateWithLifecycle(
-          initialValue = emptyList(),
-        )
-
-      RecipesScreen(
-        title = category,
-        recipes = recipes,
-        onSelectRecipe = { recipe ->
-          navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
-        },
-        onBack = { navController.navigateUp() },
-        onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
+//      val category by appViewModel.selectedCategory.collectAsStateWithLifecycle()
+//      val recipes by appViewModel.getRecipesWithFavoriteAndRatingByCategory(category)
+//        .collectAsStateWithLifecycle(
+//          initialValue = emptyList(),
+//        )
+//
+//      RecipesScreen(
+//        title = category,
+//        recipes = recipes,
+//        onSelectRecipe = { recipe ->
+//          navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
+//        },
+//        onBack = { navController.navigateUp() },
+//        onSearch = { navController.navigate(Screen.Search.getRoute()) },
+//        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
     composable(route = Screen.Favorites.getRoute()) {
-      val favorites by appViewModel.getRecipesWithFavoriteAndRatingByFavorite()
-        .collectAsStateWithLifecycle(
-          initialValue = emptyList(),
-        )
-
-      RecipesScreen(
-        title = stringResource(R.string.button_text_bookmarks),
-        recipes = favorites,
-        onSelectRecipe = { recipe ->
-          navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
-        },
-        onBack = { navController.navigateUp() },
-        onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
+//      val favorites by appViewModel.getRecipesWithFavoriteAndRatingByFavorite()
+//        .collectAsStateWithLifecycle(
+//          initialValue = emptyList(),
+//        )
+//
+//      RecipesScreen(
+//        title = stringResource(R.string.button_text_bookmarks),
+//        recipes = favorites,
+//        onSelectRecipe = { recipe ->
+//          navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
+//        },
+//        onBack = { navController.navigateUp() },
+//        onSearch = { navController.navigate(Screen.Search.getRoute()) },
+//        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
     composable(route = Screen.Search.getRoute()) {
       RecipeSearchScreen(onBack = { navController.navigateUp() }, onSelect = { id ->

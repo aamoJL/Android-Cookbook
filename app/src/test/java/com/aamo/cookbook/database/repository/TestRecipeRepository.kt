@@ -3,10 +3,10 @@ package com.aamo.cookbook.database.repository
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
-import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.FullFavoriteRecipe
+import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -15,8 +15,8 @@ class TestRecipeRepository : RecipeRepository {
   object Data {
     val recipes = Mocker.mockRecipeList()
     val favoriteRecipes = listOf(
-      FavoriteRecipe(0, 1),
-      FavoriteRecipe(1, 5),
+      RecipeBookmark(0, 1),
+      RecipeBookmark(1, 5),
     )
     val recipeRatings = listOf(
       RecipeRating(0, 2, 1), RecipeRating(1, 5, 2)
@@ -40,22 +40,22 @@ class TestRecipeRepository : RecipeRepository {
     return recipes.firstOrNull { it.value.id == id }
   }
 
-  override fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithFavoriteAndRating>> {
+  override fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>> {
     return flow {
       emit(recipes.map { recipe ->
-        RecipeWithFavoriteAndRating(
-          value = recipe.value,
-          favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
+        RecipeWithBookmarkAndRating(
+          recipe = recipe.value,
+          bookmark = favorites.firstOrNull { it.recipeId == recipe.value.id },
           rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
       })
     }
   }
 
-  override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithFavoriteAndRating? {
+  override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating? {
     return recipes.firstOrNull { it.value.id == recipeId }?.let { recipe ->
-      RecipeWithFavoriteAndRating(
-        value = recipe.value,
-        favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
+      RecipeWithBookmarkAndRating(
+        recipe = recipe.value,
+        bookmark = favorites.firstOrNull { it.recipeId == recipe.value.id },
         rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
     }
   }
@@ -96,7 +96,7 @@ class TestRecipeRepository : RecipeRepository {
   override suspend fun addRecipeToFavorites(recipeId: Int) {
     favorites = favorites.toMutableList().apply {
       recipes.first { it.value.id == recipeId }.also {
-        add(FavoriteRecipe(id = favorites.maxOf { f -> f.id } + 1, recipeId = it.value.id))
+        add(RecipeBookmark(id = favorites.maxOf { f -> f.id } + 1, recipeId = it.value.id))
       }
     }
   }

@@ -1,9 +1,8 @@
 package com.aamo.cookbook.features.home.use_cases
 
-import com.aamo.cookbook.database.dao.RecipeDao
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
-// TODO: unit test
-fun fetchRecipeCategoriesFlow(recipeDao: RecipeDao): Flow<List<String>> {
-  return recipeDao.getCategoriesFlow()
+fun fetchRecipeCategoriesFlow(fetchData: () -> Flow<List<String>>): Flow<List<String>> {
+  return fetchData().map { list -> list.sortedBy { it } }
 }

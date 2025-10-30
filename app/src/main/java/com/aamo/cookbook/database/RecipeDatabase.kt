@@ -10,12 +10,12 @@ import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.model.FavoriteRecipe
+import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 
 @Suppress("HardCodedStringLiteral")
 @Database(
-  entities = [Recipe::class, Chapter::class, Step::class, Ingredient::class, FavoriteRecipe::class, RecipeRating::class],
+  entities = [Recipe::class, Chapter::class, Step::class, Ingredient::class, RecipeBookmark::class, RecipeRating::class],
   version = 6,
   // Remember to update version, when adding migrations
   autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(

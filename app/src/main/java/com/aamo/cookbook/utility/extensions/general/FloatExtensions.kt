@@ -1,16 +1,15 @@
-package com.aamo.cookbook.utility
+package com.aamo.cookbook.utility.extensions.general
 
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 fun Float.toStringWithoutZero(
-  decimalCount: Int = 2,
-  roundingMode: RoundingMode = RoundingMode.HALF_UP
+  decimalCount: Int = 2, roundingMode: RoundingMode = RoundingMode.HALF_UP
 ): String {
   // Without converting to big decimal the string could be converted
   // to scientific notation (e.g. "1.2E8")
-  return this.toBigDecimal().setScale(decimalCount, roundingMode).toPlainString().trimEnd { it == '0' }.trimEnd { it == '.' }
-    .trimEnd { it == ',' }
+  return this.toBigDecimal().setScale(decimalCount, roundingMode).toPlainString()
+    .trimEnd { it == '0' }.trimEnd { it == '.' }.trimEnd { it == ',' }
 }
 
 /**
@@ -20,7 +19,7 @@ fun Float.toStringWithoutZero(
  *
  * @param roundToNearestFraction if true, the value will be rounded to the smaller fraction. Zero will be rounded to the first fraction
  */
-fun Float.toFractionFormattedString(roundToNearestFraction: Boolean = true) : String {
+fun Float.toFractionFormattedString(roundToNearestFraction: Boolean = true): String {
   // Pair of decimal values and fraction chars
   val fractions = setOf(
     Pair(.25, '¼'),
@@ -36,33 +35,40 @@ fun Float.toFractionFormattedString(roundToNearestFraction: Boolean = true) : St
   val integers = bigDecimal.toBigInteger().toInt()
   val decimals = bigDecimal.subtract(integers.toBigDecimal())
 
-  if(decimals.compareTo(BigDecimal.ZERO) == 0) return integers.toString()
+  if (decimals.compareTo(BigDecimal.ZERO) == 0) return integers.toString()
 
   val char: Char? = roundToNearestFraction.let { round ->
     if (round) {
-      if (decimals > fractions.last().first.toBigDecimal()) { return@let null }
+      if (decimals > fractions.last().first.toBigDecimal()) {
+        return@let null
+      }
       fractions.firstOrNull { pair -> pair.first.toBigDecimal() >= decimals }?.second
-    } else {
+    }
+    else {
       fractions.firstOrNull { pair -> pair.first.toBigDecimal() == decimals }?.second
     }
   }
 
-  return if(roundToNearestFraction) {
-    if(char != null) {
+  return if (roundToNearestFraction) {
+    if (char != null) {
       // Fraction char was found from the list
-      if(integers == 0) char.toString()
+      if (integers == 0) char.toString()
       else integers.toString().plus(' ').plus(char)
     }
     else {
       // Fraction char was not found from the list
       // value will be rounded up, if the value is over the fraction list values
-      if (decimals > fractions.last().first.toBigDecimal()) { (integers + 1).toString() }
-      else { integers.toString() }
+      if (decimals > fractions.last().first.toBigDecimal()) {
+        (integers + 1).toString()
+      }
+      else {
+        integers.toString()
+      }
     }
   }
   else {
-    if(char != null) {
-      if(integers == 0) char.toString()
+    if (char != null) {
+      if (integers == 0) char.toString()
       else integers.toString().plus(' ').plus(char)
     }
     else this.toStringWithoutZero()

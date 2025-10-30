@@ -11,7 +11,7 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.database.repository.RecipeRepository
-import com.aamo.cookbook.utility.swap
+import com.aamo.cookbook.utility.extensions.swap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -206,7 +206,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     _infoUiState.value.chapters.getOrNull(index).also { chapterPair ->
       _chapterUiState.update {
         ChapterScreenUiState.fromChapter(
-          chapter = chapterPair?.second ?: ChapterWithStepsAndIngredients(Chapter()),
+          chapter = chapterPair?.second
+          ?: ChapterWithStepsAndIngredients(Chapter()),
           index = chapterPair?.let { index } ?: _infoUiState.value.chapters.size)
       }
     }
@@ -235,17 +236,20 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_chapterUiState.value.index)?.also { existing ->
             this[_chapterUiState.value.index] = existing.copy(
               second = existing.second.copy(
-              value = existing.second.value.copy(
-                name = _chapterUiState.value.formState.name,
-                note = _chapterUiState.value.formState.note
-              ), steps = _chapterUiState.value.steps.map { it.second }))
+                value = existing.second.value.copy(
+                  name = _chapterUiState.value.formState.name,
+                  note = _chapterUiState.value.formState.note
+                ), steps = _chapterUiState.value.steps.map { it.second })
+            )
           } ?: this.add(
             Pair(
               UUID.randomUUID(), ChapterWithStepsAndIngredients(
-            value = Chapter(
-              name = _chapterUiState.value.formState.name,
-              note = _chapterUiState.value.formState.note
-            ), steps = _chapterUiState.value.steps.map { it.second })))
+                value = Chapter(
+                  name = _chapterUiState.value.formState.name,
+                  note = _chapterUiState.value.formState.note
+                ), steps = _chapterUiState.value.steps.map { it.second })
+            )
+          )
         },
         unsavedChanges = true,
       )
@@ -259,19 +263,22 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_stepUiState.value.index)?.also { existing ->
             this[_stepUiState.value.index] = existing.copy(
               second = existing.second.copy(
-              value = existing.second.value.copy(
-                description = _stepUiState.value.formState.description,
-                timerMinutes = _stepUiState.value.formState.timerMinutes,
-                note = _stepUiState.value.formState.note
-              ), ingredients = _stepUiState.value.ingredients.map { it.second }))
+                value = existing.second.value.copy(
+                  description = _stepUiState.value.formState.description,
+                  timerMinutes = _stepUiState.value.formState.timerMinutes,
+                  note = _stepUiState.value.formState.note
+                ), ingredients = _stepUiState.value.ingredients.map { it.second })
+            )
           } ?: this.add(
             Pair(
-            UUID.randomUUID(), StepWithIngredients(
-            value = Step(
-              description = _stepUiState.value.formState.description,
-              timerMinutes = _stepUiState.value.formState.timerMinutes,
-              note = _stepUiState.value.formState.note
-            ), ingredients = _stepUiState.value.ingredients.map { it.second })))
+              UUID.randomUUID(), StepWithIngredients(
+                value = Step(
+                  description = _stepUiState.value.formState.description,
+                  timerMinutes = _stepUiState.value.formState.timerMinutes,
+                  note = _stepUiState.value.formState.note
+                ), ingredients = _stepUiState.value.ingredients.map { it.second })
+            )
+          )
         }, unsavedChanges = true
       )
     }
@@ -355,12 +362,12 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
 
   fun deleteIngredient(index: Int): Boolean {
     return _stepUiState.value.ingredients.getOrNull(index)?.also { existing ->
-        _stepUiState.update { state ->
-          state.copy(
-            ingredients = state.ingredients.minus(existing), unsavedChanges = true
-          )
-        }
-      } != null
+      _stepUiState.update { state ->
+        state.copy(
+          ingredients = state.ingredients.minus(existing), unsavedChanges = true
+        )
+      }
+    } != null
   }
 
   fun swapChapterPositions(from: Int, to: Int) {

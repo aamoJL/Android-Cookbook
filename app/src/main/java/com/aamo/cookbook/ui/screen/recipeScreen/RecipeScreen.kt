@@ -65,8 +65,8 @@ import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.SnackbarProperties
+import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.tags.UITag
-import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch

@@ -29,7 +29,7 @@ class RecipeScreenViewModel(
       launch {
         val recipeWithFavoriteAndRating = recipeRepository.getRecipeWithFavoriteAndRating(recipeId)
         _favoriteState.update {
-          recipeWithFavoriteAndRating?.favorite != null
+          recipeWithFavoriteAndRating?.bookmark != null
         }
         _completedPageUiState.update { s ->
           s.copy(fiveStarRating = recipeWithFavoriteAndRating?.rating?.ratingOutOfFive ?: 0)

@@ -35,7 +35,7 @@ import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.components.NoteCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.toStringWithoutZero
+import com.aamo.cookbook.utility.extensions.general.toStringWithoutZero
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 
 @Composable
@@ -61,9 +61,7 @@ internal fun SummaryPage(
           contentDescription = stringResource(R.string.description_servings),
         )
         CountInput(
-          value = servingsState.current,
-          onValueChange = onServingsCountChange,
-          minValue = 1
+          value = servingsState.current, onValueChange = onServingsCountChange, minValue = 1
         )
         if (servingsState.multiplier != 1f) {
           Text(
@@ -80,8 +78,7 @@ internal fun SummaryPage(
           .padding(8.dp)
       ) {
         NoteCard(
-          text = uiState.recipeNote,
-          modifier = Modifier.fillMaxWidth()
+          text = uiState.recipeNote, modifier = Modifier.fillMaxWidth()
         )
         Text(
           text = stringResource(R.string.page_title_ingredients),
@@ -134,8 +131,9 @@ private fun RecipeImage(fileName: String, modifier: Modifier = Modifier) {
   Column(modifier = modifier.background(MaterialTheme.colorScheme.surfaceVariant)) {
     Image(
       painter = rememberAsyncImagePainter(
-        model = IOService(LocalContext.current)
-          .getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName)
+        model = IOService(LocalContext.current).getExternalFileUri(
+          Environment.DIRECTORY_PICTURES, fileName
+        )
       ),
       contentDescription = null,
       contentScale = ContentScale.Crop,
@@ -151,24 +149,19 @@ private fun Preview() {
   CookbookTheme {
     SummaryPage(
       uiState = RecipeScreenViewModel.SummaryPageUiState(
-        recipeName = "Recipe 1",
-        recipeNote = "Recipe Note",
-        chaptersWithIngredients = listOf(
+        recipeName = "Recipe 1", recipeNote = "Recipe Note", chaptersWithIngredients = listOf(
           Pair(
             "Chapter 1", listOf(
               Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
               Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
             )
-          ),
-          Pair(
+          ), Pair(
             "Chapter 2", listOf(
               Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
               Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
             )
           )
         )
-      ),
-      servingsState = RecipeScreenViewModel.ServingsState(),
-      onServingsCountChange = {})
+      ), servingsState = RecipeScreenViewModel.ServingsState(), onServingsCountChange = {})
   }
 }

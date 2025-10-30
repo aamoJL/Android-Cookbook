@@ -1,7 +1,7 @@
 package com.aamo.cookbook.extensions
 
-import com.aamo.cookbook.utility.toFractionFormattedString
-import com.aamo.cookbook.utility.toStringWithoutZero
+import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+import com.aamo.cookbook.utility.extensions.general.toStringWithoutZero
 import junit.framework.TestCase.assertEquals
 import org.junit.Test
 
