@@ -34,9 +34,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -46,8 +46,8 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
@@ -168,8 +168,7 @@ private fun StepList(
             }
             else null)
 
-          if (index != steps.size - 1)
-            HorizontalDivider()
+          if (index != steps.size - 1) HorizontalDivider()
         }
       }
     }
@@ -216,7 +215,7 @@ fun StepListItem(
     ListItem(
       modifier = modifier
         .clickable { onClick() }
-        .testTag(Tags.STEP_ITEM.name),
+        .testTag(UITag.STEP_ITEM.name),
       headlineContent = {
         Text(
           text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",

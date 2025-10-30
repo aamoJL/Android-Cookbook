@@ -31,14 +31,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.model.FavoriteRecipe
-import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeRating
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.tags.UITag
 
 @Composable
 fun RecipesScreen(
@@ -100,17 +100,14 @@ fun RecipesScreen(
           }
           if (filterValue != null) {
             HorizontalDivider()
-            DropdownMenuItem(
-              text = {
-                Text(
-                  text = "Reset",
-                  color = MaterialTheme.colorScheme.error
-                )
-              },
-              onClick = {
-                filterPopUpOpen = false
-                filterValue = null
-              })
+            DropdownMenuItem(text = {
+              Text(
+                text = "Reset", color = MaterialTheme.colorScheme.error
+              )
+            }, onClick = {
+              filterPopUpOpen = false
+              filterValue = null
+            })
           }
         }
       }
@@ -132,7 +129,7 @@ fun RecipesScreen(
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
-              .testTag(Tags.RECIPE_ITEM.name),
+              .testTag(UITag.RECIPE_ITEM.name),
           )
         }
       }
@@ -146,12 +143,12 @@ private fun Preview() {
   CookbookTheme {
     RecipesScreen(
       title = "Title", recipes = listOf(
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
-        RecipeWithFavoriteAndRating(
-          Recipe(name = "Resepti 1"), null, RecipeRating(ratingOutOfFive = 3, recipeId = 0)
-        ),
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
-        RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
-      ), onSelectRecipe = {}, onBack = {}, onSearch = {}, onAdd = {})
+      RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null),
+      RecipeWithFavoriteAndRating(
+        Recipe(name = "Resepti 1"), null, RecipeRating(ratingOutOfFive = 3, recipeId = 0)
+      ),
+      RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), null, null),
+      RecipeWithFavoriteAndRating(Recipe(name = "Resepti 1"), FavoriteRecipe(recipeId = 0), null)
+    ), onSelectRecipe = {}, onBack = {}, onSearch = {}, onAdd = {})
   }
 }

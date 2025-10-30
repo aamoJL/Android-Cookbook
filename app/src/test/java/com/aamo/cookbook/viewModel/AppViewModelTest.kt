@@ -1,9 +1,9 @@
 package com.aamo.cookbook.viewModel
 
 import com.aamo.cookbook.MainDispatcherRule
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.repository.TestRecipeRepository
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -13,8 +13,7 @@ import org.junit.Test
 class AppViewModelTest {
   private val viewModel = AppViewModel(TestRecipeRepository())
 
-  @get:Rule
-  val mainDispatcherRule = MainDispatcherRule()
+  @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
   @Test
   fun getCategories() = runTest {

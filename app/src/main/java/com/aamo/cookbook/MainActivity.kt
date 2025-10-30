@@ -13,14 +13,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,13 +32,14 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.aamo.cookbook.features.home.HomePage
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.screen.CategoriesScreen
 import com.aamo.cookbook.ui.screen.RecipeSearchScreen
 import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.viewModel.AppViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
@@ -76,13 +72,6 @@ class CookbookApplication : Application() {
   }
 }
 
-data class SnackbarProperties (
-  val message: String,
-  val actionLabel: String? = null,
-  val withDismissAction: Boolean = false,
-  val duration: SnackbarDuration = SnackbarDuration.Short
-)
-
 class MainActivity : ComponentActivity() {
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
@@ -91,24 +80,29 @@ class MainActivity : ComponentActivity() {
         val snackState = remember { SnackbarHostState() }
         val snackScope = rememberCoroutineScope()
 
-        // A surface container using the 'background' color from the theme
-        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-          Box {
-            MainNavGraph(
-              onShowSnackbar = { properties ->
-                snackScope.launch {
-                  snackState.showSnackbar(
-                    message = properties.message,
-                    actionLabel = properties.actionLabel,
-                    withDismissAction = properties.withDismissAction,
-                    duration = properties.duration
-                  )
-                }
-              }
-            )
-            SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
-          }
+        Box {
+          HomePage()
+          SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
         }
+
+        // TODO: snackbar
+        // A surface container using the 'background' color from the theme
+//        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
+//          Box {
+//            MainNavGraph(
+//              onShowSnackbar = { properties ->
+//                snackScope.launch {
+//                  snackState.showSnackbar(
+//                    message = properties.message,
+//                    actionLabel = properties.actionLabel,
+//                    withDismissAction = properties.withDismissAction,
+//                    duration = properties.duration
+//                  )
+//                }
+//              })
+//            SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
+//          }
+//        }
       }
     }
   }
@@ -116,8 +110,8 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun MainNavGraph(
-  appViewModel : AppViewModel = viewModel(factory = ViewModelProvider.Factory),
-  navController : NavHostController = rememberNavController(),
+  appViewModel: AppViewModel = viewModel(factory = ViewModelProvider.Factory),
+  navController: NavHostController = rememberNavController(),
   onShowSnackbar: (SnackbarProperties) -> Unit = {}
 ) {
   val context = LocalContext.current
@@ -126,27 +120,14 @@ fun MainNavGraph(
     navController = navController,
     startDestination = Screen.Categories.getRoute(),
     enterTransition = { fadeIn(animationSpec = tween(300, easing = LinearEasing)) },
-    exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }
-  ) {
-    composable(route = Screen.Categories.getRoute()) {
-      val categories by appViewModel.getCategories().collectAsState(initial = emptyList())
-
-      CategoriesScreen(
-        categories = categories,
-        onSelectCategory = {
-          appViewModel.setSelectedCategory(it)
-          navController.navigate(Screen.Recipes.getRoute())
-        },
-        onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
-        onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        onFavorites = { navController.navigate(Screen.Favorites.getRoute()) }
-      )
-    }
+    exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }) {
+    composable(route = Screen.Categories.getRoute()) {}
     composable(route = Screen.Recipes.getRoute()) {
       val category by appViewModel.selectedCategory.collectAsStateWithLifecycle()
-      val recipes by appViewModel.getRecipesWithFavoriteAndRatingByCategory(category).collectAsStateWithLifecycle(
-        initialValue = emptyList(),
-      )
+      val recipes by appViewModel.getRecipesWithFavoriteAndRatingByCategory(category)
+        .collectAsStateWithLifecycle(
+          initialValue = emptyList(),
+        )
 
       RecipesScreen(
         title = category,
@@ -156,32 +137,28 @@ fun MainNavGraph(
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) }
-      )
+        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
     composable(route = Screen.Favorites.getRoute()) {
-      val favorites by appViewModel.getRecipesWithFavoriteAndRatingByFavorite().collectAsStateWithLifecycle(
-        initialValue = emptyList(),
-      )
+      val favorites by appViewModel.getRecipesWithFavoriteAndRatingByFavorite()
+        .collectAsStateWithLifecycle(
+          initialValue = emptyList(),
+        )
 
       RecipesScreen(
-        title = stringResource(R.string.button_text_favorites),
+        title = stringResource(R.string.button_text_bookmarks),
         recipes = favorites,
         onSelectRecipe = { recipe ->
           navController.navigate(Screen.Recipe.getRouteWithArgument(recipe.id.toString()))
         },
         onBack = { navController.navigateUp() },
         onSearch = { navController.navigate(Screen.Search.getRoute()) },
-        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) }
-      )
+        onAdd = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) })
     }
     composable(route = Screen.Search.getRoute()) {
-      RecipeSearchScreen(
-        onBack = { navController.navigateUp() },
-        onSelect = { id ->
-          navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString()))
-        }
-      )
+      RecipeSearchScreen(onBack = { navController.navigateUp() }, onSelect = { id ->
+        navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString()))
+      })
     }
     composable(
       route = Screen.Recipe.getRoute(),
@@ -203,8 +180,7 @@ fun MainNavGraph(
           animationSpec = tween(300, easing = EaseOut),
           towards = AnimatedContentTransitionScope.SlideDirection.End
         )
-      }
-    ) {
+      }) {
       RecipeScreen(
         onBack = { navController.navigateUp() },
         onEditRecipe = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) },
@@ -215,8 +191,7 @@ fun MainNavGraph(
                 recipeCopy.copy(
                   value = recipeCopy.value.copy(
                     name = context.getString(
-                      R.string.recipe_name_copy,
-                      recipe.value.name
+                      R.string.recipe_name_copy, recipe.value.name
                     )
                   )
                 )
@@ -249,7 +224,8 @@ fun MainNavGraph(
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
               popUpTo(Screen.Recipe.getRoute()) { inclusive = true }
             }
-          } else {
+          }
+          else {
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
               popUpTo(Screen.EditRecipe.getRoute()) { inclusive = true }
             }

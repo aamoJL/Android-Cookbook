@@ -14,7 +14,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.aamo.cookbook.R
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.tags.UITag
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -25,7 +25,7 @@ fun BasicTopAppBar(
 ) {
   TopAppBar(
     title = {
-      Text(text = title, Modifier.testTag(Tags.SCREEN_TITLE.name))
+      Text(text = title, Modifier.testTag(UITag.SCREEN_TITLE.name))
     }, colors = TopAppBarDefaults.topAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,

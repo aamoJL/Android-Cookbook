@@ -19,8 +19,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.navArgument
 import com.aamo.cookbook.Screen
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.utility.sharedViewModel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 

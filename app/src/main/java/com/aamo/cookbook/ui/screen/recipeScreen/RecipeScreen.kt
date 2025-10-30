@@ -57,15 +57,15 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
-import com.aamo.cookbook.SnackbarProperties
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.SnackbarProperties
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
@@ -261,7 +261,7 @@ fun RecipeScreenContent(
             modifier = Modifier
               .fillMaxSize()
               .weight(1f, true)
-              .testTag(Tags.PAGER.name)
+              .testTag(UITag.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
               0 -> CompletedPage(

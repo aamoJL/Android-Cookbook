@@ -1,13 +1,13 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.Mocker
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.FullFavoriteRecipe
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeRating
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -19,8 +19,7 @@ class TestRecipeRepository : RecipeRepository {
       FavoriteRecipe(1, 5),
     )
     val recipeRatings = listOf(
-      RecipeRating(0, 2, 1),
-      RecipeRating(1, 5, 2)
+      RecipeRating(0, 2, 1), RecipeRating(1, 5, 2)
     )
   }
 
@@ -47,8 +46,7 @@ class TestRecipeRepository : RecipeRepository {
         RecipeWithFavoriteAndRating(
           value = recipe.value,
           favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
-          rating = ratings.firstOrNull { it.recipeId == recipe.value.id }
-        )
+          rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
       })
     }
   }
@@ -58,8 +56,7 @@ class TestRecipeRepository : RecipeRepository {
       RecipeWithFavoriteAndRating(
         value = recipe.value,
         favorite = favorites.firstOrNull { it.recipeId == recipe.value.id },
-        rating = ratings.firstOrNull { it.recipeId == recipe.value.id }
-      )
+        rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
     }
   }
 
@@ -87,7 +84,8 @@ class TestRecipeRepository : RecipeRepository {
 
     if (index == -1) {
       recipes = recipes.toMutableList().apply { add(RecipeWithChaptersStepsAndIngredients(recipe)) }
-    } else {
+    }
+    else {
       recipes = recipes.toMutableList().apply {
         this[index] = this[index].copy(value = recipe)
       }
@@ -113,13 +111,12 @@ class TestRecipeRepository : RecipeRepository {
     if (index != -1) {
       ratings =
         ratings.toMutableList().also { it[index] = it[index].copy(ratingOutOfFive = rating) }
-    } else {
+    }
+    else {
       ratings = ratings.toMutableList().apply {
         add(
           RecipeRating(
-            id = ratings.maxOf { it.id },
-            ratingOutOfFive = rating,
-            recipeId = recipeId
+            id = ratings.maxOf { it.id }, ratingOutOfFive = rating, recipeId = recipeId
           )
         )
       }
@@ -128,7 +125,7 @@ class TestRecipeRepository : RecipeRepository {
 
   override suspend fun deleteRecipeRating(recipeId: Int) {
     val index = ratings.indexOfFirst { it.recipeId == recipeId }
-    if(index != -1){
+    if (index != -1) {
       ratings = ratings.toMutableList().apply { removeAt(index) }
     }
   }

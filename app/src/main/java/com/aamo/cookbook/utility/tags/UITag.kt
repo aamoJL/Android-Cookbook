@@ -1,6 +1,6 @@
-package com.aamo.cookbook.utility
+package com.aamo.cookbook.utility.tags
 
-enum class Tags {
+enum class UITag {
   CHAPTER_ITEM,
   PROGRESS_CHECKBOX,
   PAGER,

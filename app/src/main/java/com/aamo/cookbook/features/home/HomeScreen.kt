@@ -1,9 +1,10 @@
-package com.aamo.cookbook.ui.screen
+package com.aamo.cookbook.features.home
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
@@ -23,27 +24,95 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
+import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
+import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.tags.UITag
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+@Serializable
+object HomeScreen
+
+class HomeScreenViewModel(fetchCategories: () -> Flow<List<String>>) : ViewModel() {
+  private val _categories = MutableStateFlow<List<String>>(emptyList())
+  val categories = _categories.asStateFlow()
+
+  var isLoading by mutableStateOf(true)
+    private set
+
+  init {
+    viewModelScope.launch {
+      fetchCategories().collect {
+        isLoading = false
+        _categories.update { it }
+      }
+    }
+  }
+}
+
+fun NavGraphBuilder.homeScreen(
+  onOpenSearch: () -> Unit,
+  onOpenRecipeForm: () -> Unit,
+  onOpenBookmarks: () -> Unit,
+  onOpenRecipesByCategory: (category: String) -> Unit
+) {
+  composable<HomeScreen> {
+    val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
+    val viewmodel: HomeScreenViewModel = viewModel(factory = viewModelFactory {
+      initializer {
+        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow(dao) })
+      }
+    })
+    val categories by viewmodel.categories.collectAsStateWithLifecycle()
+
+    LoadingScreen(enabled = viewmodel.isLoading) {
+      HomeScreen(
+        categories = categories,
+        onSearch = onOpenSearch,
+        onNewRecipe = onOpenRecipeForm,
+        onBookmarks = onOpenBookmarks,
+        onSelectCategory = onOpenRecipesByCategory
+      )
+    }
+  }
+}
 
 @Composable
-fun CategoriesScreen(
+fun HomeScreen(
   categories: List<String>,
-  onSelectCategory: (String) -> Unit = {},
-  onAddRecipe: () -> Unit = {},
-  onSearch: () -> Unit = {},
-  onFavorites: () -> Unit = {}
+  onSearch: () -> Unit,
+  onNewRecipe: () -> Unit,
+  onBookmarks: () -> Unit,
+  onSelectCategory: (String) -> Unit,
 ) {
   Surface(color = MaterialTheme.colorScheme.primary) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -68,8 +137,8 @@ fun CategoriesScreen(
         ) {
           MainButtons(
             onSearch = onSearch,
-            onAddRecipe = onAddRecipe,
-            onFavorites = onFavorites,
+            onNewRecipe = onNewRecipe,
+            onBookmarks = onBookmarks,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 36.dp)
           )
           Text(
@@ -97,32 +166,10 @@ fun CategoriesScreen(
 }
 
 @Composable
-fun MainButton(
-  onClick: () -> Unit,
-  icon: Painter,
-  text: String,
-  modifier: Modifier = Modifier,
-  buttonColors: ButtonColors = ButtonDefaults.buttonColors(
-    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-  ),
-) {
-  ElevatedButton(
-    onClick = onClick, shape = RoundedCornerShape(8.dp), colors = buttonColors, modifier = modifier
-  ) {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-      Icon(painter = icon, contentDescription = null)
-      Spacer(modifier = Modifier.height(4.dp))
-      Text(text = text)
-    }
-  }
-}
-
-@Composable
-fun MainButtons(
+private fun MainButtons(
   onSearch: () -> Unit,
-  onAddRecipe: () -> Unit,
-  onFavorites: () -> Unit,
+  onNewRecipe: () -> Unit,
+  onBookmarks: () -> Unit,
   modifier: Modifier = Modifier
 ) {
   Row(
@@ -141,15 +188,15 @@ fun MainButtons(
         .fillMaxHeight()
     )
     MainButton(
-      onClick = onFavorites,
+      onClick = onBookmarks,
       icon = painterResource(R.drawable.rounded_bookmark_24),
-      text = stringResource(R.string.button_text_favorites),
+      text = stringResource(R.string.button_text_bookmarks),
       modifier = Modifier
         .weight(1f)
         .fillMaxHeight()
     )
     MainButton(
-      onClick = onAddRecipe,
+      onClick = onNewRecipe,
       icon = painterResource(R.drawable.rounded_add_24),
       text = stringResource(R.string.button_text_new),
       modifier = Modifier
@@ -160,13 +207,37 @@ fun MainButtons(
 }
 
 @Composable
+private fun MainButton(
+  onClick: () -> Unit,
+  icon: Painter,
+  text: String,
+  modifier: Modifier = Modifier,
+  buttonColors: ButtonColors = ButtonDefaults.buttonColors(
+    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+  ),
+) {
+  ElevatedButton(
+    onClick = onClick,
+    shape = RoundedCornerShape(8.dp),
+    colors = buttonColors,
+    contentPadding = PaddingValues(0.dp),
+    modifier = modifier
+  ) {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+      Icon(painter = icon, contentDescription = null)
+      Spacer(modifier = Modifier.height(4.dp))
+      Text(text = text, softWrap = false)
+    }
+  }
+}
+
+@Composable
 private fun CategoryList(
   categories: List<String>, onSelect: (String) -> Unit, modifier: Modifier = Modifier
 ) {
   LazyColumn(
-    verticalArrangement = Arrangement.spacedBy(8.dp),
-    userScrollEnabled = true,
-    modifier = modifier,
+    verticalArrangement = Arrangement.spacedBy(8.dp), userScrollEnabled = true, modifier = modifier
   ) {
     items(categories) { category ->
       ElevatedButton(
@@ -178,7 +249,7 @@ private fun CategoryList(
         onClick = { onSelect(category) },
         modifier = Modifier
           .fillMaxWidth()
-          .testTag(Tags.CATEGORY_ITEM.name)
+          .testTag(UITag.CATEGORY_ITEM.name)
       ) {
         Text(
           text = category,
@@ -192,14 +263,16 @@ private fun CategoryList(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
   CookbookTheme {
-    CategoriesScreen(
-      categories = listOf(
-        "Category 1", "Category 2"
-      )
-    )
+    HomeScreen(
+      categories = listOf("Category 1", "Category 2"),
+      onSearch = {},
+      onNewRecipe = {},
+      onBookmarks = {},
+      onSelectCategory = {})
   }
 }

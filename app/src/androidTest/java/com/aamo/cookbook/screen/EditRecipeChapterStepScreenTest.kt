@@ -15,13 +15,13 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeChapterStepScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
@@ -34,8 +34,7 @@ class EditRecipeChapterStepScreenTest {
   private var wasClicked = false
   private var wasDismissed = false
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setup() {
@@ -46,7 +45,7 @@ class EditRecipeChapterStepScreenTest {
           onBack = { wasClicked = true },
           onSubmitChanges = { wasClicked = true },
           onEditIngredient = { wasClicked = true },
-          onDeleteIngredient = { true.also { wasDismissed = true }},
+          onDeleteIngredient = { true.also { wasDismissed = true } },
           onFormStateChange = { uiState = uiState.copy(formState = it) },
         )
       }
@@ -58,8 +57,7 @@ class EditRecipeChapterStepScreenTest {
    */
   private fun withNewStep() {
     uiState = EditRecipeViewModel.StepScreenUiState.fromStep(
-      step = StepWithIngredients(Step()),
-      index = 0
+      step = StepWithIngredients(Step()), index = 0
     )
     wasClicked = false
     wasDismissed = false
@@ -71,8 +69,7 @@ class EditRecipeChapterStepScreenTest {
   private fun withExistingStep() {
     val index = 0
     uiState = EditRecipeViewModel.StepScreenUiState.fromStep(
-      step = Mocker.mockRecipeList().first().chapters.first().steps[index],
-      index = index
+      step = Mocker.mockRecipeList().first().chapters.first().steps[index], index = index
     )
     wasClicked = false
     wasDismissed = false
@@ -81,12 +78,12 @@ class EditRecipeChapterStepScreenTest {
   @Test
   fun pageTitle_equals() {
     withNewStep().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_new_step))
     }
 
     withExistingStep().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_existing_step))
     }
   }
@@ -159,13 +156,13 @@ class EditRecipeChapterStepScreenTest {
   @Test
   fun ingredientsItemCount() {
     withNewStep().apply {
-      val nodes = rule.onAllNodesWithTag(Tags.INGREDIENT_ITEM.name).fetchSemanticsNodes()
+      val nodes = rule.onAllNodesWithTag(UITag.INGREDIENT_ITEM.name).fetchSemanticsNodes()
 
       Assert.assertEquals(uiState.ingredients.size, nodes.size)
     }
 
     withExistingStep().apply {
-      val nodes = rule.onAllNodesWithTag(Tags.INGREDIENT_ITEM.name).fetchSemanticsNodes()
+      val nodes = rule.onAllNodesWithTag(UITag.INGREDIENT_ITEM.name).fetchSemanticsNodes()
 
       Assert.assertEquals(uiState.ingredients.size, nodes.size)
     }
@@ -174,11 +171,13 @@ class EditRecipeChapterStepScreenTest {
   @Test
   fun formInputInitValues() {
     withNewStep().apply {
-      rule.onNodeWithText(R.string.textfield_step_description).assertTextContains(uiState.formState.description)
+      rule.onNodeWithText(R.string.textfield_step_description)
+        .assertTextContains(uiState.formState.description)
     }
 
     withExistingStep().apply {
-      rule.onNodeWithText(R.string.textfield_step_description).assertTextContains(uiState.formState.description)
+      rule.onNodeWithText(R.string.textfield_step_description)
+        .assertTextContains(uiState.formState.description)
     }
   }
 
@@ -199,7 +198,7 @@ class EditRecipeChapterStepScreenTest {
   @Test
   fun onIngredientDeletion() = runTest {
     withExistingStep().apply {
-      rule.onAllNodesWithTag(Tags.INGREDIENT_ITEM.name)[0].performTouchInput { swipeRight() }
+      rule.onAllNodesWithTag(UITag.INGREDIENT_ITEM.name)[0].performTouchInput { swipeRight() }
 
       rule.mainClock.advanceTimeBy(1000)
 

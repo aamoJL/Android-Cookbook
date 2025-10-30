@@ -37,11 +37,11 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
@@ -52,8 +52,8 @@ import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
 import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.toFractionFormattedString
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import java.util.UUID
@@ -273,7 +273,7 @@ private fun ChapterListItem(
     ListItem(
       modifier = Modifier
         .clickable { onClick() }
-        .testTag(Tags.CHAPTER_ITEM.name),
+        .testTag(UITag.CHAPTER_ITEM.name),
       headlineContent = {
         Text(
           text = "${chapterNumber}. ${chapter.value.name}",

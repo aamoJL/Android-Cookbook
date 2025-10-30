@@ -36,13 +36,13 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.model.FavoriteRecipe
-import com.aamo.cookbook.model.Recipe
 import com.aamo.cookbook.model.RecipeRating
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeSearchViewModel
 import com.aamo.cookbook.viewModel.ViewModelProvider
 
@@ -92,7 +92,7 @@ fun RecipeSearchScreenContent(
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
-              .testTag(Tags.RECIPE_ITEM.name),
+              .testTag(UITag.RECIPE_ITEM.name),
             isFavorite = recipe.favorite != null,
             rating = recipe.rating?.ratingOutOfFive ?: 0
           )

@@ -16,14 +16,14 @@ import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeScreenPageContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -37,8 +37,7 @@ class EditRecipeScreenTest {
   private var wasClicked = false
   private var wasDismissed = false
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setup() {
@@ -49,7 +48,7 @@ class EditRecipeScreenTest {
           onFormStateChange = { uiState = uiState.copy(formState = it) },
           onEditChapter = { wasClicked = true },
           onSubmitChanges = { wasClicked = true },
-          onDeleteChapter = { true.also { wasDismissed = true }},
+          onDeleteChapter = { true.also { wasDismissed = true } },
           onDelete = { wasClicked = true },
           onBack = { wasClicked = true },
         )
@@ -60,7 +59,7 @@ class EditRecipeScreenTest {
   /**
    * Sets ui state to represent an existing recipe
    */
-  private fun withExistingRecipe() : RecipeWithChaptersStepsAndIngredients {
+  private fun withExistingRecipe(): RecipeWithChaptersStepsAndIngredients {
     val recipe = Mocker.mockRecipeList().first()
     uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
       recipe = recipe
@@ -73,7 +72,7 @@ class EditRecipeScreenTest {
   /**
    * Sets ui state to represent a new recipe
    */
-  private fun withNewRecipe() : RecipeWithChaptersStepsAndIngredients {
+  private fun withNewRecipe(): RecipeWithChaptersStepsAndIngredients {
     val recipe = RecipeWithChaptersStepsAndIngredients(Recipe())
     uiState = EditRecipeViewModel.InfoScreenUiState.fromRecipe(
       recipe = recipe
@@ -86,12 +85,12 @@ class EditRecipeScreenTest {
   @Test
   fun pageTitle_equals() {
     withNewRecipe().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_new_recipe))
     }
 
     withExistingRecipe().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_existing_recipe))
     }
   }
@@ -208,13 +207,13 @@ class EditRecipeScreenTest {
   @Test
   fun chapterItemCount() {
     withNewRecipe().apply {
-      val nodes = rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name).fetchSemanticsNodes()
+      val nodes = rule.onAllNodesWithTag(UITag.CHAPTER_ITEM.name).fetchSemanticsNodes()
 
       assert(nodes.isEmpty())
     }
 
     withExistingRecipe().apply {
-      val nodes = rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name).fetchSemanticsNodes()
+      val nodes = rule.onAllNodesWithTag(UITag.CHAPTER_ITEM.name).fetchSemanticsNodes()
 
       assert(nodes.isNotEmpty())
     }
@@ -223,7 +222,7 @@ class EditRecipeScreenTest {
   @Test
   fun onChapterSelection() {
     withExistingRecipe().apply {
-      rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name)[0].performClick()
+      rule.onAllNodesWithTag(UITag.CHAPTER_ITEM.name)[0].performClick()
 
       assert(wasClicked)
     }
@@ -232,35 +231,30 @@ class EditRecipeScreenTest {
   @Test
   fun formInputInitValues() {
     withExistingRecipe().apply {
-      rule.onNodeWithText(R.string.textfield_recipe_name)
-        .assertTextContains(uiState.formState.name)
+      rule.onNodeWithText(R.string.textfield_recipe_name).assertTextContains(uiState.formState.name)
 
       rule.onNodeWithText(R.string.textfield_recipe_category)
         .assertTextContains(uiState.formState.category)
 
       rule.onNodeWithText(
         rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
-      )
-        .assertTextContains(uiState.formState.subCategory)
+      ).assertTextContains(uiState.formState.subCategory)
 
       rule.onNodeWithText(R.string.textfield_recipe_servings)
         .assertTextContains(uiState.formState.servings.toString())
     }
 
     withNewRecipe().apply {
-      rule.onNodeWithText(R.string.textfield_recipe_name)
-        .assertTextContains(uiState.formState.name)
+      rule.onNodeWithText(R.string.textfield_recipe_name).assertTextContains(uiState.formState.name)
 
       rule.onNodeWithText(R.string.textfield_recipe_category)
         .assertTextContains(uiState.formState.category)
 
       rule.onNodeWithText(
         rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
-      )
-        .assertTextContains(uiState.formState.subCategory)
+      ).assertTextContains(uiState.formState.subCategory)
 
-      rule.onNodeWithText(R.string.textfield_recipe_servings)
-        .assertTextContains("1")
+      rule.onNodeWithText(R.string.textfield_recipe_servings).assertTextContains("1")
     }
   }
 
@@ -301,7 +295,7 @@ class EditRecipeScreenTest {
   @Test
   fun onChapterDeletion() = runTest {
     withExistingRecipe().apply {
-      rule.onAllNodesWithTag(Tags.CHAPTER_ITEM.name)[0].performTouchInput { swipeRight() }
+      rule.onAllNodesWithTag(UITag.CHAPTER_ITEM.name)[0].performTouchInput { swipeRight() }
 
       rule.mainClock.advanceTimeBy(1000)
 

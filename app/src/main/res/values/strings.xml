@@ -48,7 +48,7 @@
     <string name="input_title_servings">Servings</string>
     <string name="button_text_save">Save</string>
     <string name="button_text_new">New</string>
-    <string name="button_text_favorites">Favorites</string>
+    <string name="button_text_bookmarks">Bookmarks</string>
     <string name="button_text_add_to_favorites">Add to favorites</string>
     <string name="button_text_remove_from_favorites">Remove from favorites</string>
     <string name="dialog_title_delete_recipe">Delete the recipe?</string>

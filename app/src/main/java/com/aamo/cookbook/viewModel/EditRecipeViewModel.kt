@@ -2,15 +2,15 @@ package com.aamo.cookbook.viewModel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.database.repository.RecipeRepository
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeCategoryTuple
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
 import com.aamo.cookbook.utility.swap
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,8 +37,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
    * Recipe's information that can't be changed from the editRecipe screens
    */
   data class RecipeInfo(
-    val id: Int,
-    val thumbnailUri: String
+    val id: Int, val thumbnailUri: String
   )
 
   /**
@@ -61,9 +60,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     )
 
     val canBeSaved: Boolean
-      get() = formState.name.isNotEmpty()
-              && formState.category.isNotEmpty()
-              && chapters.isNotEmpty()
+      get() = formState.name.isNotEmpty() && formState.category.isNotEmpty() && chapters.isNotEmpty()
 
     private fun toRecipe() = Recipe(
       name = formState.name,
@@ -85,9 +82,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
             subCategory = recipe.value.subCategory,
             servings = recipe.value.servings,
             note = recipe.value.note
-          ),
-          chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) }
-        )
+          ), chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) })
       }
     }
   }
@@ -104,8 +99,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     val isNewChapter: Boolean = formState.name.isEmpty()
 
     data class ChapterFormState(
-      val name: String = "",
-      val note: String = ""
+      val name: String = "", val note: String = ""
     )
 
     val canBeSaved: Boolean
@@ -116,8 +110,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
         return ChapterScreenUiState(
           index = index,
           formState = ChapterFormState(
-            name = chapter.value.name,
-            note = chapter.value.note
+            name = chapter.value.name, note = chapter.value.note
           ),
           steps = chapter.steps.map { Pair(UUID.randomUUID(), it) },
         )
@@ -137,9 +130,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     val isNewStep: Boolean = formState.description.isEmpty()
 
     data class StepFormState(
-      val description: String = "",
-      val timerMinutes: Int? = null,
-      val note: String = ""
+      val description: String = "", val timerMinutes: Int? = null, val note: String = ""
     )
 
     val canBeSaved: Boolean
@@ -179,11 +170,8 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     companion object {
       fun fromIngredient(ingredient: Ingredient, index: Int): IngredientScreenUiState {
         return IngredientScreenUiState(
-          index = index,
-          formState = IngredientFormState(
-            name = ingredient.name,
-            amount = ingredient.amount,
-            unit = ingredient.unit
+          index = index, formState = IngredientFormState(
+            name = ingredient.name, amount = ingredient.amount, unit = ingredient.unit
           )
         )
       }
@@ -218,30 +206,25 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     _infoUiState.value.chapters.getOrNull(index).also { chapterPair ->
       _chapterUiState.update {
         ChapterScreenUiState.fromChapter(
-          chapter = chapterPair?.second
-            ?: ChapterWithStepsAndIngredients(Chapter()),
-          index = chapterPair?.let { index } ?: _infoUiState.value.chapters.size
-        )
+          chapter = chapterPair?.second ?: ChapterWithStepsAndIngredients(Chapter()),
+          index = chapterPair?.let { index } ?: _infoUiState.value.chapters.size)
       }
     }
 
-  fun initStepUiState(index: Int) =
-    _chapterUiState.value.steps.getOrNull(index).also { stepPair ->
-      _stepUiState.update {
-        StepScreenUiState.fromStep(
-          step = stepPair?.second ?: StepWithIngredients(Step()),
-          index = stepPair?.let { index } ?: _chapterUiState.value.steps.size
-        )
-      }
+  fun initStepUiState(index: Int) = _chapterUiState.value.steps.getOrNull(index).also { stepPair ->
+    _stepUiState.update {
+      StepScreenUiState.fromStep(
+        step = stepPair?.second ?: StepWithIngredients(Step()),
+        index = stepPair?.let { index } ?: _chapterUiState.value.steps.size)
     }
+  }
 
   fun initIngredientUiState(index: Int) =
     _stepUiState.value.ingredients.getOrNull(index).also { ingredientPair ->
       _ingredientUiState.update {
         IngredientScreenUiState.fromIngredient(
           ingredient = ingredientPair?.second ?: Ingredient(),
-          index = ingredientPair?.let { index } ?: _stepUiState.value.ingredients.size
-        )
+          index = ingredientPair?.let { index } ?: _stepUiState.value.ingredients.size)
       }
     }
 
@@ -252,24 +235,17 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_chapterUiState.value.index)?.also { existing ->
             this[_chapterUiState.value.index] = existing.copy(
               second = existing.second.copy(
-                value = existing.second.value.copy(
-                  name = _chapterUiState.value.formState.name,
-                  note = _chapterUiState.value.formState.note
-                ),
-                steps = _chapterUiState.value.steps.map { it.second }
-              )
-            )
+              value = existing.second.value.copy(
+                name = _chapterUiState.value.formState.name,
+                note = _chapterUiState.value.formState.note
+              ), steps = _chapterUiState.value.steps.map { it.second }))
           } ?: this.add(
             Pair(
               UUID.randomUUID(), ChapterWithStepsAndIngredients(
-                value = Chapter(
-                  name = _chapterUiState.value.formState.name,
-                  note = _chapterUiState.value.formState.note
-                ),
-                steps = _chapterUiState.value.steps.map { it.second }
-              )
-            )
-          )
+            value = Chapter(
+              name = _chapterUiState.value.formState.name,
+              note = _chapterUiState.value.formState.note
+            ), steps = _chapterUiState.value.steps.map { it.second })))
         },
         unsavedChanges = true,
       )
@@ -283,28 +259,20 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_stepUiState.value.index)?.also { existing ->
             this[_stepUiState.value.index] = existing.copy(
               second = existing.second.copy(
-                value = existing.second.value.copy(
-                  description = _stepUiState.value.formState.description,
-                  timerMinutes = _stepUiState.value.formState.timerMinutes,
-                  note = _stepUiState.value.formState.note
-                ),
-                ingredients = _stepUiState.value.ingredients.map { it.second }
-              )
-            )
+              value = existing.second.value.copy(
+                description = _stepUiState.value.formState.description,
+                timerMinutes = _stepUiState.value.formState.timerMinutes,
+                note = _stepUiState.value.formState.note
+              ), ingredients = _stepUiState.value.ingredients.map { it.second }))
           } ?: this.add(
             Pair(
-              UUID.randomUUID(), StepWithIngredients(
-                value = Step(
-                  description = _stepUiState.value.formState.description,
-                  timerMinutes = _stepUiState.value.formState.timerMinutes,
-                  note = _stepUiState.value.formState.note
-                ),
-                ingredients = _stepUiState.value.ingredients.map { it.second }
-              )
-            )
-          )
-        },
-        unsavedChanges = true
+            UUID.randomUUID(), StepWithIngredients(
+            value = Step(
+              description = _stepUiState.value.formState.description,
+              timerMinutes = _stepUiState.value.formState.timerMinutes,
+              note = _stepUiState.value.formState.note
+            ), ingredients = _stepUiState.value.ingredients.map { it.second })))
+        }, unsavedChanges = true
       )
     }
   }
@@ -330,8 +298,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
               )
             )
           )
-        },
-        unsavedChanges = true
+        }, unsavedChanges = true
       )
     }
   }
@@ -339,25 +306,21 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
   fun setInfoFormState(state: InfoScreenUiState.InfoFormState) {
     _infoUiState.update {
       it.copy(
-        formState = state,
-        unsavedChanges = true
+        formState = state, unsavedChanges = true
       )
     }
   }
 
-  fun setChapterFormState(state: ChapterScreenUiState.ChapterFormState) =
-    _chapterUiState.update {
-      it.copy(
-        formState = state,
-        unsavedChanges = true
-      )
-    }
+  fun setChapterFormState(state: ChapterScreenUiState.ChapterFormState) = _chapterUiState.update {
+    it.copy(
+      formState = state, unsavedChanges = true
+    )
+  }
 
   fun setStepFormState(state: StepScreenUiState.StepFormState) {
     _stepUiState.update {
       it.copy(
-        formState = state,
-        unsavedChanges = true
+        formState = state, unsavedChanges = true
       )
     }
   }
@@ -365,41 +328,36 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
   fun setIngredientFormState(state: IngredientScreenUiState.IngredientFormState) {
     _ingredientUiState.update {
       it.copy(
-        formState = state,
-        unsavedChanges = true
+        formState = state, unsavedChanges = true
       )
     }
   }
 
   fun deleteChapter(index: Int): Boolean {
     return _infoUiState.value.chapters.getOrNull(index)?.also { existing ->
-        _infoUiState.update { state ->
-          state.copy(
-            chapters = state.chapters.minus(existing),
-            unsavedChanges = true
-          )
-        }
-      } != null
+      _infoUiState.update { state ->
+        state.copy(
+          chapters = state.chapters.minus(existing), unsavedChanges = true
+        )
+      }
+    } != null
   }
 
   fun deleteStep(index: Int): Boolean {
     return _chapterUiState.value.steps.getOrNull(index)?.also { existing ->
-        _chapterUiState.update { state ->
-          state.copy(
-            steps = state.steps.minus(existing),
-            unsavedChanges = true
-          )
-        }
-      } != null
+      _chapterUiState.update { state ->
+        state.copy(
+          steps = state.steps.minus(existing), unsavedChanges = true
+        )
+      }
+    } != null
   }
 
   fun deleteIngredient(index: Int): Boolean {
-    return _stepUiState.value.ingredients.getOrNull(index)
-      ?.also { existing ->
+    return _stepUiState.value.ingredients.getOrNull(index)?.also { existing ->
         _stepUiState.update { state ->
           state.copy(
-            ingredients = state.ingredients.minus(existing),
-            unsavedChanges = true
+            ingredients = state.ingredients.minus(existing), unsavedChanges = true
           )
         }
       } != null
@@ -412,8 +370,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           if (from in 0..this.size && to in 0..this.size) {
             this.swap(from, to)
           }
-        },
-        unsavedChanges = true
+        }, unsavedChanges = true
       )
     }
   }
@@ -425,8 +382,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           if (from in 0..this.size && to in 0..this.size) {
             this.swap(from, to)
           }
-        },
-        unsavedChanges = true
+        }, unsavedChanges = true
       )
     }
   }
@@ -438,8 +394,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           if (from in 0..this.size && to in 0..this.size) {
             this.swap(from, to)
           }
-        },
-        unsavedChanges = true
+        }, unsavedChanges = true
       )
     }
   }

@@ -29,7 +29,7 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.components.NoteCard

@@ -1,16 +1,17 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.database.dao.RecipeDao
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.model.FavoriteRecipe
 import com.aamo.cookbook.model.FullFavoriteRecipe
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeCategoryTuple
 import com.aamo.cookbook.model.RecipeRating
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
+// TODO: delete repository
 interface RecipeRepository {
   suspend fun getRecipeById(recipeId: Int): Recipe?
   fun getRecipesFlow(): Flow<List<Recipe>>
@@ -19,8 +20,8 @@ interface RecipeRepository {
   fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithFavoriteAndRating>>
   suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithFavoriteAndRating?
   suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
-  suspend fun upsertRecipe(recipe: Recipe) : Int
-  suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients) : Int
+  suspend fun upsertRecipe(recipe: Recipe): Int
+  suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int
   suspend fun deleteRecipe(recipe: Recipe)
   suspend fun addRecipeToFavorites(recipeId: Int)
   suspend fun removeRecipeFromFavorites(recipeId: Int)
@@ -29,8 +30,8 @@ interface RecipeRepository {
 }
 
 class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeRepository {
-  override suspend fun getRecipeById(recipeId: Int): Recipe? = recipeDao.getRecipesFlow().first()
-    .firstOrNull { it.id == recipeId }
+  override suspend fun getRecipeById(recipeId: Int): Recipe? =
+    recipeDao.getRecipesFlow().first().firstOrNull { it.id == recipeId }
 
   override fun getRecipesFlow(): Flow<List<Recipe>> = recipeDao.getRecipesFlow()
 
@@ -66,8 +67,10 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
   }
 
   override suspend fun upsertRecipeRating(recipeId: Int, rating: Int) {
-    val recipeRating = recipeDao.getRecipeRatingById(recipeId)?.copy(ratingOutOfFive = rating)
-      ?: RecipeRating(ratingOutOfFive = rating, recipeId = recipeId)
+    val recipeRating =
+      recipeDao.getRecipeRatingById(recipeId)?.copy(ratingOutOfFive = rating) ?: RecipeRating(
+        ratingOutOfFive = rating, recipeId = recipeId
+      )
     recipeDao.upsertRecipeRating(recipeRating)
   }
 

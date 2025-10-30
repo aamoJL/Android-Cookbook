@@ -1,12 +1,12 @@
 package com.aamo.cookbook
 
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 
 class Mocker {
   companion object {

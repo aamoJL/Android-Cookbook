@@ -1,10 +1,10 @@
 package com.aamo.cookbook.viewModel
 
 import androidx.lifecycle.ViewModel
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.database.repository.RecipeRepository
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow

@@ -1,6 +1,7 @@
 package com.aamo.cookbook.model
 
 import com.aamo.cookbook.Mocker
+import com.aamo.cookbook.database.entities.Step
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

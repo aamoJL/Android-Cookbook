@@ -35,20 +35,19 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Step
-import com.aamo.cookbook.model.StepWithIngredients
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.components.NoteCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.Tags
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 
 data class CheckBoxTimerProperties(
-  val title: String,
-  val minutes: Int
+  val title: String, val minutes: Int
 )
 
 @Composable
@@ -70,13 +69,14 @@ internal fun ChapterPage(
         fontFamily = Handwritten,
         style = MaterialTheme.typography.headlineLarge,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(top = 8.dp)
       )
       if (uiState.chapter.value.note.isNotEmpty()) {
         Box(modifier = Modifier.padding(8.dp)) {
           NoteCard(
-            text = uiState.chapter.value.note,
-            modifier = Modifier.fillMaxWidth()
+            text = uiState.chapter.value.note, modifier = Modifier.fillMaxWidth()
           )
         }
       }
@@ -90,8 +90,7 @@ internal fun ChapterPage(
             onCheckedChange = { onProgressChange(index, it) },
             timerProperties = step.value.timerMinutes?.let { minutes ->
               CheckBoxTimerProperties(
-                title = step.value.description,
-                minutes = minutes
+                title = step.value.description, minutes = minutes
               )
             },
             note = step.value.note,
@@ -119,40 +118,35 @@ private fun StepCheckBox(
     colors = colors,
     headlineContent = {
       Text(
-        text = headline,
-        fontFamily = Handwritten,
-        fontWeight = FontWeight.Bold
+        text = headline, fontFamily = Handwritten, fontWeight = FontWeight.Bold
       )
     },
-    supportingContent =
-      if (ingredients.isNotEmpty() || note.isNotEmpty()) {
-        {
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            if(note.isNotEmpty()) {
-              NoteCard(
-                text = note,
-                modifier = Modifier.fillMaxWidth()
+    supportingContent = if (ingredients.isNotEmpty() || note.isNotEmpty()) {
+      {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          if (note.isNotEmpty()) {
+            NoteCard(
+              text = note, modifier = Modifier.fillMaxWidth()
+            )
+          }
+          if (ingredients.isNotEmpty()) {
+            Card(
+              shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+              ), modifier = Modifier.fillMaxWidth()
+            ) {
+              IngredientList(
+                ingredients = ingredients,
+                servingsMultiplier = servingsMultiplier,
+                modifier = Modifier.padding(8.dp),
               )
-            }
-            if(ingredients.isNotEmpty()){
-              Card(
-                shape = RoundedCornerShape(4.dp),
-                colors = CardDefaults.cardColors(
-                  containerColor = MaterialTheme.colorScheme.primaryContainer,
-                  contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ),
-                modifier = Modifier.fillMaxWidth()
-              ) {
-                IngredientList(
-                  ingredients = ingredients,
-                  servingsMultiplier = servingsMultiplier,
-                  modifier = Modifier.padding(8.dp),
-                )
-              }
             }
           }
         }
-      } else null,
+      }
+    }
+    else null,
     leadingContent = {
       Box(contentAlignment = Alignment.TopCenter, modifier = Modifier) {
         Checkbox(checked = checked, onCheckedChange = null)
@@ -164,9 +158,10 @@ private fun StepCheckBox(
     trailingContent = if (timerProperties != null) {
       {
         IconButton(onClick = {
-          val intent = Intent(AlarmClock.ACTION_SET_TIMER)
-            .putExtra(AlarmClock.EXTRA_LENGTH, timerProperties.minutes * 60)
-            .putExtra(AlarmClock.EXTRA_MESSAGE, timerProperties.title)
+          val intent = Intent(AlarmClock.ACTION_SET_TIMER).putExtra(
+              AlarmClock.EXTRA_LENGTH,
+              timerProperties.minutes * 60
+            ).putExtra(AlarmClock.EXTRA_MESSAGE, timerProperties.title)
             .putExtra(AlarmClock.EXTRA_SKIP_UI, false)
           context.startActivity(intent)
         }) {
@@ -177,18 +172,17 @@ private fun StepCheckBox(
             )
             Text(
               text = stringResource(
-                R.string.minutes_amount_abbreviation,
-                timerProperties.minutes
+                R.string.minutes_amount_abbreviation, timerProperties.minutes
               )
             )
           }
         }
       }
-    } else null,
+    }
+    else null,
     modifier = modifier
       .clickable { onCheckedChange(!checked) }
-      .testTag(Tags.PROGRESS_CHECKBOX.name)
-  )
+      .testTag(UITag.PROGRESS_CHECKBOX.name))
 }
 
 @PreviewLightDark
@@ -202,48 +196,34 @@ private fun Preview() {
           steps = listOf(
             StepWithIngredients(
               value = Step(
-                description = "Description",
-                note = "Step note",
-                timerMinutes = 20
-              ),
-              ingredients = listOf(
+                description = "Description", note = "Step note", timerMinutes = 20
+              ), ingredients = listOf(
                 Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
                 Ingredient(name = "Ingredient 2", amount = 0f, unit = "")
               )
-            ),
-            StepWithIngredients(
+            ), StepWithIngredients(
               value = Step(
                 description = "This is a step with a long description",
                 note = "Step note.",
                 timerMinutes = 20
-              ),
-              ingredients = listOf(
+              ), ingredients = listOf(
                 Ingredient(name = "Ingredient 1", amount = 0f, unit = ""),
               )
-            ),
-            StepWithIngredients(
+            ), StepWithIngredients(
               value = Step(
-                description = "This is a step with a long description",
-                timerMinutes = 20
+                description = "This is a step with a long description", timerMinutes = 20
               )
-            ),
-            StepWithIngredients(
+            ), StepWithIngredients(
               value = Step(
-                description = "Step with note, without ingredients",
-                note = "Note"
+                description = "Step with note, without ingredients", note = "Note"
               )
-            ),
-            StepWithIngredients(
+            ), StepWithIngredients(
               value = Step(
                 description = "Short desc"
               )
             )
           )
-        ),
-        progress = listOf(false),
-        chapterNote = "Chapter note"
-      ),
-      servingsState = RecipeScreenViewModel.ServingsState(),
-      onProgressChange = { _, _ -> })
+        ), progress = listOf(false), chapterNote = "Chapter note"
+      ), servingsState = RecipeScreenViewModel.ServingsState(), onProgressChange = { _, _ -> })
   }
 }

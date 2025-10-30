@@ -3,11 +3,11 @@ package com.aamo.cookbook.viewModel
 import android.os.Environment
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.repository.RecipeRepository
-import com.aamo.cookbook.model.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.service.IOServiceBase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,8 +16,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 
 class RecipeScreenViewModel(
-  private val recipeRepository: RecipeRepository,
-  private val ioService: IOServiceBase
+  private val recipeRepository: RecipeRepository, private val ioService: IOServiceBase
 ) : ViewModel() {
 
   /**
@@ -28,8 +27,7 @@ class RecipeScreenViewModel(
 
     viewModelScope.launch {
       launch {
-        val recipeWithFavoriteAndRating =
-          recipeRepository.getRecipeWithFavoriteAndRating(recipeId)
+        val recipeWithFavoriteAndRating = recipeRepository.getRecipeWithFavoriteAndRating(recipeId)
         _favoriteState.update {
           recipeWithFavoriteAndRating?.favorite != null
         }
@@ -52,11 +50,8 @@ class RecipeScreenViewModel(
             recipeThumbnail = recipe.value.thumbnailUri,
             chaptersWithIngredients = recipe.chapters.map { chapter ->
               Pair(
-                chapter.value.name,
-                chapter.steps.flatMap { it.ingredients }
-              )
-            }
-          )
+                chapter.value.name, chapter.steps.flatMap { it.ingredients })
+            })
         }
         _servingsState.update {
           ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
@@ -91,8 +86,7 @@ class RecipeScreenViewModel(
   }
 
   data class CompletedPageUiState(
-    val fiveStarRating: Int = 0,
-    val recipeThumbnail: String = ""
+    val fiveStarRating: Int = 0, val recipeThumbnail: String = ""
   )
 
   data class ServingsState(
@@ -126,15 +120,13 @@ class RecipeScreenViewModel(
         if (stateIndex == chapterIndex) state.copy(
           progress = state.progress.toMutableList().apply {
             this[stepIndex] = value
-          }
-        )
+          })
         else state
       }
     }
   }
 
-  fun setServingsCount(count: Int) =
-    _servingsState.update { it.copy(current = max(1, count)) }
+  fun setServingsCount(count: Int) = _servingsState.update { it.copy(current = max(1, count)) }
 
   fun setFavoriteState(value: Boolean) {
     viewModelScope.launch {
@@ -151,7 +143,8 @@ class RecipeScreenViewModel(
         recipeRepository.upsertRecipeRating(recipeId, value)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = value) }
       }
-    } else {
+    }
+    else {
       viewModelScope.launch {
         recipeRepository.deleteRecipeRating(recipeId)
         _completedPageUiState.update { s -> s.copy(fiveStarRating = 0) }

@@ -13,13 +13,13 @@ import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Ingredient
+import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.ui.screen.editRecipe.EditRecipeChapterStepIngredientScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.asOptionalLabel
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
 import org.junit.Assert
 import org.junit.Before
@@ -30,8 +30,7 @@ class EditRecipeChapterStepIngredientScreenTest {
   private var uiState by mutableStateOf(EditRecipeViewModel.IngredientScreenUiState())
   private var wasClicked = false
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setup() {
@@ -52,8 +51,7 @@ class EditRecipeChapterStepIngredientScreenTest {
    */
   private fun withNewIngredient() {
     uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
-      ingredient = Ingredient(),
-      index = 0
+      ingredient = Ingredient(), index = 0
     )
     wasClicked = false
   }
@@ -63,8 +61,8 @@ class EditRecipeChapterStepIngredientScreenTest {
    */
   private fun withExistingIngredient() {
     uiState = EditRecipeViewModel.IngredientScreenUiState.fromIngredient(
-      ingredient = Mocker.mockRecipeList().first().chapters.first().steps.first().ingredients.first(),
-      index = 0
+      ingredient = Mocker.mockRecipeList()
+        .first().chapters.first().steps.first().ingredients.first(), index = 0
     )
     wasClicked = false
   }
@@ -72,12 +70,12 @@ class EditRecipeChapterStepIngredientScreenTest {
   @Test
   fun pageTitle_equals() {
     withNewIngredient().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_new_ingredient))
     }
 
     withExistingIngredient().apply {
-      rule.onNodeWithTag(Tags.SCREEN_TITLE.name)
+      rule.onNodeWithTag(UITag.SCREEN_TITLE.name)
         .assertTextContains(rule.activity.getString(R.string.screen_title_existing_ingredient))
     }
   }
@@ -145,28 +143,30 @@ class EditRecipeChapterStepIngredientScreenTest {
     withNewIngredient().apply {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
-      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel())
-        .assertTextContains("")
-      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel())
-        .assertTextContains(uiState.formState.unit)
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+      ).assertTextContains("")
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+      ).assertTextContains(uiState.formState.unit)
     }
 
     withExistingIngredient().apply {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
-      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel())
-        .assertTextContains(uiState.formState.amount!!.toString())
-      rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel())
-        .assertTextContains(uiState.formState.unit)
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+      ).assertTextContains(uiState.formState.amount!!.toString())
+      rule.onNodeWithText(
+        rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+      ).assertTextContains(uiState.formState.unit)
     }
   }
 
   @Test
   fun formInputs() {
     val expected = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(
-      name = "name changed",
-      amount = 3.5f,
-      unit = "unit changed"
+      name = "name changed", amount = 3.5f, unit = "unit changed"
     )
 
     rule.onNodeWithText(R.string.textfield_ingredient_name).apply {
@@ -174,12 +174,16 @@ class EditRecipeChapterStepIngredientScreenTest {
       performTextInput(expected.name)
     }
 
-    rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()).apply {
+    rule.onNodeWithText(
+      rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+    ).apply {
       performTextClearance()
       performTextInput(expected.amount.toString())
     }
 
-    rule.onNodeWithText(rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()).apply {
+    rule.onNodeWithText(
+      rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+    ).apply {
       performTextClearance()
       performTextInput(expected.unit)
     }

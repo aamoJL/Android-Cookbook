@@ -26,10 +26,10 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreenContent
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.WithActivityResultRegistry
 import com.aamo.cookbook.utility.onNodeWithContentDescription
 import com.aamo.cookbook.utility.onNodeWithText
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
@@ -111,7 +111,7 @@ class RecipeScreenTest {
   @Test
   fun pageTitle_equals() {
     val expected = recipe.value.name
-    rule.onNodeWithTag(Tags.SCREEN_TITLE.name).assertTextContains(expected)
+    rule.onNodeWithTag(UITag.SCREEN_TITLE.name).assertTextContains(expected)
   }
 
   @Test
@@ -128,16 +128,16 @@ class RecipeScreenTest {
 
   @Test
   fun onPagerSwipe() {
-    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
+    rule.onNodeWithTag(UITag.PAGER.name).performTouchInput { swipeLeft() }
 
     rule.onNodeWithText("1. ${chapterUiStates.first().chapter.value.name}").assertExists()
   }
 
   @Test
   fun changeProgress() = runTest {
-    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
+    rule.onNodeWithTag(UITag.PAGER.name).performTouchInput { swipeLeft() }
 
-    rule.onAllNodesWithTag(Tags.PROGRESS_CHECKBOX.name)[0].performClick()
+    rule.onAllNodesWithTag(UITag.PROGRESS_CHECKBOX.name)[0].performClick()
 
     assert(wasProgressChanged)
   }
@@ -147,13 +147,13 @@ class RecipeScreenTest {
     recipe.chapters.size
 
     // Swipe to first chapter page
-    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeLeft() }
+    rule.onNodeWithTag(UITag.PAGER.name).performTouchInput { swipeLeft() }
 
     // Check only one checkbox
-    rule.onAllNodesWithTag(Tags.PROGRESS_CHECKBOX.name)[0].performClick()
+    rule.onAllNodesWithTag(UITag.PROGRESS_CHECKBOX.name)[0].performClick()
 
     // Swipe to settings page
-    rule.onNodeWithTag(Tags.PAGER.name).apply {
+    rule.onNodeWithTag(UITag.PAGER.name).apply {
       performTouchInput { swipeLeft() } // Info
       performTouchInput { swipeLeft() } // Settings
     }
@@ -234,6 +234,6 @@ class RecipeScreenTest {
 //    }
 
     // Swipe to settings page
-    rule.onNodeWithTag(Tags.PAGER.name).performTouchInput { swipeRight() }
+    rule.onNodeWithTag(UITag.PAGER.name).performTouchInput { swipeRight() }
   }
 }

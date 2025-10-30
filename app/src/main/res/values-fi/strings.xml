@@ -47,7 +47,7 @@
     <string name="input_title_servings">Annokset</string>
     <string name="button_text_save">Tallenna</string>
     <string name="button_text_new">Uusi</string>
-    <string name="button_text_favorites">Suosikit</string>
+    <string name="button_text_bookmarks">Suosikit</string>
     <string name="button_text_add_to_favorites">Lisää suosikkeihin</string>
     <string name="button_text_remove_from_favorites">Poista suosikeista</string>
     <string name="dialog_title_delete_recipe">Poista resepti?</string>

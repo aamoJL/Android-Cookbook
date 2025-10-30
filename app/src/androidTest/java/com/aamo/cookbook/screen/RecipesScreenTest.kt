@@ -10,12 +10,12 @@ import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.RecipeWithFavoriteAndRating
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithFavoriteAndRating
 import com.aamo.cookbook.ui.screen.RecipesScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.Tags
 import com.aamo.cookbook.utility.onNodeWithContentDescription
+import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Before
@@ -33,8 +33,7 @@ class RecipesScreenTest {
   private var wasSelected: Recipe? = null
   private var wasClicked: Boolean = false
 
-  @get:Rule
-  val rule = createAndroidComposeRule<ComponentActivity>()
+  @get:Rule val rule = createAndroidComposeRule<ComponentActivity>()
 
   @Before
   fun setupNavHost() {
@@ -43,11 +42,10 @@ class RecipesScreenTest {
         RecipesScreen(
           title = recipes.first().value.category,
           recipes = recipes,
-          onSelectRecipe = {wasSelected = it},
+          onSelectRecipe = { wasSelected = it },
           onBack = { wasClicked = true },
           onSearch = { wasClicked = true },
-          onAdd = { wasClicked = true }
-        )
+          onAdd = { wasClicked = true })
       }
     }
   }
@@ -71,7 +69,7 @@ class RecipesScreenTest {
 
   @Test
   fun recipes_areVisible() {
-    val nodes = rule.onAllNodesWithTag(Tags.RECIPE_ITEM.name).apply {
+    val nodes = rule.onAllNodesWithTag(UITag.RECIPE_ITEM.name).apply {
       fetchSemanticsNodes().forEachIndexed { i, _ ->
         get(i).assertTextContains(recipes[i].value.name)
       }
@@ -84,7 +82,7 @@ class RecipesScreenTest {
   fun onRecipeSelection() = runTest {
     val selectionIndex = 0
 
-    rule.onAllNodesWithTag(Tags.RECIPE_ITEM.name).apply {
+    rule.onAllNodesWithTag(UITag.RECIPE_ITEM.name).apply {
       get(selectionIndex).performClick()
     }
 

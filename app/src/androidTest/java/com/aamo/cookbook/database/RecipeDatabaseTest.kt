@@ -5,10 +5,10 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.database.dao.RecipeDao
-import com.aamo.cookbook.model.Chapter
-import com.aamo.cookbook.model.Ingredient
-import com.aamo.cookbook.model.Recipe
-import com.aamo.cookbook.model.Step
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.utility.swap
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
