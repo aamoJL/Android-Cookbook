@@ -78,4 +78,6 @@
     <string name="dialog_title_app_not_found">Sovellusta ei löytynyt.</string>
     <string name="dialog_text_calculator_app_was_not_found">Laskinta ei löytynyt.</string>
     <string name="dialog_confirm_default">OK</string>
+    <string name="button_clear">Tyhjennä</string>
+    <string name="description_clear">Tyhjennä</string>
 </resources>

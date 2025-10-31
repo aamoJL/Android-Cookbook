@@ -80,4 +80,5 @@
     <string name="dialog_text_calculator_app_was_not_found">Calculator app was not found.</string>
     <string name="dialog_confirm_default">OK</string>
     <string name="button_clear">Clear</string>
+    <string name="description_clear">Clear</string>
 </resources>

@@ -2,7 +2,7 @@ package com.aamo.cookbook.features.recipe.list
 
 import androidx.navigation.NavGraphBuilder
 
-fun NavGraphBuilder.recipeListPage(
+fun NavGraphBuilder.recipeListPages(
   onOpenRecipe: (id: Int) -> Unit,
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
@@ -14,4 +14,5 @@ fun NavGraphBuilder.recipeListPage(
     onOpenRecipeForm = onOpenRecipeForm,
     onBack = onBack
   )
+  recipeSearchScreen(onOpenRecipe = onOpenRecipe, onBack = onBack)
 }

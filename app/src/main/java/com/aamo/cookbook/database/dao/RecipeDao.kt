@@ -28,7 +28,7 @@ interface RecipeDao {
 
   @Transaction
   @Query("SELECT * FROM recipes ORDER BY name ASC")
-  fun getRecipesWithAndRatingAndBookmarkFlow(): Flow<List<RecipeWithBookmarkAndRating>>
+  fun getRecipesWithBookmarkAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
   // -------- //
 

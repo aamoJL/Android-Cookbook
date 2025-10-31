@@ -33,7 +33,6 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import kotlin.math.max
 
 @Composable
 fun RecipeCard(
@@ -41,7 +40,7 @@ fun RecipeCard(
   onClick: () -> Unit,
   modifier: Modifier = Modifier,
   isBookmarked: Boolean = false,
-  rating: Int = 0
+  rating: Int? = 0
 ) {
   ElevatedCard(
     shape = RectangleShape, modifier = modifier.then(Modifier.clickable(onClick = onClick))
@@ -70,7 +69,7 @@ fun RecipeCard(
                 .padding(2.dp)
             )
           }
-          if (rating != 0) {
+          if (rating?.let { it > 0 } == true) {
             StarRating(
               rating = rating,
               modifier = Modifier
@@ -148,11 +147,11 @@ private fun BookmarkIcon(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun StarRating(
-  rating: Int, modifier: Modifier = Modifier
-) {
+private fun StarRating(rating: Int, modifier: Modifier = Modifier) {
+  val stars = rating.coerceIn(minimumValue = 0, maximumValue = 5)
+
   Row(modifier = modifier) {
-    repeat(rating) {
+    repeat(stars) {
       Icon(
         painter = painterResource(R.drawable.round_star_outline_24),
         contentDescription = null,
@@ -160,7 +159,7 @@ private fun StarRating(
         modifier = Modifier.size(16.dp)
       )
     }
-    repeat(max(0, 5 - rating)) {
+    repeat(5 - stars) {
       Box(modifier = Modifier) {
         Icon(
           painter = painterResource(R.drawable.round_star_rate_24),

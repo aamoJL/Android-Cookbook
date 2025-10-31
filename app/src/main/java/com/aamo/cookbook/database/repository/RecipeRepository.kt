@@ -42,10 +42,10 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
     recipeDao.getRecipeWithChaptersStepsAndIngredients(id)
 
   override fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>> =
-    recipeDao.getRecipesWithAndRatingAndBookmarkFlow()
+    recipeDao.getRecipesWithBookmarkAndRatingFlow()
 
   override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating? =
-    recipeDao.getRecipesWithAndRatingAndBookmarkFlow().first()
+    recipeDao.getRecipesWithBookmarkAndRatingFlow().first()
       .firstOrNull { it.recipe.id == recipeId }
 
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =

@@ -43,7 +43,8 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.use_cases.fromDao
+import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
+import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.RecipeCard
@@ -66,24 +67,10 @@ import kotlinx.serialization.Serializable
 data class RecipesByCategoryScreen(val category: String)
 
 class RecipesByCategoryScreenViewModel(
-  fetchData: () -> Flow<List<Model>>,
+  fetchData: () -> Flow<List<RecipeListRecipeModel>>,
 ) : ViewModel() {
-  data class Model(val recipe: Recipe, val rating: Int?, val isBookmarked: Boolean) {
-    companion object
-  }
-
-  private var _recipes = MutableStateFlow<List<Model>>(emptyList())
+  private var _recipes = MutableStateFlow<List<RecipeListRecipeModel>>(emptyList())
   private var _subCategoryFilter = MutableStateFlow(String.EMPTY)
-
-  init {
-    viewModelScope.launch {
-      fetchData().collect {
-        _recipes.update { it }.also {
-          isLoading = false
-        }
-      }
-    }
-  }
 
   var isLoading by mutableStateOf(true)
     private set
@@ -97,6 +84,16 @@ class RecipesByCategoryScreenViewModel(
   }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
 
   val subCategoryFilter = _subCategoryFilter.asStateFlow()
+
+  init {
+    viewModelScope.launch {
+      fetchData().collect {
+        _recipes.update { it }.also {
+          isLoading = false
+        }
+      }
+    }
+  }
 
   fun updateFilter(value: String) {
     _subCategoryFilter.update { value }
@@ -116,9 +113,7 @@ fun NavGraphBuilder.recipesByCategoryScreen(
       initializer {
         RecipesByCategoryScreenViewModel(
           fetchData = {
-            RecipesByCategoryScreenViewModel.Model.fromDao {
-              dao.getRecipesWithAndRatingAndBookmarkFlow()
-            }
+            fetchRecipes { dao.getRecipesWithBookmarkAndRatingFlow() }
           })
       }
     })
@@ -127,7 +122,7 @@ fun NavGraphBuilder.recipesByCategoryScreen(
     val filter by viewmodel.subCategoryFilter.collectAsStateWithLifecycle()
 
     LoadingScreen(enabled = viewmodel.isLoading) {
-      Screen(
+      RecipesByCategoryScreenContent(
         title = category,
         recipes = recipes,
         subCategories = subCategories,
@@ -143,9 +138,9 @@ fun NavGraphBuilder.recipesByCategoryScreen(
 }
 
 @Composable
-private fun Screen(
+private fun RecipesByCategoryScreenContent(
   title: String,
-  recipes: List<RecipesByCategoryScreenViewModel.Model>,
+  recipes: List<RecipeListRecipeModel>,
   subCategories: List<String>,
   filtered: Boolean,
   onFilterChange: (String) -> Unit,
@@ -222,7 +217,7 @@ private fun Screen(
             recipe = recipe.recipe,
             onClick = { onRecipeSelected(recipe.recipe) },
             isBookmarked = recipe.isBookmarked,
-            rating = recipe.rating ?: 0,
+            rating = recipe.rating,
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
@@ -239,16 +234,16 @@ private fun Screen(
 @Composable
 private fun Preview() {
   CookbookTheme {
-    Screen(
+    RecipesByCategoryScreenContent(
       title = "Title",
       recipes = listOf(
-        RecipesByCategoryScreenViewModel.Model(
+        RecipeListRecipeModel(
           recipe = Recipe(name = "Recipe 1"), rating = 3, isBookmarked = false
         ),
-        RecipesByCategoryScreenViewModel.Model(
+        RecipeListRecipeModel(
           recipe = Recipe(name = "Recipe 1"), rating = null, isBookmarked = false
         ),
-        RecipesByCategoryScreenViewModel.Model(
+        RecipeListRecipeModel(
           recipe = Recipe(name = "Recipe 1"), rating = 5, isBookmarked = true
         ),
       ),

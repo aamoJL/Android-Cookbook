@@ -2,8 +2,8 @@ package com.aamo.cookbook.tests.features.recipe.list.use_cases
 
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
-import com.aamo.cookbook.features.recipe.list.RecipesByCategoryScreenViewModel
-import com.aamo.cookbook.features.recipe.list.use_cases.fromDao
+import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
+import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.model.RecipeBookmark
 import com.aamo.cookbook.model.RecipeRating
 import junit.framework.TestCase.assertEquals
@@ -32,16 +32,10 @@ class FetchRecipes {
       ),
     )
 
-    val models = runBlocking {
-      RecipesByCategoryScreenViewModel.Model.fromDao {
-        flow { emit(recipes) }
-      }.first()
-    }
+    val models = runBlocking { fetchRecipes { flow { emit(recipes) } }.first() }
 
     assertEquals(recipes.map {
-      RecipesByCategoryScreenViewModel.Model(
-        it.recipe, it.rating?.ratingOutOfFive, it.bookmark != null
-      )
+      RecipeListRecipeModel(it.recipe, it.rating?.ratingOutOfFive, it.bookmark != null)
     }, models)
   }
 }

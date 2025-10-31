@@ -71,9 +71,9 @@ class HomeScreenViewModel(fetchCategories: () -> Flow<List<String>>) : ViewModel
 
   init {
     viewModelScope.launch {
-      fetchCategories().collect {
+      fetchCategories().collect { result ->
         isLoading = false
-        _categories.update { it }
+        _categories.update { result }
       }
     }
   }
@@ -95,7 +95,7 @@ fun NavGraphBuilder.homeScreen(
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
 
     LoadingScreen(enabled = viewmodel.isLoading) {
-      Screen(
+      HomeScreenContent(
         categories = categories,
         onSearch = onOpenSearch,
         onNewRecipe = onOpenRecipeForm,
@@ -107,7 +107,7 @@ fun NavGraphBuilder.homeScreen(
 }
 
 @Composable
-private fun Screen(
+private fun HomeScreenContent(
   categories: List<String>,
   onSearch: () -> Unit,
   onNewRecipe: () -> Unit,
@@ -268,7 +268,7 @@ private fun CategoryList(
 @Composable
 private fun Preview() {
   CookbookTheme {
-    Screen(
+    HomeScreenContent(
       categories = listOf("Category 1", "Category 2"),
       onSearch = {},
       onNewRecipe = {},

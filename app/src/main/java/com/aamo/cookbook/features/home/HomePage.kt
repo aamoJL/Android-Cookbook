@@ -11,8 +11,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
+import com.aamo.cookbook.features.recipe.list.RecipeSearchScreen
 import com.aamo.cookbook.features.recipe.list.RecipesByCategoryScreen
-import com.aamo.cookbook.features.recipe.list.recipeListPage
+import com.aamo.cookbook.features.recipe.list.recipeListPages
 
 @Composable
 fun HomePage() {
@@ -24,24 +25,14 @@ fun HomePage() {
       startDestination = HomeScreen,
       enterTransition = { fadeIn(animationSpec = tween(300, easing = LinearEasing)) },
       exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }) {
-      homeScreen(
-        onOpenSearch = { TODO() },
-        onOpenRecipeForm = { TODO() },
-        onOpenBookmarks = { TODO() },
-        onOpenRecipesByCategory = {
-          navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
-        })
-      recipeListPage(
-        onOpenRecipe = { TODO() },
-        onOpenSearch = { TODO() },
-        onOpenRecipeForm = { TODO() },
-        onBack = { navController.navigateUp() })
+      homeScreen(onOpenSearch = {
+        navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
+      }, onOpenRecipeForm = { TODO() }, onOpenBookmarks = { TODO() }, onOpenRecipesByCategory = {
+        navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
+      })
+      recipeListPages(onOpenRecipe = { TODO() }, onOpenSearch = {
+        navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
+      }, onOpenRecipeForm = { TODO() }, onBack = { navController.navigateUp() })
     }
   }
 }
-
-// TODO: remove
-
-//        onAddRecipe = { navController.navigate(Screen.EditRecipe.getRouteWithArgument("0")) },
-//        onSearch = { navController.navigate(Screen.Search.getRoute()) },
-//        onFavorites = { navController.navigate(Screen.Favorites.getRoute()) })
