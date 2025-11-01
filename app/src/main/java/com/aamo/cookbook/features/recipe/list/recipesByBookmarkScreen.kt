@@ -29,7 +29,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -39,7 +38,6 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
@@ -48,7 +46,6 @@ import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.RecipeCard
-import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.tags.UITag
@@ -64,26 +61,26 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipesByCategoryScreen(val category: String)
+data object RecipesByBookmarkScreen
 
-class RecipesByCategoryScreenViewModel(
+class RecipesByBookmarkScreenViewModel(
   fetchData: () -> Flow<List<RecipeListRecipeModel>>,
 ) : ViewModel() {
   private var _recipes = MutableStateFlow<List<RecipeListRecipeModel>>(emptyList())
-  private var _subCategoryFilter = MutableStateFlow(String.EMPTY)
+  private var _categoryFilter = MutableStateFlow(String.EMPTY)
 
-  var isLoading by mutableStateOf(true)
-    private set
-
-  val recipes = combine(_recipes, _subCategoryFilter) { recipe, word ->
+  val recipes = combine(_recipes, _categoryFilter) { recipe, word ->
     recipe.filter { it.recipe.subCategory.contains(word, ignoreCase = true) }
   }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
 
-  val subCategories = _recipes.map { list ->
+  val categories = _recipes.map { list ->
     list.map { it.recipe.subCategory }.distinct().filter { it.isNotEmpty() }
   }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
 
-  val subCategoryFilter = _subCategoryFilter.asStateFlow()
+  val categoryFilter = _categoryFilter.asStateFlow()
+
+  var isLoading by mutableStateOf(true)
+    private set
 
   init {
     viewModelScope.launch {
@@ -96,52 +93,49 @@ class RecipesByCategoryScreenViewModel(
   }
 
   fun updateFilter(value: String) {
-    _subCategoryFilter.update { value }
+    _categoryFilter.update { value }
   }
 }
 
-fun NavGraphBuilder.recipesByCategoryScreen(
+fun NavGraphBuilder.recipesByBookmarkScreen(
   onOpenRecipe: (id: Int) -> Unit,
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
   onBack: () -> Unit
 ) {
-  composable<RecipesByCategoryScreen> { navStack ->
-    val (category) = navStack.toRoute<RecipesByCategoryScreen>()
+  composable<RecipesByBookmarkScreen> {
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
-    val viewmodel: RecipesByCategoryScreenViewModel = viewModel(factory = viewModelFactory {
+    val viewmodel: RecipesByBookmarkScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipesByCategoryScreenViewModel(
+        RecipesByBookmarkScreenViewModel(
           fetchData = {
-            fetchRecipes { dao.getRecipesWithBookmarkAndRatingFlow(category = category) }
+            fetchRecipes { dao.getBookmarksWithRatingFlow() }
           })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()
-    val subCategories by viewmodel.subCategories.collectAsStateWithLifecycle()
-    val filter by viewmodel.subCategoryFilter.collectAsStateWithLifecycle()
+    val categories by viewmodel.categories.collectAsStateWithLifecycle()
+    val filter by viewmodel.categoryFilter.collectAsStateWithLifecycle()
 
     LoadingScreen(enabled = viewmodel.isLoading) {
-      RecipesByCategoryScreenContent(
-        title = category,
+      RecipesByBookmarkScreenContent(
         recipes = recipes,
-        subCategories = subCategories,
+        categories = categories,
         filtered = filter.isNotEmpty(),
         onFilterChange = { viewmodel.updateFilter(it) },
         onRecipeSelected = { onOpenRecipe(it.id) },
         onBack = onBack,
         onSearch = onOpenSearch,
-        onAdd = onOpenRecipeForm,
+        onAdd = onOpenRecipeForm
       )
     }
   }
 }
 
 @Composable
-private fun RecipesByCategoryScreenContent(
-  title: String,
+private fun RecipesByBookmarkScreenContent(
   recipes: List<RecipeListRecipeModel>,
-  subCategories: List<String>,
+  categories: List<String>,
   filtered: Boolean,
   onFilterChange: (String) -> Unit,
   onRecipeSelected: (Recipe) -> Unit,
@@ -153,7 +147,7 @@ private fun RecipesByCategoryScreenContent(
 
   Scaffold(topBar = {
     BasicTopAppBar(
-      title = title, actions = {
+      title = stringResource(R.string.screen_title_bookmarks), actions = {
         IconButton(onClick = onSearch) {
           Icon(
             painter = painterResource(R.drawable.rounded_search_24),
@@ -169,20 +163,21 @@ private fun RecipesByCategoryScreenContent(
       }, onBack = onBack
     )
   }, floatingActionButton = {
-    if (subCategories.isNotEmpty()) {
+    if (categories.isNotEmpty()) {
       Box {
         FloatingActionButton(onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
-            painterResource(R.drawable.baseline_filter_alt_off_24)
-          }, ifFalse = {
-            painterResource(R.drawable.baseline_filter_list_alt_24)
-          }), contentDescription = stringResource(R.string.description_filter))
+              painterResource(R.drawable.baseline_filter_alt_off_24)
+            }, ifFalse = {
+              painterResource(R.drawable.baseline_filter_list_alt_24)
+            }), contentDescription = stringResource(R.string.description_filter)
+          )
         }
         DropdownMenu(
           expanded = filterPopUpOpen, onDismissRequest = { filterPopUpOpen = false }) {
           Column {
-            subCategories.forEach { subCategory ->
+            categories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
                 filterPopUpOpen = false
                 onFilterChange(subCategory)
@@ -226,33 +221,5 @@ private fun RecipesByCategoryScreenContent(
         }
       }
     }
-  }
-}
-
-@Suppress("HardCodedStringLiteral")
-@PreviewLightDark
-@Composable
-private fun Preview() {
-  CookbookTheme {
-    RecipesByCategoryScreenContent(
-      title = "Title",
-      recipes = listOf(
-        RecipeListRecipeModel(
-          recipe = Recipe(name = "Recipe 1"), rating = 3, isBookmarked = false
-        ),
-        RecipeListRecipeModel(
-          recipe = Recipe(name = "Recipe 1"), rating = null, isBookmarked = false
-        ),
-        RecipeListRecipeModel(
-          recipe = Recipe(name = "Recipe 1"), rating = 5, isBookmarked = true
-        ),
-      ),
-      subCategories = listOf("asd"),
-      filtered = false,
-      onFilterChange = {},
-      onRecipeSelected = {},
-      onBack = {},
-      onSearch = {},
-      onAdd = {})
   }
 }

@@ -14,5 +14,11 @@ fun NavGraphBuilder.recipeListPages(
     onOpenRecipeForm = onOpenRecipeForm,
     onBack = onBack
   )
+  recipesByBookmarkScreen(
+    onOpenRecipe = onOpenRecipe,
+    onOpenSearch = onOpenSearch,
+    onOpenRecipeForm = onOpenRecipeForm,
+    onBack = onBack
+  )
   recipeSearchScreen(onOpenRecipe = onOpenRecipe, onBack = onBack)
 }

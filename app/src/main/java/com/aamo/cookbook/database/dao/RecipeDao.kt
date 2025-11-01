@@ -30,6 +30,18 @@ interface RecipeDao {
   @Query("SELECT * FROM recipes ORDER BY name ASC")
   fun getRecipesWithBookmarkAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
+  @Transaction
+  @Query("SELECT * FROM recipes WHERE category = :category ORDER BY name ASC")
+  fun getRecipesWithBookmarkAndRatingFlow(category: String): Flow<List<RecipeWithBookmarkAndRating>>
+
+  @Transaction
+  @Query("""
+    SELECT recipes.*, bookmarks.*, ratings.* FROM recipes
+    JOIN favoriteRecipes AS bookmarks ON bookmarks.recipeId = recipes.id
+    LEFT OUTER JOIN recipeRatings AS ratings ON ratings.recipeId = recipes.id
+  """)
+  fun getBookmarksWithRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
+
   // -------- //
 
   @Query("SELECT * FROM recipes ORDER BY name ASC")

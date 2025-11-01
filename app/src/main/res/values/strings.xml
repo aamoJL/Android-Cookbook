@@ -81,4 +81,5 @@
     <string name="dialog_confirm_default">OK</string>
     <string name="button_clear">Clear</string>
     <string name="description_clear">Clear</string>
+    <string name="screen_title_bookmarks">Bookmarks</string>
 </resources>

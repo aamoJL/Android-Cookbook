@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.features.recipe.list.RecipeSearchScreen
+import com.aamo.cookbook.features.recipe.list.RecipesByBookmarkScreen
 import com.aamo.cookbook.features.recipe.list.RecipesByCategoryScreen
 import com.aamo.cookbook.features.recipe.list.recipeListPages
 
@@ -27,7 +28,9 @@ fun HomePage() {
       exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }) {
       homeScreen(onOpenSearch = {
         navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
-      }, onOpenRecipeForm = { TODO() }, onOpenBookmarks = { TODO() }, onOpenRecipesByCategory = {
+      }, onOpenRecipeForm = { TODO() }, onOpenBookmarks = {
+        navController.navigate(RecipesByBookmarkScreen) { launchSingleTop = true }
+      }, onOpenRecipesByCategory = {
         navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
       })
       recipeListPages(onOpenRecipe = { TODO() }, onOpenSearch = {
