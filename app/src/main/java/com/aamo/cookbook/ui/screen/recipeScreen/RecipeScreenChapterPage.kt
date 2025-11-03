@@ -60,23 +60,19 @@ internal fun ChapterPage(
 
   Surface {
     Column(
-      modifier = Modifier
-        .fillMaxSize()
-        .verticalScroll(scrollState)
+      modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
     ) {
       Text(
-        text = "${uiState.chapter.value.orderNumber}. ${uiState.chapter.value.name}",
+        text = "${uiState.chapter.chapter.orderNumber}. ${uiState.chapter.chapter.name}",
         fontFamily = Handwritten,
         style = MaterialTheme.typography.headlineLarge,
         textAlign = TextAlign.Center,
-        modifier = Modifier
-          .fillMaxWidth()
-          .padding(top = 8.dp)
+        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
       )
-      if (uiState.chapter.value.note.isNotEmpty()) {
+      if (uiState.chapter.chapter.note.isNotEmpty()) {
         Box(modifier = Modifier.padding(8.dp)) {
           NoteCard(
-            text = uiState.chapter.value.note, modifier = Modifier.fillMaxWidth()
+            text = uiState.chapter.chapter.note, modifier = Modifier.fillMaxWidth()
           )
         }
       }
@@ -159,9 +155,8 @@ private fun StepCheckBox(
       {
         IconButton(onClick = {
           val intent = Intent(AlarmClock.ACTION_SET_TIMER).putExtra(
-              AlarmClock.EXTRA_LENGTH,
-              timerProperties.minutes * 60
-            ).putExtra(AlarmClock.EXTRA_MESSAGE, timerProperties.title)
+            AlarmClock.EXTRA_LENGTH, timerProperties.minutes * 60
+          ).putExtra(AlarmClock.EXTRA_MESSAGE, timerProperties.title)
             .putExtra(AlarmClock.EXTRA_SKIP_UI, false)
           context.startActivity(intent)
         }) {
@@ -172,7 +167,7 @@ private fun StepCheckBox(
             )
             Text(
               text = stringResource(
-                R.string.minutes_amount_abbreviation, timerProperties.minutes
+                R.string.abbreviation_minutes, timerProperties.minutes
               )
             )
           }
@@ -180,8 +175,7 @@ private fun StepCheckBox(
       }
     }
     else null,
-    modifier = modifier
-      .clickable { onCheckedChange(!checked) }
+    modifier = modifier.clickable { onCheckedChange(!checked) }
       .testTag(UITag.PROGRESS_CHECKBOX.name))
 }
 
@@ -192,7 +186,7 @@ private fun Preview() {
     ChapterPage(
       uiState = RecipeScreenViewModel.ChapterPageUiState(
         chapter = ChapterWithStepsAndIngredients(
-          value = Chapter(orderNumber = 1, name = "Chapter 1", note = "Chapter note."),
+          chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Chapter note."),
           steps = listOf(
             StepWithIngredients(
               value = Step(

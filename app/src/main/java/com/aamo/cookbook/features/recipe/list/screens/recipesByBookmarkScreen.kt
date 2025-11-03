@@ -1,4 +1,4 @@
-package com.aamo.cookbook.features.recipe.list
+package com.aamo.cookbook.features.recipe.list.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -41,11 +41,11 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
-import com.aamo.cookbook.ui.components.BasicTopAppBar
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.RecipeCard
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.tags.UITag
@@ -146,7 +146,7 @@ private fun RecipesByBookmarkScreenContent(
   var filterPopUpOpen by remember { mutableStateOf(false) }
 
   Scaffold(topBar = {
-    BasicTopAppBar(
+    PrimaryTopAppBar(
       title = stringResource(R.string.screen_title_bookmarks), actions = {
         IconButton(onClick = onSearch) {
           Icon(
@@ -188,7 +188,7 @@ private fun RecipesByBookmarkScreenContent(
             HorizontalDivider()
             DropdownMenuItem(text = {
               Text(
-                text = stringResource(R.string.button_clear),
+                text = stringResource(R.string.button_text_clear),
                 color = MaterialTheme.colorScheme.error
               )
             }, onClick = {

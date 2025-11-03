@@ -9,20 +9,23 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.model.FullFavoriteRecipe
-import com.aamo.cookbook.model.RecipeBookmark
-import com.aamo.cookbook.model.RecipeRating
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface RecipeDao {
   // region GET
+  @Query("SELECt * FROM recipes WHERE id = :recipeId")
+  suspend fun getRecipe(recipeId: Int): Recipe?
+
   @Query("SELECT DISTINCT category FROM recipes")
   fun getCategoriesFlow(): Flow<List<String>>
 
@@ -35,11 +38,13 @@ interface RecipeDao {
   fun getRecipesWithBookmarkAndRatingFlow(category: String): Flow<List<RecipeWithBookmarkAndRating>>
 
   @Transaction
-  @Query("""
+  @Query(
+    """
     SELECT recipes.*, bookmarks.*, ratings.* FROM recipes
     JOIN favoriteRecipes AS bookmarks ON bookmarks.recipeId = recipes.id
     LEFT OUTER JOIN recipeRatings AS ratings ON ratings.recipeId = recipes.id
-  """)
+  """
+  )
   fun getBookmarksWithRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
   // -------- //
@@ -60,7 +65,7 @@ interface RecipeDao {
    */
   suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients? {
     @Suppress("DEPRECATION") return getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId)?.let { recipe ->
-      recipe.copy(chapters = recipe.chapters.sortedBy { it.value.orderNumber }.map { chapter ->
+      recipe.copy(chapters = recipe.chapters.sortedBy { it.chapter.orderNumber }.map { chapter ->
         chapter.copy(steps = chapter.steps.sortedBy { it.value.orderNumber }.map { step ->
           step.copy(
             ingredients = step.ingredients.sortedBy { it.name })
@@ -102,9 +107,9 @@ interface RecipeDao {
   suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int {
     // TODO: delete old, add new
     // Delete items that are not in the recipe anymore
-    getRecipeWithChaptersStepsAndIngredients(recipe.value.id).also { oldRecipe ->
+    getRecipeWithChaptersStepsAndIngredients(recipe.recipe.id).also { oldRecipe ->
       if (oldRecipe != null) {
-        val currentChapterIds = recipe.chapters.map { c -> c.value.id }.filter { it != 0 }
+        val currentChapterIds = recipe.chapters.map { c -> c.chapter.id }.filter { it != 0 }
         val currentStepIds =
           recipe.chapters.flatMap { c -> c.steps.map { s -> s.value.id }.filter { it != 0 } }
         val currentIngredientIds = recipe.chapters.flatMap { c ->
@@ -112,7 +117,7 @@ interface RecipeDao {
         }
 
         oldRecipe.chapters.forEach { chapter ->
-          if (!currentChapterIds.contains(chapter.value.id)) deleteChapter(chapter.value)
+          if (!currentChapterIds.contains(chapter.chapter.id)) deleteChapter(chapter.chapter)
           else {
             chapter.steps.forEach { step ->
               if (!currentStepIds.contains(step.value.id)) deleteStep(step.value)
@@ -129,12 +134,13 @@ interface RecipeDao {
 
     // Upsert function will return -1 if the function updates an existing item,
     // so the value have to be set to the recipes id instead on the returned value
-    val recipeId = upsertRecipe(recipe.value).toInt().let { if (it == -1) recipe.value.id else it }
+    val recipeId =
+      upsertRecipe(recipe.recipe).toInt().let { if (it == -1) recipe.recipe.id else it }
 
     recipe.chapters.forEachIndexed { ci, chapter ->
       val chapterId =
-        upsertChapter(chapter.value.copy(orderNumber = ci + 1, recipeId = recipeId)).toInt()
-          .let { if (it == -1) chapter.value.id else it }
+        upsertChapter(chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)).toInt()
+          .let { if (it == -1) chapter.chapter.id else it }
 
       chapter.steps.forEachIndexed { si, s ->
         val step =
@@ -159,7 +165,7 @@ interface RecipeDao {
 
   // region DELETE
   @Delete
-  suspend fun deleteRecipe(recipe: Recipe)
+  suspend fun deleteRecipe(recipe: Recipe): Int
 
   @Delete
   suspend fun deleteChapter(chapter: Chapter)

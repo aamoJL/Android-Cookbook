@@ -14,8 +14,7 @@ class RecipeScreenViewModelTest {
   private lateinit var viewModel: RecipeScreenViewModel
   private lateinit var repository: TestRecipeRepository
 
-  @get:Rule
-  val mainDispatcherRule = MainDispatcherRule()
+  @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
   @Before
   fun setup() = runTest {
@@ -26,7 +25,7 @@ class RecipeScreenViewModelTest {
 
   @Test
   fun verifyInit_Recipe() = runTest {
-    val expected = repository.getRecipeWithChaptersStepsAndIngredients(recipeId)?.value?.name
+    val expected = repository.getRecipeWithChaptersStepsAndIngredients(recipeId)?.recipe?.name
     val actual = viewModel.summaryPageUiStates.value.recipeName
 
     assertEquals(expected, actual)

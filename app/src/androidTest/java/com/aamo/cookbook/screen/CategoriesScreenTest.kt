@@ -45,7 +45,7 @@ class CategoriesScreenTest {
 
   @Test
   fun backButton_isHidden() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).assertDoesNotExist()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).assertDoesNotExist()
   }
 
   @Test

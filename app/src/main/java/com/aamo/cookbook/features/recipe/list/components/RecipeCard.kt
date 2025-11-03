@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components
+package com.aamo.cookbook.features.recipe.list.components
 
 import android.os.Environment
 import androidx.compose.foundation.Image

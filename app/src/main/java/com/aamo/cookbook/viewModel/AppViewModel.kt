@@ -1,7 +1,6 @@
 package com.aamo.cookbook.viewModel
 
 import androidx.lifecycle.ViewModel
-import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.repository.RecipeRepository
@@ -34,10 +33,6 @@ class AppViewModel(private val recipeRepository: RecipeRepository) : ViewModel()
 
   suspend fun upsertRecipe(recipe: RecipeWithChaptersStepsAndIngredients): Int {
     return recipeRepository.upsertRecipeWithChaptersStepsAndIngredients(recipe)
-  }
-
-  suspend fun deleteRecipe(recipe: Recipe) {
-    recipeRepository.deleteRecipe(recipe)
   }
 
   fun setSelectedCategory(value: String) = _selectedCategory.update { value }

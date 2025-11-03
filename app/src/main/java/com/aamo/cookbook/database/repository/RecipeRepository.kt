@@ -1,13 +1,13 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.database.dao.RecipeDao
+import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.FullFavoriteRecipe
-import com.aamo.cookbook.model.RecipeBookmark
-import com.aamo.cookbook.model.RecipeRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 
@@ -22,7 +22,6 @@ interface RecipeRepository {
   suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
   suspend fun upsertRecipe(recipe: Recipe): Int
   suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int
-  suspend fun deleteRecipe(recipe: Recipe)
   suspend fun addRecipeToFavorites(recipeId: Int)
   suspend fun removeRecipeFromFavorites(recipeId: Int)
   suspend fun upsertRecipeRating(recipeId: Int, rating: Int)
@@ -45,8 +44,7 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
     recipeDao.getRecipesWithBookmarkAndRatingFlow()
 
   override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating? =
-    recipeDao.getRecipesWithBookmarkAndRatingFlow().first()
-      .firstOrNull { it.recipe.id == recipeId }
+    recipeDao.getRecipesWithBookmarkAndRatingFlow().first().firstOrNull { it.recipe.id == recipeId }
 
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =
     recipeDao.getFavoriteRecipeById(recipeId)
@@ -55,8 +53,6 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
 
   override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int =
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
-
-  override suspend fun deleteRecipe(recipe: Recipe) = recipeDao.deleteRecipe(recipe)
 
   override suspend fun addRecipeToFavorites(recipeId: Int) =
     recipeDao.addRecipeToFavorites(RecipeBookmark(recipeId = recipeId))

@@ -1,0 +1,18 @@
+package com.aamo.cookbook.ui.components.inputs
+
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import com.aamo.cookbook.R
+
+@Composable
+fun BackNavigationIconButton(onBack: () -> Unit) {
+  IconButton(onClick = onBack) {
+    Icon(
+      painter = painterResource(R.drawable.rounded_arrow_back_24),
+      contentDescription = stringResource(R.string.cd_navigate_back)
+    )
+  }
+}

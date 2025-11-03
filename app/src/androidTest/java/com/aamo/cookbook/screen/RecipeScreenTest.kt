@@ -48,7 +48,7 @@ class RecipeScreenTest {
   private var completedPageUiState by mutableStateOf(RecipeScreenViewModel.CompletedPageUiState())
   private var servingsState by mutableStateOf(
     RecipeScreenViewModel.ServingsState(
-      recipe.value.servings, recipe.value.servings
+      recipe.recipe.servings, recipe.recipe.servings
     )
   )
   private var favoriteState by mutableStateOf(false)
@@ -82,9 +82,9 @@ class RecipeScreenTest {
         WithActivityResultRegistry(activityResultRegistry = testRegistry) {
           RecipeScreenContent(
             summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(
-              recipeName = recipe.value.name,
+              recipeName = recipe.recipe.name,
               chaptersWithIngredients = recipe.chapters.map { chapter ->
-                Pair(chapter.value.name, chapter.steps.flatMap { it.ingredients })
+                Pair(chapter.chapter.name, chapter.steps.flatMap { it.ingredients })
               }),
             chapterPageUiStates = chapterUiStates,
             completedPageUiState = completedPageUiState,
@@ -110,18 +110,18 @@ class RecipeScreenTest {
 
   @Test
   fun pageTitle_equals() {
-    val expected = recipe.value.name
+    val expected = recipe.recipe.name
     rule.onNodeWithTag(UITag.SCREEN_TITLE.name).assertTextContains(expected)
   }
 
   @Test
   fun backButton_isVisible() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).assertExists()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).assertExists()
   }
 
   @Test
   fun onBack() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     assert(wasClicked)
   }
@@ -130,7 +130,7 @@ class RecipeScreenTest {
   fun onPagerSwipe() {
     rule.onNodeWithTag(UITag.PAGER.name).performTouchInput { swipeLeft() }
 
-    rule.onNodeWithText("1. ${chapterUiStates.first().chapter.value.name}").assertExists()
+    rule.onNodeWithText("1. ${chapterUiStates.first().chapter.chapter.name}").assertExists()
   }
 
   @Test

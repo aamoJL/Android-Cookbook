@@ -19,7 +19,7 @@ class AppViewModelTest {
   fun getCategories() = runTest {
     val recipes = TestRecipeRepository.Data.recipes
 
-    val expected = recipes.map { it.value.category }.sortedBy { it }.distinct()
+    val expected = recipes.map { it.recipe.category }.sortedBy { it }.distinct()
     val result = viewModel.getCategories().first()
     assertEquals(expected, result)
   }
@@ -30,11 +30,11 @@ class AppViewModelTest {
     assertEquals(recipe.id, viewModel.upsertRecipe(RecipeWithChaptersStepsAndIngredients(recipe)))
   }
 
-  @Test
-  fun deleteRecipe() = runTest {
-    viewModel.deleteRecipe(Recipe())
-    assert(true)
-  }
+//  @Test
+//  fun deleteRecipe() = runTest {
+//    viewModel.deleteRecipe(Recipe())
+//    assert(true)
+//  }
 
   @Test
   fun setSelectedCategory() {
@@ -47,7 +47,7 @@ class AppViewModelTest {
 
   @Test
   fun getRecipeWithChaptersStepsAndIngredients() = runTest {
-    val expected = TestRecipeRepository.Data.recipes.first { it.value.id == 1 }
+    val expected = TestRecipeRepository.Data.recipes.first { it.recipe.id == 1 }
     val actual = viewModel.getRecipeWithChaptersStepsAndIngredients(1)
     assertEquals(expected, actual)
   }

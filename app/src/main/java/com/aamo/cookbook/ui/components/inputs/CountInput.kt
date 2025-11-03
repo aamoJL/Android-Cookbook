@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components
+package com.aamo.cookbook.ui.components.inputs
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable

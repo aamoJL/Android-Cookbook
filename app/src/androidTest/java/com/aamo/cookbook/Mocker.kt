@@ -18,10 +18,10 @@ class Mocker {
 
       return (1..5).map { ri ->
         RecipeWithChaptersStepsAndIngredients(
-          value = Recipe(currentRecipeId, "recipe", "category", "", ri),
+          recipe = Recipe(currentRecipeId, "recipe", "category", "", ri),
           chapters = (1..3).map { ci ->
             ChapterWithStepsAndIngredients(
-              value = Chapter(currentChapterId, ci, "chapter $ci", currentRecipeId),
+              chapter = Chapter(currentChapterId, ci, "chapter $ci", currentRecipeId),
               steps = (1..3).map { si ->
                 StepWithIngredients(
                   value = Step(currentStepId, si, "step $si", currentChapterId),
@@ -29,12 +29,9 @@ class Mocker {
                     Ingredient(
                       currentIngredientId, "ingredient $ii", ii.toFloat(), "unit", currentStepId
                     ).also { currentIngredientId++ }
-                  }
-                ).also { currentStepId++ }
-              }
-            ).also { currentChapterId++ }
-          }
-        ).also { currentRecipeId++ }
+                  }).also { currentStepId++ }
+              }).also { currentChapterId++ }
+          }).also { currentRecipeId++ }
       }
     }
   }

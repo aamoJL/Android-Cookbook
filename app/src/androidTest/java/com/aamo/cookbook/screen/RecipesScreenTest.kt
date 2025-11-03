@@ -57,12 +57,12 @@ class RecipesScreenTest {
 
   @Test
   fun backButton_isVisible() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).assertExists()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).assertExists()
   }
 
   @Test
   fun onBack() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     assert(wasClicked)
   }

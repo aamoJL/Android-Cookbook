@@ -28,7 +28,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
     viewModelScope.launch {
       val recipe = recipeRepository.getRecipeWithChaptersStepsAndIngredients(recipeId)
         ?: RecipeWithChaptersStepsAndIngredients(Recipe())
-      _recipeInfo = RecipeInfo(id = recipe.value.id, thumbnailUri = recipe.value.thumbnailUri)
+      _recipeInfo = RecipeInfo(id = recipe.recipe.id, thumbnailUri = recipe.recipe.thumbnailUri)
       initInfoUiState(recipe)
     }
   }
@@ -77,11 +77,11 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
       fun fromRecipe(recipe: RecipeWithChaptersStepsAndIngredients): InfoScreenUiState {
         return InfoScreenUiState(
           formState = InfoFormState(
-            name = recipe.value.name,
-            category = recipe.value.category,
-            subCategory = recipe.value.subCategory,
-            servings = recipe.value.servings,
-            note = recipe.value.note
+            name = recipe.recipe.name,
+            category = recipe.recipe.category,
+            subCategory = recipe.recipe.subCategory,
+            servings = recipe.recipe.servings,
+            note = recipe.recipe.note
           ), chapters = recipe.chapters.map { Pair(UUID.randomUUID(), it) })
       }
     }
@@ -110,7 +110,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
         return ChapterScreenUiState(
           index = index,
           formState = ChapterFormState(
-            name = chapter.value.name, note = chapter.value.note
+            name = chapter.chapter.name, note = chapter.chapter.note
           ),
           steps = chapter.steps.map { Pair(UUID.randomUUID(), it) },
         )
@@ -236,7 +236,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_chapterUiState.value.index)?.also { existing ->
             this[_chapterUiState.value.index] = existing.copy(
               second = existing.second.copy(
-                value = existing.second.value.copy(
+                chapter = existing.second.chapter.copy(
                   name = _chapterUiState.value.formState.name,
                   note = _chapterUiState.value.formState.note
                 ), steps = _chapterUiState.value.steps.map { it.second })
@@ -244,7 +244,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           } ?: this.add(
             Pair(
               UUID.randomUUID(), ChapterWithStepsAndIngredients(
-                value = Chapter(
+                chapter = Chapter(
                   name = _chapterUiState.value.formState.name,
                   note = _chapterUiState.value.formState.note
                 ), steps = _chapterUiState.value.steps.map { it.second })
@@ -408,6 +408,6 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
 
   fun toRecipeWithChaptersStepsAndIngredients() =
     _infoUiState.value.toRecipeWithChaptersStepsAndIngredients().let {
-      it.copy(value = it.value.copy(id = _recipeInfo.id, thumbnailUri = _recipeInfo.thumbnailUri))
+      it.copy(recipe = it.recipe.copy(id = _recipeInfo.id, thumbnailUri = _recipeInfo.thumbnailUri))
     }
 }

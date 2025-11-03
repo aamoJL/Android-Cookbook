@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components
+package com.aamo.cookbook.ui.components.inputs
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.Icon

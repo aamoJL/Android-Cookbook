@@ -6,8 +6,6 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
-import com.aamo.cookbook.model.RecipeBookmark
-import com.aamo.cookbook.model.RecipeRating
 
 // TODO: rename plurals to singular
 @Entity(tableName = "recipes")
@@ -88,16 +86,50 @@ data class Ingredient(
   @ColumnInfo(name = "stepId") val stepId: Int = 0,
 )
 
+@Entity(
+  tableName = "favoriteRecipes", foreignKeys = [ForeignKey(
+    entity = Recipe::class,
+    parentColumns = arrayOf("id"),
+    childColumns = arrayOf("recipeId"),
+    onDelete = ForeignKey.CASCADE
+  )]
+)
+data class RecipeBookmark(
+  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @ColumnInfo(name = "recipeId") val recipeId: Int,
+)
+
+@Entity(
+  tableName = "recipeRatings", foreignKeys = [ForeignKey(
+    entity = Recipe::class,
+    parentColumns = arrayOf("id"),
+    childColumns = arrayOf("recipeId"),
+    onDelete = ForeignKey.CASCADE
+  )]
+)
+data class RecipeRating(
+  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @ColumnInfo(name = "ratingOutOfFive") val ratingOutOfFive: Int,
+  @ColumnInfo(name = "recipeId") val recipeId: Int,
+)
+
+data class FullFavoriteRecipe(
+  @Embedded val favoriteRecipe: RecipeBookmark,
+  @Relation(
+    entity = Recipe::class, parentColumn = "recipeId", entityColumn = "id"
+  ) val recipe: Recipe,
+)
+
 data class RecipeWithChaptersStepsAndIngredients(
-  @Embedded val value: Recipe, @Relation(
+  @Embedded val recipe: Recipe, @Relation(
     entity = Chapter::class, parentColumn = "id", entityColumn = "recipeId"
   ) val chapters: List<ChapterWithStepsAndIngredients> = emptyList()
 ) {
   fun copyAsNew(): RecipeWithChaptersStepsAndIngredients {
     return this.copy(
-      value = value.copy(id = 0, thumbnailUri = ""), chapters = chapters.map { c ->
+      recipe = recipe.copy(id = 0, thumbnailUri = ""), chapters = chapters.map { c ->
         c.copy(
-          value = c.value.copy(id = 0), steps = c.steps.map { s ->
+          chapter = c.chapter.copy(id = 0), steps = c.steps.map { s ->
             s.copy(
               value = s.value.copy(id = 0), ingredients = s.ingredients.map { i ->
                 i.copy(id = 0)
@@ -108,7 +140,7 @@ data class RecipeWithChaptersStepsAndIngredients(
 }
 
 data class ChapterWithStepsAndIngredients(
-  @Embedded val value: Chapter, @Relation(
+  @Embedded val chapter: Chapter, @Relation(
     entity = Step::class, parentColumn = "id", entityColumn = "chapterId"
   ) val steps: List<StepWithIngredients> = emptyList()
 )

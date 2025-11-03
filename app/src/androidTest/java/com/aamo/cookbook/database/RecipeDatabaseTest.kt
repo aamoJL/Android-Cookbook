@@ -52,7 +52,7 @@ class RecipeDatabaseTest {
 
     assert(recipe.id != 0)
 
-    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.value
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.recipe
     assertEquals(recipe, actual)
   }
 
@@ -65,7 +65,7 @@ class RecipeDatabaseTest {
       recipe = recipe.copy(id = it)
     }
 
-    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.value
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.recipe
     assertNotEquals(null, actual)
   }
 
@@ -79,7 +79,7 @@ class RecipeDatabaseTest {
       recipeDao.upsertRecipe(recipe)
     }
 
-    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.value
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.recipe
     assertEquals(recipe, actual)
   }
 
@@ -89,16 +89,16 @@ class RecipeDatabaseTest {
     val recipeId = recipeDao.upsertRecipeWithChaptersStepsAndIngredients(newRecipe)
 
     recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { actual ->
-      assertEquals(newRecipe.value.copy(id = recipeId), actual.value)
+      assertEquals(newRecipe.recipe.copy(id = recipeId), actual.recipe)
       assert(actual.chapters.isNotEmpty())
 
       actual.chapters.forEachIndexed { ci, chapter ->
         assertEquals(
-          newRecipe.chapters[ci].value.copy(
-            id = assertNotEquals(0, chapter.value.id).let { chapter.value.id },
+          newRecipe.chapters[ci].chapter.copy(
+            id = assertNotEquals(0, chapter.chapter.id).let { chapter.chapter.id },
             recipeId = recipeId,
             orderNumber = ci + 1
-          ), chapter.value
+          ), chapter.chapter
         )
         assert(chapter.steps.isNotEmpty())
 
@@ -106,7 +106,7 @@ class RecipeDatabaseTest {
           assertEquals(
             newRecipe.chapters[ci].steps[si].value.copy(
               id = assertNotEquals(0, step.value.id).let { step.value.id },
-              chapterId = chapter.value.id,
+              chapterId = chapter.chapter.id,
               orderNumber = si + 1
             ), step.value
           )
@@ -132,7 +132,7 @@ class RecipeDatabaseTest {
 
     recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeId)?.also { existing ->
       val expected = existing.copy(
-        value = existing.value.copy(
+        recipe = existing.recipe.copy(
           name = "Updated name"
         )
       )
@@ -155,15 +155,15 @@ class RecipeDatabaseTest {
         chapters = existing.chapters.toMutableList().apply {
           this.swap(0, 1)
         })
-      assertEquals(1, swappedRecipe.chapters[1].value.orderNumber)
-      assertEquals(2, swappedRecipe.chapters[0].value.orderNumber)
+      assertEquals(1, swappedRecipe.chapters[1].chapter.orderNumber)
+      assertEquals(2, swappedRecipe.chapters[0].chapter.orderNumber)
 
       recipeDao.upsertRecipeWithChaptersStepsAndIngredients(swappedRecipe)
 
       val expected = swappedRecipe.copy(
         chapters = swappedRecipe.chapters.mapIndexed { index, chapter ->
           chapter.copy(
-            value = chapter.value.copy(orderNumber = index + 1)
+            chapter = chapter.chapter.copy(orderNumber = index + 1)
           )
         })
 
@@ -190,7 +190,7 @@ class RecipeDatabaseTest {
     assert(chapter.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.chapter
     assertEquals(chapter, actual)
   }
 
@@ -210,7 +210,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.chapter
     assertEquals(chapter, actual)
   }
 
@@ -236,7 +236,7 @@ class RecipeDatabaseTest {
     assert(step.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
     assertEquals(step, actual)
   }
 
@@ -261,7 +261,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
     assertEquals(step, actual)
   }
 
@@ -292,7 +292,7 @@ class RecipeDatabaseTest {
     assert(ingredient.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -323,7 +323,7 @@ class RecipeDatabaseTest {
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.value.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -335,7 +335,7 @@ class RecipeDatabaseTest {
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe).also {
       // Assign id and remove the first chapter
       recipe = recipe.copy(
-        value = recipe.value.copy(id = it), chapters = recipe.chapters.drop(1)
+        recipe = recipe.recipe.copy(id = it), chapters = recipe.chapters.drop(1)
       )
     }
 
@@ -343,9 +343,9 @@ class RecipeDatabaseTest {
 
     // Order numbers should be updated
     val expected = recipe.copy(chapters = recipe.chapters.mapIndexed { index, chapter ->
-      chapter.copy(value = chapter.value.copy(orderNumber = index + 1))
+      chapter.copy(chapter = chapter.chapter.copy(orderNumber = index + 1))
     })
-    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.value.id)
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.recipe.id)
     assertEquals(expected, actual)
   }
 
@@ -382,9 +382,9 @@ class RecipeDatabaseTest {
     assertNotEquals(0, recipeList.size)
 
     recipeList.forEach { r ->
-      recipeDao.upsertRecipe(r.value)
+      recipeDao.upsertRecipe(r.recipe)
       r.chapters.forEach { c ->
-        recipeDao.upsertChapter(c.value)
+        recipeDao.upsertChapter(c.chapter)
         c.steps.forEach { s ->
           recipeDao.upsertStep(s.value)
           recipeDao.upsertIngredients(s.ingredients)
@@ -392,7 +392,7 @@ class RecipeDatabaseTest {
       }
     }
 
-    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeList.first().value.id)
+    val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipeList.first().recipe.id)
     assertEquals(recipeList.first(), actual)
   }
 }

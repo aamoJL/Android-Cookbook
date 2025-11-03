@@ -43,14 +43,13 @@ import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
-import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.FormTextFieldWithOptions
-import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -98,10 +97,10 @@ fun EditRecipeScreenPageContent(
   var openDeleteDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
-      openUnsavedDialog = false
-      onBack()
-    })
+//    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+//      openUnsavedDialog = false
+//      onBack()
+//    })
   }
   else if (openDeleteDialog) {
     DeleteDialog(onDismiss = { openDeleteDialog = false }, onConfirm = {
@@ -117,7 +116,7 @@ fun EditRecipeScreenPageContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(
+      PrimaryTopAppBar(
         title = when (uiState.isNewRecipe) {
         true -> stringResource(R.string.screen_title_new_recipe)
         else -> stringResource(R.string.screen_title_existing_recipe)
@@ -129,23 +128,21 @@ fun EditRecipeScreenPageContent(
           IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
               painter = painterResource(R.drawable.rounded_delete_24),
-              contentDescription = stringResource(R.string.description_delete_recipe)
+              contentDescription = stringResource(R.string.cd_delete_recipe)
             )
           }
         }
         IconButton(onClick = onSubmitChanges, enabled = uiState.canBeSaved) {
           Icon(
             painter = painterResource(R.drawable.rounded_check_24),
-            contentDescription = stringResource(R.string.description_save_recipe)
+            contentDescription = stringResource(R.string.cd_save_recipe)
           )
         }
       })
     }) {
     Column(
       verticalArrangement = Arrangement.spacedBy(16.dp),
-      modifier = modifier
-        .padding(it)
-        .padding(8.dp)
+      modifier = modifier.padding(it).padding(8.dp)
     ) {
       InfoForm(
         uiState = uiState.formState,
@@ -173,20 +170,20 @@ private fun InfoForm(
   subCategorySuggestions: List<String> = emptyList(),
   onStateChange: (EditRecipeViewModel.InfoScreenUiState.InfoFormState) -> Unit = {}
 ) {
-  FormBase(title = stringResource(R.string.form_title_recipe), modifier = modifier) {
+  FormBase(title = stringResource(R.string.title_recipe), modifier = modifier) {
     Row(
       horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()
     ) {
       FormTextField(
         value = uiState.name,
         onValueChange = { onStateChange(uiState.copy(name = it)) },
-        label = stringResource(R.string.textfield_recipe_name),
+        label = stringResource(R.string.label_name),
         modifier = Modifier.weight(2f, true)
       )
       FormNumberField(
         value = uiState.servings,
         onValueChange = { onStateChange(uiState.copy(servings = it)) },
-        label = stringResource(R.string.textfield_recipe_servings),
+        label = stringResource(R.string.label_servings),
         modifier = Modifier.weight(1f, true)
       )
     }
@@ -196,19 +193,19 @@ private fun InfoForm(
       FormTextFieldWithOptions(
         value = uiState.category,
         onValueChange = { onStateChange(uiState.copy(category = it)) },
-        label = stringResource(R.string.textfield_recipe_category),
+        label = stringResource(R.string.label_category),
         options = categorySuggestions,
       )
       FormTextFieldWithOptions(
         value = uiState.subCategory,
         onValueChange = { onStateChange(uiState.copy(subCategory = it)) },
-        label = stringResource(R.string.textfield_recipe_subcategory).asOptionalLabel(),
+        label = stringResource(R.string.label_subcategory).asOptionalLabel(),
         options = subCategorySuggestions
       )
       FormTextField(
         value = uiState.note,
         onValueChange = { onStateChange(uiState.copy(note = it)) },
-        label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
+        label = stringResource(R.string.label_note).asOptionalLabel(),
         keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
           imeAction = ImeAction.Done
         ),
@@ -227,7 +224,7 @@ private fun ChapterList(
   modifier: Modifier = Modifier,
 ) {
   FormList(
-    title = stringResource(R.string.form_list_title_chapters),
+    title = stringResource(R.string.title_chapters),
     onAddClick = { onEditChapter(-1) },
     modifier = modifier
   ) {
@@ -271,28 +268,24 @@ private fun ChapterListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
     ListItem(
-      modifier = Modifier
-        .clickable { onClick() }
-        .testTag(UITag.CHAPTER_ITEM.name),
+      modifier = Modifier.clickable { onClick() }.testTag(UITag.CHAPTER_ITEM.name),
       headlineContent = {
         Text(
-          text = "${chapterNumber}. ${chapter.value.name}",
+          text = "${chapterNumber}. ${chapter.chapter.name}",
           style = MaterialTheme.typography.titleMedium
         )
       },
       supportingContent = {
         Column(
           verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier
-            .padding(start = 16.dp, top = 4.dp)
-            .width(IntrinsicSize.Max)
+          modifier = Modifier.padding(start = 16.dp, top = 4.dp).width(IntrinsicSize.Max)
         ) {
           chapter.steps.forEachIndexed { index, step ->
             Column {
               if (step.value.timerMinutes != null) {
                 Text(
                   text = stringResource(
-                    R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
+                    R.string.abbreviation_minutes, step.value.timerMinutes.toString()
                   ), style = MaterialTheme.typography.labelSmall
                 )
               }
@@ -312,13 +305,13 @@ private fun ChapterListItem(
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-              contentDescription = stringResource(R.string.description_move_up)
+              contentDescription = stringResource(R.string.cd_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-              contentDescription = stringResource(R.string.description_move_down)
+              contentDescription = stringResource(R.string.cd_move_down)
             )
           }
         }
@@ -372,12 +365,12 @@ private fun DeleteDialog(
         onClick = onConfirm,
         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
       ) {
-        Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
+        //Text(text = stringResource(R.string.dialog_confirm_delete_recipe))
       }
     },
     dismissButton = {
       TextButton(onClick = onDismiss) {
-        Text(text = stringResource(R.string.dialog_dismiss_default))
+        //Text(text = stringResource(R.string.dialog_dismiss_default))
       }
     },
   )
@@ -394,7 +387,7 @@ private fun Preview() {
         chapters = listOf(
           Pair(
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
-              value = Chapter(name = "Chapter 1"), steps = listOf(
+              chapter = Chapter(name = "Chapter 1"), steps = listOf(
                 StepWithIngredients(
                   value = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
@@ -404,7 +397,7 @@ private fun Preview() {
             )
           ), Pair(
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
-              value = Chapter(name = "Chapter 2"), steps = listOf(
+              chapter = Chapter(name = "Chapter 2"), steps = listOf(
                 StepWithIngredients(
                   value = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
@@ -416,21 +409,5 @@ private fun Preview() {
         )
       )
     )
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun PreviewDeleteDialog() {
-  CookbookTheme {
-    DeleteDialog({}, {})
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun PreviewUnsavedDialog() {
-  CookbookTheme {
-    UnsavedDialog(onDismiss = {}) {}
   }
 }

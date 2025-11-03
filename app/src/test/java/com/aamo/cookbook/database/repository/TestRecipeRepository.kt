@@ -1,13 +1,13 @@
 package com.aamo.cookbook.database.repository
 
 import com.aamo.cookbook.Mocker
+import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeCategoryTuple
+import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.model.FullFavoriteRecipe
-import com.aamo.cookbook.model.RecipeBookmark
-import com.aamo.cookbook.model.RecipeRating
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
@@ -27,67 +27,60 @@ class TestRecipeRepository : RecipeRepository {
   private var favorites = Data.favoriteRecipes
   private var ratings = Data.recipeRatings
   override suspend fun getRecipeById(recipeId: Int): Recipe? {
-    return recipes.firstOrNull { it.value.id == recipeId }?.value
+    return recipes.firstOrNull { it.recipe.id == recipeId }?.recipe
   }
 
   override fun getRecipesFlow(): Flow<List<Recipe>> {
     return flow {
-      emit(recipes.map { it.value })
+      emit(recipes.map { it.recipe })
     }
   }
 
   override suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients? {
-    return recipes.firstOrNull { it.value.id == id }
+    return recipes.firstOrNull { it.recipe.id == id }
   }
 
   override fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>> {
     return flow {
       emit(recipes.map { recipe ->
         RecipeWithBookmarkAndRating(
-          recipe = recipe.value,
-          bookmark = favorites.firstOrNull { it.recipeId == recipe.value.id },
-          rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
+          recipe = recipe.recipe,
+          bookmark = favorites.firstOrNull { it.recipeId == recipe.recipe.id },
+          rating = ratings.firstOrNull { it.recipeId == recipe.recipe.id })
       })
     }
   }
 
   override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating? {
-    return recipes.firstOrNull { it.value.id == recipeId }?.let { recipe ->
+    return recipes.firstOrNull { it.recipe.id == recipeId }?.let { recipe ->
       RecipeWithBookmarkAndRating(
-        recipe = recipe.value,
-        bookmark = favorites.firstOrNull { it.recipeId == recipe.value.id },
-        rating = ratings.firstOrNull { it.recipeId == recipe.value.id })
+        recipe = recipe.recipe,
+        bookmark = favorites.firstOrNull { it.recipeId == recipe.recipe.id },
+        rating = ratings.firstOrNull { it.recipeId == recipe.recipe.id })
     }
   }
 
   override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int {
-    return recipe.value.id
-  }
-
-  override suspend fun deleteRecipe(recipe: Recipe) {
-    val index = recipes.indexOfFirst { it.value.id == recipe.id }
-    if (index != -1) {
-      recipes.minus(recipes.elementAt(index))
-    }
+    return recipe.recipe.id
   }
 
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? {
     return favorites.firstOrNull { it.recipeId == recipeId }?.let { favorite ->
-      recipes.firstOrNull { it.value.id == recipeId }?.let { recipe ->
-        FullFavoriteRecipe(favorite, recipe.value)
+      recipes.firstOrNull { it.recipe.id == recipeId }?.let { recipe ->
+        FullFavoriteRecipe(favorite, recipe.recipe)
       }
     }
   }
 
   override suspend fun upsertRecipe(recipe: Recipe): Int {
-    val index = recipes.indexOfFirst { it.value == recipe }
+    val index = recipes.indexOfFirst { it.recipe == recipe }
 
     if (index == -1) {
       recipes = recipes.toMutableList().apply { add(RecipeWithChaptersStepsAndIngredients(recipe)) }
     }
     else {
       recipes = recipes.toMutableList().apply {
-        this[index] = this[index].copy(value = recipe)
+        this[index] = this[index].copy(recipe = recipe)
       }
     }
     return if (index == -1) 0 else 1
@@ -95,8 +88,8 @@ class TestRecipeRepository : RecipeRepository {
 
   override suspend fun addRecipeToFavorites(recipeId: Int) {
     favorites = favorites.toMutableList().apply {
-      recipes.first { it.value.id == recipeId }.also {
-        add(RecipeBookmark(id = favorites.maxOf { f -> f.id } + 1, recipeId = it.value.id))
+      recipes.first { it.recipe.id == recipeId }.also {
+        add(RecipeBookmark(id = favorites.maxOf { f -> f.id } + 1, recipeId = it.recipe.id))
       }
     }
   }
@@ -132,7 +125,7 @@ class TestRecipeRepository : RecipeRepository {
 
   override suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple> {
     return recipes.map {
-      RecipeCategoryTuple(it.value.category, it.value.subCategory)
+      RecipeCategoryTuple(it.recipe.category, it.recipe.subCategory)
     }
   }
 }

@@ -1,0 +1,423 @@
+package com.aamo.cookbook.features.recipe.form.screens
+
+import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.composable
+import com.aamo.cookbook.R
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.ui.components.BasicDismissibleItem
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.ui.components.form.FormBase
+import com.aamo.cookbook.ui.components.form.FormList
+import com.aamo.cookbook.ui.components.inputs.IntNumberField
+import com.aamo.cookbook.ui.components.inputs.OptionsTextField
+import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.modals.DeleteDialog
+import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+import com.aamo.cookbook.utility.tags.UITag
+import com.aamo.cookbook.utility.viewmodels.SavingState
+import com.aamo.cookbook.utility.viewmodels.ViewModelState
+import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
+import kotlinx.coroutines.launch
+import kotlinx.serialization.Serializable
+
+@Serializable
+data object RecipeFormInfoScreen
+
+class RecipeFormInfoScreenViewModel(
+  formData: RecipeFormInfoFields,
+  chapterData: List<RecipeFormChapterFields>,
+  fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
+) : ViewModel() {
+  class FormState(formData: RecipeFormInfoFields, chapterData: List<RecipeFormChapterFields>) {
+    val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
+    val category = ViewModelState(formData.category).onChange { onUnsavedChanges() }
+    val subCategory = ViewModelState(formData.category).onChange { onUnsavedChanges() }
+    val servings =
+      ViewModelState(formData.servings).validation { value -> if (value >= 0) value else null }
+        .onChange { onUnsavedChanges() }
+    val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
+    val chapters = ViewModelStateList(chapterData).onChange { onUnsavedChanges() }
+    var savingState by mutableStateOf(SavingState())
+
+    fun canSave(): Boolean {
+      if (savingState.state == SavingState.State.SAVING) return false
+      if (name.value.isEmpty()) return false
+      if (category.value.isEmpty()) return false
+      if (subCategory.value.isEmpty()) return false
+      if (servings.value < 0) return false
+      if (note.value.isEmpty()) return false
+      if (chapters.values.isEmpty()) return false
+      return true
+    }
+
+    private fun onUnsavedChanges() {
+      if (!savingState.unsavedChanges) {
+        savingState = savingState.copy(unsavedChanges = true)
+      }
+    }
+  }
+
+  val formState = FormState(formData, chapterData)
+
+  var categorySuggestions by mutableStateOf<Map<String, List<String>>>(emptyMap())
+    private set
+
+  val isNew = formData.name.isEmpty()
+
+  init {
+    viewModelScope.launch {
+      fetchCategorySuggestions().let { result ->
+        categorySuggestions = result
+      }
+    }
+  }
+}
+
+fun NavGraphBuilder.recipeFormInfoScreen(
+  formData: RecipeFormInfoFields,
+  chapterData: List<RecipeFormChapterFields>,
+  onNewChapter: () -> Unit,
+  onDeleteRecipe: () -> Unit,
+  onBack: () -> Unit
+) {
+  composable<RecipeFormInfoScreen> {
+    val viewmodel: RecipeFormInfoScreenViewModel = viewModel(factory = viewModelFactory {
+      initializer {
+        RecipeFormInfoScreenViewModel(
+          formData = formData, chapterData = chapterData, fetchCategorySuggestions = {
+            emptyMap() // TODO()
+          })
+      }
+    })
+    val formState = viewmodel.formState
+
+    var openUnsavedDialog by remember { mutableStateOf(false) }
+    var openDeleteDialog by remember { mutableStateOf(false) }
+
+    UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
+      openUnsavedDialog = false
+      onBack()
+    })
+
+    DeleteDialog(
+      open = openDeleteDialog,
+      title = stringResource(R.string.dialog_title_delete_recipe),
+      onDismiss = { openDeleteDialog = false },
+      onConfirm = {
+        openDeleteDialog = false
+        onDeleteRecipe()
+      })
+
+    BackHandler(enabled = formState.savingState.unsavedChanges) {
+      openUnsavedDialog = true
+    }
+
+    RecipeFormInfoContent(
+      formState = formState,
+      categorySuggestions = viewmodel.categorySuggestions,
+      isNew = viewmodel.isNew,
+      onNewChapter = onNewChapter,
+      onDeleteChapter = { true },
+      onDelete = { openDeleteDialog = true },
+      onBack = { if (formState.savingState.unsavedChanges) openUnsavedDialog = true else onBack() },
+      onSwapChapters = { from, to -> })
+  }
+}
+
+@Composable
+fun RecipeFormInfoContent(
+  formState: RecipeFormInfoScreenViewModel.FormState,
+  categorySuggestions: Map<String, List<String>>,
+  isNew: Boolean,
+  onNewChapter: () -> Unit,
+  onEditChapter: (index: Int) -> Unit = {},
+  onDeleteChapter: (index: Int) -> Boolean = { false },
+  onSubmitChanges: () -> Unit = {},
+  onDelete: () -> Unit = {},
+  onBack: () -> Unit = {},
+  onSwapChapters: (from: Int, to: Int) -> Unit = { _, _ -> },
+) {
+  Scaffold(
+    topBar = {
+      PrimaryTopAppBar(
+        title = when (isNew) {
+          true -> stringResource(R.string.screen_title_new_recipe)
+          else -> stringResource(R.string.screen_title_existing_recipe)
+        }, onBack = onBack, actions = {
+          if (!isNew) {
+            IconButton(onClick = onDelete) {
+              Icon(
+                painter = painterResource(R.drawable.rounded_delete_24),
+                contentDescription = stringResource(R.string.cd_delete_recipe)
+              )
+            }
+          }
+          IconButton(onClick = onSubmitChanges, enabled = formState.canSave()) {
+            Icon(
+              painter = painterResource(R.drawable.rounded_check_24),
+              contentDescription = stringResource(R.string.cd_save_recipe)
+            )
+          }
+        })
+    }) {
+    Column(
+      verticalArrangement = Arrangement.spacedBy(16.dp),
+      modifier = Modifier
+        .padding(it)
+        .padding(8.dp)
+    ) {
+      InfoForm(formState = formState, categorySuggestions = categorySuggestions)
+      ChapterList(
+        chapters = formState.chapters.values,
+        onNewChapter = onNewChapter,
+        onEditChapter = onEditChapter,
+        onDeleteChapter = onDeleteChapter,
+        onSwap = onSwapChapters
+      )
+    }
+  }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InfoForm(
+  formState: RecipeFormInfoScreenViewModel.FormState,
+  categorySuggestions: Map<String, List<String>>,
+  modifier: Modifier = Modifier,
+) {
+  FormBase(title = stringResource(R.string.title_recipe), modifier = modifier) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+      TextField(
+        value = formState.name.value,
+        onValueChange = { formState.name.update(it) },
+        label = { Text(stringResource(R.string.label_name)) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        modifier = Modifier.weight(2f, true)
+      )
+      IntNumberField(
+        value = formState.servings.value,
+        label = { Text(stringResource(R.string.label_servings)) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        onValueChange = { formState.servings.update(it) },
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        modifier = Modifier.weight(1f, true)
+      )
+    }
+    Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
+      OptionsTextField(
+        value = formState.category.value,
+        label = { Text(stringResource(R.string.label_category)) },
+        onValueChange = { formState.category.update(it) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        options = categorySuggestions.keys.filter {
+          it.contains(formState.category.value, ignoreCase = true)
+        }.sorted(),
+        modifier = Modifier.fillMaxWidth()
+      )
+      OptionsTextField(
+        value = formState.subCategory.value,
+        label = { Text(stringResource(R.string.label_subcategory).asOptionalLabel()) },
+        onValueChange = { formState.subCategory.update(it) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        options = categorySuggestions[formState.category.value]?.filter {
+          it.contains(formState.subCategory.value, ignoreCase = true)
+        }?.sorted() ?: emptyList(),
+        modifier = Modifier.fillMaxWidth()
+      )
+      TextField(
+        value = formState.note.value,
+        onValueChange = { formState.note.update(it) },
+        label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
+  }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun ChapterList(
+  chapters: List<RecipeFormChapterFields>,
+  onNewChapter: () -> Unit,
+  onEditChapter: (index: Int) -> Unit,
+  onDeleteChapter: (index: Int) -> Boolean,
+  onSwap: (from: Int, to: Int) -> Unit,
+  modifier: Modifier = Modifier,
+) {
+  FormList(
+    title = stringResource(R.string.title_chapters), onAddClick = onNewChapter, modifier = modifier
+  ) {
+    LazyColumn {
+      itemsIndexed(items = chapters, key = { _, c -> c.uuid }) { index, chapter ->
+        Column {
+          ChapterListItem(
+            chapter = chapter,
+            chapterNumber = index + 1,
+            onClick = { onEditChapter(index) },
+            onDismiss = { onDeleteChapter(index) },
+            onMoveUp = if (index != 0) {
+              { onSwap(index, index - 1) }
+            }
+            else null,
+            onMoveDown = if (index != chapters.size - 1) {
+              { onSwap(index, index + 1) }
+            }
+            else null,
+            modifier = Modifier.fillMaxWidth())
+
+          if (index != chapters.size - 1) {
+            HorizontalDivider()
+          }
+        }
+      }
+    }
+  }
+}
+
+@Composable
+private fun ChapterListItem(
+  chapter: RecipeFormChapterFields,
+  chapterNumber: Int,
+  onClick: () -> Unit,
+  onDismiss: () -> Unit,
+  onMoveUp: (() -> Unit)?,
+  onMoveDown: (() -> Unit)?,
+  modifier: Modifier = Modifier
+) {
+  BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
+    ListItem(
+      modifier = Modifier
+        .clickable { onClick() }
+        .testTag(UITag.CHAPTER_ITEM.name),
+      headlineContent = {
+        Text(
+          text = "${chapterNumber}. ${chapter.name}", style = MaterialTheme.typography.titleMedium
+        )
+      },
+      supportingContent = {
+        Column(
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+          modifier = Modifier
+            .padding(start = 16.dp, top = 4.dp)
+            .width(IntrinsicSize.Max)
+        ) {
+          chapter.steps.forEachIndexed { index, step ->
+            Column {
+              if (step.timerMinutes != null) {
+                Text(
+                  text = stringResource(
+                    R.string.abbreviation_minutes, step.timerMinutes.toString()
+                  ), style = MaterialTheme.typography.labelSmall
+                )
+              }
+              Text(
+                text = "${index + 1}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
+                style = MaterialTheme.typography.bodyMedium
+              )
+              IngredientList(
+                ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
+              )
+            }
+          }
+        }
+      },
+      trailingContent = {
+        Column(modifier = Modifier) {
+          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+            Icon(
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
+              contentDescription = stringResource(R.string.cd_move_up)
+            )
+          }
+          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+            Icon(
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
+              contentDescription = stringResource(R.string.cd_move_down)
+            )
+          }
+        }
+      })
+  }
+}
+
+@Composable
+private fun IngredientList(
+  ingredients: List<RecipeFormIngredientFields>, modifier: Modifier = Modifier
+) {
+  Row(modifier = modifier) {
+    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
+      ingredients.forEach {
+        Text(
+          text = if (it.amount == 0f) "" else it.amount.toFractionFormattedString(),
+          style = MaterialTheme.typography.bodySmall,
+          textAlign = TextAlign.End,
+          modifier = Modifier.fillMaxWidth()
+        )
+      }
+    }
+    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
+      ingredients.forEach {
+        Text(text = it.unit, style = MaterialTheme.typography.bodySmall, modifier = Modifier)
+      }
+    }
+    Column {
+      ingredients.forEach {
+        Text(text = it.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier)
+      }
+    }
+  }
+}

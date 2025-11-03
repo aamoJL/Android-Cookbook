@@ -67,7 +67,7 @@ fun NavGraphBuilder.editRecipeGraph(
         onSubmitChanges = {
           onSubmitChanges(editRecipeViewModel.toRecipeWithChaptersStepsAndIngredients())
         },
-        onDelete = { onDeleteRecipe(editRecipeViewModel.toRecipeWithChaptersStepsAndIngredients().value) },
+        onDelete = { onDeleteRecipe(editRecipeViewModel.toRecipeWithChaptersStepsAndIngredients().recipe) },
         onBack = onBack
       )
     }

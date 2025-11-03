@@ -18,12 +18,12 @@ class RecipeTest {
   @Test
   fun recipeWithChaptersStepsAndIngredients_copyAsNew() {
     Mocker.mockRecipeList().first().copyAsNew().also { copy ->
-      assertEquals(0, copy.value.id)
+      assertEquals(0, copy.recipe.id)
       assert(copy.chapters.isNotEmpty())
 
       copy.chapters.forEachIndexed { ci, chapter ->
-        assertEquals(0, chapter.value.id)
-        assertEquals(ci + 1, chapter.value.orderNumber)
+        assertEquals(0, chapter.chapter.id)
+        assertEquals(ci + 1, chapter.chapter.orderNumber)
         assert(chapter.steps.isNotEmpty())
 
         chapter.steps.forEachIndexed { si, step ->

@@ -97,32 +97,32 @@ class EditRecipeScreenTest {
 
   @Test
   fun backButton_isVisible() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).assertExists()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).assertExists()
   }
 
   @Test
   fun onBack_noChanges() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     assert(wasClicked)
-    rule.onNodeWithText(R.string.dialog_title_unsaved_default).assertDoesNotExist()
+    rule.onNodeWithText(R.string.dialog_title_unsaved_changes).assertDoesNotExist()
   }
 
   @Test
   fun onBack_dialogVisible() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     assertFalse(wasClicked) // OnBack happens only if the user confirms the dialog
-    rule.onNodeWithText(R.string.dialog_title_unsaved_default).assertExists()
+    rule.onNodeWithText(R.string.dialog_title_unsaved_changes).assertExists()
   }
 
   @Test
   fun onBack_dialogDismiss() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     rule.onNodeWithText(R.string.dialog_dismiss_default).performClick()
     assertFalse(wasClicked) // OnBack happens only if the user confirms the dialog
@@ -132,7 +132,7 @@ class EditRecipeScreenTest {
   fun onBack_dialogConfirm() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     rule.onNodeWithText(R.string.dialog_confirm_unsaved_default).performClick()
     assert(wasClicked) // OnBack happens only if the user confirms the dialog
@@ -141,13 +141,13 @@ class EditRecipeScreenTest {
   @Test
   fun saveButtonState() {
     withNewRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_save_recipe).performClick()
+      rule.onNodeWithContentDescription(R.string.cd_save_recipe).performClick()
 
       assertFalse(wasClicked)
     }
 
     withExistingRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_save_recipe).performClick()
+      rule.onNodeWithContentDescription(R.string.cd_save_recipe).performClick()
 
       assert(wasClicked)
     }
@@ -156,18 +156,18 @@ class EditRecipeScreenTest {
   @Test
   fun deleteButtonState() {
     withNewRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_delete_recipe).assertDoesNotExist()
+      rule.onNodeWithContentDescription(R.string.cd_delete_recipe).assertDoesNotExist()
     }
 
     withExistingRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_delete_recipe).assertExists()
+      rule.onNodeWithContentDescription(R.string.cd_delete_recipe).assertExists()
     }
   }
 
   @Test
   fun onDelete_dialogVisible() {
     withExistingRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_delete_recipe).performClick()
+      rule.onNodeWithContentDescription(R.string.cd_delete_recipe).performClick()
 
       rule.onNodeWithText(R.string.dialog_title_delete_recipe).assertExists()
 
@@ -178,7 +178,7 @@ class EditRecipeScreenTest {
   @Test
   fun onDelete_dialogDismiss() {
     withExistingRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_delete_recipe).performClick()
+      rule.onNodeWithContentDescription(R.string.cd_delete_recipe).performClick()
 
       rule.onNodeWithText(R.string.dialog_dismiss_default).performClick()
 
@@ -189,7 +189,7 @@ class EditRecipeScreenTest {
   @Test
   fun onDelete_dialogConfirm() {
     withExistingRecipe().apply {
-      rule.onNodeWithContentDescription(R.string.description_delete_recipe).performClick()
+      rule.onNodeWithContentDescription(R.string.cd_delete_recipe).performClick()
 
       rule.onNodeWithText(R.string.dialog_confirm_delete_recipe).performClick()
 
@@ -231,30 +231,28 @@ class EditRecipeScreenTest {
   @Test
   fun formInputInitValues() {
     withExistingRecipe().apply {
-      rule.onNodeWithText(R.string.textfield_recipe_name).assertTextContains(uiState.formState.name)
+      rule.onNodeWithText(R.string.label_name).assertTextContains(uiState.formState.name)
 
-      rule.onNodeWithText(R.string.textfield_recipe_category)
-        .assertTextContains(uiState.formState.category)
+      rule.onNodeWithText(R.string.label_category).assertTextContains(uiState.formState.category)
 
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+        rule.activity.getString(R.string.label_subcategory).asOptionalLabel()
       ).assertTextContains(uiState.formState.subCategory)
 
-      rule.onNodeWithText(R.string.textfield_recipe_servings)
+      rule.onNodeWithText(R.string.label_servings)
         .assertTextContains(uiState.formState.servings.toString())
     }
 
     withNewRecipe().apply {
-      rule.onNodeWithText(R.string.textfield_recipe_name).assertTextContains(uiState.formState.name)
+      rule.onNodeWithText(R.string.label_name).assertTextContains(uiState.formState.name)
 
-      rule.onNodeWithText(R.string.textfield_recipe_category)
-        .assertTextContains(uiState.formState.category)
+      rule.onNodeWithText(R.string.label_category).assertTextContains(uiState.formState.category)
 
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+        rule.activity.getString(R.string.label_subcategory).asOptionalLabel()
       ).assertTextContains(uiState.formState.subCategory)
 
-      rule.onNodeWithText(R.string.textfield_recipe_servings).assertTextContains("1")
+      rule.onNodeWithText(R.string.label_servings).assertTextContains("1")
     }
   }
 
@@ -267,24 +265,24 @@ class EditRecipeScreenTest {
       servings = 3
     )
 
-    rule.onNodeWithText(R.string.textfield_recipe_name).apply {
+    rule.onNodeWithText(R.string.label_name).apply {
       performTextClearance()
       performTextInput(expected.name)
     }
 
-    rule.onNodeWithText(R.string.textfield_recipe_category).apply {
+    rule.onNodeWithText(R.string.label_category).apply {
       performTextClearance()
       performTextInput(expected.category)
     }
 
     rule.onNodeWithText(
-      rule.activity.getString(R.string.textfield_recipe_subcategory).asOptionalLabel()
+      rule.activity.getString(R.string.label_subcategory).asOptionalLabel()
     ).apply {
       performTextClearance()
       performTextInput(expected.subCategory)
     }
 
-    rule.onNodeWithText(R.string.textfield_recipe_servings).apply {
+    rule.onNodeWithText(R.string.label_servings).apply {
       performTextClearance()
       performTextInput(expected.servings.toString())
     }

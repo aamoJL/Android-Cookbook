@@ -35,14 +35,13 @@ import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
-import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormNumberField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
-import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -85,10 +84,10 @@ fun EditRecipeChapterStepScreenContent(
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
-      openUnsavedDialog = false
-      onBack()
-    })
+//    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+//      openUnsavedDialog = false
+//      onBack()
+//    })
   }
 
   BackHandler(true) {
@@ -99,7 +98,7 @@ fun EditRecipeChapterStepScreenContent(
   }
 
   Scaffold(topBar = {
-    BasicTopAppBar(
+    PrimaryTopAppBar(
       when (uiState.isNewStep) {
         true -> stringResource(R.string.screen_title_new_step)
         else -> stringResource(R.string.screen_title_existing_step)
@@ -117,9 +116,7 @@ fun EditRecipeChapterStepScreenContent(
     )
   }) {
     Column(
-      modifier = modifier
-        .padding(it)
-        .padding(8.dp)
+      modifier = modifier.padding(it).padding(8.dp)
     ) {
       StepForm(
         uiState = uiState.formState,
@@ -158,7 +155,7 @@ private fun StepForm(
     FormTextField(
       value = uiState.note,
       onValueChange = { onStateChange(uiState.copy(note = it)) },
-      label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
+      label = stringResource(R.string.label_note).asOptionalLabel(),
       keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
         imeAction = ImeAction.Done
       ),
@@ -220,9 +217,7 @@ private fun IngredientListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
-      modifier = Modifier
-        .clickable { onClick() }
-        .testTag(UITag.INGREDIENT_ITEM.name),
+      modifier = Modifier.clickable { onClick() }.testTag(UITag.INGREDIENT_ITEM.name),
       headlineContent = {
         Row(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -249,13 +244,13 @@ private fun IngredientListItem(
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-              contentDescription = stringResource(R.string.description_move_up)
+              contentDescription = stringResource(R.string.cd_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-              contentDescription = stringResource(R.string.description_move_down)
+              contentDescription = stringResource(R.string.cd_move_down)
             )
           }
         }
@@ -277,13 +272,5 @@ private fun Preview() {
         )
       )
     )
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun PreviewUnsavedDialog() {
-  CookbookTheme {
-    UnsavedDialog(onDismiss = {}) {}
   }
 }

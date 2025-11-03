@@ -5,8 +5,8 @@ package com.aamo.cookbook.tests.features.recipe.list
 import com.aamo.cookbook.MainDispatcherRule
 import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.RecipeSearchScreenViewModel
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
+import com.aamo.cookbook.features.recipe.list.screens.RecipeSearchScreenViewModel
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,7 +42,7 @@ class RecipeSearchScreenViewModelTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun verifyInitValidRecipes() = runTest {
-    val models = Mocker.Companion.mockRecipeList().map { it.value }.map {
+    val models = Mocker.Companion.mockRecipeList().map { it.recipe }.map {
       RecipeListRecipeModel(recipe = it, isBookmarked = true, rating = 3)
     }
 

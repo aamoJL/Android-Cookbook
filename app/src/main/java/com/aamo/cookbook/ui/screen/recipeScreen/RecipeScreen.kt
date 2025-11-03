@@ -61,7 +61,7 @@ import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.SnackbarProperties
@@ -149,7 +149,7 @@ fun RecipeScreenContent(
 
   Scaffold(
     topBar = {
-      BasicTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
+      PrimaryTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
         IconButton(onClick = {
           try {
             context.startActivity(

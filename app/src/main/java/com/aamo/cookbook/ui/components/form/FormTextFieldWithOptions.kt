@@ -4,6 +4,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +38,7 @@ fun FormTextFieldWithOptions(
   ) {
     FormTextField(
       // The `menuAnchor` modifier must be passed to the text field for correctness.
-      modifier = Modifier.menuAnchor(),
+      modifier = Modifier.menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true),
       value = value,
       onValueChange = onValueChange,
       label = label,
@@ -51,16 +52,13 @@ fun FormTextFieldWithOptions(
         modifier = Modifier.exposedDropdownSize(true),
         properties = PopupProperties(focusable = false),
         expanded = expanded,
-        onDismissRequest = { expanded = false }
-      ) {
+        onDismissRequest = { expanded = false }) {
         filteringOptions.forEach { selectionOption ->
           DropDownOption(
-            text = selectionOption,
-            onClick = {
+            text = selectionOption, onClick = {
               onValueChange(selectionOption)
               expanded = false
-            }
-          )
+            })
         }
       }
     }
@@ -82,6 +80,7 @@ private fun DropDownOption(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
@@ -94,6 +93,7 @@ private fun Preview() {
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun DropDownOptionsPreview() {

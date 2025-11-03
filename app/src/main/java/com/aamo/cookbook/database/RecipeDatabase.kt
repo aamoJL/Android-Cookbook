@@ -9,9 +9,9 @@ import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
+import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.model.RecipeBookmark
-import com.aamo.cookbook.model.RecipeRating
 
 @Suppress("HardCodedStringLiteral")
 @Database(

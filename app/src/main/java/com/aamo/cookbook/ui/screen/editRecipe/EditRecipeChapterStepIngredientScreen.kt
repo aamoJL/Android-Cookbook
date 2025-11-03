@@ -20,13 +20,12 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormFloatField
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
-import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.viewModel.EditRecipeViewModel
@@ -59,10 +58,10 @@ fun EditRecipeChapterStepIngredientScreenContent(
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
-      openUnsavedDialog = false
-      onBack()
-    })
+//    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+//      openUnsavedDialog = false
+//      onBack()
+//    })
   }
 
   BackHandler(true) {
@@ -73,7 +72,7 @@ fun EditRecipeChapterStepIngredientScreenContent(
   }
 
   Scaffold(topBar = {
-    BasicTopAppBar(
+    PrimaryTopAppBar(
       title = when (uiState.isNewIngredient) {
         true -> stringResource(R.string.screen_title_new_ingredient)
         else -> stringResource(R.string.screen_title_existing_ingredient)
@@ -143,13 +142,5 @@ private fun Preview() {
         formState = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(name = "Name")
       )
     )
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun PreviewUnsavedDialog() {
-  CookbookTheme {
-    UnsavedDialog(onDismiss = {}) {}
   }
 }

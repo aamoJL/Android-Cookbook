@@ -38,13 +38,12 @@ import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
-import com.aamo.cookbook.ui.components.BasicTopAppBar
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
 import com.aamo.cookbook.ui.components.form.FormTextField
 import com.aamo.cookbook.ui.components.form.FormTextFieldDefaults
 import com.aamo.cookbook.ui.components.form.SaveButton
-import com.aamo.cookbook.ui.components.form.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -88,10 +87,10 @@ fun EditRecipeChapterScreenContent(
   var openUnsavedDialog by remember { mutableStateOf(false) }
 
   if (openUnsavedDialog) {
-    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
-      openUnsavedDialog = false
-      onBack()
-    })
+//    UnsavedDialog(onDismiss = { openUnsavedDialog = false }, onConfirm = {
+//      openUnsavedDialog = false
+//      onBack()
+//    })
   }
 
   BackHandler(true) {
@@ -100,7 +99,7 @@ fun EditRecipeChapterScreenContent(
   }
 
   Scaffold(topBar = {
-    BasicTopAppBar(
+    PrimaryTopAppBar(
       title = when (uiState.isNewChapter) {
         true -> stringResource(R.string.screen_title_new_chapter)
         else -> stringResource(R.string.screen_title_existing_chapter)
@@ -116,9 +115,7 @@ fun EditRecipeChapterScreenContent(
     )
   }) {
     Column(
-      modifier = modifier
-        .padding(it)
-        .padding(8.dp)
+      modifier = modifier.padding(it).padding(8.dp)
     ) {
       ChapterForm(
         uiState = uiState.formState,
@@ -193,7 +190,7 @@ fun ChapterForm(
     FormTextField(
       value = uiState.note,
       onValueChange = { onFormStateChange(uiState.copy(note = it)) },
-      label = stringResource(R.string.textfield_label_note).asOptionalLabel(),
+      label = stringResource(R.string.label_note).asOptionalLabel(),
       keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
         imeAction = ImeAction.Done
       ),
@@ -213,9 +210,7 @@ fun StepListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
-      modifier = modifier
-        .clickable { onClick() }
-        .testTag(UITag.STEP_ITEM.name),
+      modifier = modifier.clickable { onClick() }.testTag(UITag.STEP_ITEM.name),
       headlineContent = {
         Text(
           text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
@@ -231,7 +226,7 @@ fun StepListItem(
         {
           Text(
             text = stringResource(
-              R.string.minutes_amount_abbreviation, step.value.timerMinutes.toString()
+              R.string.abbreviation_minutes, step.value.timerMinutes.toString()
             ), style = MaterialTheme.typography.labelSmall
           )
         }
@@ -241,13 +236,13 @@ fun StepListItem(
           if (onMoveUp != null) IconButton(onClick = onMoveUp) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-              contentDescription = stringResource(R.string.description_move_up)
+              contentDescription = stringResource(R.string.cd_move_up)
             )
           }
           if (onMoveDown != null) IconButton(onClick = onMoveDown) {
             Icon(
               painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-              contentDescription = stringResource(R.string.description_move_down)
+              contentDescription = stringResource(R.string.cd_move_down)
             )
           }
         }
@@ -312,13 +307,5 @@ private fun Preview() {
         )
       )
     )
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun PreviewUnsavedDialog() {
-  CookbookTheme {
-    UnsavedDialog(onDismiss = {}) {}
   }
 }

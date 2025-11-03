@@ -12,8 +12,7 @@ import org.junit.Test
 class EditRecipeViewModelTest {
   private var repository = TestRecipeRepository()
 
-  @get:Rule
-  val mainDispatcherRule = MainDispatcherRule()
+  @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
   /**
    * Returns viewmodel with an existing recipe
@@ -34,13 +33,11 @@ class EditRecipeViewModelTest {
     withNewRecipe().also { viewModel ->
       assertTrue(viewModel.infoUiState.value.isNewRecipe)
       assertEquals(
-        EditRecipeViewModel.InfoScreenUiState.InfoFormState(),
-        viewModel.infoUiState.value.formState
+        EditRecipeViewModel.InfoScreenUiState.InfoFormState(), viewModel.infoUiState.value.formState
       )
       assertTrue(viewModel.infoUiState.value.chapters.isEmpty())
       assertEquals(
-        repository.getCategoriesWithSubCategories(),
-        viewModel.infoUiState.value.categorySuggestions
+        repository.getCategoriesWithSubCategories(), viewModel.infoUiState.value.categorySuggestions
       )
       assertFalse(viewModel.infoUiState.value.canBeSaved)
       assertFalse(viewModel.infoUiState.value.unsavedChanges)
@@ -52,17 +49,16 @@ class EditRecipeViewModelTest {
       assertFalse(viewModel.infoUiState.value.isNewRecipe)
       assertEquals(
         EditRecipeViewModel.InfoScreenUiState.InfoFormState(
-          name = recipe.value.name,
-          category = recipe.value.category,
-          subCategory = recipe.value.subCategory,
-          servings = recipe.value.servings,
-          note = recipe.value.note
+          name = recipe.recipe.name,
+          category = recipe.recipe.category,
+          subCategory = recipe.recipe.subCategory,
+          servings = recipe.recipe.servings,
+          note = recipe.recipe.note
         ), viewModel.infoUiState.value.formState
       )
       assertEquals(recipe.chapters, viewModel.infoUiState.value.chapters.map { it.second })
       assertEquals(
-        repository.getCategoriesWithSubCategories(),
-        viewModel.infoUiState.value.categorySuggestions
+        repository.getCategoriesWithSubCategories(), viewModel.infoUiState.value.categorySuggestions
       )
       assertTrue(viewModel.infoUiState.value.canBeSaved)
       assertFalse(viewModel.infoUiState.value.unsavedChanges)
@@ -91,8 +87,7 @@ class EditRecipeViewModelTest {
       assertEquals(0, viewModel.chapterUiState.value.index)
       assertEquals(
         EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
-          name = chapter.value.name,
-          note = chapter.value.note
+          name = chapter.chapter.name, note = chapter.chapter.note
         ), viewModel.chapterUiState.value.formState
       )
       assertEquals(chapter.steps, viewModel.chapterUiState.value.steps.map { it.second })
@@ -110,8 +105,7 @@ class EditRecipeViewModelTest {
       assertFalse(viewModel.stepUiState.value.canBeSaved)
       assertEquals(viewModel.chapterUiState.value.steps.size, viewModel.stepUiState.value.index)
       assertEquals(
-        EditRecipeViewModel.StepScreenUiState.StepFormState(),
-        viewModel.stepUiState.value.formState
+        EditRecipeViewModel.StepScreenUiState.StepFormState(), viewModel.stepUiState.value.formState
       )
       assertTrue(viewModel.stepUiState.value.ingredients.isEmpty())
       assertFalse(viewModel.stepUiState.value.unsavedChanges)
@@ -131,8 +125,7 @@ class EditRecipeViewModelTest {
           description = step.value.description,
           timerMinutes = step.value.timerMinutes,
           note = step.value.note
-        ),
-        viewModel.stepUiState.value.formState
+        ), viewModel.stepUiState.value.formState
       )
       assertEquals(step.ingredients, viewModel.stepUiState.value.ingredients.map { it.second })
       assertFalse(viewModel.stepUiState.value.unsavedChanges)
@@ -148,7 +141,9 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertTrue(viewModel.ingredientUiState.value.isNewIngredient)
       assertFalse(viewModel.ingredientUiState.value.canBeSaved)
-      assertEquals(viewModel.stepUiState.value.ingredients.size, viewModel.ingredientUiState.value.index)
+      assertEquals(
+        viewModel.stepUiState.value.ingredients.size, viewModel.ingredientUiState.value.index
+      )
       assertEquals(
         EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(),
         viewModel.ingredientUiState.value.formState
@@ -161,19 +156,16 @@ class EditRecipeViewModelTest {
       initStepUiState(0)
       initIngredientUiState(0)
     }.also { viewModel ->
-      val ingredient = TestRecipeRepository.Data.recipes
-        .first().chapters.first().steps.first().ingredients.first()
+      val ingredient =
+        TestRecipeRepository.Data.recipes.first().chapters.first().steps.first().ingredients.first()
 
       assertFalse(viewModel.ingredientUiState.value.isNewIngredient)
       assertTrue(viewModel.ingredientUiState.value.canBeSaved)
       assertEquals(0, viewModel.ingredientUiState.value.index)
       assertEquals(
         EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(
-          name = ingredient.name,
-          unit = ingredient.unit,
-          amount = ingredient.amount
-        ),
-        viewModel.ingredientUiState.value.formState
+          name = ingredient.name, unit = ingredient.unit, amount = ingredient.amount
+        ), viewModel.ingredientUiState.value.formState
       )
       assertFalse(viewModel.ingredientUiState.value.unsavedChanges)
     }
@@ -182,8 +174,7 @@ class EditRecipeViewModelTest {
   @Test
   fun applyChapterChanges() {
     val newFormState = EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
-      name = "Name Updated",
-      note = "Note Updated"
+      name = "Name Updated", note = "Note Updated"
     )
 
     withNewRecipe().apply {
@@ -193,8 +184,8 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertEquals(
         newFormState, EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
-          name = viewModel.infoUiState.value.chapters.first().second.value.name,
-          note = viewModel.infoUiState.value.chapters.first().second.value.note,
+          name = viewModel.infoUiState.value.chapters.first().second.chapter.name,
+          note = viewModel.infoUiState.value.chapters.first().second.chapter.note,
         )
       )
     }
@@ -206,8 +197,8 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertEquals(
         newFormState, EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
-          name = viewModel.infoUiState.value.chapters.first().second.value.name,
-          note = viewModel.infoUiState.value.chapters.first().second.value.note,
+          name = viewModel.infoUiState.value.chapters.first().second.chapter.name,
+          note = viewModel.infoUiState.value.chapters.first().second.chapter.note,
         )
       )
     }
@@ -216,9 +207,7 @@ class EditRecipeViewModelTest {
   @Test
   fun applyStepChanges() {
     val newFormState = EditRecipeViewModel.StepScreenUiState.StepFormState(
-      description = "Description Updated",
-      timerMinutes = 5,
-      note = "Note Updated"
+      description = "Description Updated", timerMinutes = 5, note = "Note Updated"
     )
 
     withNewRecipe().apply {
@@ -255,9 +244,7 @@ class EditRecipeViewModelTest {
   @Test
   fun applyIngredientChanges() {
     val newFormState = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(
-      name = "Name Updated",
-      amount = 5f,
-      unit = "Unit Updated"
+      name = "Name Updated", amount = 5f, unit = "Unit Updated"
     )
 
     withNewRecipe().apply {
@@ -295,8 +282,7 @@ class EditRecipeViewModelTest {
   @Test
   fun setChapterFormState() {
     val newFormState = EditRecipeViewModel.ChapterScreenUiState.ChapterFormState(
-      name = "Name Updated",
-      note = "Note Updated"
+      name = "Name Updated", note = "Note Updated"
     )
 
     withNewRecipe().apply {
@@ -309,9 +295,7 @@ class EditRecipeViewModelTest {
   @Test
   fun setStepFormState() {
     val newFormState = EditRecipeViewModel.StepScreenUiState.StepFormState(
-      description = "Description Updated",
-      timerMinutes = 5,
-      note = "Note Updated"
+      description = "Description Updated", timerMinutes = 5, note = "Note Updated"
     )
 
     withNewRecipe().apply {
@@ -324,9 +308,7 @@ class EditRecipeViewModelTest {
   @Test
   fun setIngredientFormState() {
     val newFormState = EditRecipeViewModel.IngredientScreenUiState.IngredientFormState(
-      name = "Name Updated",
-      amount = 5f,
-      unit = "Unit Updated"
+      name = "Name Updated", amount = 5f, unit = "Unit Updated"
     )
 
     withNewRecipe().apply {
@@ -381,8 +363,8 @@ class EditRecipeViewModelTest {
       swapChapterPositions(1, 2)
     }.also { viewModel ->
       // swap indexes 1 and 2
-      val expected = TestRecipeRepository.Data.recipes
-        .first().chapters.toMutableList().also { list ->
+      val expected =
+        TestRecipeRepository.Data.recipes.first().chapters.toMutableList().also { list ->
           list[1] = list[2].also { list[2] = list[1] }
         }
       val actual = viewModel.infoUiState.value.chapters.map { it.second }
@@ -397,10 +379,11 @@ class EditRecipeViewModelTest {
       swapStepPositions(1, 2)
     }.also { viewModel ->
       // swap indexes 1 and 2
-      val expected = TestRecipeRepository.Data.recipes
-        .first().chapters.first().steps.toMutableList().also { list ->
-          list[1] = list[2].also { list[2] = list[1] }
-        }
+      val expected =
+        TestRecipeRepository.Data.recipes.first().chapters.first().steps.toMutableList()
+          .also { list ->
+            list[1] = list[2].also { list[2] = list[1] }
+          }
       val actual = viewModel.chapterUiState.value.steps.map { it.second }
       assertEquals(expected, actual)
     }
@@ -414,10 +397,11 @@ class EditRecipeViewModelTest {
       swapIngredientPositions(1, 2)
     }.also { viewModel ->
       // swap indexes 1 and 2
-      val expected = TestRecipeRepository.Data.recipes
-        .first().chapters.first().steps.first().ingredients.toMutableList().also { list ->
-          list[1] = list[2].also { list[2] = list[1] }
-        }
+      val expected =
+        TestRecipeRepository.Data.recipes.first().chapters.first().steps.first().ingredients.toMutableList()
+          .also { list ->
+            list[1] = list[2].also { list[2] = list[1] }
+          }
       val actual = viewModel.stepUiState.value.ingredients.map { it.second }
       assertEquals(expected, actual)
     }

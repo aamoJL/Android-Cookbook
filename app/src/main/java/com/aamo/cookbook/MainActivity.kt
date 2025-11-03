@@ -2,7 +2,6 @@ package com.aamo.cookbook
 
 import android.app.Application
 import android.os.Bundle
-import android.os.Environment
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedContentTransitionScope
@@ -30,7 +29,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.aamo.cookbook.features.home.HomePage
-import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -76,28 +74,19 @@ class MainActivity : ComponentActivity() {
         val snackScope = rememberCoroutineScope()
 
         Box {
-          HomePage()
+          HomePage(
+            onShowSnackbar = { properties ->
+              snackScope.launch {
+                snackState.showSnackbar(
+                  message = properties.message,
+                  actionLabel = properties.actionLabel,
+                  withDismissAction = properties.withDismissAction,
+                  duration = properties.duration
+                )
+              }
+            })
           SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
         }
-
-        // TODO: snackbar
-        // A surface container using the 'background' color from the theme
-//        Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
-//          Box {
-//            MainNavGraph(
-//              onShowSnackbar = { properties ->
-//                snackScope.launch {
-//                  snackState.showSnackbar(
-//                    message = properties.message,
-//                    actionLabel = properties.actionLabel,
-//                    withDismissAction = properties.withDismissAction,
-//                    duration = properties.duration
-//                  )
-//                }
-//              })
-//            SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
-//          }
-//        }
       }
     }
   }
@@ -149,9 +138,9 @@ fun MainNavGraph(
             appViewModel.getRecipeWithChaptersStepsAndIngredients(id)?.let { recipe ->
               recipe.copyAsNew().let { recipeCopy ->
                 recipeCopy.copy(
-                  value = recipeCopy.value.copy(
+                  recipe = recipeCopy.recipe.copy(
                     name = context.getString(
-                      R.string.recipe_name_copy, recipe.value.name
+                      R.string.recipe_name_copy, recipe.recipe.name
                     )
                   )
                 )
@@ -178,7 +167,7 @@ fun MainNavGraph(
       onSubmitChanges = { recipe ->
         appViewModel.viewModelScope.launch {
           val id = appViewModel.upsertRecipe(recipe)
-          appViewModel.setSelectedCategory(recipe.value.category)
+          appViewModel.setSelectedCategory(recipe.recipe.category)
 
           if (navController.previousBackStackEntry?.destination?.route == Screen.Recipe.getRoute()) {
             navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
@@ -193,18 +182,7 @@ fun MainNavGraph(
           onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_saved_successfully)))
         }
       },
-      onDeleteRecipe = {
-        appViewModel.viewModelScope.launch {
-          appViewModel.deleteRecipe(it)
-          // Delete thumbnail file
-          IOService(context).deleteExternalFile(Environment.DIRECTORY_PICTURES, it.thumbnailUri)
-
-          navController.navigate(Screen.Categories.getRoute()) {
-            popUpTo(Screen.Categories.getRoute()) { inclusive = true }
-          }
-          onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_deleted_successfully)))
-        }
-      },
+      onDeleteRecipe = {},
     )
   }
 }

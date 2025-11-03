@@ -1,4 +1,4 @@
-package com.aamo.cookbook.features.recipe.list
+package com.aamo.cookbook.features.recipe.list.screens
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -43,10 +43,10 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.RecipeCard
 import com.aamo.cookbook.ui.components.inputs.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
@@ -192,7 +192,7 @@ private fun SearchTopBar(
     IconButton(onClick = { onBack() }) {
       Icon(
         painter = painterResource(R.drawable.rounded_arrow_back_24),
-        contentDescription = stringResource(R.string.description_screen_back)
+        contentDescription = stringResource(R.string.cd_navigate_back)
       )
     }
   })

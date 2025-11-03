@@ -43,7 +43,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.BuildConfig
 import com.aamo.cookbook.R
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.components.FiveStarRating
+import com.aamo.cookbook.ui.components.inputs.FiveStarRating
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import java.io.File
@@ -95,9 +95,8 @@ private fun ThumbnailPicker(
         Image(
           painter = rememberAsyncImagePainter(
             model = IOService(LocalContext.current).getExternalFileUri(
-                Environment.DIRECTORY_PICTURES,
-                fileName
-              )
+              Environment.DIRECTORY_PICTURES, fileName
+            )
           ),
           contentDescription = null,
           contentScale = ContentScale.Crop,

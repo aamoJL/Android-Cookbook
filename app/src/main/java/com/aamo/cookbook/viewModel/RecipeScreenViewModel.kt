@@ -45,19 +45,19 @@ class RecipeScreenViewModel(
         }
         _summaryPageUiStates.update {
           SummaryPageUiState(
-            recipeName = recipe.value.name,
-            recipeNote = recipe.value.note,
-            recipeThumbnail = recipe.value.thumbnailUri,
+            recipeName = recipe.recipe.name,
+            recipeNote = recipe.recipe.note,
+            recipeThumbnail = recipe.recipe.thumbnailUri,
             chaptersWithIngredients = recipe.chapters.map { chapter ->
               Pair(
-                chapter.value.name, chapter.steps.flatMap { it.ingredients })
+                chapter.chapter.name, chapter.steps.flatMap { it.ingredients })
             })
         }
         _servingsState.update {
-          ServingsState(baseline = recipe.value.servings, current = recipe.value.servings)
+          ServingsState(baseline = recipe.recipe.servings, current = recipe.recipe.servings)
         }
         _completedPageUiState.update { s ->
-          s.copy(recipeThumbnail = recipe.value.thumbnailUri)
+          s.copy(recipeThumbnail = recipe.recipe.thumbnailUri)
         }
       }
     }

@@ -82,32 +82,32 @@ class EditRecipeChapterStepIngredientScreenTest {
 
   @Test
   fun backButton_isVisible() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).assertExists()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).assertExists()
   }
 
   @Test
   fun onBack_noChanges() {
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     assert(wasClicked)
-    rule.onNodeWithText(R.string.dialog_title_unsaved_default).assertDoesNotExist()
+    rule.onNodeWithText(R.string.dialog_title_unsaved_changes).assertDoesNotExist()
   }
 
   @Test
   fun onBack_dialogVisible() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     Assert.assertFalse(wasClicked) // OnBack happens only if the user confirms the dialog
-    rule.onNodeWithText(R.string.dialog_title_unsaved_default).assertExists()
+    rule.onNodeWithText(R.string.dialog_title_unsaved_changes).assertExists()
   }
 
   @Test
   fun onBack_dialogDismiss() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     rule.onNodeWithText(R.string.dialog_dismiss_default).performClick()
     Assert.assertFalse(wasClicked) // OnBack happens only if the user confirms the dialog
@@ -117,7 +117,7 @@ class EditRecipeChapterStepIngredientScreenTest {
   fun onBack_dialogConfirm() {
     uiState = uiState.copy(unsavedChanges = true)
 
-    rule.onNodeWithContentDescription(R.string.description_screen_back).performClick()
+    rule.onNodeWithContentDescription(R.string.cd_navigate_back).performClick()
 
     rule.onNodeWithText(R.string.dialog_confirm_unsaved_default).performClick()
     assert(wasClicked) // OnBack happens only if the user confirms the dialog

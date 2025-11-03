@@ -31,8 +31,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.components.CountInput
 import com.aamo.cookbook.ui.components.NoteCard
+import com.aamo.cookbook.ui.components.inputs.CountInput
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.extensions.general.toStringWithoutZero

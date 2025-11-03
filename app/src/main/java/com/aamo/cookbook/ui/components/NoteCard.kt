@@ -33,15 +33,14 @@ fun NoteCard(
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
   ),
 ) {
-  if(text.isEmpty()) return
+  if (text.isEmpty()) return
   ElevatedCard(
-    colors = colors,
-    shape = CutCornerShape(bottomEnd = 15.dp)
+    colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)
   ) {
     Box(modifier = modifier) {
       Column(modifier = Modifier.padding(8.dp)) {
         Text(
-          text = "${stringResource(R.string.textfield_label_note)}:",
+          text = "${stringResource(R.string.label_note)}:",
           fontFamily = Handwritten,
           style = MaterialTheme.typography.labelSmall
         )
@@ -61,7 +60,7 @@ fun NoteCard(
 
 @PreviewLightDark
 @Composable
-private fun Preview(){
+private fun Preview() {
   CookbookTheme {
     NoteCard(text = "Ashioho hio shiods isdhoiosh dioshdoi")
   }
