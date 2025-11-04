@@ -144,10 +144,10 @@ class EditRecipeChapterStepIngredientScreenTest {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+        rule.activity.getString(R.string.label_amount).asOptionalLabel()
       ).assertTextContains("")
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+        rule.activity.getString(R.string.label_unit).asOptionalLabel()
       ).assertTextContains(uiState.formState.unit)
     }
 
@@ -155,10 +155,10 @@ class EditRecipeChapterStepIngredientScreenTest {
       rule.onNodeWithText(R.string.textfield_ingredient_name)
         .assertTextContains(uiState.formState.name)
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+        rule.activity.getString(R.string.label_amount).asOptionalLabel()
       ).assertTextContains(uiState.formState.amount!!.toString())
       rule.onNodeWithText(
-        rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+        rule.activity.getString(R.string.label_unit).asOptionalLabel()
       ).assertTextContains(uiState.formState.unit)
     }
   }
@@ -175,14 +175,14 @@ class EditRecipeChapterStepIngredientScreenTest {
     }
 
     rule.onNodeWithText(
-      rule.activity.getString(R.string.textfield_ingredient_amount).asOptionalLabel()
+      rule.activity.getString(R.string.label_amount).asOptionalLabel()
     ).apply {
       performTextClearance()
       performTextInput(expected.amount.toString())
     }
 
     rule.onNodeWithText(
-      rule.activity.getString(R.string.textfield_ingredient_unit).asOptionalLabel()
+      rule.activity.getString(R.string.label_unit).asOptionalLabel()
     ).apply {
       performTextClearance()
       performTextInput(expected.unit)

@@ -107,7 +107,7 @@ private fun IngredientForm(
   modifier: Modifier = Modifier,
   onStateChange: (EditRecipeViewModel.IngredientScreenUiState.IngredientFormState) -> Unit = {}
 ) {
-  FormBase(title = stringResource(R.string.form_title_ingredient), modifier = modifier) {
+  FormBase(title = stringResource(R.string.title_ingredient), modifier = modifier) {
     FormTextField(
       value = formState.name,
       onValueChange = { onStateChange(formState.copy(name = it)) },
@@ -117,13 +117,13 @@ private fun IngredientForm(
       FormFloatField(
         value = if (formState.amount == 0f) null else formState.amount,
         onValueChange = { onStateChange(formState.copy(amount = it)) },
-        label = stringResource(R.string.textfield_ingredient_amount).asOptionalLabel(),
+        label = stringResource(R.string.label_amount).asOptionalLabel(),
         modifier = Modifier.weight(1f, true),
       )
       FormTextField(
         value = formState.unit,
         onValueChange = { onStateChange(formState.copy(unit = it)) },
-        label = stringResource(R.string.textfield_ingredient_unit).asOptionalLabel(),
+        label = stringResource(R.string.label_unit).asOptionalLabel(),
         keyboardOptions = FormTextFieldDefaults.keyboardOptions.copy(
           capitalization = KeyboardCapitalization.None, imeAction = ImeAction.Done
         ),

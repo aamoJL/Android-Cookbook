@@ -33,6 +33,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
@@ -41,7 +43,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavGraphBuilder
+import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
@@ -138,7 +142,6 @@ class RecipeFormInfoScreenViewModel(
 
 fun NavGraphBuilder.recipeFormInfoScreen(
   formData: () -> RecipeFormInfoFields,
-  onNewChapter: () -> Unit,
   onDeleteRecipe: () -> Unit,
   onSubmit: (RecipeFormInfoFields) -> Unit,
   onBack: () -> Unit
@@ -151,41 +154,33 @@ fun NavGraphBuilder.recipeFormInfoScreen(
         }, saveData = onSubmit)
       }
     })
-    val formState = viewmodel.formState
 
-    var openUnsavedDialog by remember { mutableStateOf(false) }
-    var openDeleteDialog by remember { mutableStateOf(false) }
+    val infoNavController = rememberNavController()
 
-    UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
-      openUnsavedDialog = false
-      onBack()
-    })
-
-    DeleteDialog(
-      open = openDeleteDialog,
-      title = stringResource(R.string.dialog_title_delete_recipe),
-      onDismiss = { openDeleteDialog = false },
-      onConfirm = {
-        openDeleteDialog = false
-        onDeleteRecipe()
+    NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
+      composable<RecipeFormInfoScreen> {
+        val formState = viewmodel.formState
+        RecipeFormInfoScreenContent(
+          formState = formState,
+          categorySuggestions = viewmodel.categorySuggestions,
+          isNew = viewmodel.isNew,
+          onNewChapter = {
+            infoNavController.navigate(RecipeFormChapterScreen(index = formState.chapters.values.size))
+          },
+          onEditChapter = { TODO() },
+          onDeleteChapter = { TODO() },
+          onSwapChapters = { from, to -> TODO() },
+          onDelete = onDeleteRecipe,
+          onSubmit = { viewmodel.save() },
+          onBack = onBack,
+        )
+      }
+      recipeFormChapterScreen(formData = { index ->
+        viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
+      }, onSubmit = { TODO() }, onBack = {
+        infoNavController.navigateUp()
       })
-
-    BackHandler(enabled = formState.savingState.unsavedChanges) {
-      openUnsavedDialog = true
     }
-
-    RecipeFormInfoScreenContent(
-      formState = formState,
-      categorySuggestions = viewmodel.categorySuggestions,
-      isNew = viewmodel.isNew,
-      onNewChapter = onNewChapter,
-      onEditChapter = { TODO() },
-      onDeleteChapter = { TODO() },
-      onDelete = { openDeleteDialog = true },
-      onSubmit = { viewmodel.save() },
-      onBack = { if (formState.savingState.unsavedChanges) openUnsavedDialog = true else onBack() },
-      onSwapChapters = { from, to -> TODO() },
-    )
   }
 }
 
@@ -197,37 +192,61 @@ fun RecipeFormInfoScreenContent(
   onNewChapter: () -> Unit,
   onEditChapter: (index: Int) -> Unit,
   onDeleteChapter: (RecipeFormChapterFields) -> Boolean,
+  onSwapChapters: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onDelete: () -> Unit,
   onBack: () -> Unit,
-  onSwapChapters: (from: Int, to: Int) -> Unit,
 ) {
+  var openUnsavedDialog by remember { mutableStateOf(false) }
+  var openDeleteDialog by remember { mutableStateOf(false) }
+
+  UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
+    openUnsavedDialog = false
+    onBack()
+  })
+
+  DeleteDialog(
+    open = openDeleteDialog,
+    title = stringResource(R.string.dialog_title_delete_recipe),
+    onDismiss = { openDeleteDialog = false },
+    onConfirm = {
+      openDeleteDialog = false
+      onDelete()
+    })
+
+  BackHandler(enabled = formState.savingState.unsavedChanges) {
+    openUnsavedDialog = true
+  }
+
   Scaffold(
     topBar = {
       PrimaryTopAppBar(
         title = when (isNew) {
-          true -> stringResource(R.string.screen_title_new_recipe)
-          else -> stringResource(R.string.screen_title_existing_recipe)
-        }, onBack = onBack, actions = {
-          if (!isNew) {
-            IconButton(onClick = onDelete) {
-              Icon(
-                painter = painterResource(R.drawable.rounded_delete_24),
-                contentDescription = stringResource(R.string.cd_delete_recipe)
-              )
-            }
-          }
-          LoadingIconButton(
-            onClick = onSubmit,
-            isLoading = formState.savingState.state == SavingState.State.SAVING,
-            enabled = formState.canSave(),
-          ) {
+        true -> stringResource(R.string.screen_title_new_recipe)
+        else -> stringResource(R.string.screen_title_existing_recipe)
+      }, onBack = {
+        if (formState.savingState.unsavedChanges) openUnsavedDialog = true
+        else onBack()
+      }, actions = {
+        if (!isNew) {
+          IconButton(onClick = { openDeleteDialog = true }) {
             Icon(
-              painter = painterResource(R.drawable.rounded_check_24),
-              contentDescription = stringResource(R.string.cd_save)
+              painter = painterResource(R.drawable.rounded_delete_24),
+              contentDescription = stringResource(R.string.cd_delete_recipe)
             )
           }
-        })
+        }
+        LoadingIconButton(
+          onClick = onSubmit,
+          isLoading = formState.savingState.state == SavingState.State.SAVING,
+          enabled = formState.canSave(),
+        ) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_check_24),
+            contentDescription = stringResource(R.string.cd_save)
+          )
+        }
+      })
     }) {
     Column(
       verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -261,7 +280,11 @@ private fun InfoForm(
         label = { Text(stringResource(R.string.label_name)) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Next
+        ),
         modifier = Modifier.weight(2f, true)
       )
       IntNumberField(
@@ -281,7 +304,11 @@ private fun InfoForm(
         onValueChange = { formState.category.update(it) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Next
+        ),
         options = categorySuggestions.keys.filter {
           it.contains(formState.category.value, ignoreCase = true)
         }.sorted(),
@@ -293,7 +320,11 @@ private fun InfoForm(
         onValueChange = { formState.subCategory.update(it) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Next
+        ),
         options = categorySuggestions[formState.category.value]?.filter {
           it.contains(formState.subCategory.value, ignoreCase = true)
         }?.sorted() ?: emptyList(),
@@ -305,7 +336,11 @@ private fun InfoForm(
         label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Done
+        ),
         modifier = Modifier.fillMaxWidth()
       )
     }

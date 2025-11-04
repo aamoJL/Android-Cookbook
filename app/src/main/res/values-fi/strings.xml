@@ -17,7 +17,7 @@
     <string name="title_recipe">Reseptin tiedot</string>
     <string name="form_title_chapter">%1$s. kappaleen tiedot</string>
     <string name="form_title_step">%1$s. vaiheen tiedot</string>
-    <string name="form_title_ingredient">Ainesosan tiedot</string>
+    <string name="title_ingredient">Ainesosan tiedot</string>
     <string name="title_chapters">Kappaleet</string>
     <string name="form_list_title_steps">Vaiheet</string>
     <string name="form_list_title_ingredients">Ainesosat</string>
@@ -39,10 +39,10 @@
     <string name="label_category">Kategoria</string>
     <string name="label_subcategory">Alakategoria</string>
     <string name="textfield_chapter_name">Nimi</string>
-    <string name="textfield_step_description">Kuvaus</string>
+    <string name="label_description">Kuvaus</string>
     <string name="textfield_ingredient_name">Nimi</string>
-    <string name="textfield_ingredient_amount">Määrä</string>
-    <string name="textfield_ingredient_unit">Mitta</string>
+    <string name="label_amount">Määrä</string>
+    <string name="label_unit">Mitta</string>
     <string name="textfield_placeholder_search">Hae…</string>
     <string name="input_title_servings">Annokset</string>
     <string name="button_text_save">Tallenna</string>
@@ -62,7 +62,7 @@
     <string name="snackbar_recipe_saved_successfully">Resepti tallennettu onnistuneesti.</string>
     <string name="abbreviation_minutes">%1$s m</string>
     <string name="description_set_timer">Aseta ajastin</string>
-    <string name="textfield_step_timer">Ajastin (minuuttia)</string>
+    <string name="label_step_timer">Ajastin (minuuttia)</string>
     <string name="label_note">Huomautus</string>
     <string name="description_take_a_photo">Ota kuva</string>
     <string name="description_delete_photo">Poista kuva</string>

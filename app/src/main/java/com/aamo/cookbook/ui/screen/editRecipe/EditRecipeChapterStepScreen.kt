@@ -116,7 +116,9 @@ fun EditRecipeChapterStepScreenContent(
     )
   }) {
     Column(
-      modifier = modifier.padding(it).padding(8.dp)
+      modifier = modifier
+        .padding(it)
+        .padding(8.dp)
     ) {
       StepForm(
         uiState = uiState.formState,
@@ -145,12 +147,12 @@ private fun StepForm(
     FormTextField(
       value = uiState.description,
       onValueChange = { onStateChange(uiState.copy(description = it)) },
-      label = stringResource(R.string.textfield_step_description)
+      label = stringResource(R.string.label_description)
     )
     FormNumberField(
       value = uiState.timerMinutes,
       onValueChange = { onStateChange(uiState.copy(timerMinutes = it)) },
-      label = stringResource(R.string.textfield_step_timer).asOptionalLabel()
+      label = stringResource(R.string.label_step_timer).asOptionalLabel()
     )
     FormTextField(
       value = uiState.note,
@@ -217,7 +219,9 @@ private fun IngredientListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
-      modifier = Modifier.clickable { onClick() }.testTag(UITag.INGREDIENT_ITEM.name),
+      modifier = Modifier
+        .clickable { onClick() }
+        .testTag(UITag.INGREDIENT_ITEM.name),
       headlineContent = {
         Row(
           horizontalArrangement = Arrangement.spacedBy(8.dp),

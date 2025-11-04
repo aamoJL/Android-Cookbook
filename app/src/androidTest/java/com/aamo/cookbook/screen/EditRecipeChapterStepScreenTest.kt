@@ -171,12 +171,12 @@ class EditRecipeChapterStepScreenTest {
   @Test
   fun formInputInitValues() {
     withNewStep().apply {
-      rule.onNodeWithText(R.string.textfield_step_description)
+      rule.onNodeWithText(R.string.label_description)
         .assertTextContains(uiState.formState.description)
     }
 
     withExistingStep().apply {
-      rule.onNodeWithText(R.string.textfield_step_description)
+      rule.onNodeWithText(R.string.label_description)
         .assertTextContains(uiState.formState.description)
     }
   }
@@ -187,7 +187,7 @@ class EditRecipeChapterStepScreenTest {
       description = "description changed",
     )
 
-    rule.onNodeWithText(R.string.textfield_step_description).apply {
+    rule.onNodeWithText(R.string.label_description).apply {
       performTextClearance()
       performTextInput(expected.description)
     }

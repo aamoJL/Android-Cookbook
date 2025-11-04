@@ -1,10 +1,11 @@
 package com.aamo.cookbook.features.recipe.form.models
 
-import kotlinx.serialization.Serializable
+import com.aamo.cookbook.utility.extensions.general.EMPTY
+import java.util.UUID
 
-@Serializable
 data class RecipeFormIngredientFields(
-  val name: String,
-  val amount: Float,
-  val unit: String,
+  val uuid: UUID = UUID.randomUUID(),
+  val name: String = String.EMPTY,
+  val amount: Float = 0f,
+  val unit: String = String.EMPTY,
 )

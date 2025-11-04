@@ -30,11 +30,8 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
-import com.aamo.cookbook.features.recipe.form.screens.RecipeFormChapterScreen
 import com.aamo.cookbook.features.recipe.form.screens.RecipeFormInfoScreen
-import com.aamo.cookbook.features.recipe.form.screens.recipeFormChapterScreen
 import com.aamo.cookbook.features.recipe.form.screens.recipeFormInfoScreen
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
@@ -53,8 +50,6 @@ class RecipeFormViewModel(
 ) : ViewModel() {
   var infoFields by mutableStateOf(RecipeFormInfoFields())
     private set
-
-  val chapterFields = mutableListOf<RecipeFormChapterFields>()
 
   var isLoading by mutableStateOf(true)
     private set
@@ -109,20 +104,11 @@ fun NavGraphBuilder.recipeFormPage(onBack: () -> Unit, onRecipeDeleted: () -> Un
 
     LoadingScreen(enabled = viewmodel.isLoading) {
       NavHost(navController = formNavController, startDestination = RecipeFormInfoScreen) {
-        recipeFormInfoScreen(formData = { viewmodel.infoFields }, onNewChapter = {
-          formNavController.navigate(RecipeFormChapterScreen(index = viewmodel.chapterFields.size)) {
-            launchSingleTop = true
-          }
-        }, onDeleteRecipe = {
+        recipeFormInfoScreen(formData = { viewmodel.infoFields }, onDeleteRecipe = {
           viewmodel.viewModelScope.launch {
             viewmodel.deleteRecipe().onTrue { onRecipeDeleted() }
           }
         }, onBack = onBack, onSubmit = { TODO() })
-        recipeFormChapterScreen(formData = { index ->
-          viewmodel.chapterFields.elementAtOrNull(index) ?: RecipeFormChapterFields()
-        }, onNewStep = { TODO() }, onSubmit = { TODO() }, onBack = {
-          formNavController.navigateUp()
-        })
       }
     }
   }

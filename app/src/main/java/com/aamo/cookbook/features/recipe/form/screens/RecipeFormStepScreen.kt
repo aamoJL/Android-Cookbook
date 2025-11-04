@@ -3,13 +3,12 @@ package com.aamo.cookbook.features.recipe.form.screens
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardOptions
@@ -31,6 +30,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
@@ -47,13 +47,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
+import com.aamo.cookbook.ui.components.inputs.IntNumberField
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
@@ -67,22 +67,22 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeFormChapterScreen(val index: Int)
+data class RecipeFormStepScreen(val index: Int)
 
-class RecipeFormChapterScreenViewModel(
-  formData: RecipeFormChapterFields,
-  private val saveData: suspend (RecipeFormChapterFields) -> Unit,
+class RecipeFormStepScreenViewModel(
+  formData: RecipeFormStepFields,
+  private val saveData: suspend (RecipeFormStepFields) -> Unit,
 ) : ViewModel() {
-  class FormState(formData: RecipeFormChapterFields) {
-    val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
+  class FormState(formData: RecipeFormStepFields) {
+    val description = ViewModelState(formData.description).onChange { onUnsavedChanges() }
+    val timerMinutes = ViewModelState(formData.timerMinutes ?: 1).onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
-    val steps = ViewModelStateList(formData.steps).onChange { onUnsavedChanges() }
+    val ingredients = ViewModelStateList(formData.ingredients).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
-      if (name.value.isEmpty()) return false
-      if (steps.values.isEmpty()) return false
+      if (description.value.isEmpty()) return false
       return true
     }
 
@@ -94,7 +94,7 @@ class RecipeFormChapterScreenViewModel(
   }
 
   val formState = FormState(formData)
-  val isNew = formData.name.isEmpty()
+  val isNew = formData.description.isEmpty()
 
   fun save() {
     if (!formState.canSave()) return
@@ -103,7 +103,12 @@ class RecipeFormChapterScreenViewModel(
 
     viewModelScope.launch {
       saveData(formState.let {
-        RecipeFormChapterFields(name = it.name.value, note = it.note.value, steps = it.steps.values)
+        RecipeFormStepFields(
+          description = it.description.value,
+          timerMinutes = it.timerMinutes.value,
+          note = it.note.value,
+          ingredients = it.ingredients.values
+        )
       })
     }.invokeOnCompletion {
       formState.apply { savingState = savingState.getAsSaved() }
@@ -111,59 +116,58 @@ class RecipeFormChapterScreenViewModel(
   }
 }
 
-fun NavGraphBuilder.recipeFormChapterScreen(
-  formData: (index: Int) -> RecipeFormChapterFields,
-  onSubmit: (RecipeFormChapterFields) -> Unit,
+fun NavGraphBuilder.recipeFormStepScreen(
+  formData: (index: Int) -> RecipeFormStepFields,
+  onSubmit: (RecipeFormStepFields) -> Unit,
   onBack: () -> Unit,
 ) {
-  composable<RecipeFormChapterScreen> { navStack ->
-    val (index) = navStack.toRoute<RecipeFormChapterScreen>()
-    val viewmodel: RecipeFormChapterScreenViewModel = viewModel(factory = viewModelFactory {
+  composable<RecipeFormStepScreen> { navStack ->
+    val (index) = navStack.toRoute<RecipeFormStepScreen>()
+    val viewmodel: RecipeFormStepScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipeFormChapterScreenViewModel(
+        RecipeFormStepScreenViewModel(
           formData = formData(index),
           saveData = onSubmit,
         )
       }
     })
 
-    val chapterNavController = rememberNavController()
+    val stepNavController = rememberNavController()
 
     NavHost(
-      navController = chapterNavController,
-      startDestination = RecipeFormChapterScreen(index = index)
+      navController = stepNavController, startDestination = RecipeFormStepScreen(index = index)
     ) {
-      composable<RecipeFormChapterScreen> {
-        RecipeFormChapterScreenContent(
+      composable<RecipeFormStepScreen> {
+        RecipeFormStepScreenContent(
           formState = viewmodel.formState,
           isNew = viewmodel.isNew,
-          chapterIndex = index,
-          onNewStep = { chapterNavController.navigate(RecipeFormStepScreen(index = 0)) },
-          onEditStep = { TODO() },
-          onDeleteStep = { TODO() },
-          onSwapSteps = { _, _ -> TODO() },
+          stepIndex = index,
+          onNewIngredient = { stepNavController.navigate(RecipeFormIngredientScreen(index = 0)) },
+          onEditIngredient = { TODO() },
+          onDeleteIngredient = { TODO() },
+          onSwapIngredients = { _, _ -> TODO() },
           onSubmit = { viewmodel.save() },
           onBack = onBack,
         )
       }
-      recipeFormStepScreen(formData = { index ->
-        viewmodel.formState.steps.values.elementAtOrElse(index) { RecipeFormStepFields() }
+      recipeFormIngredientScreen(formData = { index ->
+        viewmodel.formState.ingredients.values.elementAtOrElse(index) { RecipeFormIngredientFields() }
       }, onSubmit = { TODO() }, onBack = {
-        chapterNavController.navigateUp()
+        stepNavController.navigateUp()
       })
     }
   }
 }
 
 @Composable
-fun RecipeFormChapterScreenContent(
-  formState: RecipeFormChapterScreenViewModel.FormState,
+fun RecipeFormStepScreenContent(
+  formState: RecipeFormStepScreenViewModel.FormState,
   isNew: Boolean,
-  chapterIndex: Int,
-  onNewStep: () -> Unit,
-  onEditStep: (index: Int) -> Unit,
-  onDeleteStep: (RecipeFormStepFields) -> (Boolean),
-  onSwapSteps: (from: Int, to: Int) -> Unit,
+  stepIndex: Int,
+  onNewIngredient: () -> Unit,
+  onEditIngredient: (index: Int) -> Unit,
+  onDeleteIngredient: (RecipeFormIngredientFields) -> (Boolean),
+  onSwapIngredients: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onBack: () -> Unit,
 ) {
@@ -181,49 +185,51 @@ fun RecipeFormChapterScreenContent(
   Scaffold(topBar = {
     PrimaryTopAppBar(
       title = when (isNew) {
-      true -> stringResource(R.string.screen_title_new_chapter)
-      else -> stringResource(R.string.screen_title_existing_chapter)
-    }, onBack = {
-      if (formState.savingState.unsavedChanges) openUnsavedDialog = true
-      else onBack()
-    }, actions = {
-      LoadingIconButton(
-        onClick = onSubmit,
-        isLoading = formState.savingState.state == SavingState.State.SAVING,
-        enabled = formState.canSave(),
-      ) {
-        Icon(
-          painter = painterResource(R.drawable.rounded_check_24),
-          contentDescription = stringResource(R.string.cd_save)
-        )
-      }
-    })
+        true -> stringResource(R.string.screen_title_new_step)
+        else -> stringResource(R.string.screen_title_existing_step)
+      },
+      onBack = { if (formState.savingState.unsavedChanges) openUnsavedDialog = true else onBack() },
+      actions = {
+        LoadingIconButton(
+          onClick = onSubmit,
+          isLoading = formState.savingState.state == SavingState.State.SAVING,
+          enabled = formState.canSave(),
+        ) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_check_24),
+            contentDescription = stringResource(R.string.cd_save)
+          )
+        }
+      })
   }) {
     Column(
       modifier = Modifier
         .padding(it)
         .padding(8.dp)
     ) {
-      ChapterForm(formState = formState, chapterNumber = chapterIndex + 1)
+      StepForm(formState = formState, orderNumber = stepIndex + 1)
       Spacer(modifier = Modifier.padding(8.dp))
-      StepList(
-        steps = formState.steps.values,
-        onNewStep = onNewStep,
-        onEditStep = onEditStep,
-        onDeleteStep = onDeleteStep,
-        onSwap = onSwapSteps
+      StepFormIngredientList(
+        ingredients = formState.ingredients.values,
+        onNewIngredient = onNewIngredient,
+        onEditIngredient = onEditIngredient,
+        onDeleteIngredient = onDeleteIngredient,
+        onSwap = onSwapIngredients,
       )
     }
   }
 }
 
 @Composable
-fun ChapterForm(formState: RecipeFormChapterScreenViewModel.FormState, chapterNumber: Int) {
-  FormBase(title = stringResource(R.string.form_title_chapter, chapterNumber)) {
+private fun StepForm(
+  formState: RecipeFormStepScreenViewModel.FormState,
+  orderNumber: Int,
+) {
+  FormBase(title = stringResource(R.string.form_title_step, orderNumber)) {
     TextField(
-      value = formState.name.value,
-      onValueChange = { formState.name.update(it) },
-      label = { Text(stringResource(R.string.label_name)) },
+      value = formState.description.value,
+      onValueChange = { formState.description.update(it) },
+      label = { Text(stringResource(R.string.label_description)) },
       shape = RectangleShape,
       colors = borderlessTextFieldColors(),
       keyboardOptions = KeyboardOptions(
@@ -231,6 +237,15 @@ fun ChapterForm(formState: RecipeFormChapterScreenViewModel.FormState, chapterNu
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next
       ),
+      modifier = Modifier.fillMaxWidth()
+    )
+    IntNumberField(
+      value = formState.timerMinutes.value,
+      label = { Text(stringResource(R.string.label_step_timer)) },
+      shape = RectangleShape,
+      colors = borderlessTextFieldColors(),
+      onValueChange = { formState.timerMinutes.update(it) },
+      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
       modifier = Modifier.fillMaxWidth()
     )
     TextField(
@@ -251,39 +266,38 @@ fun ChapterForm(formState: RecipeFormChapterScreenViewModel.FormState, chapterNu
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun StepList(
-  steps: List<RecipeFormStepFields>,
-  onNewStep: () -> Unit,
-  onEditStep: (index: Int) -> Unit,
-  modifier: Modifier = Modifier,
+private fun StepFormIngredientList(
+  ingredients: List<RecipeFormIngredientFields>,
+  onNewIngredient: () -> Unit,
+  onEditIngredient: (index: Int) -> Unit,
+  onDeleteIngredient: (RecipeFormIngredientFields) -> Boolean,
   onSwap: (from: Int, to: Int) -> Unit,
-  onDeleteStep: (RecipeFormStepFields) -> Boolean,
 ) {
   FormList(
-    title = stringResource(R.string.form_list_title_steps),
-    onAddClick = onNewStep,
-    modifier = modifier
+    title = stringResource(R.string.form_list_title_ingredients),
+    onAddClick = onNewIngredient,
   ) {
     LazyColumn {
       itemsIndexed(
-        items = steps, key = { _, step -> step.uuid }) { index, step ->
+        items = ingredients,
+        key = { _, ingredient -> ingredient.uuid },
+      ) { index, ingredient ->
         Column {
-          StepListItem(
-            step = step,
-            stepNumber = index + 1,
-            onClick = { onEditStep(index) },
-            onDismiss = { onDeleteStep(step) },
+          IngredientListItem(
+            ingredient = ingredient,
+            onClick = { onEditIngredient(index) },
+            onDismiss = { onDeleteIngredient(ingredient) },
             onMoveUp = if (index != 0) {
               { onSwap(index, index - 1) }
             }
             else null,
-            onMoveDown = if (index != steps.size - 1) {
+            onMoveDown = if (index != ingredients.size - 1) {
               { onSwap(index, index + 1) }
             }
             else null,
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier.padding(vertical = 16.dp))
 
-          if (index != steps.size - 1) {
+          if (index != ingredients.size - 1) {
             HorizontalDivider()
           }
         }
@@ -293,34 +307,37 @@ private fun StepList(
 }
 
 @Composable
-fun StepListItem(
-  step: RecipeFormStepFields,
-  stepNumber: Int,
+private fun IngredientListItem(
+  ingredient: RecipeFormIngredientFields,
   onClick: () -> Unit,
   onDismiss: () -> Unit,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
 ) {
-  BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
+  BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
       modifier = Modifier
         .clickable { onClick() }
-        .testTag(UITag.STEP_ITEM.name),
+        .testTag(UITag.INGREDIENT_ITEM.name),
       headlineContent = {
-        Text(
-          text = "${stepNumber}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
-          style = MaterialTheme.typography.titleMedium,
-        )
-      },
-      supportingContent = {
-        StepListIngredientList(ingredients = step.ingredients, modifier = Modifier.padding(16.dp))
-      },
-      overlineContent = step.timerMinutes?.let {
-        {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = modifier.padding(horizontal = 8.dp)
+        ) {
           Text(
-            text = stringResource(R.string.abbreviation_minutes, step.timerMinutes.toString()),
-            style = MaterialTheme.typography.labelSmall
+            text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.End,
+          )
+          Text(
+            text = ingredient.unit,
+            style = MaterialTheme.typography.titleMedium,
+            fontStyle = FontStyle.Italic,
+          )
+          Text(
+            text = ingredient.name,
+            style = MaterialTheme.typography.titleMedium,
           )
         }
       },
@@ -340,33 +357,5 @@ fun StepListItem(
           }
         }
       })
-  }
-}
-
-@Composable
-private fun StepListIngredientList(
-  ingredients: List<RecipeFormIngredientFields>, modifier: Modifier = Modifier
-) {
-  Row(modifier = modifier) {
-    Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-      ingredients.forEach {
-        Text(
-          text = if (it.amount == 0f) "" else it.amount.toFractionFormattedString(),
-          style = MaterialTheme.typography.bodySmall,
-          textAlign = TextAlign.End,
-          modifier = Modifier.fillMaxWidth()
-        )
-      }
-    }
-    Column(modifier = Modifier.padding(horizontal = 8.dp)) {
-      ingredients.forEach {
-        Text(text = it.unit, style = MaterialTheme.typography.bodySmall, modifier = Modifier)
-      }
-    }
-    Column {
-      ingredients.forEach {
-        Text(text = it.name, style = MaterialTheme.typography.bodySmall, modifier = Modifier)
-      }
-    }
   }
 }
