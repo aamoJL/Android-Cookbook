@@ -82,4 +82,5 @@
     <string name="btn_delete">Poista</string>
     <string name="btn_cancel">Peruuta</string>
     <string name="btn_yes">Kyllä</string>
+    <string name="cd_save">Tallenna</string>
 </resources>

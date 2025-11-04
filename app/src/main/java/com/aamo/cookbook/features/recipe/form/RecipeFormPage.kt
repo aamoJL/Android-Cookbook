@@ -1,6 +1,17 @@
 package com.aamo.cookbook.features.recipe.form
 
 import android.os.Environment
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.EaseIn
+import androidx.compose.animation.core.EaseOut
+import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -10,6 +21,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -97,29 +109,56 @@ fun NavGraphBuilder.recipeFormPage(onBack: () -> Unit, onRecipeDeleted: () -> Un
 
     LoadingScreen(enabled = viewmodel.isLoading) {
       NavHost(navController = formNavController, startDestination = RecipeFormInfoScreen) {
-        recipeFormInfoScreen(
-          formData = viewmodel.infoFields,
-          chapterData = viewmodel.chapterFields,
-          onNewChapter = {
-            formNavController.navigate(RecipeFormChapterScreen(index = null)) {
-              launchSingleTop = true
-            }
-          },
-          onDeleteRecipe = {
-            viewmodel.viewModelScope.launch {
-              viewmodel.deleteRecipe().onTrue { onRecipeDeleted() }
-            }
-          },
-          onBack = onBack,
-        )
-        recipeFormChapterScreen(formData = {
-          viewmodel.chapterFields.elementAtOrNull(
-            formNavController.currentBackStackEntry?.toRoute<RecipeFormChapterScreen>()?.index ?: -1
-          ) ?: RecipeFormChapterFields()
-        }, stepsData = emptyList(), onNewStep = {}, onBack = {
+        recipeFormInfoScreen(formData = { viewmodel.infoFields }, onNewChapter = {
+          formNavController.navigate(RecipeFormChapterScreen(index = viewmodel.chapterFields.size)) {
+            launchSingleTop = true
+          }
+        }, onDeleteRecipe = {
+          viewmodel.viewModelScope.launch {
+            viewmodel.deleteRecipe().onTrue { onRecipeDeleted() }
+          }
+        }, onBack = onBack, onSubmit = { TODO() })
+        recipeFormChapterScreen(formData = { index ->
+          viewmodel.chapterFields.elementAtOrNull(index) ?: RecipeFormChapterFields()
+        }, onNewStep = { TODO() }, onSubmit = { TODO() }, onBack = {
           formNavController.navigateUp()
         })
       }
     }
   }
+}
+
+// TODO: transitions
+fun AnimatedContentTransitionScope<NavBackStackEntry>.primaryEnterTransition(): EnterTransition {
+  return fadeIn(
+    animationSpec = tween(300, easing = LinearEasing)
+  ) + slideIntoContainer(
+    animationSpec = tween(300, easing = EaseIn),
+    towards = AnimatedContentTransitionScope.SlideDirection.Start
+  )
+}
+
+fun secondaryEnterTransition(): EnterTransition {
+  return fadeIn(
+    animationSpec = tween(300, easing = LinearEasing)
+  ) + scaleIn(
+    animationSpec = tween(300, easing = EaseIn), initialScale = 0.9f
+  )
+}
+
+fun primaryExitTransition(): ExitTransition {
+  return fadeOut(
+    animationSpec = tween(300, easing = LinearEasing)
+  ) + scaleOut(
+    animationSpec = tween(300, easing = EaseOut), targetScale = 0.9f
+  )
+}
+
+fun AnimatedContentTransitionScope<NavBackStackEntry>.secondaryExitTransition(): ExitTransition {
+  return fadeOut(
+    animationSpec = tween(300, easing = LinearEasing)
+  ) + slideOutOfContainer(
+    animationSpec = tween(300, easing = EaseOut),
+    towards = AnimatedContentTransitionScope.SlideDirection.End
+  )
 }

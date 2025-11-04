@@ -8,4 +8,5 @@ data class RecipeFormInfoFields(
   val subCategory: String = String.EMPTY,
   val servings: Int = 1,
   val note: String = String.EMPTY,
+  val chapters: List<RecipeFormChapterFields> = emptyList()
 )

@@ -1,11 +1,12 @@
 package com.aamo.cookbook.features.recipe.form.models
 
-import kotlinx.serialization.Serializable
+import com.aamo.cookbook.utility.extensions.general.EMPTY
+import java.util.UUID
 
-@Serializable
 data class RecipeFormStepFields(
-  val description: String,
-  val timerMinutes: Int?,
-  val note: String,
-  val ingredients: List<RecipeFormIngredientFields>
+  val uuid: UUID = UUID.randomUUID(),
+  val description: String = String.EMPTY,
+  val timerMinutes: Int? = null,
+  val note: String = String.EMPTY,
+  val ingredients: List<RecipeFormIngredientFields> = emptyList()
 )
