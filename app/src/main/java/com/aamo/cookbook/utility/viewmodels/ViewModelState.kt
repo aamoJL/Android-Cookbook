@@ -9,13 +9,13 @@ class ViewModelState<T>(initValue: T) {
     private set
 
   private var onChange: ((T) -> Unit)? = null
-  private var validationPredicate: ((T) -> T?)? = null
+  private var transformationPredicate: ((T) -> T)? = null
+  private var validationPredicate: ((T) -> Boolean)? = null
 
-  fun update(value: T): T {
-    val validation = validationPredicate
-    val newValue = if (validation != null) validation(value) else value
+  fun update(value: T): T? {
+    val newValue = transformationPredicate?.invoke(value) ?: value
 
-    if (this.value != newValue && newValue != null) {
+    if (this.value != newValue && validationPredicate?.invoke(newValue) != false) {
       this.value = newValue
       onChange?.invoke(this.value)
     }
@@ -32,9 +32,18 @@ class ViewModelState<T>(initValue: T) {
   }
 
   /**
+   * Adds transformation predicate to the state
+   */
+  // TODO: unit test
+  fun transformation(predicate: (T) -> T): ViewModelState<T> {
+    transformationPredicate = predicate
+    return this
+  }
+
+  /**
    * Adds validation predicate to the state
    */
-  fun validation(predicate: (T) -> T?): ViewModelState<T> {
+  fun validation(predicate: (T) -> Boolean): ViewModelState<T> {
     validationPredicate = predicate
     return this
   }

@@ -6,6 +6,6 @@ import java.util.UUID
 data class RecipeFormIngredientFields(
   val uuid: UUID = UUID.randomUUID(),
   val name: String = String.EMPTY,
-  val amount: Float = 0f,
+  val amount: Float? = null,
   val unit: String = String.EMPTY,
 )

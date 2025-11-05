@@ -1,6 +1,7 @@
 package com.aamo.cookbook.utility.extensions.general
 
 import java.util.UUID
+import java.util.regex.Pattern
 
 @Suppress("SameReturnValue") val String.Companion.EMPTY: String get() = ""
 
@@ -30,3 +31,7 @@ fun String.trimFirst(vararg chars: Char): String {
  * Returns the string formatted as a label for an optional input field
  */
 fun String.asOptionalLabel(): String = "(${this})"
+
+fun String.isNumber(): Boolean {
+  @Suppress("HardCodedStringLiteral") return Pattern.matches("^-?\\d*\\.?\\d*", this)
+}

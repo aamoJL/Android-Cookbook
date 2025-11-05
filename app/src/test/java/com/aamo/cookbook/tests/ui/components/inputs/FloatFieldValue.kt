@@ -3,6 +3,7 @@
 package com.aamo.cookbook.tests.ui.components.inputs
 
 import com.aamo.cookbook.ui.components.inputs.FloatFieldValue
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -27,18 +28,24 @@ class FloatFieldValueTests {
         assertTrue(update(value).also { assertEquals(value, this.value) })
       }
       0f.also { value -> assertTrue(update(value).also { assertEquals(value, this.value) }) }
-
-      9991.999f.also { value -> update(value).also { assertFalse(update(value)) } }
     }
   }
 
   @Test
   fun `does not set value when updating invalid value`() {
     FloatFieldValue().apply {
-      this.value.also { value -> update(value).also { assertEquals(0f, this.value) } }
-      Float.POSITIVE_INFINITY.also { value -> update(value).also { assertEquals(0f, this.value) } }
-      Float.NEGATIVE_INFINITY.also { value -> update(value).also { assertEquals(0f, this.value) } }
-      Float.NaN.also { value -> update(value).also { assertEquals(0f, this.value) } }
+      this.value.also { value ->
+        assertFalse(update(value)).also { assertEquals(0f, this.value) }
+      }
+      Float.POSITIVE_INFINITY.also { value ->
+        assertFalse(update(value)).also { assertEquals(0f, this.value) }
+      }
+      Float.NEGATIVE_INFINITY.also { value ->
+        assertFalse(update(value)).also { assertEquals(0f, this.value) }
+      }
+      Float.NaN.also { value ->
+        assertFalse(update(value)).also { assertEquals(0f, this.value) }
+      }
     }
   }
 
@@ -72,10 +79,18 @@ class FloatFieldValueTests {
   @Test
   fun `does not set text when updating invalid value`() {
     FloatFieldValue().apply {
-      this.value.also { value -> update(value).also { assertEquals("0", this.text) } }
-      Float.POSITIVE_INFINITY.also { value -> update(value).also { assertEquals("0", this.text) } }
-      Float.NEGATIVE_INFINITY.also { value -> update(value).also { assertEquals("0", this.text) } }
-      Float.NaN.also { value -> update(value).also { assertEquals("0", this.text) } }
+      this.value.also { value ->
+        assertFalse(update(value)).also { assertEquals("0", this.text) }
+      }
+      Float.POSITIVE_INFINITY.also { value ->
+        assertFalse(update(value)).also { assertEquals("0", this.text) }
+      }
+      Float.NEGATIVE_INFINITY.also { value ->
+        assertFalse(update(value)).also { assertEquals("0", this.text) }
+      }
+      Float.NaN.also { value ->
+        assertFalse(update(value)).also { assertEquals("0", this.text) }
+      }
     }
   }
 
@@ -128,36 +143,16 @@ class FloatFieldValueTests {
       "-9990282350000000000000000000000000000000".also { value ->
         assertFalse(update(value).also { assertEquals("0", this.text) })
       }
-      "..".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      ".-1".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "1.0.0".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "1 2".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      " ".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "test".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "12f".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "--12".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "-.-12".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
-      "1-2".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals("0", this.text) }) }
-      }
+      "..".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      ".-1".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "1.0.0".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "1 2".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      " ".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "test".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "12f".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "--12".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "-.-12".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
+      "1-2".also { value -> assertFalse(update(value).also { assertEquals("0", this.text) }) }
     }
   }
 
@@ -171,20 +166,13 @@ class FloatFieldValueTests {
       "-9990282350000000000000000000000000000000".also { value ->
         assertFalse(update(value).also { assertEquals(0f, this.value) })
       }
-      "..".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals(0f, this.value) }) }
-      }
-      ".-1".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals(0f, this.value) }) }
-      }
-      "1.0.0".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals(0f, this.value) }) }
-      }
-      "1 2".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals(0f, this.value) }) }
-      }
-      " ".also { value ->
-        update(value).also { assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      "..".also { value -> assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      ".-1".also { value -> assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      "1.0.0".also { value -> assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      "1 2".also { value -> assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      " ".also { value -> assertFalse(update(value).also { assertEquals(0f, this.value) }) }
+      String.EMPTY.also { value ->
+        assertFalse(update(value).also { assertEquals(0f, this.value) })
       }
     }
   }

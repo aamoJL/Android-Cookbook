@@ -37,7 +37,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -53,29 +52,26 @@ import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
-import com.aamo.cookbook.ui.components.inputs.IntNumberField
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RecipeFormStepScreen(val index: Int)
 
-class RecipeFormStepScreenViewModel(
-  formData: RecipeFormStepFields,
-  private val saveData: suspend (RecipeFormStepFields) -> Unit,
-) : ViewModel() {
+class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) : ViewModel() {
   class FormState(formData: RecipeFormStepFields) {
     val description = ViewModelState(formData.description).onChange { onUnsavedChanges() }
-    val timerMinutes = ViewModelState(formData.timerMinutes ?: 1).onChange { onUnsavedChanges() }
+    val timerMinutes = ViewModelState(formData.timerMinutes).onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
     val ingredients = ViewModelStateList(formData.ingredients).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
@@ -96,21 +92,26 @@ class RecipeFormStepScreenViewModel(
   val formState = FormState(formData)
   val isNew = formData.description.isEmpty()
 
-  fun save() {
-    if (!formState.canSave()) return
+  fun update(ingredient: RecipeFormIngredientFields) {
+    formState.ingredients.values.indexOfFirst { it.uuid == ingredient.uuid }.also { index ->
+      if (index == -1) formState.ingredients.add(ingredient)
+      else formState.ingredients.replaceAt(index, ingredient)
+    }
+  }
+
+  fun saveModel(): RecipeFormStepFields? {
+    if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
 
-    viewModelScope.launch {
-      saveData(formState.let {
-        RecipeFormStepFields(
-          description = it.description.value,
-          timerMinutes = it.timerMinutes.value,
-          note = it.note.value,
-          ingredients = it.ingredients.values
-        )
-      })
-    }.invokeOnCompletion {
+    return formState.let {
+      formData.copy(
+        description = it.description.value,
+        timerMinutes = it.timerMinutes.value,
+        note = it.note.value,
+        ingredients = it.ingredients.values
+      )
+    }.also {
       formState.apply { savingState = savingState.getAsSaved() }
     }
   }
@@ -124,12 +125,7 @@ fun NavGraphBuilder.recipeFormStepScreen(
   composable<RecipeFormStepScreen> { navStack ->
     val (index) = navStack.toRoute<RecipeFormStepScreen>()
     val viewmodel: RecipeFormStepScreenViewModel = viewModel(factory = viewModelFactory {
-      initializer {
-        RecipeFormStepScreenViewModel(
-          formData = formData(index),
-          saveData = onSubmit,
-        )
-      }
+      initializer { RecipeFormStepScreenViewModel(formData = formData(index)) }
     })
 
     val stepNavController = rememberNavController()
@@ -142,19 +138,22 @@ fun NavGraphBuilder.recipeFormStepScreen(
           formState = viewmodel.formState,
           isNew = viewmodel.isNew,
           stepIndex = index,
-          onNewIngredient = { stepNavController.navigate(RecipeFormIngredientScreen(index = 0)) },
-          onEditIngredient = { TODO() },
-          onDeleteIngredient = { TODO() },
-          onSwapIngredients = { _, _ -> TODO() },
-          onSubmit = { viewmodel.save() },
+          onNewIngredient = {
+            stepNavController.navigate(RecipeFormIngredientScreen(index = viewmodel.formState.ingredients.values.size))
+          },
+          onEditIngredient = { stepNavController.navigate(RecipeFormIngredientScreen(index = it)) },
+          onDeleteIngredient = { viewmodel.formState.ingredients.remove(it) },
+          onSwapIngredients = { a, b -> viewmodel.formState.ingredients.swapAt(a, b) },
+          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
           onBack = onBack,
         )
       }
       recipeFormIngredientScreen(formData = { index ->
         viewmodel.formState.ingredients.values.elementAtOrElse(index) { RecipeFormIngredientFields() }
-      }, onSubmit = { TODO() }, onBack = {
+      }, onSubmit = { ingredient ->
+        viewmodel.update(ingredient)
         stepNavController.navigateUp()
-      })
+      }, onBack = { stepNavController.navigateUp() })
     }
   }
 }
@@ -166,7 +165,7 @@ fun RecipeFormStepScreenContent(
   stepIndex: Int,
   onNewIngredient: () -> Unit,
   onEditIngredient: (index: Int) -> Unit,
-  onDeleteIngredient: (RecipeFormIngredientFields) -> (Boolean),
+  onDeleteIngredient: (RecipeFormIngredientFields) -> Unit,
   onSwapIngredients: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onBack: () -> Unit,
@@ -239,12 +238,13 @@ private fun StepForm(
       ),
       modifier = Modifier.fillMaxWidth()
     )
-    IntNumberField(
+    NullableIntNumberField(
       value = formState.timerMinutes.value,
-      label = { Text(stringResource(R.string.label_step_timer)) },
+      onValueChange = { formState.timerMinutes.update(it) },
+      zeroEqualsNull = true,
+      label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
       shape = RectangleShape,
       colors = borderlessTextFieldColors(),
-      onValueChange = { formState.timerMinutes.update(it) },
       keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
       modifier = Modifier.fillMaxWidth()
     )
@@ -270,7 +270,7 @@ private fun StepFormIngredientList(
   ingredients: List<RecipeFormIngredientFields>,
   onNewIngredient: () -> Unit,
   onEditIngredient: (index: Int) -> Unit,
-  onDeleteIngredient: (RecipeFormIngredientFields) -> Boolean,
+  onDeleteIngredient: (RecipeFormIngredientFields) -> Unit,
   onSwap: (from: Int, to: Int) -> Unit,
 ) {
   FormList(
@@ -282,7 +282,7 @@ private fun StepFormIngredientList(
         items = ingredients,
         key = { _, ingredient -> ingredient.uuid },
       ) { index, ingredient ->
-        Column {
+        Column(modifier = Modifier.animateItem()) {
           IngredientListItem(
             ingredient = ingredient,
             onClick = { onEditIngredient(index) },
@@ -326,7 +326,7 @@ private fun IngredientListItem(
           modifier = modifier.padding(horizontal = 8.dp)
         ) {
           Text(
-            text = if (ingredient.amount == 0f) "" else ingredient.amount.toFractionFormattedString(),
+            text = if (ingredient.amount == 0f || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.End,
           )

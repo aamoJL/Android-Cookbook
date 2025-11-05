@@ -36,6 +36,8 @@ fun BasicDismissibleItem(
   SwipeToDismissBox(
     state = dismissState,
     backgroundContent = { DismissBackground(dismissState) },
+    enableDismissFromEndToStart = false,
+    enableDismissFromStartToEnd = true,
     onDismiss = { dir -> if (dir == SwipeToDismissBoxValue.StartToEnd) dismissAction() },
     content = content,
     modifier = modifier

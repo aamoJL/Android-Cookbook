@@ -26,13 +26,32 @@ class ViewModelStateList<T>(items: List<T> = emptyList()) {
       }
     }
 
-    changed.onTrue { onChange?.invoke() }
+    if (changed) {
+      onChange?.invoke()
+    }
   }
 
   fun remove(vararg items: T) {
     _values.removeAll(items).onTrue {
       onChange?.invoke()
     }
+  }
+
+  fun replaceAt(index: Int, item: T) {
+    val validation = validationPredicate
+    val value = if (validation != null) validation(item) else item
+
+    if (value != null) {
+      _values[index] = item
+      onChange?.invoke()
+    }
+  }
+
+  fun swapAt(indexA: Int, indexB: Int) {
+    if (indexA == indexB) return
+
+    _values[indexA] = _values[indexB].also { _values[indexB] = _values[indexA] }
+    onChange?.invoke()
   }
 
   fun clear() {

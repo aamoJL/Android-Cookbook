@@ -24,6 +24,6 @@ fun LoadingIconButton(
         trackColor = MaterialTheme.colorScheme.surfaceVariant,
       )
     }
-    IconButton(onClick = onClick, enabled = enabled, content = content)
+    IconButton(onClick = onClick, enabled = (enabled && !isLoading), content = content)
   }
 }

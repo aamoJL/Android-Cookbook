@@ -37,7 +37,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -58,20 +57,19 @@ import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RecipeFormChapterScreen(val index: Int)
 
 class RecipeFormChapterScreenViewModel(
-  formData: RecipeFormChapterFields,
-  private val saveData: suspend (RecipeFormChapterFields) -> Unit,
+  private val formData: RecipeFormChapterFields
 ) : ViewModel() {
   class FormState(formData: RecipeFormChapterFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
@@ -96,16 +94,21 @@ class RecipeFormChapterScreenViewModel(
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
-  fun save() {
-    if (!formState.canSave()) return
+  fun update(step: RecipeFormStepFields) {
+    formState.steps.values.indexOfFirst { it.uuid == step.uuid }.also { index ->
+      if (index == -1) formState.steps.add(step)
+      else formState.steps.replaceAt(index, step)
+    }
+  }
+
+  fun saveModel(): RecipeFormChapterFields? {
+    if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
 
-    viewModelScope.launch {
-      saveData(formState.let {
-        RecipeFormChapterFields(name = it.name.value, note = it.note.value, steps = it.steps.values)
-      })
-    }.invokeOnCompletion {
+    return formState.let {
+      formData.copy(name = it.name.value, note = it.note.value, steps = it.steps.values)
+    }.also {
       formState.apply { savingState = savingState.getAsSaved() }
     }
   }
@@ -119,12 +122,7 @@ fun NavGraphBuilder.recipeFormChapterScreen(
   composable<RecipeFormChapterScreen> { navStack ->
     val (index) = navStack.toRoute<RecipeFormChapterScreen>()
     val viewmodel: RecipeFormChapterScreenViewModel = viewModel(factory = viewModelFactory {
-      initializer {
-        RecipeFormChapterScreenViewModel(
-          formData = formData(index),
-          saveData = onSubmit,
-        )
-      }
+      initializer { RecipeFormChapterScreenViewModel(formData = formData(index)) }
     })
 
     val chapterNavController = rememberNavController()
@@ -138,17 +136,22 @@ fun NavGraphBuilder.recipeFormChapterScreen(
           formState = viewmodel.formState,
           isNew = viewmodel.isNew,
           chapterIndex = index,
-          onNewStep = { chapterNavController.navigate(RecipeFormStepScreen(index = 0)) },
-          onEditStep = { TODO() },
-          onDeleteStep = { TODO() },
-          onSwapSteps = { _, _ -> TODO() },
-          onSubmit = { viewmodel.save() },
+          onNewStep = {
+            chapterNavController.navigate(RecipeFormStepScreen(index = viewmodel.formState.steps.values.size))
+          },
+          onEditStep = { chapterNavController.navigate(RecipeFormStepScreen(index = it)) },
+          onDeleteStep = { viewmodel.formState.steps.remove(it) },
+          onSwapSteps = { a, b -> viewmodel.formState.steps.swapAt(a, b) },
+          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
           onBack = onBack,
         )
       }
       recipeFormStepScreen(formData = { index ->
         viewmodel.formState.steps.values.elementAtOrElse(index) { RecipeFormStepFields() }
-      }, onSubmit = { TODO() }, onBack = {
+      }, onSubmit = { step ->
+        viewmodel.update(step)
+        chapterNavController.navigateUp()
+      }, onBack = {
         chapterNavController.navigateUp()
       })
     }
@@ -162,7 +165,7 @@ fun RecipeFormChapterScreenContent(
   chapterIndex: Int,
   onNewStep: () -> Unit,
   onEditStep: (index: Int) -> Unit,
-  onDeleteStep: (RecipeFormStepFields) -> (Boolean),
+  onDeleteStep: (RecipeFormStepFields) -> Unit,
   onSwapSteps: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onBack: () -> Unit,
@@ -257,7 +260,7 @@ private fun StepList(
   onEditStep: (index: Int) -> Unit,
   modifier: Modifier = Modifier,
   onSwap: (from: Int, to: Int) -> Unit,
-  onDeleteStep: (RecipeFormStepFields) -> Boolean,
+  onDeleteStep: (RecipeFormStepFields) -> Unit,
 ) {
   FormList(
     title = stringResource(R.string.form_list_title_steps),
@@ -267,7 +270,7 @@ private fun StepList(
     LazyColumn {
       itemsIndexed(
         items = steps, key = { _, step -> step.uuid }) { index, step ->
-        Column {
+        Column(modifier = Modifier.animateItem()) {
           StepListItem(
             step = step,
             stepNumber = index + 1,
@@ -351,7 +354,7 @@ private fun StepListIngredientList(
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       ingredients.forEach {
         Text(
-          text = if (it.amount == 0f) "" else it.amount.toFractionFormattedString(),
+          text = if (it.amount == 0f || it.amount == null) "" else it.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.bodySmall,
           textAlign = TextAlign.End,
           modifier = Modifier.fillMaxWidth()

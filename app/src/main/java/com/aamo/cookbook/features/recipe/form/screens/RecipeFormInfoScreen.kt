@@ -54,13 +54,14 @@ import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
 import com.aamo.cookbook.ui.components.form.FormList
-import com.aamo.cookbook.ui.components.inputs.IntNumberField
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
 import com.aamo.cookbook.ui.components.inputs.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
@@ -73,17 +74,14 @@ import kotlinx.serialization.Serializable
 data object RecipeFormInfoScreen
 
 class RecipeFormInfoScreenViewModel(
-  formData: RecipeFormInfoFields,
-  fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
-  private val saveData: suspend (RecipeFormInfoFields) -> Unit,
+  private val formData: RecipeFormInfoFields,
+  fetchCategorySuggestions: suspend () -> Map<String, List<String>>
 ) : ViewModel() {
   class FormState(formData: RecipeFormInfoFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val category = ViewModelState(formData.category).onChange { onUnsavedChanges() }
     val subCategory = ViewModelState(formData.category).onChange { onUnsavedChanges() }
-    val servings =
-      ViewModelState(formData.servings).validation { value -> if (value >= 0) value else null }
-        .onChange { onUnsavedChanges() }
+    val servings = ViewModelState<Int?>(formData.servings).onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
     val chapters = ViewModelStateList(formData.chapters).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
@@ -92,8 +90,10 @@ class RecipeFormInfoScreenViewModel(
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
       if (category.value.isEmpty()) return false
-      if (servings.value < 0) return false
       if (chapters.values.isEmpty()) return false
+      servings.value.also {
+        if (it == null || it < 0) return false
+      }
       return true
     }
 
@@ -118,23 +118,29 @@ class RecipeFormInfoScreenViewModel(
     }
   }
 
-  fun save() {
-    if (!formState.canSave()) return
+  fun update(chapter: RecipeFormChapterFields) {
+    formState.chapters.values.indexOfFirst { it.uuid == chapter.uuid }.also { index ->
+      if (index == -1) formState.chapters.add(chapter)
+      else formState.chapters.replaceAt(index, chapter)
+    }
+  }
+
+  fun saveModel(): RecipeFormInfoFields? {
+    if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
 
-    viewModelScope.launch {
-      saveData(formState.let {
-        RecipeFormInfoFields(
-          name = it.name.value,
-          category = it.category.value,
-          subCategory = it.subCategory.value,
-          servings = it.servings.value,
-          note = it.note.value,
-          chapters = it.chapters.values
-        )
-      })
-    }.invokeOnCompletion {
+    return formState.let {
+      formData.copy(
+        name = it.name.value,
+        category = it.category.value,
+        subCategory = it.subCategory.value,
+        servings = it.servings.value
+          ?: throw IllegalArgumentException("Servings should not be null"),
+        note = it.note.value,
+        chapters = it.chapters.values
+      )
+    }.also {
       formState.apply { savingState = savingState.getAsSaved() }
     }
   }
@@ -151,7 +157,7 @@ fun NavGraphBuilder.recipeFormInfoScreen(
       initializer {
         RecipeFormInfoScreenViewModel(formData = formData(), fetchCategorySuggestions = {
           emptyMap() // TODO()
-        }, saveData = onSubmit)
+        })
       }
     })
 
@@ -159,25 +165,27 @@ fun NavGraphBuilder.recipeFormInfoScreen(
 
     NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
       composable<RecipeFormInfoScreen> {
-        val formState = viewmodel.formState
         RecipeFormInfoScreenContent(
-          formState = formState,
+          formState = viewmodel.formState,
           categorySuggestions = viewmodel.categorySuggestions,
           isNew = viewmodel.isNew,
           onNewChapter = {
-            infoNavController.navigate(RecipeFormChapterScreen(index = formState.chapters.values.size))
+            infoNavController.navigate(RecipeFormChapterScreen(index = viewmodel.formState.chapters.values.size))
           },
-          onEditChapter = { TODO() },
-          onDeleteChapter = { TODO() },
-          onSwapChapters = { from, to -> TODO() },
+          onEditChapter = { infoNavController.navigate(RecipeFormChapterScreen(index = it)) },
+          onDeleteChapter = { viewmodel.formState.chapters.remove(it) },
+          onSwapChapters = { a, b -> viewmodel.formState.chapters.swapAt(a, b) },
           onDelete = onDeleteRecipe,
-          onSubmit = { viewmodel.save() },
+          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
           onBack = onBack,
         )
       }
       recipeFormChapterScreen(formData = { index ->
         viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
-      }, onSubmit = { TODO() }, onBack = {
+      }, onSubmit = { chapter ->
+        viewmodel.update(chapter)
+        infoNavController.navigateUp()
+      }, onBack = {
         infoNavController.navigateUp()
       })
     }
@@ -191,7 +199,7 @@ fun RecipeFormInfoScreenContent(
   isNew: Boolean,
   onNewChapter: () -> Unit,
   onEditChapter: (index: Int) -> Unit,
-  onDeleteChapter: (RecipeFormChapterFields) -> Boolean,
+  onDeleteChapter: (RecipeFormChapterFields) -> Unit,
   onSwapChapters: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onDelete: () -> Unit,
@@ -287,9 +295,10 @@ private fun InfoForm(
         ),
         modifier = Modifier.weight(2f, true)
       )
-      IntNumberField(
+      NullableIntNumberField(
         value = formState.servings.value,
         label = { Text(stringResource(R.string.label_servings)) },
+        zeroEqualsNull = true,
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
         onValueChange = { formState.servings.update(it) },
@@ -353,7 +362,7 @@ private fun ChapterList(
   chapters: List<RecipeFormChapterFields>,
   onNewChapter: () -> Unit,
   onEditChapter: (index: Int) -> Unit,
-  onDeleteChapter: (RecipeFormChapterFields) -> Boolean,
+  onDeleteChapter: (RecipeFormChapterFields) -> Unit,
   onSwap: (from: Int, to: Int) -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -362,7 +371,7 @@ private fun ChapterList(
   ) {
     LazyColumn {
       itemsIndexed(items = chapters, key = { _, c -> c.uuid }) { index, chapter ->
-        Column {
+        Column(modifier = Modifier.animateItem()) {
           ChapterListItem(
             chapter = chapter,
             chapterNumber = index + 1,
@@ -461,7 +470,7 @@ private fun ChapterListIngredientList(
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       ingredients.forEach {
         Text(
-          text = if (it.amount == 0f) "" else it.amount.toFractionFormattedString(),
+          text = if (it.amount == 0f || it.amount == null) "" else it.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.bodySmall,
           textAlign = TextAlign.End,
           modifier = Modifier.fillMaxWidth()

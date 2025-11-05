@@ -26,35 +26,31 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.form.FormBase
-import com.aamo.cookbook.ui.components.inputs.FloatNumberField
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableFloatNumberField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class RecipeFormIngredientScreen(val index: Int)
 
 class RecipeFormIngredientScreenViewModel(
-  formData: RecipeFormIngredientFields,
-  private val saveData: suspend (RecipeFormIngredientFields) -> Unit,
+  private val formData: RecipeFormIngredientFields,
 ) : ViewModel() {
   class FormState(formData: RecipeFormIngredientFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
@@ -78,18 +74,16 @@ class RecipeFormIngredientScreenViewModel(
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
-  fun save() {
-    if (!formState.canSave()) return
+  fun saveModel(): RecipeFormIngredientFields? {
+    if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
 
-    viewModelScope.launch {
-      saveData(formState.let {
-        RecipeFormIngredientFields(
-          name = it.name.value, amount = it.amount.value, unit = it.unit.value
-        )
-      })
-    }.invokeOnCompletion {
+    return formState.let {
+      formData.copy(
+        name = it.name.value, amount = it.amount.value, unit = it.unit.value
+      )
+    }.also {
       formState.apply { savingState = savingState.getAsSaved() }
     }
   }
@@ -104,24 +98,15 @@ fun NavGraphBuilder.recipeFormIngredientScreen(
     val (index) = navStack.toRoute<RecipeFormIngredientScreen>()
     val viewmodel: RecipeFormIngredientScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipeFormIngredientScreenViewModel(formData = formData(index), saveData = onSubmit)
+        RecipeFormIngredientScreenViewModel(formData = formData(index))
       }
     })
 
-    val ingredientNavController = rememberNavController()
-
-    NavHost(
-      navController = ingredientNavController,
-      startDestination = RecipeFormIngredientScreen(index = index)
-    ) {
-      composable<RecipeFormIngredientScreen> {
-        RecipeFormIngredientScreenContent(
-          formState = viewmodel.formState,
-          isNew = viewmodel.isNew,
-          onBack = onBack,
-          onSubmit = { viewmodel.save() })
-      }
-    }
+    RecipeFormIngredientScreenContent(
+      formState = viewmodel.formState,
+      isNew = viewmodel.isNew,
+      onBack = onBack,
+      onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } })
   }
 }
 
@@ -192,9 +177,10 @@ private fun IngredientForm(
       modifier = Modifier.fillMaxWidth()
     )
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      FloatNumberField(
+      NullableFloatNumberField(
         value = formState.amount.value,
         onValueChange = { formState.amount.update(it) },
+        zeroEqualsNull = true,
         label = { Text(stringResource(R.string.label_amount).asOptionalLabel()) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
