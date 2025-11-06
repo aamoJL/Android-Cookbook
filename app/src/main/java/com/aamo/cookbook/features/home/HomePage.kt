@@ -41,15 +41,17 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
       }, onOpenRecipesByCategory = {
         navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
       })
-      recipeListPages(onOpenRecipe = { TODO() }, onOpenSearch = {
+      recipeListPages(onOpenRecipe = { TODO("onOpenRecipe") }, onOpenSearch = {
         navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
       }, onOpenRecipeForm = {
         navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
       }, onBack = { navController.navigateUp() })
-      recipeFormPage(onBack = { navController.navigateUp() }, onRecipeDeleted = {
+      recipeFormPage(onBack = { navController.navigateUp() }, onOpenCategories = {
         navController.navigate(HomeScreen) { popUpTo(HomeScreen) { inclusive = true } }.also {
           onShowSnackbar(SnackbarProperties(recipeDeletedSnackbarMessage))
         }
+      }, onOpenRecipe = {
+        TODO("onOpenRecipe")
       })
     }
   }

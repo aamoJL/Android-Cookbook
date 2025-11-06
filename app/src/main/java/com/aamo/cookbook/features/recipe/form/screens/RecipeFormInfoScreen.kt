@@ -29,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -42,11 +43,11 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
+import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
@@ -75,7 +76,7 @@ data object RecipeFormInfoScreen
 
 class RecipeFormInfoScreenViewModel(
   private val formData: RecipeFormInfoFields,
-  fetchCategorySuggestions: suspend () -> Map<String, List<String>>
+  fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
   class FormState(formData: RecipeFormInfoFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
@@ -105,10 +106,11 @@ class RecipeFormInfoScreenViewModel(
   }
 
   val formState = FormState(formData)
-  val isNew = formData.name.isEmpty()
 
   var categorySuggestions by mutableStateOf<Map<String, List<String>>>(emptyMap())
     private set
+
+  val isNew = formData.name.isEmpty()
 
   init {
     viewModelScope.launch {
@@ -125,7 +127,7 @@ class RecipeFormInfoScreenViewModel(
     }
   }
 
-  fun saveModel(): RecipeFormInfoFields? {
+  fun getModel(): RecipeFormInfoFields? {
     if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
@@ -146,49 +148,50 @@ class RecipeFormInfoScreenViewModel(
   }
 }
 
-fun NavGraphBuilder.recipeFormInfoScreen(
-  formData: () -> RecipeFormInfoFields,
-  onDeleteRecipe: () -> Unit,
+@Composable
+fun RecipeFormInfoScreen(
+  formData: RecipeFormInfoFields,
   onSubmit: (RecipeFormInfoFields) -> Unit,
-  onBack: () -> Unit
+  onDeleteRecipe: () -> Unit,
+  onBack: () -> Unit,
 ) {
-  composable<RecipeFormInfoScreen> {
-    val viewmodel: RecipeFormInfoScreenViewModel = viewModel(factory = viewModelFactory {
-      initializer {
-        RecipeFormInfoScreenViewModel(formData = formData(), fetchCategorySuggestions = {
-          emptyMap() // TODO()
-        })
-      }
-    })
-
-    val infoNavController = rememberNavController()
-
-    NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
-      composable<RecipeFormInfoScreen> {
-        RecipeFormInfoScreenContent(
-          formState = viewmodel.formState,
-          categorySuggestions = viewmodel.categorySuggestions,
-          isNew = viewmodel.isNew,
-          onNewChapter = {
-            infoNavController.navigate(RecipeFormChapterScreen(index = viewmodel.formState.chapters.values.size))
-          },
-          onEditChapter = { infoNavController.navigate(RecipeFormChapterScreen(index = it)) },
-          onDeleteChapter = { viewmodel.formState.chapters.remove(it) },
-          onSwapChapters = { a, b -> viewmodel.formState.chapters.swapAt(a, b) },
-          onDelete = onDeleteRecipe,
-          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
-          onBack = onBack,
-        )
-      }
-      recipeFormChapterScreen(formData = { index ->
-        viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
-      }, onSubmit = { chapter ->
-        viewmodel.update(chapter)
-        infoNavController.navigateUp()
-      }, onBack = {
-        infoNavController.navigateUp()
-      })
+  val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
+  val viewmodel: RecipeFormInfoScreenViewModel = viewModel(factory = viewModelFactory {
+    initializer {
+      RecipeFormInfoScreenViewModel(
+        formData = formData,
+        fetchCategorySuggestions = { dao.getCategoriesMap() },
+      )
     }
+  })
+
+  val infoNavController = rememberNavController()
+
+  NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
+    composable<RecipeFormInfoScreen> {
+      RecipeFormInfoScreenContent(
+        formState = viewmodel.formState,
+        categorySuggestions = viewmodel.categorySuggestions,
+        isNew = viewmodel.isNew,
+        onNewChapter = {
+          infoNavController.navigate(RecipeFormChapterScreen(index = viewmodel.formState.chapters.values.size))
+        },
+        onEditChapter = { infoNavController.navigate(RecipeFormChapterScreen(index = it)) },
+        onDeleteChapter = { viewmodel.formState.chapters.remove(it) },
+        onSwapChapters = { a, b -> viewmodel.formState.chapters.swapAt(a, b) },
+        onDelete = onDeleteRecipe,
+        onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } },
+        onBack = onBack,
+      )
+    }
+    recipeFormChapterScreen(formData = { index ->
+      viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
+    }, onSubmit = { chapter ->
+      viewmodel.update(chapter)
+      infoNavController.navigateUp()
+    }, onBack = {
+      infoNavController.navigateUp()
+    })
   }
 }
 

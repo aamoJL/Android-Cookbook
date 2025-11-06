@@ -2,7 +2,6 @@ package com.aamo.cookbook.ui.components.inputs
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuAnchorType
@@ -51,20 +50,21 @@ fun OptionsTextField(
       trailingIcon = { TrailingIcon(expanded = expanded) },
       keyboardOptions = keyboardOptions,
       modifier = Modifier
-        .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
+        .menuAnchor(
+          type = ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = options.isNotEmpty()
+        )
         .fillMaxWidth()
     )
-
-    if (options.isNotEmpty()) {
-      DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-        options.forEach { option ->
-          Surface(color = MaterialTheme.colorScheme.surface) {
-            DropdownMenuItem(
-              text = { Text(option) }, onClick = {
-              onValueChange(option)
-              expanded = false
-            }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding)
-          }
+    ExposedDropdownMenu(
+      expanded = expanded, onDismissRequest = { expanded = false }) {
+      options.forEach { option ->
+        Surface(color = MaterialTheme.colorScheme.surface) {
+          DropdownMenuItem(
+            text = { Text(option) }, onClick = {
+            onValueChange(option)
+            expanded = false
+          }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+          )
         }
       }
     }

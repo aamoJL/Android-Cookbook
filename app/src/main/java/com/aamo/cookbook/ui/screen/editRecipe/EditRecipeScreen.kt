@@ -142,7 +142,9 @@ fun EditRecipeScreenPageContent(
     }) {
     Column(
       verticalArrangement = Arrangement.spacedBy(16.dp),
-      modifier = modifier.padding(it).padding(8.dp)
+      modifier = modifier
+        .padding(it)
+        .padding(8.dp)
     ) {
       InfoForm(
         uiState = uiState.formState,
@@ -268,7 +270,9 @@ private fun ChapterListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
     ListItem(
-      modifier = Modifier.clickable { onClick() }.testTag(UITag.CHAPTER_ITEM.name),
+      modifier = Modifier
+        .clickable { onClick() }
+        .testTag(UITag.CHAPTER_ITEM.name),
       headlineContent = {
         Text(
           text = "${chapterNumber}. ${chapter.chapter.name}",
@@ -278,19 +282,21 @@ private fun ChapterListItem(
       supportingContent = {
         Column(
           verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier.padding(start = 16.dp, top = 4.dp).width(IntrinsicSize.Max)
+          modifier = Modifier
+            .padding(start = 16.dp, top = 4.dp)
+            .width(IntrinsicSize.Max)
         ) {
           chapter.steps.forEachIndexed { index, step ->
             Column {
-              if (step.value.timerMinutes != null) {
+              if (step.step.timerMinutes != null) {
                 Text(
                   text = stringResource(
-                    R.string.abbreviation_minutes, step.value.timerMinutes.toString()
+                    R.string.abbreviation_minutes, step.step.timerMinutes.toString()
                   ), style = MaterialTheme.typography.labelSmall
                 )
               }
               Text(
-                text = "${index + 1}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
+                text = "${index + 1}. ${step.step.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
                 style = MaterialTheme.typography.bodyMedium
               )
               IngredientList(
@@ -389,7 +395,7 @@ private fun Preview() {
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
               chapter = Chapter(name = "Chapter 1"), steps = listOf(
                 StepWithIngredients(
-                  value = Step(description = "Description..."), ingredients = listOf(
+                  step = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
                   )
                 )
@@ -399,7 +405,7 @@ private fun Preview() {
             UUID.randomUUID(), ChapterWithStepsAndIngredients(
               chapter = Chapter(name = "Chapter 2"), steps = listOf(
                 StepWithIngredients(
-                  value = Step(description = "Description..."), ingredients = listOf(
+                  step = Step(description = "Description..."), ingredients = listOf(
                     Ingredient(name = "Ingredient", amount = 250f, unit = "g")
                   )
                 )

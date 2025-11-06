@@ -99,7 +99,7 @@ class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) 
     }
   }
 
-  fun saveModel(): RecipeFormStepFields? {
+  fun getModel(): RecipeFormStepFields? {
     if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
@@ -144,7 +144,7 @@ fun NavGraphBuilder.recipeFormStepScreen(
           onEditIngredient = { stepNavController.navigate(RecipeFormIngredientScreen(index = it)) },
           onDeleteIngredient = { viewmodel.formState.ingredients.remove(it) },
           onSwapIngredients = { a, b -> viewmodel.formState.ingredients.swapAt(a, b) },
-          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
+          onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } },
           onBack = onBack,
         )
       }

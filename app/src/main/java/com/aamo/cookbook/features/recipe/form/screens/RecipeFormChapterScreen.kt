@@ -101,7 +101,7 @@ class RecipeFormChapterScreenViewModel(
     }
   }
 
-  fun saveModel(): RecipeFormChapterFields? {
+  fun getModel(): RecipeFormChapterFields? {
     if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
@@ -142,7 +142,7 @@ fun NavGraphBuilder.recipeFormChapterScreen(
           onEditStep = { chapterNavController.navigate(RecipeFormStepScreen(index = it)) },
           onDeleteStep = { viewmodel.formState.steps.remove(it) },
           onSwapSteps = { a, b -> viewmodel.formState.steps.swapAt(a, b) },
-          onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } },
+          onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } },
           onBack = onBack,
         )
       }

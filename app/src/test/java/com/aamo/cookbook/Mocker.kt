@@ -24,7 +24,7 @@ class Mocker {
               chapter = Chapter(currentChapterId, ci, "chapter $ci", currentRecipeId),
               steps = (1..3).map { si ->
                 StepWithIngredients(
-                  value = Step(currentStepId, si, "step $si", currentChapterId),
+                  step = Step(currentStepId, si, "step $si", currentChapterId),
                   ingredients = (1..3).map { ii ->
                     Ingredient(
                       currentIngredientId, "ingredient $ii", ii.toFloat(), "unit", currentStepId

@@ -49,7 +49,7 @@ class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeReposito
   override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =
     recipeDao.getFavoriteRecipeById(recipeId)
 
-  override suspend fun upsertRecipe(recipe: Recipe): Int = recipeDao.upsertRecipe(recipe).toInt()
+  override suspend fun upsertRecipe(recipe: Recipe): Int = recipeDao.upsert(recipe).toInt()
 
   override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int =
     recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)

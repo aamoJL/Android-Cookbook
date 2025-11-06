@@ -43,6 +43,7 @@ class ViewModelState<T>(initValue: T) {
   /**
    * Adds validation predicate to the state
    */
+  // TODO: unit test
   fun validation(predicate: (T) -> Boolean): ViewModelState<T> {
     validationPredicate = predicate
     return this

@@ -4,9 +4,6 @@ import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -23,11 +20,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.aamo.cookbook.features.home.HomePage
 import com.aamo.cookbook.ui.screen.editRecipe.editRecipeGraph
 import com.aamo.cookbook.ui.screen.recipeScreen.RecipeScreen
@@ -109,27 +104,7 @@ fun MainNavGraph(
     composable(route = Screen.Recipes.getRoute()) {}
     composable(route = Screen.Favorites.getRoute()) {}
     composable(route = Screen.Search.getRoute()) {}
-    composable(
-      route = Screen.Recipe.getRoute(),
-      arguments = listOf(navArgument(Screen.Recipe.argumentName) {
-        type = NavType.IntType
-      }),
-      enterTransition = {
-        fadeIn(
-          animationSpec = tween(300, easing = LinearEasing)
-        ) + slideIntoContainer(
-          animationSpec = tween(300, easing = EaseIn),
-          towards = AnimatedContentTransitionScope.SlideDirection.Start
-        )
-      },
-      exitTransition = {
-        fadeOut(
-          animationSpec = tween(300, easing = LinearEasing)
-        ) + slideOutOfContainer(
-          animationSpec = tween(300, easing = EaseOut),
-          towards = AnimatedContentTransitionScope.SlideDirection.End
-        )
-      }) {
+    composable(route = Screen.Recipe.getRoute()) {
       RecipeScreen(
         onBack = { navController.navigateUp() },
         onEditRecipe = { id -> navController.navigate(Screen.EditRecipe.getRouteWithArgument(id.toString())) },
@@ -164,24 +139,7 @@ fun MainNavGraph(
       screen = Screen.EditRecipe,
       navController = navController,
       onBack = { navController.navigateUp() },
-      onSubmitChanges = { recipe ->
-        appViewModel.viewModelScope.launch {
-          val id = appViewModel.upsertRecipe(recipe)
-          appViewModel.setSelectedCategory(recipe.recipe.category)
-
-          if (navController.previousBackStackEntry?.destination?.route == Screen.Recipe.getRoute()) {
-            navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
-              popUpTo(Screen.Recipe.getRoute()) { inclusive = true }
-            }
-          }
-          else {
-            navController.navigate(Screen.Recipe.getRouteWithArgument(id.toString())) {
-              popUpTo(Screen.EditRecipe.getRoute()) { inclusive = true }
-            }
-          }
-          onShowSnackbar(SnackbarProperties(context.getString(R.string.snackbar_recipe_saved_successfully)))
-        }
-      },
+      onSubmitChanges = {},
       onDeleteRecipe = {},
     )
   }

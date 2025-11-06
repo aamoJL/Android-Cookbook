@@ -141,9 +141,9 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
         return StepScreenUiState(
           index = index,
           formState = StepFormState(
-            description = step.value.description,
-            timerMinutes = step.value.timerMinutes,
-            note = step.value.note
+            description = step.step.description,
+            timerMinutes = step.step.timerMinutes,
+            note = step.step.note
           ),
           ingredients = step.ingredients.map { Pair(UUID.randomUUID(), it) },
         )
@@ -263,7 +263,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           this.elementAtOrNull(_stepUiState.value.index)?.also { existing ->
             this[_stepUiState.value.index] = existing.copy(
               second = existing.second.copy(
-                value = existing.second.value.copy(
+                step = existing.second.step.copy(
                   description = _stepUiState.value.formState.description,
                   timerMinutes = _stepUiState.value.formState.timerMinutes,
                   note = _stepUiState.value.formState.note
@@ -272,7 +272,7 @@ class EditRecipeViewModel(private val recipeRepository: RecipeRepository) : View
           } ?: this.add(
             Pair(
               UUID.randomUUID(), StepWithIngredients(
-                value = Step(
+                step = Step(
                   description = _stepUiState.value.formState.description,
                   timerMinutes = _stepUiState.value.formState.timerMinutes,
                   note = _stepUiState.value.formState.note

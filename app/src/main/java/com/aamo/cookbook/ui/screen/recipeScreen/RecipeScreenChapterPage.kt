@@ -60,14 +60,18 @@ internal fun ChapterPage(
 
   Surface {
     Column(
-      modifier = Modifier.fillMaxSize().verticalScroll(scrollState)
+      modifier = Modifier
+        .fillMaxSize()
+        .verticalScroll(scrollState)
     ) {
       Text(
         text = "${uiState.chapter.chapter.orderNumber}. ${uiState.chapter.chapter.name}",
         fontFamily = Handwritten,
         style = MaterialTheme.typography.headlineLarge,
         textAlign = TextAlign.Center,
-        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(top = 8.dp)
       )
       if (uiState.chapter.chapter.note.isNotEmpty()) {
         Box(modifier = Modifier.padding(8.dp)) {
@@ -79,17 +83,17 @@ internal fun ChapterPage(
       Column {
         uiState.chapter.steps.forEachIndexed { index, step ->
           StepCheckBox(
-            headline = "${step.value.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
-            ingredients = step.ingredients.filter { it.stepId == step.value.id },
+            headline = "${step.step.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
+            ingredients = step.ingredients.filter { it.stepId == step.step.id },
             servingsMultiplier = servingsState.multiplier,
             checked = uiState.progress.elementAtOrElse(index) { false },
             onCheckedChange = { onProgressChange(index, it) },
-            timerProperties = step.value.timerMinutes?.let { minutes ->
+            timerProperties = step.step.timerMinutes?.let { minutes ->
               CheckBoxTimerProperties(
-                title = step.value.description, minutes = minutes
+                title = step.step.description, minutes = minutes
               )
             },
-            note = step.value.note,
+            note = step.step.note,
           )
         }
       }
@@ -175,7 +179,8 @@ private fun StepCheckBox(
       }
     }
     else null,
-    modifier = modifier.clickable { onCheckedChange(!checked) }
+    modifier = modifier
+      .clickable { onCheckedChange(!checked) }
       .testTag(UITag.PROGRESS_CHECKBOX.name))
 }
 
@@ -189,14 +194,14 @@ private fun Preview() {
           chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Chapter note."),
           steps = listOf(
             StepWithIngredients(
-              value = Step(
+              step = Step(
                 description = "Description", note = "Step note", timerMinutes = 20
               ), ingredients = listOf(
                 Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
                 Ingredient(name = "Ingredient 2", amount = 0f, unit = "")
               )
             ), StepWithIngredients(
-              value = Step(
+              step = Step(
                 description = "This is a step with a long description",
                 note = "Step note.",
                 timerMinutes = 20
@@ -204,15 +209,15 @@ private fun Preview() {
                 Ingredient(name = "Ingredient 1", amount = 0f, unit = ""),
               )
             ), StepWithIngredients(
-              value = Step(
+              step = Step(
                 description = "This is a step with a long description", timerMinutes = 20
               )
             ), StepWithIngredients(
-              value = Step(
+              step = Step(
                 description = "Step with note, without ingredients", note = "Note"
               )
             ), StepWithIngredients(
-              value = Step(
+              step = Step(
                 description = "Short desc"
               )
             )

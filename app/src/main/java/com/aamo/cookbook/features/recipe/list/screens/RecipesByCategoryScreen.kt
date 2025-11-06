@@ -87,8 +87,8 @@ class RecipesByCategoryScreenViewModel(
 
   init {
     viewModelScope.launch {
-      fetchData().collect {
-        _recipes.update { it }.also {
+      fetchData().collect { result ->
+        _recipes.update { result }.also {
           isLoading = false
         }
       }

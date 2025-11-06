@@ -115,7 +115,9 @@ fun EditRecipeChapterScreenContent(
     )
   }) {
     Column(
-      modifier = modifier.padding(it).padding(8.dp)
+      modifier = modifier
+        .padding(it)
+        .padding(8.dp)
     ) {
       ChapterForm(
         uiState = uiState.formState,
@@ -210,10 +212,12 @@ fun StepListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
     ListItem(
-      modifier = modifier.clickable { onClick() }.testTag(UITag.STEP_ITEM.name),
+      modifier = modifier
+        .clickable { onClick() }
+        .testTag(UITag.STEP_ITEM.name),
       headlineContent = {
         Text(
-          text = "${stepNumber}. ${step.value.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
+          text = "${stepNumber}. ${step.step.getDescriptionWithFormattedEndChar(step.ingredients.isEmpty())}",
           style = MaterialTheme.typography.titleMedium,
         )
       },
@@ -222,11 +226,11 @@ fun StepListItem(
           ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
         )
       },
-      overlineContent = step.value.timerMinutes?.let {
+      overlineContent = step.step.timerMinutes?.let {
         {
           Text(
             text = stringResource(
-              R.string.abbreviation_minutes, step.value.timerMinutes.toString()
+              R.string.abbreviation_minutes, step.step.timerMinutes.toString()
             ), style = MaterialTheme.typography.labelSmall
           )
         }
@@ -293,13 +297,13 @@ private fun Preview() {
         steps = listOf(
           Pair(
             UUID.randomUUID(), StepWithIngredients(
-              value = Step(description = "Description..."), ingredients = listOf(
+              step = Step(description = "Description..."), ingredients = listOf(
                 Ingredient(name = "Ingredient", amount = 250f, unit = "g")
               )
             )
           ), Pair(
             UUID.randomUUID(), StepWithIngredients(
-              value = Step(description = "Description..."), ingredients = listOf(
+              step = Step(description = "Description..."), ingredients = listOf(
                 Ingredient(name = "Ingredient", amount = 250f, unit = "g")
               )
             )

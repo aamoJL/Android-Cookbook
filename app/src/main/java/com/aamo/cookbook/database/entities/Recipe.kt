@@ -131,7 +131,7 @@ data class RecipeWithChaptersStepsAndIngredients(
         c.copy(
           chapter = c.chapter.copy(id = 0), steps = c.steps.map { s ->
             s.copy(
-              value = s.value.copy(id = 0), ingredients = s.ingredients.map { i ->
+              step = s.step.copy(id = 0), ingredients = s.ingredients.map { i ->
                 i.copy(id = 0)
               })
           })
@@ -146,7 +146,7 @@ data class ChapterWithStepsAndIngredients(
 )
 
 data class StepWithIngredients(
-  @Embedded val value: Step, @Relation(
+  @Embedded val step: Step, @Relation(
     entity = Ingredient::class,
     parentColumn = "id",
     entityColumn = "stepId",

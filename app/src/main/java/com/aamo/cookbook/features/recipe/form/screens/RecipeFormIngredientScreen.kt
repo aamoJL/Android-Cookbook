@@ -74,7 +74,7 @@ class RecipeFormIngredientScreenViewModel(
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
-  fun saveModel(): RecipeFormIngredientFields? {
+  fun getModel(): RecipeFormIngredientFields? {
     if (!formState.canSave()) return null
 
     formState.apply { savingState = savingState.getAsSaving() }
@@ -106,7 +106,7 @@ fun NavGraphBuilder.recipeFormIngredientScreen(
       formState = viewmodel.formState,
       isNew = viewmodel.isNew,
       onBack = onBack,
-      onSubmit = { viewmodel.saveModel().onNotNull { onSubmit(it) } })
+      onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } })
   }
 }
 

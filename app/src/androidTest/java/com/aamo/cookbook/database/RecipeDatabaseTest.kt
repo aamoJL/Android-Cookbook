@@ -46,7 +46,7 @@ class RecipeDatabaseTest {
   fun upsertRecipe_New() = runTest {
     var recipe = Recipe(name = "new recipe", category = "new category")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
     }
 
@@ -61,7 +61,7 @@ class RecipeDatabaseTest {
   fun upsertRecipe_NewWithId() = runTest {
     var recipe = Recipe(id = 2, name = "new recipe", category = "new category")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
     }
 
@@ -74,9 +74,9 @@ class RecipeDatabaseTest {
   fun upsertRecipe_Existing() = runTest {
     var recipe = Recipe(name = "new recipe", category = "new category")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it, name = "updated recipe", category = "updated category")
-      recipeDao.upsertRecipe(recipe)
+      recipeDao.upsert(recipe)
     }
 
     val actual = recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.recipe
@@ -104,18 +104,18 @@ class RecipeDatabaseTest {
 
         chapter.steps.forEachIndexed { si, step ->
           assertEquals(
-            newRecipe.chapters[ci].steps[si].value.copy(
-              id = assertNotEquals(0, step.value.id).let { step.value.id },
+            newRecipe.chapters[ci].steps[si].step.copy(
+              id = assertNotEquals(0, step.step.id).let { step.step.id },
               chapterId = chapter.chapter.id,
               orderNumber = si + 1
-            ), step.value
+            ), step.step
           )
           assert(step.ingredients.isNotEmpty())
 
           step.ingredients.forEachIndexed { ii, ingredient ->
             assertEquals(
               newRecipe.chapters[ci].steps[si].ingredients[ii].copy(
-                id = assertNotEquals(0, ingredient.id).let { ingredient.id }, stepId = step.value.id
+                id = assertNotEquals(0, ingredient.id).let { ingredient.id }, stepId = step.step.id
               ), ingredient
             )
           }
@@ -179,11 +179,11 @@ class RecipeDatabaseTest {
     var recipe = Recipe(name = "new recipe", category = "new category")
     var chapter = Chapter(name = "new chapter")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it)
     }
 
@@ -200,13 +200,13 @@ class RecipeDatabaseTest {
     var recipe = Recipe(name = "new recipe", category = "new category")
     var chapter = Chapter(name = "new chapter")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it, name = "updated name")
-      recipeDao.upsertChapter(chapter)
+      recipeDao.upsert(chapter)
     }
 
     val actual =
@@ -221,22 +221,22 @@ class RecipeDatabaseTest {
     var chapter = Chapter(name = "new chapter")
     var step = Step(description = "new step")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it)
       step = step.copy(chapterId = it)
     }
-    recipeDao.upsertStep(step).toInt().also {
+    recipeDao.upsert(step).toInt().also {
       step = step.copy(id = it)
     }
 
     assert(step.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.step.id == step.id }?.step
     assertEquals(step, actual)
   }
 
@@ -247,21 +247,21 @@ class RecipeDatabaseTest {
     var chapter = Chapter(name = "new chapter")
     var step = Step(description = "new step")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it)
       step = step.copy(chapterId = it)
     }
-    recipeDao.upsertStep(step).toInt().also {
+    recipeDao.upsert(step).toInt().also {
       step = step.copy(id = it, description = "updated description")
-      recipeDao.upsertStep(step)
+      recipeDao.upsert(step)
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.value
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.step.id == step.id }?.step
     assertEquals(step, actual)
   }
 
@@ -273,26 +273,26 @@ class RecipeDatabaseTest {
     var step = Step(description = "new step")
     var ingredient = Ingredient(name = "new ingredient")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it)
       step = step.copy(chapterId = it)
     }
-    recipeDao.upsertStep(step).toInt().also {
+    recipeDao.upsert(step).toInt().also {
       step = step.copy(id = it, chapterId = chapter.id)
       ingredient = ingredient.copy(stepId = step.id)
     }
-    recipeDao.upsertIngredients(listOf(ingredient)).also {
+    recipeDao.upsert(listOf(ingredient)).also {
       ingredient = ingredient.copy(id = it.first().toInt())
     }
 
     assert(ingredient.id != 0)
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.step.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -305,25 +305,25 @@ class RecipeDatabaseTest {
     var ingredient = Ingredient(name = "new ingredient")
 
     // Add items to the database and assign the produced id to the child items
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
       chapter = chapter.copy(recipeId = it)
     }
-    recipeDao.upsertChapter(chapter).toInt().also {
+    recipeDao.upsert(chapter).toInt().also {
       chapter = chapter.copy(id = it)
       step = step.copy(chapterId = it)
     }
-    recipeDao.upsertStep(step).toInt().also {
+    recipeDao.upsert(step).toInt().also {
       step = step.copy(id = it, chapterId = chapter.id)
       ingredient = ingredient.copy(stepId = step.id)
     }
-    recipeDao.upsertIngredients(listOf(ingredient)).also {
+    recipeDao.upsert(listOf(ingredient)).also {
       ingredient = ingredient.copy(id = it.first().toInt(), name = "updated name")
-      recipeDao.upsertIngredients(listOf(ingredient))
+      recipeDao.upsert(listOf(ingredient))
     }
 
     val actual =
-      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.value.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
+      recipeDao.getRecipeWithChaptersStepsAndIngredients(recipe.id)?.chapters?.firstOrNull { it.chapter.id == chapter.id }?.steps?.firstOrNull { it.step.id == step.id }?.ingredients?.firstOrNull { it.id == ingredient.id }
     assertEquals(ingredient, actual)
   }
 
@@ -354,7 +354,7 @@ class RecipeDatabaseTest {
   fun deleteRecipe() = runTest {
     var recipe = Recipe(name = "new recipe", category = "new category")
 
-    recipeDao.upsertRecipe(recipe).toInt().also {
+    recipeDao.upsert(recipe).toInt().also {
       recipe = recipe.copy(id = it)
     }
     recipeDao.deleteRecipe(recipe)
@@ -367,7 +367,7 @@ class RecipeDatabaseTest {
   fun getRecipes() = runTest {
     val count = 3
     repeat(count) {
-      recipeDao.upsertRecipe(Recipe(name = "name"))
+      recipeDao.upsert(Recipe(name = "name"))
     }
 
     val actual = recipeDao.getRecipesFlow().first().size
@@ -382,12 +382,12 @@ class RecipeDatabaseTest {
     assertNotEquals(0, recipeList.size)
 
     recipeList.forEach { r ->
-      recipeDao.upsertRecipe(r.recipe)
+      recipeDao.upsert(r.recipe)
       r.chapters.forEach { c ->
-        recipeDao.upsertChapter(c.chapter)
+        recipeDao.upsert(c.chapter)
         c.steps.forEach { s ->
-          recipeDao.upsertStep(s.value)
-          recipeDao.upsertIngredients(s.ingredients)
+          recipeDao.upsert(s.step)
+          recipeDao.upsert(s.ingredients)
         }
       }
     }

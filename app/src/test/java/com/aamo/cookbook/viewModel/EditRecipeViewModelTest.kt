@@ -122,9 +122,9 @@ class EditRecipeViewModelTest {
       assertEquals(0, viewModel.stepUiState.value.index)
       assertEquals(
         EditRecipeViewModel.StepScreenUiState.StepFormState(
-          description = step.value.description,
-          timerMinutes = step.value.timerMinutes,
-          note = step.value.note
+          description = step.step.description,
+          timerMinutes = step.step.timerMinutes,
+          note = step.step.note
         ), viewModel.stepUiState.value.formState
       )
       assertEquals(step.ingredients, viewModel.stepUiState.value.ingredients.map { it.second })
@@ -218,9 +218,9 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertEquals(
         newFormState, EditRecipeViewModel.StepScreenUiState.StepFormState(
-          description = viewModel.chapterUiState.value.steps.first().second.value.description,
-          timerMinutes = viewModel.chapterUiState.value.steps.first().second.value.timerMinutes,
-          note = viewModel.chapterUiState.value.steps.first().second.value.note,
+          description = viewModel.chapterUiState.value.steps.first().second.step.description,
+          timerMinutes = viewModel.chapterUiState.value.steps.first().second.step.timerMinutes,
+          note = viewModel.chapterUiState.value.steps.first().second.step.note,
         )
       )
     }
@@ -233,9 +233,9 @@ class EditRecipeViewModelTest {
     }.also { viewModel ->
       assertEquals(
         newFormState, EditRecipeViewModel.StepScreenUiState.StepFormState(
-          description = viewModel.chapterUiState.value.steps.first().second.value.description,
-          timerMinutes = viewModel.chapterUiState.value.steps.first().second.value.timerMinutes,
-          note = viewModel.chapterUiState.value.steps.first().second.value.note,
+          description = viewModel.chapterUiState.value.steps.first().second.step.description,
+          timerMinutes = viewModel.chapterUiState.value.steps.first().second.step.timerMinutes,
+          note = viewModel.chapterUiState.value.steps.first().second.step.note,
         )
       )
     }

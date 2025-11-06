@@ -14,6 +14,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.ViewModel
@@ -23,20 +24,23 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
-import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.features.recipe.form.screens.RecipeFormInfoScreen
-import com.aamo.cookbook.features.recipe.form.screens.recipeFormInfoScreen
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
+import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
+import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -46,35 +50,59 @@ data class RecipeFormPage(val id: Int)
 
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
-  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Boolean,
+  private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Int?,
+  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
-  var infoFields by mutableStateOf(RecipeFormInfoFields())
-    private set
+  private var recipe by mutableStateOf(RecipeWithChaptersStepsAndIngredients(recipe = Recipe()))
 
   var isLoading by mutableStateOf(true)
     private set
 
   init {
     viewModelScope.launch {
-      fetchData().let { (recipe, _) ->
-        infoFields = RecipeFormInfoFields(
-          name = recipe.name,
-          category = recipe.category,
-          subCategory = recipe.subCategory,
-          servings = recipe.servings,
-          note = recipe.note
-        )
+      fetchData().let { result ->
+        recipe = result
         isLoading = false
       }
     }
   }
 
+  fun getModel(): RecipeFormInfoFields {
+    return recipe.let { (r, cs) ->
+      RecipeFormInfoFields(
+        name = r.name,
+        category = r.category,
+        subCategory = r.subCategory,
+        servings = r.servings,
+        note = r.note,
+        chapters = cs.map { (c, ss) ->
+          RecipeFormChapterFields(name = c.name, note = c.note, steps = ss.map { (s, ins) ->
+            RecipeFormStepFields(
+              description = s.description,
+              timerMinutes = s.timerMinutes,
+              note = s.note,
+              ingredients = ins.map { i ->
+                RecipeFormIngredientFields(name = i.name, amount = i.amount, unit = i.unit)
+              })
+          })
+        })
+    }
+  }
+
   suspend fun deleteRecipe(): Boolean {
-    return runCatching { deleteData(fetchData()) }.isSuccess
+    return runCatching { deleteData(recipe) }.isSuccess
+  }
+
+  suspend fun saveRecipe(data: RecipeFormInfoFields): Int? {
+    return runCatching {
+      saveData(data.toDao(id = recipe.recipe.id, thumbnailUri = recipe.recipe.thumbnailUri))
+    }.getOrNull()
   }
 }
 
-fun NavGraphBuilder.recipeFormPage(onBack: () -> Unit, onRecipeDeleted: () -> Unit) {
+fun NavGraphBuilder.recipeFormPage(
+  onBack: () -> Unit, onOpenRecipe: (id: Int) -> Unit, onOpenCategories: () -> Unit
+) {
   composable<RecipeFormPage> { navStack ->
     val (recipeId) = navStack.toRoute<RecipeFormPage>()
     val localContext = LocalContext.current
@@ -96,20 +124,30 @@ fun NavGraphBuilder.recipeFormPage(onBack: () -> Unit, onRecipeDeleted: () -> Un
                 IOService(localContext).deleteExternalFile(Environment.DIRECTORY_PICTURES, uri)
               }) { recipe -> dao.deleteRecipe(recipe) > 0 }
           },
+          saveData = { entity ->
+            saveRecipe(recipe = entity) {
+              dao.upsertRecipeWithChaptersStepsAndIngredients(it)
+            }
+          },
         )
       }
     })
 
-    val formNavController = rememberNavController()
-
-    LoadingScreen(enabled = viewmodel.isLoading) {
-      NavHost(navController = formNavController, startDestination = RecipeFormInfoScreen) {
-        recipeFormInfoScreen(formData = { viewmodel.infoFields }, onDeleteRecipe = {
+    LoadingScreen(viewmodel.isLoading) {
+      RecipeFormInfoScreen(
+        formData = remember { mutableStateOf(viewmodel.getModel()) }.value,
+        onSubmit = {
           viewmodel.viewModelScope.launch {
-            viewmodel.deleteRecipe().onTrue { onRecipeDeleted() }
+            viewmodel.saveRecipe(it).onNotNull { id -> onOpenRecipe(id) }
           }
-        }, onBack = onBack, onSubmit = { TODO() })
-      }
+        },
+        onDeleteRecipe = {
+          viewmodel.viewModelScope.launch {
+            viewmodel.deleteRecipe().onTrue { onOpenCategories() }
+          }
+        },
+        onBack = onBack
+      )
     }
   }
 }

@@ -5,6 +5,7 @@ package com.aamo.cookbook.database.dao
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
+import androidx.room.MapColumn
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
@@ -18,6 +19,7 @@ import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.utility.extensions.general.letIf
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -28,6 +30,11 @@ interface RecipeDao {
 
   @Query("SELECT DISTINCT category FROM recipes")
   fun getCategoriesFlow(): Flow<List<String>>
+
+  @Query("SELECT category, subCategory FROM recipes")
+  suspend fun getCategoriesMap(): Map<@MapColumn(columnName = "category") String, List<@MapColumn(
+    columnName = "subCategory"
+  ) String>>
 
   @Transaction
   @Query("SELECT * FROM recipes ORDER BY name ASC")
@@ -66,7 +73,7 @@ interface RecipeDao {
   suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients? {
     @Suppress("DEPRECATION") return getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId)?.let { recipe ->
       recipe.copy(chapters = recipe.chapters.sortedBy { it.chapter.orderNumber }.map { chapter ->
-        chapter.copy(steps = chapter.steps.sortedBy { it.value.orderNumber }.map { step ->
+        chapter.copy(steps = chapter.steps.sortedBy { it.step.orderNumber }.map { step ->
           step.copy(
             ingredients = step.ingredients.sortedBy { it.name })
         })
@@ -87,72 +94,53 @@ interface RecipeDao {
 
   // region UPSERT
   @Upsert
-  suspend fun upsertRecipe(recipe: Recipe): Long
+  suspend fun upsert(recipe: Recipe): Long
 
   @Upsert
-  suspend fun upsertChapter(chapter: Chapter): Long
+  suspend fun upsert(chapter: Chapter): Long
 
   @Upsert
-  suspend fun upsertStep(step: Step): Long
+  suspend fun upsert(step: Step): Long
 
   @Upsert
-  suspend fun upsertIngredients(ingredients: List<Ingredient>): List<Long>
+  suspend fun upsert(ingredients: List<Ingredient>): List<Long>
 
   /**
    * Adds or updates the given [recipe] to the database
-   * The items' order numbers will be changed to according to the list indexing
-   * @return Upserted recipes Id, whether the recipe was added or updated.
+   * The items' order numbers will be changed according to the list indexing
+   * @return Upserted recipes Id, whether the recipe was inserted or updated.
    */
   @Transaction
   suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int {
-    // TODO: delete old, add new
-    // Delete items that are not in the recipe anymore
-    getRecipeWithChaptersStepsAndIngredients(recipe.recipe.id).also { oldRecipe ->
-      if (oldRecipe != null) {
-        val currentChapterIds = recipe.chapters.map { c -> c.chapter.id }.filter { it != 0 }
-        val currentStepIds =
-          recipe.chapters.flatMap { c -> c.steps.map { s -> s.value.id }.filter { it != 0 } }
-        val currentIngredientIds = recipe.chapters.flatMap { c ->
-          c.steps.flatMap { s -> s.ingredients.map { i -> i.id } }.filter { it != 0 }
-        }
+    val existingRecipe = getRecipeWithChaptersStepsAndIngredients(recipe.recipe.id)
 
-        oldRecipe.chapters.forEach { chapter ->
-          if (!currentChapterIds.contains(chapter.chapter.id)) deleteChapter(chapter.chapter)
-          else {
-            chapter.steps.forEach { step ->
-              if (!currentStepIds.contains(step.value.id)) deleteStep(step.value)
-              else {
-                step.ingredients.forEach { ingredient ->
-                  if (!currentIngredientIds.contains(ingredient.id)) deleteIngredient(ingredient)
-                }
-              }
-            }
-          }
-        }
-      }
+    // Delete old chapters. Steps and ingredients will be also deleted
+    existingRecipe?.also {
+      delete(*it.chapters.map { c -> c.chapter }.toTypedArray())
     }
 
     // Upsert function will return -1 if the function updates an existing item,
-    // so the value have to be set to the recipes id instead on the returned value
-    val recipeId =
-      upsertRecipe(recipe.recipe).toInt().let { if (it == -1) recipe.recipe.id else it }
+    //    so the value have to be set to the recipes id instead on the returned value
+    val recipeId = upsert(recipe.recipe).toInt().let { if (it == -1) recipe.recipe.id else it }
 
+    // Update chapter order numbers and ids
     recipe.chapters.forEachIndexed { ci, chapter ->
       val chapterId =
-        upsertChapter(chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)).toInt()
+        upsert(chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)).toInt()
           .let { if (it == -1) chapter.chapter.id else it }
 
+      // Update step order numbers and ids
       chapter.steps.forEachIndexed { si, s ->
-        val step =
-          if (s.value.timerMinutes == 0) s.copy(value = s.value.copy(timerMinutes = null)) else s
+        s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
+          .also { step ->
+            val stepId = upsert(step.step.copy(orderNumber = si + 1, chapterId = chapterId)).toInt()
+              .let { if (it == -1) step.step.id else it }
 
-        val stepId =
-          upsertStep(step.value.copy(orderNumber = si + 1, chapterId = chapterId)).toInt()
-            .let { if (it == -1) step.value.id else it }
-
-        upsertIngredients(step.ingredients.map { ingredient ->
-          ingredient.copy(stepId = stepId)
-        })
+            // Update ingredient ids
+            upsert(step.ingredients.map { ingredient ->
+              ingredient.copy(stepId = stepId)
+            })
+          }
       }
     }
 
@@ -168,7 +156,7 @@ interface RecipeDao {
   suspend fun deleteRecipe(recipe: Recipe): Int
 
   @Delete
-  suspend fun deleteChapter(chapter: Chapter)
+  suspend fun delete(vararg chapter: Chapter)
 
   @Delete
   suspend fun deleteStep(step: Step)

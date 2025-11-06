@@ -27,8 +27,8 @@ class RecipeTest {
         assert(chapter.steps.isNotEmpty())
 
         chapter.steps.forEachIndexed { si, step ->
-          assertEquals(0, step.value.id)
-          assertEquals(si + 1, step.value.orderNumber)
+          assertEquals(0, step.step.id)
+          assertEquals(si + 1, step.step.orderNumber)
           assert(step.ingredients.isNotEmpty())
 
           step.ingredients.forEach { ingredient ->
