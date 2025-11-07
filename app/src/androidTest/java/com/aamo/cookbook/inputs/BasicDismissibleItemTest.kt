@@ -1,3 +1,5 @@
+@file:Suppress("HardCodedStringLiteral")
+
 package com.aamo.cookbook.inputs
 
 import androidx.activity.ComponentActivity
@@ -10,8 +12,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import androidx.compose.ui.test.swipeRight
-import com.aamo.cookbook.ui.components.BasicDismissibleItem
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.utility.components.inputs.BasicDismissibleItem
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertFalse
 import org.junit.Before

@@ -39,18 +39,18 @@ import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.utility.components.LoadingScreen
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeFormPage(val id: Int)
+data class RecipeFormPage(val id: Long)
 
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
-  private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Int?,
+  private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Long?,
   private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
   private var recipe by mutableStateOf(RecipeWithChaptersStepsAndIngredients(recipe = Recipe()))
@@ -93,7 +93,7 @@ class RecipeFormViewModel(
     return runCatching { deleteData(recipe) }.isSuccess
   }
 
-  suspend fun saveRecipe(data: RecipeFormInfoFields): Int? {
+  suspend fun saveRecipe(data: RecipeFormInfoFields): Long? {
     return runCatching {
       saveData(data.toDao(id = recipe.recipe.id, thumbnailUri = recipe.recipe.thumbnailUri))
     }.getOrNull()
@@ -101,7 +101,7 @@ class RecipeFormViewModel(
 }
 
 fun NavGraphBuilder.recipeFormPage(
-  onBack: () -> Unit, onOpenRecipe: (id: Int) -> Unit, onOpenCategories: () -> Unit
+  onBack: () -> Unit, onOpenRecipe: (id: Long) -> Unit, onOpenCategories: () -> Unit
 ) {
   composable<RecipeFormPage> { navStack ->
     val (recipeId) = navStack.toRoute<RecipeFormPage>()
@@ -112,9 +112,8 @@ fun NavGraphBuilder.recipeFormPage(
         RecipeFormViewModel(
           fetchData = {
             fetchRecipe {
-              if (recipeId == 0) RecipeWithChaptersStepsAndIngredients(recipe = Recipe())
-              else dao.getRecipeWithChaptersStepsAndIngredients(recipeId)
-                ?: throw Exception("Failed to fetch data")
+              if (recipeId == 0L) RecipeWithChaptersStepsAndIngredients(recipe = Recipe())
+              else dao.getCompleteRecipe(recipeId) ?: throw Exception("Failed to fetch data")
             }
           },
           deleteData = {
@@ -126,7 +125,7 @@ fun NavGraphBuilder.recipeFormPage(
           },
           saveData = { entity ->
             saveRecipe(recipe = entity) {
-              dao.upsertRecipeWithChaptersStepsAndIngredients(it)
+              dao.upsert(it)
             }
           },
         )

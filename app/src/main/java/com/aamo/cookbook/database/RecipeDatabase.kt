@@ -16,13 +16,17 @@ import com.aamo.cookbook.database.entities.Step
 @Suppress("HardCodedStringLiteral")
 @Database(
   entities = [Recipe::class, Chapter::class, Step::class, Ingredient::class, RecipeBookmark::class, RecipeRating::class],
-  version = 6,
+  version = RecipeDatabase.Properties.VERSION,
   // Remember to update version, when adding migrations
   autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(
     from = 3, to = 4
   ), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6)]
 )
 abstract class RecipeDatabase : RoomDatabase() {
+  object Properties {
+    const val VERSION = 6
+  }
+
   abstract fun recipeDao(): RecipeDao
 
   companion object {

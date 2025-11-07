@@ -1,21 +1,15 @@
 package com.aamo.cookbook.database.repository
 
-import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.database.entities.RecipeBookmark
-import com.aamo.cookbook.database.entities.RecipeCategoryTuple
-import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 
 // TODO: delete repository
 interface RecipeRepository {
   suspend fun getRecipeById(recipeId: Int): Recipe?
   fun getRecipesFlow(): Flow<List<Recipe>>
-  suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple>
   suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients?
   fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
   suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating?
@@ -26,54 +20,4 @@ interface RecipeRepository {
   suspend fun removeRecipeFromFavorites(recipeId: Int)
   suspend fun upsertRecipeRating(recipeId: Int, rating: Int)
   suspend fun deleteRecipeRating(recipeId: Int)
-}
-
-class OfflineRecipeRepository(private val recipeDao: RecipeDao) : RecipeRepository {
-  override suspend fun getRecipeById(recipeId: Int): Recipe? =
-    recipeDao.getRecipesFlow().first().firstOrNull { it.id == recipeId }
-
-  override fun getRecipesFlow(): Flow<List<Recipe>> = recipeDao.getRecipesFlow()
-
-  override suspend fun getCategoriesWithSubCategories(): List<RecipeCategoryTuple> =
-    recipeDao.getCategoriesWithSubcategories()
-
-  override suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients? =
-    recipeDao.getRecipeWithChaptersStepsAndIngredients(id)
-
-  override fun getRecipesWithFavoriteAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>> =
-    recipeDao.getRecipesWithBookmarkAndRatingFlow()
-
-  override suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating? =
-    recipeDao.getRecipesWithBookmarkAndRatingFlow().first().firstOrNull { it.recipe.id == recipeId }
-
-  override suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe? =
-    recipeDao.getFavoriteRecipeById(recipeId)
-
-  override suspend fun upsertRecipe(recipe: Recipe): Int = recipeDao.upsert(recipe).toInt()
-
-  override suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int =
-    recipeDao.upsertRecipeWithChaptersStepsAndIngredients(recipe)
-
-  override suspend fun addRecipeToFavorites(recipeId: Int) =
-    recipeDao.addRecipeToFavorites(RecipeBookmark(recipeId = recipeId))
-
-  override suspend fun removeRecipeFromFavorites(recipeId: Int) {
-    getFavoriteRecipeById(recipeId)?.also {
-      recipeDao.removeRecipeFromFavorites(it.favoriteRecipe)
-    }
-  }
-
-  override suspend fun upsertRecipeRating(recipeId: Int, rating: Int) {
-    val recipeRating =
-      recipeDao.getRecipeRatingById(recipeId)?.copy(ratingOutOfFive = rating) ?: RecipeRating(
-        ratingOutOfFive = rating, recipeId = recipeId
-      )
-    recipeDao.upsertRecipeRating(recipeRating)
-  }
-
-  override suspend fun deleteRecipeRating(recipeId: Int) {
-    recipeDao.getRecipeRatingById(recipeId)?.also {
-      recipeDao.deleteRecipeRating(it)
-    }
-  }
 }

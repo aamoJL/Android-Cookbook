@@ -46,9 +46,9 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
-import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.inputs.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.utility.components.LoadingScreen
+import com.aamo.cookbook.utility.components.inputs.SearchTextField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.flow.Flow
@@ -99,7 +99,7 @@ class RecipeSearchScreenViewModel(
 }
 
 fun NavGraphBuilder.recipeSearchScreen(
-  onOpenRecipe: (id: Int) -> Unit, onBack: () -> Unit
+  onOpenRecipe: (id: Long) -> Unit, onBack: () -> Unit
 ) {
   composable<RecipeSearchScreen> {
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
@@ -130,7 +130,7 @@ fun NavGraphBuilder.recipeSearchScreen(
 private fun RecipeSearchScreenContent(
   recipes: List<RecipeListRecipeModel>,
   searchWord: String,
-  onRecipeSelected: (id: Int) -> Unit,
+  onRecipeSelected: (id: Long) -> Unit,
   onBack: () -> Unit,
   onSearchWordChange: (String) -> Unit,
 ) {

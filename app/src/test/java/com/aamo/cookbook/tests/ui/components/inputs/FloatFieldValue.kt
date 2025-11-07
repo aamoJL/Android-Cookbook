@@ -2,7 +2,7 @@
 
 package com.aamo.cookbook.tests.ui.components.inputs
 
-import com.aamo.cookbook.ui.components.inputs.FloatFieldValue
+import com.aamo.cookbook.utility.components.inputs.FloatFieldValue
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse

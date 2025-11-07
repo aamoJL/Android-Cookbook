@@ -1,3 +1,5 @@
+@file:Suppress("HardCodedStringLiteral")
+
 package com.aamo.cookbook.database
 
 import androidx.room.testing.MigrationTestHelper
@@ -10,24 +12,23 @@ import java.io.IOException
 
 @RunWith(AndroidJUnit4::class)
 class MigrationTest {
-  private val TEST_DB = "migration-test"
+  private val testDB = "migration-test"
 
-  @get:Rule
-  val helper: MigrationTestHelper = MigrationTestHelper(
-    InstrumentationRegistry.getInstrumentation(),
-    RecipeDatabase::class.java
+  @get:Rule val helper: MigrationTestHelper = MigrationTestHelper(
+    instrumentation = InstrumentationRegistry.getInstrumentation(),
+    databaseClass = RecipeDatabase::class.java
   )
 
   @Test
   @Throws(IOException::class)
   fun migrateAll() {
     // Create earliest version of the database.
-    helper.createDatabase(TEST_DB, 1).apply {
+    helper.createDatabase(testDB, 1).apply {
       close()
     }
 
-    for (autoMigrationVersion in 1..2) {
-      helper.runMigrationsAndValidate(TEST_DB, autoMigrationVersion, true)
+    for (version in 1..RecipeDatabase.Properties.VERSION) {
+      helper.runMigrationsAndValidate(testDB, version, true)
     }
   }
 }

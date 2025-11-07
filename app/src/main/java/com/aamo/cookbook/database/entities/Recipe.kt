@@ -1,3 +1,5 @@
+@file:Suppress("HardCodedStringLiteral")
+
 package com.aamo.cookbook.database.entities
 
 import androidx.room.ColumnInfo
@@ -10,7 +12,7 @@ import androidx.room.Relation
 // TODO: rename plurals to singular
 @Entity(tableName = "recipes")
 data class Recipe(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "category") val category: String = "",
   @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = "",
@@ -33,10 +35,10 @@ data class Recipe(
  * The order number will be assigned when a recipe is saved to the database
  */
 data class Chapter(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "name") val name: String = "",
-  @ColumnInfo(name = "recipeId") val recipeId: Int = 0,
+  @ColumnInfo(name = "recipeId") val recipeId: Long = 0,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
 )
 
@@ -54,21 +56,13 @@ data class Chapter(
  * The order number will be assigned when a recipe is saved to the database
  */
 data class Step(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  @ColumnInfo(name = "chapterId") val chapterId: Long = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "description") val description: String = "",
-  @ColumnInfo(name = "chapterId") val chapterId: Int = 0,
   @ColumnInfo(name = "timerMinutes", defaultValue = "NULL") val timerMinutes: Int? = null,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
-) {
-  /**
-   * Returns the description as a string that ends with ':' or '.',
-   * depending if the step has any ingredients.
-   */
-  fun getDescriptionWithFormattedEndChar(isEmpty: Boolean): String {
-    return "${description}${if (isEmpty) "." else ":"}"
-  }
-}
+)
 
 @Entity(
   tableName = "ingredients", foreignKeys = [ForeignKey(
@@ -79,11 +73,11 @@ data class Step(
   )]
 )
 data class Ingredient(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  @ColumnInfo(name = "stepId") val stepId: Long = 0,
   @ColumnInfo(name = "name") val name: String = "",
   @ColumnInfo(name = "amount", defaultValue = "0") val amount: Float = 0f,
   @ColumnInfo(name = "unit", defaultValue = "") val unit: String = "",
-  @ColumnInfo(name = "stepId") val stepId: Int = 0,
 )
 
 @Entity(
@@ -95,8 +89,8 @@ data class Ingredient(
   )]
 )
 data class RecipeBookmark(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
-  @ColumnInfo(name = "recipeId") val recipeId: Int,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  @ColumnInfo(name = "recipeId") val recipeId: Long,
 )
 
 @Entity(
@@ -108,9 +102,9 @@ data class RecipeBookmark(
   )]
 )
 data class RecipeRating(
-  @PrimaryKey(autoGenerate = true) val id: Int = 0,
+  @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  @ColumnInfo(name = "recipeId") val recipeId: Long,
   @ColumnInfo(name = "ratingOutOfFive") val ratingOutOfFive: Int,
-  @ColumnInfo(name = "recipeId") val recipeId: Int,
 )
 
 data class FullFavoriteRecipe(
@@ -124,20 +118,7 @@ data class RecipeWithChaptersStepsAndIngredients(
   @Embedded val recipe: Recipe, @Relation(
     entity = Chapter::class, parentColumn = "id", entityColumn = "recipeId"
   ) val chapters: List<ChapterWithStepsAndIngredients> = emptyList()
-) {
-  fun copyAsNew(): RecipeWithChaptersStepsAndIngredients {
-    return this.copy(
-      recipe = recipe.copy(id = 0, thumbnailUri = ""), chapters = chapters.map { c ->
-        c.copy(
-          chapter = c.chapter.copy(id = 0), steps = c.steps.map { s ->
-            s.copy(
-              step = s.step.copy(id = 0), ingredients = s.ingredients.map { i ->
-                i.copy(id = 0)
-              })
-          })
-      })
-  }
-}
+)
 
 data class ChapterWithStepsAndIngredients(
   @Embedded val chapter: Chapter, @Relation(
@@ -151,11 +132,6 @@ data class StepWithIngredients(
     parentColumn = "id",
     entityColumn = "stepId",
   ) val ingredients: List<Ingredient> = emptyList()
-)
-
-data class RecipeCategoryTuple(
-  @ColumnInfo(name = "category") val category: String,
-  @ColumnInfo(name = "subCategory") val subCategory: String
 )
 
 data class RecipeWithBookmarkAndRating(

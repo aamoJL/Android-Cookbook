@@ -6,7 +6,7 @@ import com.aamo.cookbook.features.recipe.list.screens.recipesByBookmarkScreen
 import com.aamo.cookbook.features.recipe.list.screens.recipesByCategoryScreen
 
 fun NavGraphBuilder.recipeListPages(
-  onOpenRecipe: (id: Int) -> Unit,
+  onOpenRecipe: (id: Long) -> Unit,
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
   onBack: () -> Unit

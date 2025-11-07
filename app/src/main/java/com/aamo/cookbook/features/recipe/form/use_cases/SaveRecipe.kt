@@ -11,13 +11,13 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 
 suspend fun saveRecipe(
   recipe: RecipeWithChaptersStepsAndIngredients,
-  saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Int?
-): Int? {
+  saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Long?
+): Long? {
   return saveData(recipe)
 }
 
 fun RecipeFormInfoFields.toDao(
-  id: Int, thumbnailUri: String
+  id: Long, thumbnailUri: String
 ): RecipeWithChaptersStepsAndIngredients {
   return RecipeWithChaptersStepsAndIngredients(
     recipe = Recipe(

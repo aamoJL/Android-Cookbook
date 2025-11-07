@@ -48,9 +48,9 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
-import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.components.LoadingScreen
 import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

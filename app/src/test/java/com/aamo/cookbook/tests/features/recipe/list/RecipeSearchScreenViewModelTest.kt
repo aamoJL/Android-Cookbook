@@ -2,11 +2,11 @@
 
 package com.aamo.cookbook.tests.features.recipe.list
 
-import com.aamo.cookbook.MainDispatcherRule
-import com.aamo.cookbook.Mocker
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.screens.RecipeSearchScreenViewModel
+import com.aamo.cookbook.test_utility.MainDispatcherRule
+import com.aamo.cookbook.test_utility.Mocker
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow

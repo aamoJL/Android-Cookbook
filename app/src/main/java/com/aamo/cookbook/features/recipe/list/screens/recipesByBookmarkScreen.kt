@@ -44,8 +44,8 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
-import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.utility.components.LoadingScreen
+import com.aamo.cookbook.utility.components.PrimaryTopAppBar
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.tags.UITag
@@ -98,7 +98,7 @@ class RecipesByBookmarkScreenViewModel(
 }
 
 fun NavGraphBuilder.recipesByBookmarkScreen(
-  onOpenRecipe: (id: Int) -> Unit,
+  onOpenRecipe: (id: Long) -> Unit,
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
   onBack: () -> Unit

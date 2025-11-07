@@ -14,7 +14,6 @@ import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
-import com.aamo.cookbook.database.entities.RecipeCategoryTuple
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
@@ -26,7 +25,7 @@ import kotlinx.coroutines.flow.Flow
 interface RecipeDao {
   // region GET
   @Query("SELECt * FROM recipes WHERE id = :recipeId")
-  suspend fun getRecipe(recipeId: Int): Recipe?
+  suspend fun getRecipe(recipeId: Long): Recipe?
 
   @Query("SELECT DISTINCT category FROM recipes")
   fun getCategoriesFlow(): Flow<List<String>>
@@ -54,42 +53,27 @@ interface RecipeDao {
   )
   fun getBookmarksWithRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
+  @Transaction
+  @Query(
+    """
+    SELECT * FROM recipes
+    LEFT JOIN recipeChapters AS chapters ON chapters.recipeId = recipes.id
+    LEFT JOIN chapterSteps AS steps ON steps.chapterId = chapters.id
+    LEFT JOIN ingredients ON ingredients.stepId = steps.id
+    WHERE recipes.id = :recipeId
+    ORDER BY chapters.orderNumber, steps.orderNumber, ingredients.name
+  """
+  )
+  suspend fun getCompleteRecipe(recipeId: Long): RecipeWithChaptersStepsAndIngredients?
+  
   // -------- //
 
-  @Query("SELECT * FROM recipes ORDER BY name ASC")
-  fun getRecipesFlow(): Flow<List<Recipe>>
-
-  @Transaction
-  @Query("SELECT * FROM recipes WHERE id = :recipeId")
-  @Deprecated(
-    message = "This function returns unsorted recipe",
-    replaceWith = ReplaceWith("getRecipeWithChaptersStepsAndIngredients(recipeId)")
-  )
-  suspend fun getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId: Int): RecipeWithChaptersStepsAndIngredients?
-
-  /**
-   * Returns recipes with chapters and steps sorted by order number, and ingredients sorted by with name
-   */
-  suspend fun getRecipeWithChaptersStepsAndIngredients(recipeId: Int): RecipeWithChaptersStepsAndIngredients? {
-    @Suppress("DEPRECATION") return getRecipeWithChaptersStepsAndIngredientsUnsorted(recipeId)?.let { recipe ->
-      recipe.copy(chapters = recipe.chapters.sortedBy { it.chapter.orderNumber }.map { chapter ->
-        chapter.copy(steps = chapter.steps.sortedBy { it.step.orderNumber }.map { step ->
-          step.copy(
-            ingredients = step.ingredients.sortedBy { it.name })
-        })
-      })
-    }
-  }
-
-  @Query("SELECT DISTINCT category, subCategory FROM recipes")
-  suspend fun getCategoriesWithSubcategories(): List<RecipeCategoryTuple>
-
   @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
-  suspend fun getRecipeRatingById(recipeId: Int): RecipeRating?
+  suspend fun getRecipeRatingById(recipeId: Long): RecipeRating?
 
   @Transaction
   @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
-  suspend fun getFavoriteRecipeById(recipeId: Int): FullFavoriteRecipe?
+  suspend fun getFavoriteRecipeById(recipeId: Long): FullFavoriteRecipe?
   // endregion
 
   // region UPSERT
@@ -108,11 +92,11 @@ interface RecipeDao {
   /**
    * Adds or updates the given [recipe] to the database
    * The items' order numbers will be changed according to the list indexing
-   * @return Upserted recipes Id, whether the recipe was inserted or updated.
+   * @return Recipe's Id, whether the recipe was inserted or updated.
    */
   @Transaction
-  suspend fun upsertRecipeWithChaptersStepsAndIngredients(recipe: RecipeWithChaptersStepsAndIngredients): Int {
-    val existingRecipe = getRecipeWithChaptersStepsAndIngredients(recipe.recipe.id)
+  suspend fun upsert(recipe: RecipeWithChaptersStepsAndIngredients): Long {
+    val existingRecipe = getCompleteRecipe(recipe.recipe.id)
 
     // Delete old chapters. Steps and ingredients will be also deleted
     existingRecipe?.also {
@@ -121,20 +105,25 @@ interface RecipeDao {
 
     // Upsert function will return -1 if the function updates an existing item,
     //    so the value have to be set to the recipes id instead on the returned value
-    val recipeId = upsert(recipe.recipe).toInt().let { if (it == -1) recipe.recipe.id else it }
+    val recipeId = upsert(recipe.recipe).let { if (it == -1L) recipe.recipe.id else it }
 
     // Update chapter order numbers and ids
     recipe.chapters.forEachIndexed { ci, chapter ->
-      val chapterId =
-        upsert(chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)).toInt()
-          .let { if (it == -1) chapter.chapter.id else it }
+      val chapterId = upsert(
+        chapter.chapter.copy(
+          orderNumber = ci + 1, recipeId = recipeId
+        )
+      ).let { if (it == -1L) chapter.chapter.id else it }
 
       // Update step order numbers and ids
       chapter.steps.forEachIndexed { si, s ->
         s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
           .also { step ->
-            val stepId = upsert(step.step.copy(orderNumber = si + 1, chapterId = chapterId)).toInt()
-              .let { if (it == -1) step.step.id else it }
+            val stepId = upsert(
+              step.step.copy(
+                orderNumber = si + 1, chapterId = chapterId
+              )
+            ).let { if (it == -1L) step.step.id else it }
 
             // Update ingredient ids
             upsert(step.ingredients.map { ingredient ->
@@ -148,7 +137,10 @@ interface RecipeDao {
   }
 
   @Upsert
-  suspend fun upsertRecipeRating(recipeRating: RecipeRating)
+  suspend fun upsert(recipeRating: RecipeRating): Long
+
+  @Upsert
+  suspend fun upsert(recipeBookmark: RecipeBookmark): Long
   // endregion
 
   // region DELETE
@@ -156,19 +148,19 @@ interface RecipeDao {
   suspend fun deleteRecipe(recipe: Recipe): Int
 
   @Delete
-  suspend fun delete(vararg chapter: Chapter)
+  suspend fun delete(vararg chapter: Chapter): Int
 
   @Delete
-  suspend fun deleteStep(step: Step)
+  suspend fun deleteStep(step: Step): Int
 
   @Delete
-  suspend fun deleteIngredient(ingredient: Ingredient)
+  suspend fun deleteIngredient(ingredient: Ingredient): Int
 
   @Delete
-  suspend fun removeRecipeFromFavorites(value: RecipeBookmark)
+  suspend fun removeRecipeFromFavorites(value: RecipeBookmark): Int
 
   @Delete
-  suspend fun deleteRecipeRating(recipeRating: RecipeRating)
+  suspend fun deleteRecipeRating(recipeRating: RecipeRating): Int
   // endregion
 
   @Insert
