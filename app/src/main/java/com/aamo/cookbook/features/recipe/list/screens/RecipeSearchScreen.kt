@@ -46,9 +46,9 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
+import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.ui.components.inputs.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.components.LoadingScreen
-import com.aamo.cookbook.utility.components.inputs.SearchTextField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.flow.Flow
@@ -86,9 +86,8 @@ class RecipeSearchScreenViewModel(
   init {
     viewModelScope.launch {
       fetchData().collect { result ->
-        _recipes.update { result }.also {
-          isLoading = false
-        }
+        _recipes.update { result }
+        isLoading = false
       }
     }
   }
@@ -114,7 +113,7 @@ fun NavGraphBuilder.recipeSearchScreen(
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()
     val filterWord by viewmodel.filterWord.collectAsStateWithLifecycle()
 
-    LoadingScreen(enabled = viewmodel.isLoading) {
+    LoadingScreen(loading = viewmodel.isLoading) {
       RecipeSearchScreenContent(
         recipes = recipes,
         searchWord = filterWord,
@@ -174,7 +173,7 @@ private fun SearchTopBar(
   }
 
   TopAppBar(
-    title = { null }, colors = TopAppBarDefaults.topAppBarColors(
+    title = { }, colors = TopAppBarDefaults.topAppBarColors(
     actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
     navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
     containerColor = MaterialTheme.colorScheme.primary,

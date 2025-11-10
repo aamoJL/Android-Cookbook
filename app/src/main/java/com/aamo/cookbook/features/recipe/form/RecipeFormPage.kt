@@ -39,7 +39,7 @@ import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.utility.components.LoadingScreen
+import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import kotlinx.coroutines.launch
@@ -67,6 +67,7 @@ class RecipeFormViewModel(
     }
   }
 
+  // TODO: unit test
   fun getModel(): RecipeFormInfoFields {
     return recipe.let { (r, cs) ->
       RecipeFormInfoFields(
@@ -89,10 +90,12 @@ class RecipeFormViewModel(
     }
   }
 
+  // TODO: unit test
   suspend fun deleteRecipe(): Boolean {
     return runCatching { deleteData(recipe) }.isSuccess
   }
 
+  // TODO: unit test
   suspend fun saveRecipe(data: RecipeFormInfoFields): Long? {
     return runCatching {
       saveData(data.toDao(id = recipe.recipe.id, thumbnailUri = recipe.recipe.thumbnailUri))
@@ -121,7 +124,7 @@ fun NavGraphBuilder.recipeFormPage(
               recipe = dao.getRecipe(recipeId) ?: throw Exception("Failed to fetch data"),
               deleteThumbnail = { uri ->
                 IOService(localContext).deleteExternalFile(Environment.DIRECTORY_PICTURES, uri)
-              }) { recipe -> dao.deleteRecipe(recipe) > 0 }
+              }) { recipe -> dao.delete(recipe) > 0 }
           },
           saveData = { entity ->
             saveRecipe(recipe = entity) {

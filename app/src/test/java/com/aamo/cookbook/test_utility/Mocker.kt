@@ -10,7 +10,9 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 
-// TODO: change to same as ui tests
+@Deprecated(
+  "Use RecipeMocker", replaceWith = ReplaceWith(expression = "RecipeMocker")
+)
 class Mocker {
   companion object {
     fun mockRecipeList(): List<RecipeWithChaptersStepsAndIngredients> {

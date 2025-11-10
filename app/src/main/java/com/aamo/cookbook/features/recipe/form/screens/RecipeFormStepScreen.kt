@@ -23,7 +23,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -50,12 +50,12 @@ import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
-import com.aamo.cookbook.utility.components.PrimaryTopAppBar
-import com.aamo.cookbook.utility.components.inputs.BasicDismissibleItem
-import com.aamo.cookbook.utility.components.inputs.LoadingIconButton
-import com.aamo.cookbook.utility.components.inputs.NullableIntNumberField
-import com.aamo.cookbook.utility.components.inputs.borderlessTextFieldColors
-import com.aamo.cookbook.utility.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
+import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
+import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -69,6 +69,7 @@ import kotlinx.serialization.Serializable
 data class RecipeFormStepScreen(val index: Int)
 
 class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) : ViewModel() {
+  // TODO: unit test
   class FormState(formData: RecipeFormStepFields) {
     val description = ViewModelState(formData.description).onChange { onUnsavedChanges() }
     val timerMinutes = ViewModelState(formData.timerMinutes).onChange { onUnsavedChanges() }
@@ -76,6 +77,7 @@ class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) 
     val ingredients = ViewModelStateList(formData.ingredients).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
+    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (description.value.isEmpty()) return false
@@ -92,6 +94,7 @@ class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) 
   val formState = FormState(formData)
   val isNew = formData.description.isEmpty()
 
+  // TODO: unit test
   fun update(ingredient: RecipeFormIngredientFields) {
     formState.ingredients.values.indexOfFirst { it.uuid == ingredient.uuid }.also { index ->
       if (index == -1) formState.ingredients.add(ingredient)
@@ -99,6 +102,7 @@ class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) 
     }
   }
 
+  // TODO: unit test
   fun getModel(): RecipeFormStepFields? {
     if (!formState.canSave()) return null
 
@@ -170,7 +174,7 @@ fun RecipeFormStepScreenContent(
   onSubmit: () -> Unit,
   onBack: () -> Unit,
 ) {
-  var openUnsavedDialog by remember { mutableStateOf(false) }
+  var openUnsavedDialog by rememberSaveable { mutableStateOf(false) }
 
   UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
     openUnsavedDialog = false

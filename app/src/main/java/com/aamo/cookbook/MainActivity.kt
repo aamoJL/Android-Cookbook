@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 /**
  * Enum class for screen navigation
  */
+// TODO: remove
 enum class Screen(private val route: String, val argumentName: String = "") {
   Categories("categories"),
   Recipes("recipes"),
@@ -68,6 +69,7 @@ class MainActivity : ComponentActivity() {
   }
 }
 
+// TODO: remove
 @Composable
 fun MainNavGraph(
   navController: NavHostController = rememberNavController(),

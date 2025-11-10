@@ -4,13 +4,11 @@ package com.aamo.cookbook.database.dao
 
 import androidx.room.Dao
 import androidx.room.Delete
-import androidx.room.Insert
 import androidx.room.MapColumn
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.aamo.cookbook.database.entities.Chapter
-import com.aamo.cookbook.database.entities.FullFavoriteRecipe
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
@@ -65,15 +63,9 @@ interface RecipeDao {
   """
   )
   suspend fun getCompleteRecipe(recipeId: Long): RecipeWithChaptersStepsAndIngredients?
-  
-  // -------- //
 
   @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
-  suspend fun getRecipeRatingById(recipeId: Long): RecipeRating?
-
-  @Transaction
-  @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
-  suspend fun getFavoriteRecipeById(recipeId: Long): FullFavoriteRecipe?
+  suspend fun getRating(recipeId: Long): RecipeRating?
   // endregion
 
   // region UPSERT
@@ -87,7 +79,7 @@ interface RecipeDao {
   suspend fun upsert(step: Step): Long
 
   @Upsert
-  suspend fun upsert(ingredients: List<Ingredient>): List<Long>
+  suspend fun upsert(vararg ingredients: Ingredient)
 
   /**
    * Adds or updates the given [recipe] to the database
@@ -110,9 +102,7 @@ interface RecipeDao {
     // Update chapter order numbers and ids
     recipe.chapters.forEachIndexed { ci, chapter ->
       val chapterId = upsert(
-        chapter.chapter.copy(
-          orderNumber = ci + 1, recipeId = recipeId
-        )
+        chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)
       ).let { if (it == -1L) chapter.chapter.id else it }
 
       // Update step order numbers and ids
@@ -120,15 +110,12 @@ interface RecipeDao {
         s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
           .also { step ->
             val stepId = upsert(
-              step.step.copy(
-                orderNumber = si + 1, chapterId = chapterId
-              )
+              step.step.copy(orderNumber = si + 1, chapterId = chapterId)
             ).let { if (it == -1L) step.step.id else it }
 
             // Update ingredient ids
-            upsert(step.ingredients.map { ingredient ->
-              ingredient.copy(stepId = stepId)
-            })
+            upsert(*step.ingredients.map { ingredient -> ingredient.copy(stepId = stepId) }
+              .toTypedArray())
           }
       }
     }
@@ -145,24 +132,9 @@ interface RecipeDao {
 
   // region DELETE
   @Delete
-  suspend fun deleteRecipe(recipe: Recipe): Int
+  suspend fun delete(recipe: Recipe): Int
 
   @Delete
   suspend fun delete(vararg chapter: Chapter): Int
-
-  @Delete
-  suspend fun deleteStep(step: Step): Int
-
-  @Delete
-  suspend fun deleteIngredient(ingredient: Ingredient): Int
-
-  @Delete
-  suspend fun removeRecipeFromFavorites(value: RecipeBookmark): Int
-
-  @Delete
-  suspend fun deleteRecipeRating(recipeRating: RecipeRating): Int
   // endregion
-
-  @Insert
-  suspend fun addRecipeToFavorites(value: RecipeBookmark)
 }

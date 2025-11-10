@@ -43,8 +43,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.BuildConfig
 import com.aamo.cookbook.R
 import com.aamo.cookbook.service.IOService
+import com.aamo.cookbook.ui.components.inputs.FiveStarRating
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.components.inputs.FiveStarRating
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 import java.io.File
 import java.util.Objects

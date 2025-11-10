@@ -8,15 +8,16 @@ import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.repository.RecipeRepository
-import com.aamo.cookbook.service.IOServiceBase
+import com.aamo.cookbook.service.IIOService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlin.math.max
 
+// TODO: remove
 class RecipeScreenViewModel(
-  private val recipeRepository: RecipeRepository, private val ioService: IOServiceBase
+  private val recipeRepository: RecipeRepository, private val ioService: IIOService
 ) : ViewModel() {
 
   /**

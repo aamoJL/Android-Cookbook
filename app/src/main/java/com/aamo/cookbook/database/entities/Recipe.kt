@@ -30,7 +30,7 @@ data class Recipe(
   )]
 )
 /**
- * @param [orderNumber] Chapter's index number in a recipe. Starts from one.
+ * @param [orderNumber] Chapter's order number in a recipe. Starts from one.
  * Primarily used to fetch the chapters in the right order from the database.
  * The order number will be assigned when a recipe is saved to the database
  */
@@ -51,7 +51,7 @@ data class Chapter(
   )]
 )
 /**
- * @param [orderNumber] Step's index number in a chapter. Starts from one.
+ * @param [orderNumber] Step's order number in a chapter. Starts from one.
  * Primarily used to fetch the steps in the right order from the database.
  * The order number will be assigned when a recipe is saved to the database
  */
@@ -80,6 +80,7 @@ data class Ingredient(
   @ColumnInfo(name = "unit", defaultValue = "") val unit: String = "",
 )
 
+// TODO: rename to bookmark
 @Entity(
   tableName = "favoriteRecipes", foreignKeys = [ForeignKey(
     entity = Recipe::class,
@@ -107,13 +108,6 @@ data class RecipeRating(
   @ColumnInfo(name = "ratingOutOfFive") val ratingOutOfFive: Int,
 )
 
-data class FullFavoriteRecipe(
-  @Embedded val favoriteRecipe: RecipeBookmark,
-  @Relation(
-    entity = Recipe::class, parentColumn = "recipeId", entityColumn = "id"
-  ) val recipe: Recipe,
-)
-
 data class RecipeWithChaptersStepsAndIngredients(
   @Embedded val recipe: Recipe, @Relation(
     entity = Chapter::class, parentColumn = "id", entityColumn = "recipeId"
@@ -128,9 +122,7 @@ data class ChapterWithStepsAndIngredients(
 
 data class StepWithIngredients(
   @Embedded val step: Step, @Relation(
-    entity = Ingredient::class,
-    parentColumn = "id",
-    entityColumn = "stepId",
+    entity = Ingredient::class, parentColumn = "id", entityColumn = "stepId",
   ) val ingredients: List<Ingredient> = emptyList()
 )
 

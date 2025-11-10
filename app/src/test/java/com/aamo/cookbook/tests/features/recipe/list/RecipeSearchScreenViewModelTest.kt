@@ -5,7 +5,6 @@ package com.aamo.cookbook.tests.features.recipe.list
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.screens.RecipeSearchScreenViewModel
-import com.aamo.cookbook.test_utility.MainDispatcherRule
 import com.aamo.cookbook.test_utility.Mocker
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -16,14 +15,12 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
 
+// TODO: update
 class RecipeSearchScreenViewModelTest {
   private lateinit var viewmodel: RecipeSearchScreenViewModel
   private val source = MutableSharedFlow<List<RecipeListRecipeModel>>()
-
-  @get:Rule val mainDispatcherRule = MainDispatcherRule()
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Before
@@ -34,7 +31,7 @@ class RecipeSearchScreenViewModelTest {
   @Test
   fun verifyInitWord() {
     val viewModel = RecipeSearchScreenViewModel(fetchData = { flow { emit(emptyList()) } })
-    val expected = String.Companion.EMPTY
+    val expected = String.EMPTY
     val actual = viewModel.filterWord.value
     Assert.assertEquals(expected, actual)
   }
@@ -42,7 +39,7 @@ class RecipeSearchScreenViewModelTest {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun verifyInitValidRecipes() = runTest {
-    val models = Mocker.Companion.mockRecipeList().map { it.recipe }.map {
+    val models = Mocker.mockRecipeList().map { it.recipe }.map {
       RecipeListRecipeModel(recipe = it, isBookmarked = true, rating = 3)
     }
 

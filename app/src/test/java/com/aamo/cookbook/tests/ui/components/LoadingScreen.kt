@@ -1,0 +1,52 @@
+package com.aamo.cookbook.tests.ui.components
+
+import androidx.compose.material3.Button
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
+import com.aamo.cookbook.test_utility.TestTags
+import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.utility.tags.UITag
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class LoadingScreen {
+  @get:Rule val rule = createComposeRule()
+
+  @Test
+  fun `content not visible when loading`() {
+    rule.setContent {
+      LoadingScreen(loading = true) {
+        Button(onClick = {}, modifier = Modifier.testTag(TestTags.INVISIBLE.name)) {}
+      }
+    }
+
+    rule.onNodeWithTag(TestTags.INVISIBLE.name).assertDoesNotExist()
+  }
+
+  @Test
+  fun `content visible when not loading`() {
+    rule.setContent {
+      LoadingScreen(loading = false) {
+        Button(onClick = {}, modifier = Modifier.testTag(TestTags.VISIBLE.name)) {}
+      }
+    }
+
+    rule.onNodeWithTag(TestTags.VISIBLE.name).assertExists()
+  }
+
+  @Test
+  fun `Progress indicator visible when loading`() {
+    rule.setContent {
+      LoadingScreen(loading = true) {
+        Button(onClick = {}, modifier = Modifier.testTag(TestTags.INVISIBLE.name)) {}
+      }
+    }
+
+    rule.onNodeWithTag(UITag.PROGRESS_INDICATOR.name).assertExists()
+  }
+}

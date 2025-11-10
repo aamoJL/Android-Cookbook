@@ -12,7 +12,7 @@ fun String.toUUIDorNull(): UUID? {
   return try {
     UUID.fromString(this)
   }
-  catch (e: IllegalArgumentException) {
+  catch (_: IllegalArgumentException) {
     null
   }
 }
@@ -32,6 +32,10 @@ fun String.trimFirst(vararg chars: Char): String {
  */
 fun String.asOptionalLabel(): String = "(${this})"
 
-fun String.isNumber(): Boolean {
+fun String.isValidDecimalNumberString(): Boolean {
   @Suppress("HardCodedStringLiteral") return Pattern.matches("^-?\\d*\\.?\\d*", this)
+}
+
+fun String.isValidIntegerString(): Boolean {
+  @Suppress("HardCodedStringLiteral") return Pattern.matches("^-?\\d*", this)
 }

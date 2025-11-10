@@ -25,7 +25,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -53,14 +53,14 @@ import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
-import com.aamo.cookbook.utility.components.PrimaryTopAppBar
-import com.aamo.cookbook.utility.components.inputs.BasicDismissibleItem
-import com.aamo.cookbook.utility.components.inputs.LoadingIconButton
-import com.aamo.cookbook.utility.components.inputs.NullableIntNumberField
-import com.aamo.cookbook.utility.components.inputs.OptionsTextField
-import com.aamo.cookbook.utility.components.inputs.borderlessTextFieldColors
-import com.aamo.cookbook.utility.components.modals.DeleteDialog
-import com.aamo.cookbook.utility.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
+import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
+import com.aamo.cookbook.ui.components.inputs.OptionsTextField
+import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.modals.DeleteDialog
+import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -78,6 +78,7 @@ class RecipeFormInfoScreenViewModel(
   private val formData: RecipeFormInfoFields,
   fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
+  // TODO: unit test
   class FormState(formData: RecipeFormInfoFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val category = ViewModelState(formData.category).onChange { onUnsavedChanges() }
@@ -87,6 +88,7 @@ class RecipeFormInfoScreenViewModel(
     val chapters = ViewModelStateList(formData.chapters).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
+    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
@@ -120,6 +122,7 @@ class RecipeFormInfoScreenViewModel(
     }
   }
 
+  // TODO: unit test
   fun update(chapter: RecipeFormChapterFields) {
     formState.chapters.values.indexOfFirst { it.uuid == chapter.uuid }.also { index ->
       if (index == -1) formState.chapters.add(chapter)
@@ -127,6 +130,7 @@ class RecipeFormInfoScreenViewModel(
     }
   }
 
+  // TODO: unit test
   fun getModel(): RecipeFormInfoFields? {
     if (!formState.canSave()) return null
 
@@ -208,8 +212,8 @@ fun RecipeFormInfoScreenContent(
   onDelete: () -> Unit,
   onBack: () -> Unit,
 ) {
-  var openUnsavedDialog by remember { mutableStateOf(false) }
-  var openDeleteDialog by remember { mutableStateOf(false) }
+  var openUnsavedDialog by rememberSaveable { mutableStateOf(false) }
+  var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
   UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
     openUnsavedDialog = false

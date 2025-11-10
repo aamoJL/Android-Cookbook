@@ -40,9 +40,9 @@ import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
+import com.aamo.cookbook.ui.components.NoteCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.components.NoteCard
 import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 

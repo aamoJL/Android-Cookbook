@@ -1,9 +1,10 @@
 package com.aamo.cookbook.test_utility.service
 
 import android.net.Uri
-import com.aamo.cookbook.service.IOServiceBase
+import com.aamo.cookbook.service.IIOService
+import java.io.File
 
-class TestIOService : IOServiceBase() {
+class TestIOService : IIOService {
   override fun getFileNameWithSuffixFromUri(uri: Uri): String? {
     return null
   }
@@ -13,6 +14,10 @@ class TestIOService : IOServiceBase() {
   }
 
   override fun getExternalFileUri(subFolder: String?, fileName: String): Uri {
+    throw NotImplementedError()
+  }
+
+  override fun getExternalFileDir(subFolder: String): File {
     throw NotImplementedError()
   }
 }

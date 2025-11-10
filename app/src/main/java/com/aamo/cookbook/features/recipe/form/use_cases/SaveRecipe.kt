@@ -9,6 +9,7 @@ import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 
+// TODO: unit test
 suspend fun saveRecipe(
   recipe: RecipeWithChaptersStepsAndIngredients,
   saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Long?
@@ -16,6 +17,7 @@ suspend fun saveRecipe(
   return saveData(recipe)
 }
 
+// TODO: unit test
 fun RecipeFormInfoFields.toDao(
   id: Long, thumbnailUri: String
 ): RecipeWithChaptersStepsAndIngredients {

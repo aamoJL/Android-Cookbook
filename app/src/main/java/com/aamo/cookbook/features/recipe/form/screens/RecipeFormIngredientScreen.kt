@@ -15,7 +15,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
@@ -35,11 +35,11 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
-import com.aamo.cookbook.utility.components.PrimaryTopAppBar
-import com.aamo.cookbook.utility.components.inputs.LoadingIconButton
-import com.aamo.cookbook.utility.components.inputs.NullableFloatNumberField
-import com.aamo.cookbook.utility.components.inputs.borderlessTextFieldColors
-import com.aamo.cookbook.utility.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
+import com.aamo.cookbook.ui.components.inputs.NullableFloatNumberField
+import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.viewmodels.SavingState
@@ -52,12 +52,14 @@ data class RecipeFormIngredientScreen(val index: Int)
 class RecipeFormIngredientScreenViewModel(
   private val formData: RecipeFormIngredientFields,
 ) : ViewModel() {
+  // TODO: unit test
   class FormState(formData: RecipeFormIngredientFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val amount = ViewModelState(formData.amount).onChange { onUnsavedChanges() }
     val unit = ViewModelState(formData.unit).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
+    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
@@ -74,6 +76,7 @@ class RecipeFormIngredientScreenViewModel(
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
+  // TODO: unit test
   fun getModel(): RecipeFormIngredientFields? {
     if (!formState.canSave()) return null
 
@@ -117,7 +120,7 @@ fun RecipeFormIngredientScreenContent(
   onBack: () -> Unit,
   onSubmit: () -> Unit,
 ) {
-  var openUnsavedDialog by remember { mutableStateOf(false) }
+  var openUnsavedDialog by rememberSaveable { mutableStateOf(false) }
 
   UnsavedDialog(open = openUnsavedDialog, onDismiss = { openUnsavedDialog = false }, onConfirm = {
     openUnsavedDialog = false

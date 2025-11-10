@@ -4,6 +4,7 @@ import androidx.compose.runtime.mutableStateListOf
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.onTrue
+import java.util.Collections
 
 class ViewModelStateList<T>(items: List<T> = emptyList()) {
   private var validationPredicate: ((T) -> T?)? = null
@@ -32,7 +33,7 @@ class ViewModelStateList<T>(items: List<T> = emptyList()) {
   }
 
   fun remove(vararg items: T) {
-    _values.removeAll(items).onTrue {
+    _values.removeAll(items.toSet()).onTrue {
       onChange?.invoke()
     }
   }
@@ -50,7 +51,7 @@ class ViewModelStateList<T>(items: List<T> = emptyList()) {
   fun swapAt(indexA: Int, indexB: Int) {
     if (indexA == indexB) return
 
-    _values[indexA] = _values[indexB].also { _values[indexB] = _values[indexA] }
+    Collections.swap(_values, indexA, indexB)
     onChange?.invoke()
   }
 

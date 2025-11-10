@@ -70,6 +70,11 @@ android {
   room {
     schemaDirectory("$projectDir/schemas")
   }
+  testOptions {
+    unitTests {
+      isIncludeAndroidResources = true
+    }
+  }
 }
 
 dependencies {
@@ -85,12 +90,15 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.coil.compose)
   implementation(libs.androidx.camera.camera2)
-  // JSON serialization library, works with the Kotlin serialization plugin
   implementation(libs.kotlinx.serialization.json)
   ksp(libs.androidx.room.compiler)
 
   testImplementation(libs.junit)
   testImplementation(libs.kotlinx.coroutines.test)
+  testImplementation(libs.robolectric)
+  testImplementation(libs.ui.test.junit4)
+  testImplementation(libs.androidx.room.testing)
+  testImplementation(libs.androidx.core.testing)
 
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
@@ -98,7 +106,6 @@ dependencies {
   androidTestImplementation(libs.androidx.ui.test.junit4)
   androidTestImplementation(libs.androidx.navigation.testing)
   androidTestImplementation(libs.androidx.room.testing)
-  androidTestImplementation(libs.androidx.uiautomator)
 
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)
