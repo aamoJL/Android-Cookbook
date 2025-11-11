@@ -10,7 +10,6 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -22,11 +21,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.isValidIntegerString
 import com.aamo.cookbook.utility.extensions.general.letIf
 
-// TODO: unit test
+// TODO: test on device
 @Composable
 fun IntNumberField(
   value: Int,
@@ -44,7 +42,7 @@ fun IntNumberField(
   supportingText: @Composable (() -> Unit)? = null,
   isError: Boolean = false,
   visualTransformation: VisualTransformation = VisualTransformation.None,
-  keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+  keyboardOptions: KeyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
   keyboardActions: KeyboardActions = KeyboardActions.Default,
   interactionSource: MutableInteractionSource? = null,
   shape: Shape = TextFieldDefaults.shape,
@@ -52,18 +50,18 @@ fun IntNumberField(
   /** Keeps selection on the right side of zero if the value is zero */
   restrictSelectionOnZero: Boolean = true
 ) {
-  var currentValue by rememberSaveable { mutableIntStateOf(value) }
-  var currentText by rememberSaveable { mutableStateOf(String.EMPTY) }
+  var currentText by rememberSaveable { mutableStateOf("0") }
   var currentSelection by remember { mutableStateOf(TextRange(currentText.length)) }
 
-  val validator = remember {
-    IntFieldValidator(update = { t, v -> currentText = t; currentValue = v })
-  }
+  val validator = remember { IntFieldValidator() }
 
-  LaunchedEffect(currentValue != value) {
-    // change text if the value was changed outside this component
-    if (validator.update(new = value, old = currentValue)) {
-      currentSelection = TextRange(currentText.length)
+  LaunchedEffect(value) {
+    // Change text when value changes
+    validator.onValid(value = value) { result ->
+      if (currentText != result) {
+        currentText = result
+        currentSelection = TextRange(currentText.length)
+      }
     }
   }
 
@@ -76,13 +74,18 @@ fun IntNumberField(
       if (currentText == it.text) {
         // Only selection changed
         // Prevent cursor movement if zero was prepended to the value
-        currentSelection = it.selection.letIf(it.text == "0" && restrictSelectionOnZero) {
+        currentSelection = it.selection.letIf(currentText == "0" && restrictSelectionOnZero) {
           TextRange(1)
         }
       }
-      else if (validator.update(new = it.text, old = currentText)) {
-        currentSelection = it.selection.letIf(currentText == "0") { TextRange(1) }
-        onValueChange(currentValue)
+      else {
+        validator.onValid(text = it.text) { v, t ->
+          if (currentText != t) {
+            currentText = it.text
+            currentSelection = it.selection.letIf(currentText == "0") { TextRange(1) }
+          }
+          if (value != v) onValueChange(v)
+        }
       }
     },
     suffix = suffix,
@@ -106,27 +109,16 @@ fun IntNumberField(
   )
 }
 
-class IntFieldValidator(private val update: (text: String, value: Int) -> Unit) {
-  fun update(new: String, old: String): Boolean {
-    val newText = transformText(new) ?: return false
+class IntFieldValidator() {
+  fun onValid(text: String, onValid: (value: Int, text: String) -> Unit) {
+    val result = transformText(text = text) ?: return
+    val value = getValueFromText(result) ?: return
 
-    if (old == newText) return false
-
-    val newValue = getValueFromText(newText) ?: return false
-
-    update(newText, newValue)
-
-    return true
+    onValid(value, result)
   }
 
-  fun update(new: Int, old: Int): Boolean {
-    if (old == new) return false
-
-    val newText = getTextFromValue(new)
-
-    update(newText, new)
-
-    return true
+  fun onValid(value: Int, onValid: (text: String) -> Unit) {
+    onValid(value.toString())
   }
 
   private fun getValueFromText(text: String): Int? {
@@ -135,16 +127,11 @@ class IntFieldValidator(private val update: (text: String, value: Int) -> Unit) 
     return if (text.isEmpty()) 0 else text.toIntOrNull()
   }
 
-  private fun getTextFromValue(value: Int): String {
-    return value.toString()
-  }
-
   private fun transformText(text: String): String? {
-    if (getValueFromText(text) == null) return null
+    val result = text.trimStart('0')
 
-    return text.letIf({ it.startsWith("0") }) { a ->
-      // Trim leading zeroes
-      a.trimStart('0')
-    }.letIf({ it.isEmpty() }) { "0" }
+    if (getValueFromText(result) == null) return null
+
+    return result.letIf({ it.isEmpty() }) { "0" }
   }
 }

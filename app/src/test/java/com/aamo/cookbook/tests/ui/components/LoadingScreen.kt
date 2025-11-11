@@ -21,29 +21,29 @@ class LoadingScreen {
   fun `content not visible when loading`() {
     rule.setContent {
       LoadingScreen(loading = true) {
-        Button(onClick = {}, modifier = Modifier.testTag(TestTags.INVISIBLE.name)) {}
+        Button(onClick = {}, modifier = Modifier.testTag(TestTags.NODE.name)) {}
       }
     }
 
-    rule.onNodeWithTag(TestTags.INVISIBLE.name).assertDoesNotExist()
+    rule.onNodeWithTag(TestTags.NODE.name).assertDoesNotExist()
   }
 
   @Test
   fun `content visible when not loading`() {
     rule.setContent {
       LoadingScreen(loading = false) {
-        Button(onClick = {}, modifier = Modifier.testTag(TestTags.VISIBLE.name)) {}
+        Button(onClick = {}, modifier = Modifier.testTag(TestTags.NODE.name)) {}
       }
     }
 
-    rule.onNodeWithTag(TestTags.VISIBLE.name).assertExists()
+    rule.onNodeWithTag(TestTags.NODE.name).assertExists()
   }
 
   @Test
   fun `Progress indicator visible when loading`() {
     rule.setContent {
       LoadingScreen(loading = true) {
-        Button(onClick = {}, modifier = Modifier.testTag(TestTags.INVISIBLE.name)) {}
+        Button(onClick = {}) {}
       }
     }
 

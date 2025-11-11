@@ -64,11 +64,11 @@ class PrimaryTopAppBar {
     rule.apply {
       setContent {
         PrimaryTopAppBar(title = title, actions = {
-          Button(onClick = {}, modifier = Modifier.testTag(TestTags.VISIBLE.name)) {}
+          Button(onClick = {}, modifier = Modifier.testTag(TestTags.NODE.name)) {}
         })
       }
 
-      onNodeWithTag(TestTags.VISIBLE.name).assertExists()
+      onNodeWithTag(TestTags.NODE.name).assertExists()
     }
   }
 }

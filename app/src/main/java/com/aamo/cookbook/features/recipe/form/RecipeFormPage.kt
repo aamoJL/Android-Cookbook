@@ -1,17 +1,6 @@
 package com.aamo.cookbook.features.recipe.form
 
 import android.os.Environment
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
-import androidx.compose.animation.core.EaseIn
-import androidx.compose.animation.core.EaseOut
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -22,7 +11,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -155,36 +143,36 @@ fun NavGraphBuilder.recipeFormPage(
 }
 
 // TODO: transitions
-fun AnimatedContentTransitionScope<NavBackStackEntry>.primaryEnterTransition(): EnterTransition {
-  return fadeIn(
-    animationSpec = tween(300, easing = LinearEasing)
-  ) + slideIntoContainer(
-    animationSpec = tween(300, easing = EaseIn),
-    towards = AnimatedContentTransitionScope.SlideDirection.Start
-  )
-}
-
-fun secondaryEnterTransition(): EnterTransition {
-  return fadeIn(
-    animationSpec = tween(300, easing = LinearEasing)
-  ) + scaleIn(
-    animationSpec = tween(300, easing = EaseIn), initialScale = 0.9f
-  )
-}
-
-fun primaryExitTransition(): ExitTransition {
-  return fadeOut(
-    animationSpec = tween(300, easing = LinearEasing)
-  ) + scaleOut(
-    animationSpec = tween(300, easing = EaseOut), targetScale = 0.9f
-  )
-}
-
-fun AnimatedContentTransitionScope<NavBackStackEntry>.secondaryExitTransition(): ExitTransition {
-  return fadeOut(
-    animationSpec = tween(300, easing = LinearEasing)
-  ) + slideOutOfContainer(
-    animationSpec = tween(300, easing = EaseOut),
-    towards = AnimatedContentTransitionScope.SlideDirection.End
-  )
-}
+//fun AnimatedContentTransitionScope<NavBackStackEntry>.primaryEnterTransition(): EnterTransition {
+//  return fadeIn(
+//    animationSpec = tween(300, easing = LinearEasing)
+//  ) + slideIntoContainer(
+//    animationSpec = tween(300, easing = EaseIn),
+//    towards = AnimatedContentTransitionScope.SlideDirection.Start
+//  )
+//}
+//
+//fun secondaryEnterTransition(): EnterTransition {
+//  return fadeIn(
+//    animationSpec = tween(300, easing = LinearEasing)
+//  ) + scaleIn(
+//    animationSpec = tween(300, easing = EaseIn), initialScale = 0.9f
+//  )
+//}
+//
+//fun primaryExitTransition(): ExitTransition {
+//  return fadeOut(
+//    animationSpec = tween(300, easing = LinearEasing)
+//  ) + scaleOut(
+//    animationSpec = tween(300, easing = EaseOut), targetScale = 0.9f
+//  )
+//}
+//
+//fun AnimatedContentTransitionScope<NavBackStackEntry>.secondaryExitTransition(): ExitTransition {
+//  return fadeOut(
+//    animationSpec = tween(300, easing = LinearEasing)
+//  ) + slideOutOfContainer(
+//    animationSpec = tween(300, easing = EaseOut),
+//    towards = AnimatedContentTransitionScope.SlideDirection.End
+//  )
+//}

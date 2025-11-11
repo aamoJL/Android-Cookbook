@@ -67,6 +67,4 @@ class UpdateValueZeroEqualsNull {
     Assert.assertEquals(null, value)
     Assert.assertEquals(String.EMPTY, text)
   }
-
-  // TODO out of range
 }
