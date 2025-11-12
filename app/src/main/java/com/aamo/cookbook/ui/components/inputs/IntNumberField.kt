@@ -21,6 +21,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.isValidIntegerString
 import com.aamo.cookbook.utility.extensions.general.letIf
 
@@ -53,13 +54,11 @@ fun IntNumberField(
   var currentText by rememberSaveable { mutableStateOf("0") }
   var currentSelection by remember { mutableStateOf(TextRange(currentText.length)) }
 
-  val validator = remember { IntFieldValidator() }
-
   LaunchedEffect(value) {
     // Change text when value changes
-    validator.onValid(value = value) { result ->
-      if (currentText != result) {
-        currentText = result
+    IntFieldValidator.onValid(value = value) { t ->
+      if (currentText != t) {
+        currentText = t
         currentSelection = TextRange(currentText.length)
       }
     }
@@ -79,9 +78,9 @@ fun IntNumberField(
         }
       }
       else {
-        validator.onValid(text = it.text) { v, t ->
+        IntFieldValidator.onValid(text = it.text) { v, t ->
           if (currentText != t) {
-            currentText = it.text
+            currentText = t
             currentSelection = it.selection.letIf(currentText == "0") { TextRange(1) }
           }
           if (value != v) onValueChange(v)
@@ -109,7 +108,7 @@ fun IntNumberField(
   )
 }
 
-class IntFieldValidator() {
+data object IntFieldValidator {
   fun onValid(text: String, onValid: (value: Int, text: String) -> Unit) {
     val result = transformText(text = text) ?: return
     val value = getValueFromText(result) ?: return
@@ -124,10 +123,15 @@ class IntFieldValidator() {
   private fun getValueFromText(text: String): Int? {
     if (!text.isValidIntegerString()) return null
 
-    return if (text.isEmpty()) 0 else text.toIntOrNull()
+    return when (text) {
+      String.EMPTY -> 0
+      "-" -> 0
+      else -> text.toIntOrNull()
+    }
   }
 
   private fun transformText(text: String): String? {
+    // zeroes needs to be trimmed so the value will be valid when the text is "0-"
     val result = text.trimStart('0')
 
     if (getValueFromText(result) == null) return null

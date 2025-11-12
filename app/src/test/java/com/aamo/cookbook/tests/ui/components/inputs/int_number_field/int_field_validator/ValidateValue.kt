@@ -5,59 +5,21 @@ import org.junit.Assert
 import org.junit.Test
 
 class ValidateValue {
-  val validator = IntFieldValidator()
-
   @Test
-  fun `validate positive integer`() {
-    val expected = 1 to "1"
-    var text: String? = null
+  fun `validate valid value`() {
+    val inputOutputs = listOf(
+      0 to "0",
+      1 to "1",
+      -1 to "-1",
+      Int.MAX_VALUE to "2147483647",
+      -Int.MAX_VALUE to "-2147483647",
+      Int.MIN_VALUE to "-2147483648",
+    )
 
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
-  }
-
-  @Test
-  fun `validate negative integer`() {
-    val expected = -1 to "-1"
-    var text: String? = null
-
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
-  }
-
-  @Test
-  fun `validate positive max int`() {
-    val expected = Int.MAX_VALUE to "2147483647"
-    var text: String? = null
-
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
-  }
-
-  @Test
-  fun `validate negative max int`() {
-    val expected = -Int.MAX_VALUE to "-2147483647"
-    var text: String? = null
-
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
-  }
-
-  @Test
-  fun `validate positive min int`() {
-    val expected = Int.MIN_VALUE to "-2147483648"
-    var text: String? = null
-
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
-  }
-
-  @Test
-  fun `validate zero`() {
-    val expected = 0 to "0"
-    var text: String? = null
-
-    validator.onValid(value = expected.first) { text = it }
-    Assert.assertEquals(expected.second, text)
+    inputOutputs.forEach { (input, output) ->
+      var text: String? = null
+      IntFieldValidator.onValid(value = input) { text = it }
+      Assert.assertEquals(output, text)
+    }
   }
 }

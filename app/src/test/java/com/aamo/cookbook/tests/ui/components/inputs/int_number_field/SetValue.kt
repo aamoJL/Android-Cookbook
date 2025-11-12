@@ -36,7 +36,6 @@ class SetValue {
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
-    rule.waitForIdle()
 
     assertText(expected.second)
   }
@@ -52,7 +51,6 @@ class SetValue {
     }
 
     value = expected.first
-    rule.waitForIdle()
 
     assertText(expected.second)
   }
@@ -69,20 +67,17 @@ class SetValue {
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
-    rule.waitForIdle()
 
     assertText("5")
 
     value = expected.first
-
-    rule.waitForIdle()
 
     assertText(expected.second)
     assertEquals(expected.first, value)
   }
 
   @Test
-  fun `change value`() {
+  fun `change valid value`() {
     var value by mutableStateOf(0)
 
     rule.setContent {
@@ -91,14 +86,18 @@ class SetValue {
       )
     }
 
-    (1 to "1").also { input -> value = input.first }.also { input -> assertText(input.second) }
-    (-1 to "-1").also { input -> value = input.first }.also { input -> assertText(input.second) }
-    (Int.MAX_VALUE to "2147483647").also { input -> value = input.first }
-      .also { input -> assertText(input.second) }
-    (-Int.MAX_VALUE to "-2147483647").also { input -> value = input.first }
-      .also { input -> assertText(input.second) }
-    (Int.MIN_VALUE to "-2147483648").also { input -> value = input.first }
-      .also { input -> assertText(input.second) }
-    (0 to "0").also { input -> value = input.first }.also { input -> assertText(input.second) }
+    val inputOutputs = listOf(
+      0 to "0",
+      1 to "1",
+      -1 to "-1",
+      Int.MAX_VALUE to "2147483647",
+      -Int.MAX_VALUE to "-2147483647",
+      Int.MIN_VALUE to "-2147483648",
+    )
+
+    inputOutputs.forEach { (input, output) ->
+      value = input
+      assertText(output)
+    }
   }
 }
