@@ -16,6 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
@@ -23,7 +24,13 @@ import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
 
-// TODO: unit test
+enum class CountInputTags {
+  TITLE,
+  INCREASE,
+  DECREASE,
+  VALUE
+}
+
 @Composable
 fun CountInput(
   value: Int,
@@ -44,7 +51,11 @@ fun CountInput(
 
   Surface {
     Column(modifier = modifier) {
-      if (label.isNotEmpty()) Text(text = label, style = MaterialTheme.typography.labelMedium)
+      if (label.isNotEmpty()) Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        modifier = Modifier.testTag(CountInputTags.TITLE.name)
+      )
       Row(verticalAlignment = Alignment.CenterVertically) {
         Surface(
           color = decreaseContainerColor,
@@ -55,6 +66,7 @@ fun CountInput(
             .clickable(
               onClick = { onValueChange(value - 1) }, enabled = value > minValue
             )
+            .testTag(CountInputTags.DECREASE.name)
         ) {
           Box(contentAlignment = Alignment.Center) {
             Icon(
@@ -67,7 +79,7 @@ fun CountInput(
           contentAlignment = Alignment.Center,
           modifier = Modifier.defaultMinSize(minWidth = 48.dp, minHeight = 40.dp)
         ) {
-          Text(text = value.toString())
+          Text(text = value.toString(), modifier = Modifier.testTag(CountInputTags.VALUE.name))
         }
         Surface(
           color = increaseContainerColor,
@@ -77,6 +89,7 @@ fun CountInput(
             .clickable(
               onClick = { onValueChange(value + 1) }, enabled = value < maxValue
             )
+            .testTag(CountInputTags.INCREASE.name)
         ) {
           Box(contentAlignment = Alignment.Center) {
             Icon(
