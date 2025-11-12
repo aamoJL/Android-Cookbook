@@ -1,6 +1,6 @@
 @file:Suppress("HardCodedStringLiteral")
 
-package com.aamo.cookbook.tests.ui.components.inputs.float_number_field
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.int_number_field
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,7 +14,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextReplacement
 import com.aamo.cookbook.test_utility.TestTags
-import com.aamo.cookbook.ui.components.inputs.FloatNumberField
+import com.aamo.cookbook.ui.components.inputs.number_field.IntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
@@ -29,13 +30,13 @@ import org.robolectric.RobolectricTestRunner
 class SetText {
   @get:Rule val rule = createComposeRule()
 
-  private var value by mutableStateOf(0f)
+  private var value by mutableStateOf(0)
 
   private fun assertText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).assert(hasText(text))
   }
 
-  private fun assertValue(value: Float) {
+  private fun assertValue(value: Int) {
     assertEquals(value, this.value)
   }
 
@@ -43,15 +44,12 @@ class SetText {
     rule.onNodeWithTag(TestTags.NODE.name).performTextReplacement(text = text)
   }
 
-  private fun clear() {
-    rule.onNodeWithTag(TestTags.NODE.name).performTextClearance()
-  }
-
-  private fun setup(onValueChange: ((Float) -> Unit)? = null) {
+  private fun setup(onValueChange: ((Int) -> Unit)? = null) {
     rule.setContent {
-      FloatNumberField(
+      NumberField(
         value = value,
         onValueChange = { value = it; onValueChange?.invoke(it) },
+        validator = IntFieldValidator,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
@@ -66,34 +64,23 @@ class SetText {
   }
 
   @Test
-  fun `clear sanity`() {
-    setup()
-    replaceText("1")
-    assertValue(1f)
-    clear()
-    assertValue(0f)
-    assertText("0")
-    replaceText("1")
-    assertValue(1f)
-  }
-
-  @Test
   fun `readOnly true`() {
-    val expected = 0f to "0"
+    val expected = 0 to "0"
     rule.setContent {
-      FloatNumberField(
+      NumberField(
         value = expected.first,
         onValueChange = { fail() },
+        validator = IntFieldValidator,
         readOnly = true,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
     rule.waitForIdle()
+
     assertText(expected.second)
     assertThrows(AssertionError::class.java) {
       replaceText("5")
     }
-    rule.waitForIdle()
     assertText(expected.second)
     assertEquals(expected.first, value)
   }
@@ -109,32 +96,25 @@ class SetText {
     setup()
 
     val inputOutputs = listOf(
-      "100" to ("100" to 100f),
-      "-100" to ("-100" to -100f),
-      "1.999" to ("1.999" to 1.999f),
-      "-1.999" to ("-1.999" to -1.999f),
-      "340282350000000000000000000000000000000" to ("340282350000000000000000000000000000000" to Float.MAX_VALUE),
-      "-340282350000000000000000000000000000000" to ("-340282350000000000000000000000000000000" to -Float.MAX_VALUE),
-      "0.0000000000000000000000000000000000000000000014" to ("0.0000000000000000000000000000000000000000000014" to Float.MIN_VALUE),
-      "-0.0000000000000000000000000000000000000000000014" to ("-0.0000000000000000000000000000000000000000000014" to -Float.MIN_VALUE),
-      "0" to ("0" to 0f),
-      String.EMPTY to ("0" to 0f),
-      "000" to ("0" to 0f),
-      "0.0" to ("0.0" to 0f),
-      "000.000" to ("0.000" to 0f),
-      "." to ("." to 0f),
-      "-." to ("-." to 0f),
-      ".00" to (".00" to 0f),
-      "0.100" to ("0.100" to 0.1f),
-      "00100" to ("100" to 100f),
-      "0-" to ("-" to 0f),
+      "100" to ("100" to 100),
+      "-100" to ("-100" to -100),
+      "2147483647" to ("2147483647" to Int.MAX_VALUE),
+      "-2147483647" to ("-2147483647" to -Int.MAX_VALUE),
+      "-2147483648" to ("-2147483648" to Int.MIN_VALUE),
+      String.EMPTY to ("0" to 0),
+      "0" to ("0" to 0),
+      "000" to ("0" to 0),
+      "00100" to ("100" to 100),
+      "0-" to ("-" to 0),
+      "-" to ("-" to 0),
+      "0-2" to ("-2" to -2),
     )
 
-    inputOutputs.forEach { (input, output) ->
+    inputOutputs.forEach { (input, outputs) ->
       replaceText(input)
-      assertText(output.first)
-      assertValue(output.second)
-      clear()
+      assertText(outputs.first)
+      assertValue(outputs.second)
+      rule.onNodeWithTag(TestTags.NODE.name).performTextClearance()
     }
   }
 
@@ -143,14 +123,20 @@ class SetText {
     setup { fail() }
 
     val inputs = listOf(
+      "1.99999",
+      "-1.99999",
+      "0.0",
+      "000.000",
+      "0.100",
       "9990282350000000000000000000000000000000",
       "-9990282350000000000000000000000000000000",
+      ".",
+      ".00",
       "..",
       ".-1",
       "1.0.0",
       "1 2",
       " ",
-      "..",
       "test",
       "12f",
       "--12",
@@ -158,7 +144,7 @@ class SetText {
       "1-2",
     )
 
-    val expected = "5" to 5f
+    val expected = "5" to 5
 
     // sanity check
     assertThrows(AssertionError::class.java) { replaceText(expected.first) }

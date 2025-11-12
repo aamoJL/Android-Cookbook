@@ -53,8 +53,9 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
-import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
@@ -72,7 +73,9 @@ class RecipeFormStepScreenViewModel(private val formData: RecipeFormStepFields) 
   // TODO: unit test
   class FormState(formData: RecipeFormStepFields) {
     val description = ViewModelState(formData.description).onChange { onUnsavedChanges() }
-    val timerMinutes = ViewModelState(formData.timerMinutes).onChange { onUnsavedChanges() }
+    val timerMinutes = ViewModelState(formData.timerMinutes).transformation { value ->
+      if (value != null && value < 1) null else value
+    }.onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
     val ingredients = ViewModelStateList(formData.ingredients).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
@@ -242,10 +245,10 @@ private fun StepForm(
       ),
       modifier = Modifier.fillMaxWidth()
     )
-    NullableIntNumberField(
+    NumberField(
       value = formState.timerMinutes.value,
       onValueChange = { formState.timerMinutes.update(it) },
-      zeroEqualsNull = true,
+      validator = NullableIntFieldValidator,
       label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
       shape = RectangleShape,
       colors = borderlessTextFieldColors(),

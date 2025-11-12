@@ -1,4 +1,4 @@
-package com.aamo.cookbook.tests.ui.components.inputs.int_number_field
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_int_field
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -10,7 +10,9 @@ import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import com.aamo.cookbook.test_utility.TestTags
-import com.aamo.cookbook.ui.components.inputs.IntNumberField
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail
 import org.junit.Rule
@@ -22,6 +24,8 @@ import org.robolectric.RobolectricTestRunner
 class SetValue {
   @get:Rule val rule = createComposeRule()
 
+  val validator = NullableIntFieldValidator
+
   private fun assertText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).assert(hasText(text))
   }
@@ -30,9 +34,10 @@ class SetValue {
   fun `initial render with value`() {
     val expected = 0 to "0"
     rule.setContent {
-      IntNumberField(
+      NumberField(
         value = expected.first,
         onValueChange = { fail() },
+        validator = validator,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
@@ -45,8 +50,11 @@ class SetValue {
     val expected = 10 to "10"
     var value by mutableStateOf(5)
     rule.setContent {
-      IntNumberField(
-        value = value, onValueChange = { fail() }, modifier = Modifier.testTag(TestTags.NODE.name)
+      NumberField(
+        value = value,
+        onValueChange = { fail() },
+        validator = validator,
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
 
@@ -60,9 +68,10 @@ class SetValue {
     val expected = 0 to "0"
     var value by mutableStateOf(5)
     rule.setContent {
-      IntNumberField(
+      NumberField(
         value = value,
         onValueChange = { fail() },
+        validator = validator,
         readOnly = true,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
@@ -78,11 +87,14 @@ class SetValue {
 
   @Test
   fun `change valid value`() {
-    var value by mutableStateOf(0)
+    var value by mutableStateOf<Int?>(0)
 
     rule.setContent {
-      IntNumberField(
-        value = value, onValueChange = { fail() }, modifier = Modifier.testTag(TestTags.NODE.name)
+      NumberField(
+        value = value,
+        onValueChange = { fail() },
+        validator = validator,
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
 
@@ -93,6 +105,7 @@ class SetValue {
       Int.MAX_VALUE to "2147483647",
       -Int.MAX_VALUE to "-2147483647",
       Int.MIN_VALUE to "-2147483648",
+      null to String.EMPTY
     )
 
     inputOutputs.forEach { (input, output) ->

@@ -1,8 +1,8 @@
 @file:Suppress("HardCodedStringLiteral")
 
-package com.aamo.cookbook.tests.ui.components.inputs.float_number_field.float_field_validator
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.float_number_field.float_field_validator
 
-import com.aamo.cookbook.ui.components.inputs.FloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.FloatFieldValidator
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.fail

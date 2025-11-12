@@ -1,4 +1,4 @@
-package com.aamo.cookbook.tests.ui.components.inputs.float_number_field
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_float_field
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -12,7 +12,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextInput
 import com.aamo.cookbook.test_utility.TestTags
-import com.aamo.cookbook.ui.components.inputs.FloatNumberField
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableFloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.fail
@@ -25,6 +27,8 @@ import org.robolectric.RobolectricTestRunner
 class SetValue {
   @get:Rule val rule = createComposeRule()
 
+  val validator = NullableFloatFieldValidator
+
   private fun assertText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).assert(hasText(text))
   }
@@ -33,9 +37,10 @@ class SetValue {
   fun `initial render with value`() {
     val expected = 0f to "0"
     rule.setContent {
-      FloatNumberField(
+      NumberField(
         value = expected.first,
         onValueChange = { fail() },
+        validator = validator,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
@@ -48,8 +53,11 @@ class SetValue {
     val expected = 10f to "10"
     var value by mutableFloatStateOf(5f)
     rule.setContent {
-      FloatNumberField(
-        value = value, onValueChange = { fail() }, modifier = Modifier.testTag(TestTags.NODE.name)
+      NumberField(
+        value = value,
+        onValueChange = { fail() },
+        validator = validator,
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
 
@@ -62,9 +70,10 @@ class SetValue {
     val expected = 0f to "0"
     var value by mutableStateOf(5f)
     rule.setContent {
-      FloatNumberField(
+      NumberField(
         value = value,
         onValueChange = { fail() },
+        validator = validator,
         readOnly = true,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
@@ -80,11 +89,12 @@ class SetValue {
 
   @Test
   fun `readonly when value is not finite`() {
-    var value by mutableStateOf(0f)
+    var value by mutableStateOf<Float?>(0f)
     rule.setContent {
-      FloatNumberField(
+      NumberField(
         value = value,
         onValueChange = { value = it },
+        validator = validator,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
@@ -112,24 +122,28 @@ class SetValue {
 
   @Test
   fun `change valid value`() {
-    var value by mutableStateOf(0f)
+    var value by mutableStateOf<Float?>(0f)
 
     rule.setContent {
-      FloatNumberField(
-        value = value, onValueChange = { fail() }, modifier = Modifier.testTag(TestTags.NODE.name)
+      NumberField(
+        value = value,
+        onValueChange = { fail() },
+        validator = validator,
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
 
     val inputOutputs = listOf(
-      (1f to "1"),
-      (-1f to "-1"),
-      (1.99999f to "1.99999"),
-      (-1.99999f to "-1.99999"),
-      (Float.MAX_VALUE to "340282350000000000000000000000000000000"),
-      (-Float.MAX_VALUE to "-340282350000000000000000000000000000000"),
-      (Float.MIN_VALUE to "0.0000000000000000000000000000000000000000000014"),
-      (-Float.MIN_VALUE to "-0.0000000000000000000000000000000000000000000014"),
-      (0f to "0"),
+      1f to "1",
+      -1f to "-1",
+      1.99999f to "1.99999",
+      -1.99999f to "-1.99999",
+      Float.MAX_VALUE to "340282350000000000000000000000000000000",
+      -Float.MAX_VALUE to "-340282350000000000000000000000000000000",
+      Float.MIN_VALUE to "0.0000000000000000000000000000000000000000000014",
+      -Float.MIN_VALUE to "-0.0000000000000000000000000000000000000000000014",
+      0f to "0",
+      null to String.EMPTY
     )
 
     inputOutputs.forEach { (input, output) ->
@@ -142,8 +156,11 @@ class SetValue {
   fun `change invalid value`() {
     var value by mutableStateOf(0f)
     rule.setContent {
-      FloatNumberField(
-        value = value, onValueChange = { fail() }, modifier = Modifier.testTag(TestTags.NODE.name)
+      NumberField(
+        value = value,
+        onValueChange = { fail() },
+        validator = validator,
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
 

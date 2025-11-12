@@ -1,7 +1,9 @@
-package com.aamo.cookbook.tests.ui.components.inputs.int_number_field.int_field_validator
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_int_field.nullable_int_field_validator
 
-import com.aamo.cookbook.ui.components.inputs.IntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class ValidateValue {
@@ -14,11 +16,12 @@ class ValidateValue {
       Int.MAX_VALUE to "2147483647",
       -Int.MAX_VALUE to "-2147483647",
       Int.MIN_VALUE to "-2147483648",
+      null to String.EMPTY
     )
 
     inputOutputs.forEach { (input, output) ->
       var text: String? = null
-      IntFieldValidator.onValid(value = input) { text = it }
+      assertTrue(NullableIntFieldValidator.onValid(value = input) { text = it })
       Assert.assertEquals(output, text)
     }
   }

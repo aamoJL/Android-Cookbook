@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components.inputs
+package com.aamo.cookbook.ui.components.inputs.number_field
 
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.text.KeyboardActions
@@ -21,15 +21,13 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.input.VisualTransformation
-import com.aamo.cookbook.utility.extensions.general.EMPTY
-import com.aamo.cookbook.utility.extensions.general.isValidDecimalNumberString
 import com.aamo.cookbook.utility.extensions.general.letIf
 
-// TODO: unit test
 @Composable
-fun FloatNumberField(
-  value: Float,
-  onValueChange: (Float) -> Unit,
+fun <T : Any?> NumberField(
+  value: T,
+  onValueChange: (T) -> Unit,
+  validator: FieldValidator<T>,
   modifier: Modifier = Modifier,
   enabled: Boolean = true,
   readOnly: Boolean = false,
@@ -48,33 +46,30 @@ fun FloatNumberField(
   interactionSource: MutableInteractionSource? = null,
   shape: Shape = TextFieldDefaults.shape,
   colors: TextFieldColors = TextFieldDefaults.colors(),
-  /** Keeps selection on the right side of zero if the value is zero */
-  restrictSelectionOnZero: Boolean = true
+  /** Keeps selection on the right side of zero if the text is zero */
+  restrictSelectionOnZero: Boolean = true,
 ) {
   var currentText by rememberSaveable { mutableStateOf("0") }
   var currentSelection by remember { mutableStateOf(TextRange(currentText.length)) }
+  var error by remember { mutableStateOf<Error?>(null) }
 
   LaunchedEffect(value) {
-    if (!value.isFinite()) {
-      currentText = value.toString()
-      currentSelection = TextRange(currentText.length)
-    }
-    else {
-      // change text when value changes...
-      FloatFieldValidator.onValid(value = value) { valueText ->
+    // Change text when value changes
+    if (!validator.onValid(value = value) { valueText ->
         // ... but only if the currentText's value is different
-        FloatFieldValidator.onValid(text = currentText) { currentTextValue, _ ->
+        validator.onValid(text = currentText) { currentTextValue, _ ->
           if (value != currentTextValue) {
             currentText = valueText
             currentSelection = TextRange(currentText.length)
           }
         }
-      }
+      }) {
+      error = Error(value.toString())
     }
   }
 
   TextField(
-    value = TextFieldValue(text = currentText, selection = currentSelection),
+    value = TextFieldValue(text = error?.message ?: currentText, selection = currentSelection),
     shape = shape,
     colors = colors,
     placeholder = placeholder,
@@ -87,7 +82,7 @@ fun FloatNumberField(
         }
       }
       else {
-        FloatFieldValidator.onValid(text = it.text) { v, t ->
+        validator.onValid(text = it.text) { v, t ->
           if (currentText != t) {
             currentText = t
             currentSelection = it.selection.letIf(currentText == "0") { TextRange(1) }
@@ -99,7 +94,7 @@ fun FloatNumberField(
     suffix = suffix,
     keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Number),
     enabled = enabled,
-    readOnly = !value.isFinite() || readOnly,
+    readOnly = if (error == null) readOnly else true,
     textStyle = textStyle,
     label = label,
     leadingIcon = leadingIcon,
@@ -117,50 +112,7 @@ fun FloatNumberField(
   )
 }
 
-data object FloatFieldValidator {
-  fun onValid(text: String, onValid: (value: Float, text: String) -> Unit) {
-    val result = transformText(text = text) ?: return
-    val value = getValueFromText(result) ?: return
-
-    onValid(value, result)
-  }
-
-  fun onValid(value: Float, onValid: (text: String) -> Unit) {
-    if (!value.isFinite()) return
-    val text = getTextFromValue(value)
-
-    onValid(text)
-  }
-
-  private fun getTextFromValue(value: Float): String {
-    return value.toBigDecimal().stripTrailingZeros().toPlainString()
-  }
-
-  private fun getValueFromText(text: String): Float? {
-    if (!text.isValidDecimalNumberString()) return null
-
-    val value = when (text) {
-      String.EMPTY -> 0f
-      "." -> .0f
-      "-" -> 0f
-      "-." -> 0f
-      else -> text.toFloatOrNull()
-    } ?: return null
-
-    if (!value.isFinite()) return null
-
-    return value
-  }
-
-  private fun transformText(text: String): String? {
-    // zeroes needs to be trimmed so the value will be valid when the text is "0-"
-    //    leading zero will be left, if the value is a decimal
-    val result = text.letIf({ a -> a.startsWith('0') }) { a ->
-      a.trimStart('0').letIf({ b -> b.startsWith(".") }) { c -> "0".plus(c) }
-    }
-
-    if (getValueFromText(result) == null) return null
-
-    return result.letIf({ it.isEmpty() }) { "0" }
-  }
+interface FieldValidator<T : Any?> {
+  fun onValid(text: String, onValid: (value: T, text: String) -> Unit)
+  fun onValid(value: T, onValid: (text: String) -> Unit): Boolean
 }

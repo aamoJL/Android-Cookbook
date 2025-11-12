@@ -1,14 +1,13 @@
-@file:Suppress("HardCodedStringLiteral")
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_int_field.nullable_int_field_validator
 
-package com.aamo.cookbook.tests.ui.components.inputs.int_number_field.int_field_validator
-
-import com.aamo.cookbook.ui.components.inputs.IntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import org.junit.Assert.assertEquals
-import org.junit.Assert.fail
+import org.junit.Assert
 import org.junit.Test
 
 class ValidateText {
+  val validator = NullableIntFieldValidator
+
   @Test
   fun `validate valid text`() {
     val inputOutputs = listOf(
@@ -17,25 +16,26 @@ class ValidateText {
       "2147483647" to ("2147483647" to Int.MAX_VALUE),
       "-2147483647" to ("-2147483647" to -Int.MAX_VALUE),
       "-2147483648" to ("-2147483648" to Int.MIN_VALUE),
-      String.EMPTY to ("0" to 0),
+      String.EMPTY to (String.EMPTY to null),
       "0" to ("0" to 0),
       "000" to ("0" to 0),
       "00100" to ("100" to 100),
-      "0-" to ("-" to 0),
-      "00-" to ("-" to 0),
-      "-" to ("-" to 0),
+      "0-" to ("-" to null),
+      "00-" to ("-" to null),
+      "-" to ("-" to null),
     )
 
     inputOutputs.forEach { (input, output) ->
       var value: Int? = null
       var text: String? = null
 
-      IntFieldValidator.onValid(text = input) { v, t -> value = v; text = t }
-      assertEquals(output.first, text)
-      assertEquals(output.second, value)
+      validator.onValid(text = input) { v, t -> value = v; text = t }
+      Assert.assertEquals(output.first, text)
+      Assert.assertEquals(output.second, value)
     }
   }
 
+  @Suppress("HardCodedStringLiteral")
   @Test
   fun `validate invalid text`() {
     val inputs = listOf(
@@ -61,7 +61,7 @@ class ValidateText {
     )
 
     inputs.forEach { input ->
-      IntFieldValidator.onValid(input) { _, _ -> fail() }
+      validator.onValid(input) { _, _ -> Assert.fail() }
     }
   }
 }

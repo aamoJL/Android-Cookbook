@@ -37,8 +37,9 @@ import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
-import com.aamo.cookbook.ui.components.inputs.NullableFloatNumberField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableFloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
@@ -55,7 +56,9 @@ class RecipeFormIngredientScreenViewModel(
   // TODO: unit test
   class FormState(formData: RecipeFormIngredientFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
-    val amount = ViewModelState(formData.amount).onChange { onUnsavedChanges() }
+    val amount = ViewModelState(formData.amount).transformation { value ->
+      if (value != null && value < 1) null else value
+    }.onChange { onUnsavedChanges() }
     val unit = ViewModelState(formData.unit).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
@@ -180,10 +183,10 @@ private fun IngredientForm(
       modifier = Modifier.fillMaxWidth()
     )
     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      NullableFloatNumberField(
+      NumberField(
         value = formState.amount.value,
         onValueChange = { formState.amount.update(it) },
-        zeroEqualsNull = true,
+        validator = NullableFloatFieldValidator,
         label = { Text(stringResource(R.string.label_amount).asOptionalLabel()) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),

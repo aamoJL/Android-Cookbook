@@ -1,6 +1,4 @@
-@file:Suppress("HardCodedStringLiteral")
-
-package com.aamo.cookbook.tests.ui.components.inputs.int_number_field
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_int_field
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,12 +12,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextReplacement
 import com.aamo.cookbook.test_utility.TestTags
-import com.aamo.cookbook.ui.components.inputs.IntNumberField
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertThrows
-import org.junit.Assert.assertTrue
-import org.junit.Assert.fail
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -29,25 +25,27 @@ import org.robolectric.RobolectricTestRunner
 class SetText {
   @get:Rule val rule = createComposeRule()
 
-  private var value by mutableStateOf(0)
+  private var value by mutableStateOf<Int?>(0)
+  private val validator = NullableIntFieldValidator
 
   private fun assertText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).assert(hasText(text))
   }
 
-  private fun assertValue(value: Int) {
-    assertEquals(value, this.value)
+  private fun assertValue(value: Int?) {
+    Assert.assertEquals(value, this.value)
   }
 
   private fun replaceText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).performTextReplacement(text = text)
   }
 
-  private fun setup(onValueChange: ((Int) -> Unit)? = null) {
+  private fun setup(onValueChange: ((Int?) -> Unit)? = null) {
     rule.setContent {
-      IntNumberField(
+      NumberField(
         value = value,
         onValueChange = { value = it; onValueChange?.invoke(it) },
+        validator = validator,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
@@ -58,33 +56,34 @@ class SetText {
     var onValueChangeCalled = false
     setup(onValueChange = { onValueChangeCalled = true })
     replaceText("1")
-    assertTrue(onValueChangeCalled)
+    Assert.assertTrue(onValueChangeCalled)
   }
 
   @Test
   fun `readOnly true`() {
     val expected = 0 to "0"
     rule.setContent {
-      IntNumberField(
+      NumberField(
         value = expected.first,
-        onValueChange = { fail() },
+        onValueChange = { Assert.fail() },
+        validator = validator,
         readOnly = true,
         modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
     rule.waitForIdle()
+
     assertText(expected.second)
-    assertThrows(AssertionError::class.java) {
+    Assert.assertThrows(AssertionError::class.java) {
       replaceText("5")
     }
-    rule.waitForIdle()
     assertText(expected.second)
-    assertEquals(expected.first, value)
+    Assert.assertEquals(expected.first, value)
   }
 
   @Test
   fun `input same`() {
-    setup { fail() }
+    setup { Assert.fail() }
     replaceText(value.toString())
   }
 
@@ -98,12 +97,12 @@ class SetText {
       "2147483647" to ("2147483647" to Int.MAX_VALUE),
       "-2147483647" to ("-2147483647" to -Int.MAX_VALUE),
       "-2147483648" to ("-2147483648" to Int.MIN_VALUE),
-      String.EMPTY to ("0" to 0),
+      String.EMPTY to (String.EMPTY to null),
       "0" to ("0" to 0),
       "000" to ("0" to 0),
       "00100" to ("100" to 100),
-      "0-" to ("-" to 0),
-      "-" to ("-" to 0),
+      "0-" to ("-" to null),
+      "-" to ("-" to null),
       "0-2" to ("-2" to -2),
     )
 
@@ -115,9 +114,10 @@ class SetText {
     }
   }
 
+  @Suppress("HardCodedStringLiteral")
   @Test
   fun `input invalid text`() {
-    setup { fail() }
+    setup { Assert.fail() }
 
     val inputs = listOf(
       "1.99999",
@@ -144,7 +144,7 @@ class SetText {
     val expected = "5" to 5
 
     // sanity check
-    assertThrows(AssertionError::class.java) { replaceText(expected.first) }
+    Assert.assertThrows(AssertionError::class.java) { replaceText(expected.first) }
 
     inputs.forEach { input ->
       replaceText(input)

@@ -27,9 +27,9 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 @Composable
 fun CountInput(
   value: Int,
+  onValueChange: (Int) -> Unit,
   modifier: Modifier = Modifier,
   label: String = "",
-  onValueChange: (Int) -> Unit,
   minValue: Int = Int.MIN_VALUE,
   maxValue: Int = Int.MAX_VALUE,
 ) {

@@ -1,9 +1,11 @@
 @file:Suppress("HardCodedStringLiteral")
 
-package com.aamo.cookbook.tests.ui.components.inputs.float_number_field.float_field_validator
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.float_number_field.float_field_validator
 
-import com.aamo.cookbook.ui.components.inputs.FloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.FloatFieldValidator
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 
@@ -24,7 +26,8 @@ class ValidateValue {
 
     inputOutputs.forEach { (input, output) ->
       var text: String? = null
-      FloatFieldValidator.onValid(value = input) { text = it }; assertEquals(output, text)
+      assertTrue(FloatFieldValidator.onValid(value = input) { text = it })
+      assertEquals(output, text)
     }
   }
 
@@ -36,6 +39,8 @@ class ValidateValue {
       Float.NaN,
     )
 
-    inputs.forEach { input -> FloatFieldValidator.onValid(value = input) { fail() } }
+    inputs.forEach { input ->
+      assertFalse(FloatFieldValidator.onValid(value = input) { fail() })
+    }
   }
 }

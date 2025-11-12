@@ -56,9 +56,10 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
-import com.aamo.cookbook.ui.components.inputs.NullableIntNumberField
 import com.aamo.cookbook.ui.components.inputs.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.borderlessTextFieldColors
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
@@ -83,7 +84,9 @@ class RecipeFormInfoScreenViewModel(
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val category = ViewModelState(formData.category).onChange { onUnsavedChanges() }
     val subCategory = ViewModelState(formData.category).onChange { onUnsavedChanges() }
-    val servings = ViewModelState<Int?>(formData.servings).onChange { onUnsavedChanges() }
+    val servings = ViewModelState<Int?>(formData.servings).transformation { value ->
+      if (value != null && value < 1) null else value
+    }.onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
     val chapters = ViewModelStateList(formData.chapters).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
@@ -95,7 +98,7 @@ class RecipeFormInfoScreenViewModel(
       if (category.value.isEmpty()) return false
       if (chapters.values.isEmpty()) return false
       servings.value.also {
-        if (it == null || it < 0) return false
+        if (it == null || it < 1) return false
       }
       return true
     }
@@ -302,13 +305,13 @@ private fun InfoForm(
         ),
         modifier = Modifier.weight(2f, true)
       )
-      NullableIntNumberField(
+      NumberField(
         value = formState.servings.value,
+        onValueChange = { formState.servings.update(it) },
+        validator = NullableIntFieldValidator,
         label = { Text(stringResource(R.string.label_servings)) },
-        zeroEqualsNull = true,
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),
-        onValueChange = { formState.servings.update(it) },
         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
         modifier = Modifier.weight(1f, true)
       )
