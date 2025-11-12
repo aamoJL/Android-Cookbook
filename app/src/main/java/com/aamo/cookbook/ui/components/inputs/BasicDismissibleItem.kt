@@ -23,7 +23,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 
-// TODO: unit test
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BasicDismissibleItem(
@@ -47,7 +46,7 @@ fun BasicDismissibleItem(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun DismissBackground(dismissState: SwipeToDismissBoxState) {
+private fun DismissBackground(dismissState: SwipeToDismissBoxState) {
   val color = when (dismissState.dismissDirection) {
     SwipeToDismissBoxValue.StartToEnd -> MaterialTheme.colorScheme.errorContainer
     SwipeToDismissBoxValue.EndToStart -> MaterialTheme.colorScheme.primaryContainer

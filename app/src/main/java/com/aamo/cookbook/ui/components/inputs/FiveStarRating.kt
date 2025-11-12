@@ -11,7 +11,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import com.aamo.cookbook.R
 
-// TODO: unit test
 @Composable
 fun FiveStarRating(
   value: Int?,
@@ -26,14 +25,18 @@ fun FiveStarRating(
         if (value != null && value >= star) {
           Icon(
             painter = painterResource(R.drawable.round_star_rate_24),
-            contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
+            contentDescription = stringResource(
+              R.string.description_star_rating_star_icon_selected, star
+            ),
             tint = color
           )
         }
         else {
           Icon(
             painter = painterResource(R.drawable.round_star_outline_24),
-            contentDescription = stringResource(R.string.description_star_rating_star_icon, star),
+            contentDescription = stringResource(
+              R.string.description_star_rating_star_icon_unselected, star
+            ),
             tint = color
           )
         }
