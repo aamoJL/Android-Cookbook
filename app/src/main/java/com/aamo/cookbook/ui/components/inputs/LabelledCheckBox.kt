@@ -19,14 +19,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.ui.theme.CookbookTheme
 
-// TODO: unit test
 @Composable
 fun LabelledCheckBox(
   checked: Boolean,
   onCheckedChange: ((Boolean) -> Unit),
   label: @Composable () -> Unit,
   modifier: Modifier = Modifier,
-  content: @Composable () -> Unit = {},
 ) {
   Column(
     modifier = modifier
@@ -37,14 +35,9 @@ fun LabelledCheckBox(
       .padding(horizontal = 4.dp, vertical = 8.dp)
   ) {
     Row(verticalAlignment = Alignment.Top) {
-      Checkbox(
-        checked = checked, onCheckedChange = null
-      )
+      Checkbox(checked = checked, onCheckedChange = null)
       Spacer(Modifier.size(8.dp))
-      Column {
-        label()
-        content()
-      }
+      label()
     }
   }
 }
@@ -54,6 +47,10 @@ fun LabelledCheckBox(
 @Composable
 private fun Preview() {
   CookbookTheme {
-    LabelledCheckBox(checked = true, onCheckedChange = {}, label = { Text("asd") })
+    LabelledCheckBox(
+      checked = false,
+      onCheckedChange = { },
+      label = { Text("Label") },
+    )
   }
 }
