@@ -1,0 +1,108 @@
+@file:Suppress("HardCodedStringLiteral")
+
+package com.aamo.cookbook.tests.ui.components.inputs
+
+import androidx.activity.compose.setContent
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTextInput
+import com.aamo.cookbook.MainActivity
+import com.aamo.cookbook.R
+import com.aamo.cookbook.test_utility.TestTags
+import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
+import com.aamo.cookbook.utility.extensions.general.EMPTY
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotEquals
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+
+@RunWith(RobolectricTestRunner::class)
+class SearchTextField {
+  @get:Rule val rule = createAndroidComposeRule<MainActivity>()
+
+  @Test
+  fun `placeholder visibility`() {
+    var value by mutableStateOf(String.EMPTY)
+    val placeholder = "Placeholder"
+    rule.activity.setContent {
+      SearchTextField(value = value, onValueChange = {}, placeholder = placeholder)
+    }
+
+    rule.onNode(hasText(placeholder)).assertExists()
+
+    value = "value"
+
+    rule.onNode(hasText(placeholder)).assertDoesNotExist()
+  }
+
+  @Test
+  fun `value change`() {
+    var value by mutableStateOf("Value")
+    rule.activity.setContent {
+      SearchTextField(value = value, onValueChange = {})
+    }
+
+    rule.onNode(hasText(value)).assertExists()
+
+    value = "New Value"
+
+    rule.onNode(hasText(value)).assertExists()
+  }
+
+  @Test
+  fun `onValueChange called`() {
+    var called = false
+    rule.activity.setContent {
+      SearchTextField(
+        value = String.EMPTY,
+        onValueChange = { called = true },
+        modifier = Modifier.testTag(TestTags.NODE.name)
+      )
+    }
+
+    rule.onNodeWithTag(TestTags.NODE.name).performTextInput("Value")
+
+    assert(called)
+  }
+
+  @Test
+  fun `clear state change`() {
+    var value by mutableStateOf(String.EMPTY)
+    rule.activity.setContent {
+      SearchTextField(value = value, onValueChange = {})
+    }
+
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
+      .assertDoesNotExist()
+
+    value = "New Value"
+
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
+      .assertExists()
+  }
+
+  @Test
+  fun `clear click`() {
+    var value by mutableStateOf("Value")
+    rule.activity.setContent {
+      SearchTextField(value = value, onValueChange = { value = it })
+    }
+
+    assertNotEquals(String.EMPTY, value)
+
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
+      .performClick()
+
+    assertEquals(String.EMPTY, value)
+  }
+}

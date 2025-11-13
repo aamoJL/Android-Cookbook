@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components.inputs
+package com.aamo.cookbook.ui.components.inputs.text_field
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions

@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components.inputs
+package com.aamo.cookbook.ui.components.inputs.text_field
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -19,12 +19,11 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 
-// TODO: unit test
 @Composable
 fun SearchTextField(
   value: String,
-  placeholder: String,
   onValueChange: (String) -> Unit,
+  placeholder: String = String.EMPTY,
   modifier: Modifier = Modifier,
   shape: Shape = RoundedCornerShape(4.dp),
 ) {

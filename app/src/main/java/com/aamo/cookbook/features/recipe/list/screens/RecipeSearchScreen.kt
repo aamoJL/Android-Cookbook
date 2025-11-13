@@ -47,7 +47,7 @@ import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.inputs.SearchTextField
+import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.tags.UITag
