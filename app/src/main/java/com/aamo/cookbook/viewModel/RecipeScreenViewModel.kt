@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.database.repository.RecipeRepository
 import com.aamo.cookbook.service.IIOService
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,13 +16,22 @@ import kotlinx.coroutines.launch
 import kotlin.math.max
 
 // TODO: remove
+interface RecipeRepository {
+  suspend fun getRecipeById(recipeId: Int): Recipe?
+  suspend fun getRecipeWithChaptersStepsAndIngredients(id: Int): RecipeWithChaptersStepsAndIngredients?
+  suspend fun getRecipeWithFavoriteAndRating(recipeId: Int): RecipeWithBookmarkAndRating?
+  suspend fun upsertRecipe(recipe: Recipe): Int
+  suspend fun addRecipeToFavorites(recipeId: Int)
+  suspend fun removeRecipeFromFavorites(recipeId: Int)
+  suspend fun upsertRecipeRating(recipeId: Int, rating: Int)
+  suspend fun deleteRecipeRating(recipeId: Int)
+}
+
+// TODO: remove
 class RecipeScreenViewModel(
   private val recipeRepository: RecipeRepository, private val ioService: IIOService
 ) : ViewModel() {
 
-  /**
-   * Initializer for this viewmodel used in [ViewModelProvider.Factory]
-   */
   fun init(recipeId: Int) {
     this.recipeId = recipeId
 

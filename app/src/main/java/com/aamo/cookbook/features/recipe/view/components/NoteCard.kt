@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui.components
+package com.aamo.cookbook.features.recipe.view.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -24,7 +24,6 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 
-// TODO: move to recipe feature package
 @Composable
 fun NoteCard(
   text: String,
@@ -34,7 +33,6 @@ fun NoteCard(
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
   ),
 ) {
-  if (text.isEmpty()) return
   ElevatedCard(
     colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)
   ) {
@@ -59,10 +57,11 @@ fun NoteCard(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
   CookbookTheme {
-    NoteCard(text = "Ashioho hio shiods isdhoiosh dioshdoi")
+    NoteCard(text = "Lorem ipsum")
   }
 }

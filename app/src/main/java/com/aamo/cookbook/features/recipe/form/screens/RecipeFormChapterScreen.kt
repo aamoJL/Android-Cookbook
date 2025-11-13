@@ -28,7 +28,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -59,7 +58,6 @@ import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
-import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -310,43 +308,36 @@ fun StepListItem(
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
-    ListItem(
-      modifier = Modifier
-        .clickable { onClick() }
-        .testTag(UITag.STEP_ITEM.name),
-      headlineContent = {
+    ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
+      Text(
+        text = "${stepNumber}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
+        style = MaterialTheme.typography.titleMedium,
+      )
+    }, supportingContent = {
+      StepListIngredientList(ingredients = step.ingredients, modifier = Modifier.padding(16.dp))
+    }, overlineContent = step.timerMinutes?.let {
+      {
         Text(
-          text = "${stepNumber}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
-          style = MaterialTheme.typography.titleMedium,
+          text = stringResource(R.string.abbreviation_minutes, step.timerMinutes.toString()),
+          style = MaterialTheme.typography.labelSmall
         )
-      },
-      supportingContent = {
-        StepListIngredientList(ingredients = step.ingredients, modifier = Modifier.padding(16.dp))
-      },
-      overlineContent = step.timerMinutes?.let {
-        {
-          Text(
-            text = stringResource(R.string.abbreviation_minutes, step.timerMinutes.toString()),
-            style = MaterialTheme.typography.labelSmall
+      }
+    }, trailingContent = {
+      Column(modifier = Modifier) {
+        if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
+            contentDescription = stringResource(R.string.cd_move_up)
           )
         }
-      },
-      trailingContent = {
-        Column(modifier = Modifier) {
-          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
-            Icon(
-              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-              contentDescription = stringResource(R.string.cd_move_up)
-            )
-          }
-          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
-            Icon(
-              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-              contentDescription = stringResource(R.string.cd_move_down)
-            )
-          }
+        if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
+            contentDescription = stringResource(R.string.cd_move_down)
+          )
         }
-      })
+      }
+    })
   }
 }
 

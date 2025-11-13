@@ -47,7 +47,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -55,7 +54,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
@@ -66,9 +64,7 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
-import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
-import com.aamo.cookbook.viewModel.ViewModelProvider
 import kotlinx.coroutines.launch
 
 @Composable
@@ -78,7 +74,7 @@ fun RecipeScreen(
   onEditRecipe: (id: Int) -> Unit,
   onCopyRecipe: (id: Int) -> Unit,
   onShowSnackbar: (SnackbarProperties) -> Unit = {},
-  viewModel: RecipeScreenViewModel = viewModel(factory = ViewModelProvider.Factory)
+  viewModel: RecipeScreenViewModel
 ) {
   val chapterUiStates by viewModel.chapterPageUiStates.collectAsStateWithLifecycle()
   val summaryUiState by viewModel.summaryPageUiStates.collectAsStateWithLifecycle()
@@ -261,7 +257,6 @@ fun RecipeScreenContent(
             modifier = Modifier
               .fillMaxSize()
               .weight(1f, true)
-              .testTag(UITag.PAGER.name)
           ) { pageIndex ->
             when (pageIndex) {
               0 -> CompletedPage(

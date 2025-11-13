@@ -7,7 +7,6 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
-import com.aamo.cookbook.utility.extensions.general.EMPTY
 
 class RecipeMocker(seed: Int = 0) {
   private var recipe: Recipe = Recipe(
@@ -17,7 +16,7 @@ class RecipeMocker(seed: Int = 0) {
     subCategory = "$seed",
     servings = seed + 1,
     note = "$seed",
-    thumbnailUri = String.EMPTY
+    thumbnailUri = "$seed"
   )
   val chapters = mutableListOf<ChapterMocker>()
 

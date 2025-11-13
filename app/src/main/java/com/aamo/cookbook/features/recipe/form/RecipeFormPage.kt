@@ -17,13 +17,11 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.features.recipe.form.screens.RecipeFormInfoScreen
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
+import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.service.IOService
@@ -39,9 +37,10 @@ data class RecipeFormPage(val id: Long)
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
   private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Long?,
-  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
+  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Boolean,
 ) : ViewModel() {
-  private var recipe by mutableStateOf(RecipeWithChaptersStepsAndIngredients(recipe = Recipe()))
+  var recipe by mutableStateOf(RecipeWithChaptersStepsAndIngredients(recipe = Recipe()))
+    private set
 
   var isLoading by mutableStateOf(true)
     private set
@@ -55,35 +54,10 @@ class RecipeFormViewModel(
     }
   }
 
-  // TODO: unit test
-  fun getModel(): RecipeFormInfoFields {
-    return recipe.let { (r, cs) ->
-      RecipeFormInfoFields(
-        name = r.name,
-        category = r.category,
-        subCategory = r.subCategory,
-        servings = r.servings,
-        note = r.note,
-        chapters = cs.map { (c, ss) ->
-          RecipeFormChapterFields(name = c.name, note = c.note, steps = ss.map { (s, ins) ->
-            RecipeFormStepFields(
-              description = s.description,
-              timerMinutes = s.timerMinutes,
-              note = s.note,
-              ingredients = ins.map { i ->
-                RecipeFormIngredientFields(name = i.name, amount = i.amount, unit = i.unit)
-              })
-          })
-        })
-    }
-  }
-
-  // TODO: unit test
   suspend fun deleteRecipe(): Boolean {
-    return runCatching { deleteData(recipe) }.isSuccess
+    return runCatching { deleteData(recipe) }.getOrDefault(defaultValue = false)
   }
 
-  // TODO: unit test
   suspend fun saveRecipe(data: RecipeFormInfoFields): Long? {
     return runCatching {
       saveData(data.toDao(id = recipe.recipe.id, thumbnailUri = recipe.recipe.thumbnailUri))
@@ -125,7 +99,7 @@ fun NavGraphBuilder.recipeFormPage(
 
     LoadingScreen(viewmodel.isLoading) {
       RecipeFormInfoScreen(
-        formData = remember { mutableStateOf(viewmodel.getModel()) }.value,
+        formData = remember { mutableStateOf(RecipeFormInfoFields.fromDao(dao = viewmodel.recipe)).value },
         onSubmit = {
           viewmodel.viewModelScope.launch {
             viewmodel.saveRecipe(it).onNotNull { id -> onOpenRecipe(id) }

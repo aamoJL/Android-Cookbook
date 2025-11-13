@@ -27,7 +27,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -40,10 +39,9 @@ import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
-import com.aamo.cookbook.ui.components.NoteCard
+import com.aamo.cookbook.features.recipe.view.components.NoteCard
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
-import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 
 data class CheckBoxTimerProperties(
@@ -115,47 +113,43 @@ private fun StepCheckBox(
 ) {
   val context = LocalContext.current
   ListItem(
-    colors = colors,
-    headlineContent = {
-      Text(
-        text = headline, fontFamily = Handwritten, fontWeight = FontWeight.Bold
-      )
-    },
-    supportingContent = if (ingredients.isNotEmpty() || note.isNotEmpty()) {
-      {
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          if (note.isNotEmpty()) {
-            NoteCard(
-              text = note, modifier = Modifier.fillMaxWidth()
+    colors = colors, headlineContent = {
+    Text(
+      text = headline, fontFamily = Handwritten, fontWeight = FontWeight.Bold
+    )
+  }, supportingContent = if (ingredients.isNotEmpty() || note.isNotEmpty()) {
+    {
+      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (note.isNotEmpty()) {
+          NoteCard(
+            text = note, modifier = Modifier.fillMaxWidth()
+          )
+        }
+        if (ingredients.isNotEmpty()) {
+          Card(
+            shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(
+              containerColor = MaterialTheme.colorScheme.primaryContainer,
+              contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+            ), modifier = Modifier.fillMaxWidth()
+          ) {
+            IngredientList(
+              ingredients = ingredients,
+              servingsMultiplier = servingsMultiplier,
+              modifier = Modifier.padding(8.dp),
             )
-          }
-          if (ingredients.isNotEmpty()) {
-            Card(
-              shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-              ), modifier = Modifier.fillMaxWidth()
-            ) {
-              IngredientList(
-                ingredients = ingredients,
-                servingsMultiplier = servingsMultiplier,
-                modifier = Modifier.padding(8.dp),
-              )
-            }
           }
         }
       }
     }
-    else null,
-    leadingContent = {
-      Box(contentAlignment = Alignment.TopCenter, modifier = Modifier) {
-        Checkbox(checked = checked, onCheckedChange = null)
-      }
-    },
+  }
+  else null, leadingContent = {
+    Box(contentAlignment = Alignment.TopCenter, modifier = Modifier) {
+      Checkbox(checked = checked, onCheckedChange = null)
+    }
+  },
     // OverlineContent needs to be { } if the supporting content is not null,
     // otherwise the leadingContent will be aligned to center vertically.
-    overlineContent = {},
-    trailingContent = if (timerProperties != null) {
+    overlineContent = {}, trailingContent = if (timerProperties != null) {
       {
         IconButton(onClick = {
           val intent = Intent(AlarmClock.ACTION_SET_TIMER).putExtra(
@@ -178,10 +172,7 @@ private fun StepCheckBox(
         }
       }
     }
-    else null,
-    modifier = modifier
-      .clickable { onCheckedChange(!checked) }
-      .testTag(UITag.PROGRESS_CHECKBOX.name))
+    else null, modifier = modifier.clickable { onCheckedChange(!checked) })
 }
 
 @PreviewLightDark

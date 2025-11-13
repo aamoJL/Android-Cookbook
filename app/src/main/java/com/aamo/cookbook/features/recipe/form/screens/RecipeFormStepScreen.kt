@@ -27,7 +27,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -60,7 +59,6 @@ import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
-import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -323,46 +321,41 @@ private fun IngredientListItem(
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss) {
-    ListItem(
-      modifier = Modifier
-        .clickable { onClick() }
-        .testTag(UITag.INGREDIENT_ITEM.name),
-      headlineContent = {
-        Row(
-          horizontalArrangement = Arrangement.spacedBy(8.dp),
-          modifier = modifier.padding(horizontal = 8.dp)
-        ) {
-          Text(
-            text = if (ingredient.amount == 0f || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.End,
-          )
-          Text(
-            text = ingredient.unit,
-            style = MaterialTheme.typography.titleMedium,
-            fontStyle = FontStyle.Italic,
-          )
-          Text(
-            text = ingredient.name,
-            style = MaterialTheme.typography.titleMedium,
+    ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = modifier.padding(horizontal = 8.dp)
+      ) {
+        Text(
+          text = if (ingredient.amount == 0f || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
+          style = MaterialTheme.typography.titleMedium,
+          textAlign = TextAlign.End,
+        )
+        Text(
+          text = ingredient.unit,
+          style = MaterialTheme.typography.titleMedium,
+          fontStyle = FontStyle.Italic,
+        )
+        Text(
+          text = ingredient.name,
+          style = MaterialTheme.typography.titleMedium,
+        )
+      }
+    }, trailingContent = {
+      Column(modifier = Modifier) {
+        if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
+            contentDescription = stringResource(R.string.cd_move_up)
           )
         }
-      },
-      trailingContent = {
-        Column(modifier = Modifier) {
-          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
-            Icon(
-              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-              contentDescription = stringResource(R.string.cd_move_up)
-            )
-          }
-          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
-            Icon(
-              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-              contentDescription = stringResource(R.string.cd_move_down)
-            )
-          }
+        if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+          Icon(
+            painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
+            contentDescription = stringResource(R.string.cd_move_down)
+          )
         }
-      })
+      }
+    })
   }
 }

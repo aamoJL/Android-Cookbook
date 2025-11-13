@@ -9,4 +9,6 @@ data class RecipeFormInfoFields(
   val servings: Int = 1,
   val note: String = String.EMPTY,
   val chapters: List<RecipeFormChapterFields> = emptyList()
-)
+) {
+  companion object
+}
