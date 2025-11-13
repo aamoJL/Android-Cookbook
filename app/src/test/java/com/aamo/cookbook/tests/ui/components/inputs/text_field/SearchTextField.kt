@@ -1,6 +1,6 @@
 @file:Suppress("HardCodedStringLiteral")
 
-package com.aamo.cookbook.tests.ui.components.inputs
+package com.aamo.cookbook.tests.ui.components.inputs.text_field
 
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.getValue
@@ -19,8 +19,7 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.test_utility.TestTags
 import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
+import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -98,11 +97,11 @@ class SearchTextField {
       SearchTextField(value = value, onValueChange = { value = it })
     }
 
-    assertNotEquals(String.EMPTY, value)
+    Assert.assertNotEquals(String.EMPTY, value)
 
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
       .performClick()
 
-    assertEquals(String.EMPTY, value)
+    Assert.assertEquals(String.EMPTY, value)
   }
 }

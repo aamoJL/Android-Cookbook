@@ -21,8 +21,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.platform.testTag
+import com.aamo.cookbook.utility.tags.UITag
 
-// TODO: unit test
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun OptionsTextField(
@@ -59,10 +60,13 @@ fun OptionsTextField(
       options.forEach { option ->
         Surface(color = MaterialTheme.colorScheme.surface) {
           DropdownMenuItem(
-            text = { Text(option) }, onClick = {
-            onValueChange(option)
-            expanded = false
-          }, contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+            text = { Text(option) },
+            onClick = {
+              onValueChange(option)
+              expanded = false
+            },
+            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding,
+            modifier = Modifier.testTag(UITag.OPTION.name)
           )
         }
       }
