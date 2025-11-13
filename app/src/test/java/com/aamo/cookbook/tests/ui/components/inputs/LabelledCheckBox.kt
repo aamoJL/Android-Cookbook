@@ -14,7 +14,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.test_utility.TestTags
 import com.aamo.cookbook.ui.components.inputs.LabelledCheckBox
-import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -31,13 +30,11 @@ class LabelledCheckBox {
   fun `label visible`() {
     val label = "Label"
     rule.setContent {
-      CookbookTheme {
-        LabelledCheckBox(
-          checked = false,
-          onCheckedChange = { },
-          label = { Text(text = label, modifier = Modifier.testTag(TestTags.NODE.name)) },
-        )
-      }
+      LabelledCheckBox(
+        checked = false,
+        onCheckedChange = { },
+        label = { Text(text = label, modifier = Modifier.testTag(TestTags.NODE.name)) },
+      )
     }
 
     rule.onNode(hasTestTag(TestTags.NODE.name), useUnmergedTree = true).assertExists()

@@ -8,8 +8,9 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
+import com.aamo.cookbook.utility.tags.UITag
 
-// TODO: unit test
 @Composable
 fun LoadingIconButton(
   onClick: () -> Unit,
@@ -23,6 +24,7 @@ fun LoadingIconButton(
       CircularProgressIndicator(
         color = MaterialTheme.colorScheme.secondary,
         trackColor = MaterialTheme.colorScheme.surfaceVariant,
+        modifier = Modifier.testTag(UITag.PROGRESS_INDICATOR.name)
       )
     }
     IconButton(onClick = onClick, enabled = (enabled && !isLoading), content = content)
