@@ -6,6 +6,8 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.utility.extensions.general.EMPTY
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Test
@@ -18,7 +20,9 @@ class SaveRecipe {
     RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { called = true; 1L },
-      deleteData = { false }).saveRecipe(RecipeFormInfoFields())
+      deleteData = { false }).also {
+      it.recipe.drop(1).first()
+    }.saveRecipe(RecipeFormInfoFields())
 
     Assert.assertTrue(called)
   }
@@ -31,7 +35,9 @@ class SaveRecipe {
     RecipeFormViewModel(
       fetchData = { model },
       saveData = { actual = it; 1L },
-      deleteData = { false }).saveRecipe(RecipeFormInfoFields.fromDao(model))
+      deleteData = { false }).also {
+      it.recipe.drop(1).first()
+    }.saveRecipe(RecipeFormInfoFields.fromDao(model))
 
     Assert.assertEquals(model, actual)
   }
@@ -42,7 +48,9 @@ class SaveRecipe {
     val actual = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { expected },
-      deleteData = { false }).saveRecipe(RecipeFormInfoFields())
+      deleteData = { false }).also {
+      it.recipe.drop(1).first()
+    }.saveRecipe(RecipeFormInfoFields())
 
     Assert.assertEquals(expected, actual)
   }

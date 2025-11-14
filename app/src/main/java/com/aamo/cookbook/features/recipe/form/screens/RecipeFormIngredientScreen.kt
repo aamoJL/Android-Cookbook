@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -36,13 +37,11 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
-import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableFloatFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
-import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import kotlinx.serialization.Serializable
@@ -53,7 +52,6 @@ data class RecipeFormIngredientScreen(val index: Int)
 class RecipeFormIngredientScreenViewModel(
   private val formData: RecipeFormIngredientFields,
 ) : ViewModel() {
-  // TODO: unit test
   class FormState(formData: RecipeFormIngredientFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val amount = ViewModelState(formData.amount).transformation { value ->
@@ -62,35 +60,26 @@ class RecipeFormIngredientScreenViewModel(
     val unit = ViewModelState(formData.unit).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
-    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
+      if (amount.value?.let { it < 0 } == true) return false
       return true
     }
 
     private fun onUnsavedChanges() {
-      if (!savingState.unsavedChanges) {
-        savingState = savingState.copy(unsavedChanges = true)
-      }
+      savingState = savingState.copy(unsavedChanges = true)
     }
   }
 
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
-  // TODO: unit test
-  fun getModel(): RecipeFormIngredientFields? {
-    if (!formState.canSave()) return null
-
-    formState.apply { savingState = savingState.getAsSaving() }
-
+  fun getModel(): RecipeFormIngredientFields {
     return formState.let {
       formData.copy(
         name = it.name.value, amount = it.amount.value, unit = it.unit.value
       )
-    }.also {
-      formState.apply { savingState = savingState.getAsSaved() }
     }
   }
 }
@@ -112,7 +101,7 @@ fun NavGraphBuilder.recipeFormIngredientScreen(
       formState = viewmodel.formState,
       isNew = viewmodel.isNew,
       onBack = onBack,
-      onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } })
+      onSubmit = { onSubmit(viewmodel.getModel()) })
   }
 }
 
@@ -142,11 +131,7 @@ fun RecipeFormIngredientScreenContent(
       },
       onBack = { if (formState.savingState.unsavedChanges) openUnsavedDialog = true else onBack() },
       actions = {
-        LoadingIconButton(
-          onClick = onSubmit,
-          isLoading = formState.savingState.state == SavingState.State.SAVING,
-          enabled = formState.canSave(),
-        ) {
+        IconButton(onClick = onSubmit, enabled = formState.canSave()) {
           Icon(
             painter = painterResource(R.drawable.rounded_check_24),
             contentDescription = stringResource(R.string.cd_save)

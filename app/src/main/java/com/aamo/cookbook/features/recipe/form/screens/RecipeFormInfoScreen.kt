@@ -38,6 +38,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
@@ -54,7 +55,6 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
-import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.OptionsTextField
@@ -62,12 +62,13 @@ import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColo
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
-import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -77,11 +78,10 @@ class RecipeFormInfoScreenViewModel(
   private val formData: RecipeFormInfoFields,
   fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
-  // TODO: unit test
   class FormState(formData: RecipeFormInfoFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val category = ViewModelState(formData.category).onChange { onUnsavedChanges() }
-    val subCategory = ViewModelState(formData.category).onChange { onUnsavedChanges() }
+    val subCategory = ViewModelState(formData.subCategory).onChange { onUnsavedChanges() }
     val servings = ViewModelState<Int?>(formData.servings).transformation { value ->
       if (value != null && value < 1) null else value
     }.onChange { onUnsavedChanges() }
@@ -89,7 +89,6 @@ class RecipeFormInfoScreenViewModel(
     val chapters = ViewModelStateList(formData.chapters).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
-    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
@@ -102,28 +101,16 @@ class RecipeFormInfoScreenViewModel(
     }
 
     private fun onUnsavedChanges() {
-      if (!savingState.unsavedChanges) {
-        savingState = savingState.copy(unsavedChanges = true)
-      }
+      savingState = savingState.copy(unsavedChanges = true)
     }
   }
 
   val formState = FormState(formData)
-
-  var categorySuggestions by mutableStateOf<Map<String, List<String>>>(emptyMap())
-    private set
-
   val isNew = formData.name.isEmpty()
+  val categorySuggestions = flow { emit(fetchCategorySuggestions()) }.stateIn(
+    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyMap()
+  )
 
-  init {
-    viewModelScope.launch {
-      fetchCategorySuggestions().let { result ->
-        categorySuggestions = result
-      }
-    }
-  }
-
-  // TODO: unit test
   fun update(chapter: RecipeFormChapterFields) {
     formState.chapters.values.indexOfFirst { it.uuid == chapter.uuid }.also { index ->
       if (index == -1) formState.chapters.add(chapter)
@@ -131,12 +118,7 @@ class RecipeFormInfoScreenViewModel(
     }
   }
 
-  // TODO: unit test
-  fun getModel(): RecipeFormInfoFields? {
-    if (!formState.canSave()) return null
-
-    formState.apply { savingState = savingState.getAsSaving() }
-
+  fun getModel(): RecipeFormInfoFields {
     return formState.let {
       formData.copy(
         name = it.name.value,
@@ -147,8 +129,6 @@ class RecipeFormInfoScreenViewModel(
         note = it.note.value,
         chapters = it.chapters.values
       )
-    }.also {
-      formState.apply { savingState = savingState.getAsSaved() }
     }
   }
 }
@@ -171,12 +151,13 @@ fun RecipeFormInfoScreen(
   })
 
   val infoNavController = rememberNavController()
+  val suggestions = viewmodel.categorySuggestions.collectAsStateWithLifecycle()
 
   NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
     composable<RecipeFormInfoScreen> {
       RecipeFormInfoScreenContent(
         formState = viewmodel.formState,
-        categorySuggestions = viewmodel.categorySuggestions,
+        categorySuggestions = suggestions.value,
         isNew = viewmodel.isNew,
         onNewChapter = {
           infoNavController.navigate(RecipeFormChapterScreen(index = viewmodel.formState.chapters.values.size))
@@ -185,7 +166,7 @@ fun RecipeFormInfoScreen(
         onDeleteChapter = { viewmodel.formState.chapters.remove(it) },
         onSwapChapters = { a, b -> viewmodel.formState.chapters.swapAt(a, b) },
         onDelete = onDeleteRecipe,
-        onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } },
+        onSubmit = { onSubmit(viewmodel.getModel()) },
         onBack = onBack,
       )
     }
@@ -252,11 +233,7 @@ fun RecipeFormInfoScreenContent(
             )
           }
         }
-        LoadingIconButton(
-          onClick = onSubmit,
-          isLoading = formState.savingState.state == SavingState.State.SAVING,
-          enabled = formState.canSave(),
-        ) {
+        IconButton(onClick = onSubmit, enabled = formState.canSave()) {
           Icon(
             painter = painterResource(R.drawable.rounded_check_24),
             contentDescription = stringResource(R.string.cd_save)

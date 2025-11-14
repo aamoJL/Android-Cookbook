@@ -2,8 +2,8 @@ package com.aamo.cookbook.tests.features.recipe.form.recipe_form_viewmodel
 
 import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.extensions.load
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.yield
 import org.junit.Assert
 import org.junit.Test
 
@@ -14,20 +14,10 @@ class Init {
     val viewmodel =
       RecipeFormViewModel(fetchData = { model }, saveData = { null }, deleteData = { false })
 
-    while (viewmodel.isLoading) yield()
+    Assert.assertNull(viewmodel.recipe.value)
 
-    Assert.assertEquals(model, viewmodel.recipe)
-  }
+    viewmodel.recipe.load()
 
-  @Test
-  fun `isLoading state`() = runTest {
-    val viewmodel = RecipeFormViewModel(
-      fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { null },
-      deleteData = { false })
-
-    Assert.assertTrue(viewmodel.isLoading)
-    while (viewmodel.isLoading) yield()
-    Assert.assertFalse(viewmodel.isLoading)
+    Assert.assertEquals(model, viewmodel.recipe.value)
   }
 }

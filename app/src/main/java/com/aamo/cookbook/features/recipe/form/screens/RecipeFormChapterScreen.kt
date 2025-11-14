@@ -52,11 +52,9 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
-import com.aamo.cookbook.ui.components.inputs.LoadingIconButton
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
-import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
@@ -69,14 +67,12 @@ data class RecipeFormChapterScreen(val index: Int)
 class RecipeFormChapterScreenViewModel(
   private val formData: RecipeFormChapterFields
 ) : ViewModel() {
-  // TODO: unit test
   class FormState(formData: RecipeFormChapterFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val note = ViewModelState(formData.note).onChange { onUnsavedChanges() }
     val steps = ViewModelStateList(formData.steps).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
 
-    // TODO: unit test
     fun canSave(): Boolean {
       if (savingState.state == SavingState.State.SAVING) return false
       if (name.value.isEmpty()) return false
@@ -85,16 +81,13 @@ class RecipeFormChapterScreenViewModel(
     }
 
     private fun onUnsavedChanges() {
-      if (!savingState.unsavedChanges) {
-        savingState = savingState.copy(unsavedChanges = true)
-      }
+      savingState = savingState.copy(unsavedChanges = true)
     }
   }
 
   val formState = FormState(formData)
   val isNew = formData.name.isEmpty()
 
-  // TODO: unit test
   fun update(step: RecipeFormStepFields) {
     formState.steps.values.indexOfFirst { it.uuid == step.uuid }.also { index ->
       if (index == -1) formState.steps.add(step)
@@ -102,16 +95,9 @@ class RecipeFormChapterScreenViewModel(
     }
   }
 
-  // TODO: unit test
-  fun getModel(): RecipeFormChapterFields? {
-    if (!formState.canSave()) return null
-
-    formState.apply { savingState = savingState.getAsSaving() }
-
+  fun getModel(): RecipeFormChapterFields {
     return formState.let {
       formData.copy(name = it.name.value, note = it.note.value, steps = it.steps.values)
-    }.also {
-      formState.apply { savingState = savingState.getAsSaved() }
     }
   }
 }
@@ -144,7 +130,7 @@ fun NavGraphBuilder.recipeFormChapterScreen(
           onEditStep = { chapterNavController.navigate(RecipeFormStepScreen(index = it)) },
           onDeleteStep = { viewmodel.formState.steps.remove(it) },
           onSwapSteps = { a, b -> viewmodel.formState.steps.swapAt(a, b) },
-          onSubmit = { viewmodel.getModel().onNotNull { onSubmit(it) } },
+          onSubmit = { onSubmit(viewmodel.getModel()) },
           onBack = onBack,
         )
       }
@@ -192,11 +178,7 @@ fun RecipeFormChapterScreenContent(
       if (formState.savingState.unsavedChanges) openUnsavedDialog = true
       else onBack()
     }, actions = {
-      LoadingIconButton(
-        onClick = onSubmit,
-        isLoading = formState.savingState.state == SavingState.State.SAVING,
-        enabled = formState.canSave(),
-      ) {
+      IconButton(onClick = onSubmit, enabled = formState.canSave()) {
         Icon(
           painter = painterResource(R.drawable.rounded_check_24),
           contentDescription = stringResource(R.string.cd_save)
