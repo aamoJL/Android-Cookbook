@@ -26,15 +26,15 @@
     <string name="cd_save_recipe">Save the recipe</string>
     <string name="description_form_add_new_item">Add new item</string>
     <string name="cd_navigate_back">Go back</string>
-    <string name="description_edit_recipe">Edit the recipe</string>
+    <string name="cd_edit_recipe">Edit the recipe</string>
     <string name="cd_delete_recipe">Delete the recipe</string>
     <string name="description_search">Search</string>
     <string name="description_filter">Filter</string>
-    <string name="description_copy_recipe">Copy the recipe</string>
+    <string name="cd_copy_recipe">Copy the recipe</string>
     <string name="description_delete_list_item">Delete list item</string>
     <string name="cd_move_up">Move item up</string>
     <string name="cd_move_down">Move item down</string>
-    <string name="description_more_options">More options…</string>
+    <string name="cd_more_options">More options…</string>
     <string name="label_name">Name</string>
     <string name="label_servings">Servings</string>
     <string name="label_category">Category</string>
@@ -73,8 +73,8 @@
     <string name="description_increase_value">Increase value</string>
     <string name="description_star_rating_star_icon_selected">%1$s star (selected)</string>
     <string name="description_star_rating_star_icon_unselected">%1$s star (unselected)</string>
-    <string name="description_timer">Timer</string>
-    <string name="description_calculator">Calculator</string>
+    <string name="cd_open_timer">Timer</string>
+    <string name="cd_open_calculator">Calculator</string>
     <string name="dialog_title_app_not_found">App not found.</string>
     <string name="dialog_text_calculator_app_was_not_found">Calculator app was not found.</string>
     <string name="dialog_confirm_default">OK</string>
@@ -85,4 +85,10 @@
     <string name="btn_cancel">Cancel</string>
     <string name="btn_yes">Yes</string>
     <string name="cd_save">Save</string>
+    <string name="cd_remove_bookmark">Remove bookmark</string>
+    <string name="cd_add_bookmark">Add bookmark</string>
+    <string name="cd_settings_page">Settings page</string>
+    <string name="cd_info_page">Info page</string>
+    <string name="cd_chapter_x_page">Chapter %1$d page</string>
+    <string name="snackbar_app_not_found">App was not found.</string>
 </resources>

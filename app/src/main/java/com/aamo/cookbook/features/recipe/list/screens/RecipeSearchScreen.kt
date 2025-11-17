@@ -19,9 +19,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -56,7 +54,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -65,33 +62,17 @@ data object RecipeSearchScreen
 class RecipeSearchScreenViewModel(
   fetchData: () -> Flow<List<RecipeListRecipeModel>>,
 ) : ViewModel() {
-  private var _recipes = MutableStateFlow<List<RecipeListRecipeModel>>(emptyList())
-  private var _filterWord = MutableStateFlow(String.EMPTY)
+  private var _nameFilter = MutableStateFlow(String.EMPTY)
+  val nameFilter = _nameFilter.asStateFlow()
 
-  var isLoading by mutableStateOf(true)
-    private set
-
-  val recipes = combine(_recipes, _filterWord) { recipe, word ->
+  val recipes = combine(fetchData(), _nameFilter) { recipe, word ->
     recipe.filter { it.recipe.name.contains(word, ignoreCase = true) }
   }.stateIn(
-    scope = viewModelScope,
-    started = SharingStarted.WhileSubscribed(5000L),
-    initialValue = _recipes.value
+    scope = viewModelScope, started = SharingStarted.WhileSubscribed(5000L), initialValue = null
   )
 
-  val filterWord = _filterWord.asStateFlow()
-
-  init {
-    viewModelScope.launch {
-      fetchData().collect { result ->
-        _recipes.update { result }
-        isLoading = false
-      }
-    }
-  }
-
   fun updateFilter(value: String) {
-    _filterWord.update { value }
+    _nameFilter.update { value }
   }
 }
 
@@ -109,12 +90,12 @@ fun NavGraphBuilder.recipeSearchScreen(
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()
-    val filterWord by viewmodel.filterWord.collectAsStateWithLifecycle()
+    val nameFilter by viewmodel.nameFilter.collectAsStateWithLifecycle()
 
-    LoadingScreen(loading = viewmodel.isLoading) {
+    LoadingScreen(loading = recipes == null) {
       RecipeSearchScreenContent(
-        recipes = recipes,
-        searchWord = filterWord,
+        recipes = checkNotNull(recipes),
+        searchWord = nameFilter,
         onSearchWordChange = { viewmodel.updateFilter(it) },
         onRecipeSelected = onOpenRecipe,
         onBack = onBack,

@@ -47,7 +47,7 @@ import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 data class CheckBoxTimerProperties(
   val title: String, val minutes: Int
 )
-
+// TODO: remove
 @Composable
 internal fun ChapterPage(
   uiState: RecipeScreenViewModel.ChapterPageUiState,

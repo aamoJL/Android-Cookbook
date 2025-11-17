@@ -58,7 +58,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -67,30 +66,16 @@ data class RecipesByCategoryScreen(val category: String)
 class RecipesByCategoryScreenViewModel(
   fetchData: () -> Flow<List<RecipeListRecipeModel>>,
 ) : ViewModel() {
-  private var _recipes = MutableStateFlow<List<RecipeListRecipeModel>>(emptyList())
   private var _subCategoryFilter = MutableStateFlow(String.EMPTY)
-
-  var isLoading by mutableStateOf(true)
-    private set
-
-  val recipes = combine(_recipes, _subCategoryFilter) { recipe, word ->
-    recipe.filter { it.recipe.subCategory.contains(word, ignoreCase = true) }
-  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
-
-  val subCategories = _recipes.map { list ->
-    list.map { it.recipe.subCategory }.distinct().filter { it.isNotEmpty() }
-  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
-
   val subCategoryFilter = _subCategoryFilter.asStateFlow()
 
-  init {
-    viewModelScope.launch {
-      fetchData().collect { result ->
-        _recipes.update { result }
-        isLoading = false
-      }
-    }
-  }
+  val recipes = combine(fetchData(), _subCategoryFilter) { recipe, word ->
+    recipe.filter { it.recipe.subCategory.contains(word, ignoreCase = true) }
+  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null)
+
+  val subCategories = fetchData().map { list ->
+    list.map { it.recipe.subCategory }.distinct().filter { it.isNotEmpty() }
+  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
 
   fun updateFilter(value: String) {
     _subCategoryFilter.update { value }
@@ -118,10 +103,10 @@ fun NavGraphBuilder.recipesByCategoryScreen(
     val subCategories by viewmodel.subCategories.collectAsStateWithLifecycle()
     val filter by viewmodel.subCategoryFilter.collectAsStateWithLifecycle()
 
-    LoadingScreen(loading = viewmodel.isLoading) {
+    LoadingScreen(loading = recipes == null) {
       RecipesByCategoryScreenContent(
         title = category,
-        recipes = recipes,
+        recipes = checkNotNull(recipes),
         subCategories = subCategories,
         filtered = filter.isNotEmpty(),
         onFilterChange = { viewmodel.updateFilter(it) },

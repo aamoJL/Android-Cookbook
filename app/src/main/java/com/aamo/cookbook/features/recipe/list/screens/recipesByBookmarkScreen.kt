@@ -55,7 +55,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -64,30 +63,16 @@ data object RecipesByBookmarkScreen
 class RecipesByBookmarkScreenViewModel(
   fetchData: () -> Flow<List<RecipeListRecipeModel>>,
 ) : ViewModel() {
-  private var _recipes = MutableStateFlow<List<RecipeListRecipeModel>>(emptyList())
-  private var _categoryFilter = MutableStateFlow(String.EMPTY)
-
-  val recipes = combine(_recipes, _categoryFilter) { recipe, word ->
-    recipe.filter { it.recipe.subCategory.contains(word, ignoreCase = true) }
-  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
-
-  val categories = _recipes.map { list ->
-    list.map { it.recipe.subCategory }.distinct().filter { it.isNotEmpty() }
-  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
-
+  private val _categoryFilter = MutableStateFlow(String.EMPTY)
   val categoryFilter = _categoryFilter.asStateFlow()
 
-  var isLoading by mutableStateOf(true)
-    private set
+  val recipes = combine(fetchData(), _categoryFilter) { recipes, word ->
+    recipes.filter { it.recipe.category.contains(word, ignoreCase = true) }
+  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null)
 
-  init {
-    viewModelScope.launch {
-      fetchData().collect { result ->
-        _recipes.update { result }
-        isLoading = false
-      }
-    }
-  }
+  val categories = fetchData().map { list ->
+    list.map { it.recipe.category }.distinct().filter { it.isNotEmpty() }
+  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyList())
 
   fun updateFilter(value: String) {
     _categoryFilter.update { value }
@@ -105,18 +90,16 @@ fun NavGraphBuilder.recipesByBookmarkScreen(
     val viewmodel: RecipesByBookmarkScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipesByBookmarkScreenViewModel(
-          fetchData = {
-            fetchRecipes { dao.getBookmarksWithRatingFlow() }
-          })
+          fetchData = { fetchRecipes { dao.getBookmarksWithRatingFlow() } })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
     val filter by viewmodel.categoryFilter.collectAsStateWithLifecycle()
 
-    LoadingScreen(loading = viewmodel.isLoading) {
+    LoadingScreen(loading = recipes == null) {
       RecipesByBookmarkScreenContent(
-        recipes = recipes,
+        recipes = checkNotNull(recipes),
         categories = categories,
         filtered = filter.isNotEmpty(),
         onFilterChange = { viewmodel.updateFilter(it) },

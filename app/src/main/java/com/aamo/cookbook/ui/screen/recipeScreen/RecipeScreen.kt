@@ -172,20 +172,20 @@ fun RecipeScreenContent(
         }) {
           Icon(
             painterResource(R.drawable.baseline_calculate_24),
-            contentDescription = stringResource(R.string.description_calculator)
+            contentDescription = stringResource(R.string.cd_open_calculator)
           )
         }
         IconButton(onClick = { context.startActivity(Intent(AlarmClock.ACTION_SHOW_TIMERS)) }) {
           Icon(
             painterResource(R.drawable.baseline_alarm_24),
-            contentDescription = stringResource(R.string.description_timer)
+            contentDescription = stringResource(R.string.cd_open_timer)
           )
         }
         Box(modifier = Modifier) {
           IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
             Icon(
               painter = painterResource(R.drawable.rounded_more_vert_24),
-              contentDescription = stringResource(R.string.description_more_options)
+              contentDescription = stringResource(R.string.cd_more_options)
             )
           }
           DropdownMenu(
@@ -194,10 +194,10 @@ fun RecipeScreenContent(
               leadingIcon = {
               Icon(
                 painter = painterResource(R.drawable.rounded_edit_24),
-                contentDescription = stringResource(R.string.description_edit_recipe)
+                contentDescription = stringResource(R.string.cd_edit_recipe)
               )
             },
-              text = { Text(text = stringResource(R.string.description_edit_recipe)) },
+              text = { Text(text = stringResource(R.string.cd_edit_recipe)) },
               onClick = {
                 moreDropMenuState = false
                 onEditRecipe()
@@ -206,10 +206,10 @@ fun RecipeScreenContent(
               leadingIcon = {
               Icon(
                 painter = painterResource(id = R.drawable.baseline_content_copy_24),
-                contentDescription = stringResource(R.string.description_copy_recipe)
+                contentDescription = stringResource(R.string.cd_copy_recipe)
               )
             },
-              text = { Text(text = stringResource(R.string.description_copy_recipe)) },
+              text = { Text(text = stringResource(R.string.cd_copy_recipe)) },
               onClick = {
                 moreDropMenuState = false
                 onCopyRecipe()

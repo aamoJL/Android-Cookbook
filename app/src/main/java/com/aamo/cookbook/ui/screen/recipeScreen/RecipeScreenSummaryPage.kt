@@ -38,6 +38,7 @@ import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.extensions.general.toStringWithoutZero
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 
+// TODO: remove
 @Composable
 internal fun SummaryPage(
   uiState: RecipeScreenViewModel.SummaryPageUiState,

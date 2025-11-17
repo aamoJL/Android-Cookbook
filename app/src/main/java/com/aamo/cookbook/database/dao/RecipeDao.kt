@@ -65,7 +65,10 @@ interface RecipeDao {
   suspend fun getCompleteRecipe(recipeId: Long): RecipeWithChaptersStepsAndIngredients?
 
   @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
-  suspend fun getRating(recipeId: Long): RecipeRating?
+  fun getRatingFlow(recipeId: Long): Flow<RecipeRating?>
+
+  @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
+  fun getBookmarkFlow(recipeId: Long): Flow<RecipeBookmark?>
   // endregion
 
   // region UPSERT
@@ -136,5 +139,8 @@ interface RecipeDao {
 
   @Delete
   suspend fun delete(vararg chapter: Chapter): Int
+
+  @Delete
+  suspend fun delete(bookmark: RecipeBookmark): Int
   // endregion
 }

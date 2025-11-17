@@ -4,6 +4,7 @@ import android.os.Environment
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -13,6 +14,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
+import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
@@ -25,6 +27,7 @@ import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.onNotNull
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import kotlinx.coroutines.flow.SharingStarted
@@ -58,7 +61,10 @@ class RecipeFormViewModel(
 }
 
 fun NavGraphBuilder.recipeFormPage(
-  onBack: () -> Unit, onOpenRecipe: (id: Long) -> Unit, onOpenCategories: () -> Unit
+  onOpenRecipe: (id: Long) -> Unit,
+  onOpenCategories: () -> Unit,
+  onSnackbar: (SnackbarProperties) -> Unit,
+  onBack: () -> Unit
 ) {
   composable<RecipeFormPage> { navStack ->
     val (recipeId) = navStack.toRoute<RecipeFormPage>()
@@ -89,6 +95,7 @@ fun NavGraphBuilder.recipeFormPage(
       }
     })
 
+    val recipeDeletedSnackbarMessage = stringResource(R.string.snackbar_recipe_deleted_successfully)
     val recipe = viewmodel.recipe.collectAsStateWithLifecycle().value
 
     LoadingScreen(loading = recipe == null) {
@@ -101,7 +108,10 @@ fun NavGraphBuilder.recipeFormPage(
         },
         onDeleteRecipe = {
           viewmodel.viewModelScope.launch {
-            viewmodel.deleteRecipe().onTrue { onOpenCategories() }
+            viewmodel.deleteRecipe().onTrue {
+              onSnackbar(SnackbarProperties(recipeDeletedSnackbarMessage))
+              onOpenCategories()
+            }
           }
         },
         onBack = onBack

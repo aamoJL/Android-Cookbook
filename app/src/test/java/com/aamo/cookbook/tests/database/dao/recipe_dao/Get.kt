@@ -1,4 +1,4 @@
-package com.aamo.cookbook.tests.database.dao
+package com.aamo.cookbook.tests.database.dao.recipe_dao
 
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
@@ -19,7 +19,7 @@ import org.robolectric.RobolectricTestRunner
 import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-class RecipeDao {
+class Get {
   private lateinit var database: RecipeDatabase
   private lateinit var dao: RecipeDao
 
@@ -37,7 +37,6 @@ class RecipeDao {
     database.close()
   }
 
-  // region GET
   @Test
   fun getRecipe() = runTest {
     val recipe = RecipeMocker().mock()
@@ -154,8 +153,7 @@ class RecipeDao {
         recipe = recipes.first().recipe, bookmark = bookmarks.first(), rating = ratings.first()
       )
     )
-    val actual =
-      dao.getRecipesWithBookmarkAndRatingFlow(category = recipes.first().recipe.category).first()
+    val actual = dao.getBookmarksWithRatingFlow().first()
 
     TestCase.assertEquals(expected, actual)
   }
@@ -204,45 +202,32 @@ class RecipeDao {
   }
 
   @Test
-  fun getRating() = runTest {
-    val recipe = RecipeMocker.getFullMocker().let {
-      it.also { dao.upsert(it.mock()) }
-    }.withIds().mock().recipe
+  fun getRatingFlow() = runTest {
+    val recipe =
+      RecipeMocker.getFullMocker().let { it.also { dao.upsert(it.mock()) } }.withIds().mock().recipe
 
     val rating = RecipeRating(id = 0, recipeId = recipe.id, ratingOutOfFive = 3).also {
       dao.upsert(it)
     }
 
     val expected = rating.copy(id = 1)
-    val actual = dao.getRating(recipe.id)
+    val actual = dao.getRatingFlow(recipe.id).first()
 
     TestCase.assertEquals(expected, actual)
   }
 
-  // endregion
-
-  // region INSERT & UPDATE
   @Test
-  fun upsert_RecipeWithChaptersStepsAndIngredients() = runTest {
-    dao.upsert(RecipeMocker.getFullMocker().mock())
+  fun getBookmarkFlow() = runTest {
+    val recipe =
+      RecipeMocker.getFullMocker().let { it.also { dao.upsert(it.mock()) } }.withIds().mock().recipe
 
-    val expected = RecipeMocker.getFullMocker().withIds().mock()
-    val actual = dao.getCompleteRecipe(expected.recipe.id)
-
-    checkNotNull(actual)
-    TestCase.assertEquals(expected.recipe, actual.recipe)
-    expected.chapters.forEachIndexed { iC, ec ->
-      TestCase.assertEquals(ec.chapter, actual.chapters[iC].chapter)
-
-      ec.steps.forEachIndexed { iS, es ->
-        TestCase.assertEquals(es.step, actual.chapters[iC].steps[iS].step)
-
-        es.ingredients.forEachIndexed { iI, ei ->
-          TestCase.assertEquals(ei, actual.chapters[iC].steps[iS].ingredients[iI])
-        }
-      }
+    val bookmark = RecipeBookmark(id = 0, recipeId = recipe.id).also {
+      dao.upsert(it)
     }
+
+    val expected = bookmark.copy(id = 1)
+    val actual = dao.getBookmarkFlow(recipe.id).first()
+
     TestCase.assertEquals(expected, actual)
   }
-  // endregion
 }
