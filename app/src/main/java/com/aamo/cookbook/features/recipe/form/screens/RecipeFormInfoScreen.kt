@@ -61,6 +61,7 @@ import com.aamo.cookbook.ui.components.inputs.text_field.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.SavingState
@@ -449,7 +450,7 @@ private fun ChapterListIngredientList(
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       ingredients.forEach {
         Text(
-          text = if (it.amount == 0f || it.amount == null) "" else it.amount.toFractionFormattedString(),
+          text = if (it.amount == Double.Zero || it.amount == null) "" else it.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.bodySmall,
           textAlign = TextAlign.End,
           modifier = Modifier.fillMaxWidth()

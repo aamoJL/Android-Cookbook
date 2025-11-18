@@ -8,17 +8,19 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
 import androidx.room.Relation
+import com.aamo.cookbook.utility.extensions.general.EMPTY
+import com.aamo.cookbook.utility.extensions.general.Zero
 
 // TODO: rename plurals to singular
 @Entity(tableName = "recipes")
 data class Recipe(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
-  @ColumnInfo(name = "name") val name: String = "",
-  @ColumnInfo(name = "category") val category: String = "",
-  @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = "",
+  @ColumnInfo(name = "name") val name: String = String.EMPTY,
+  @ColumnInfo(name = "category") val category: String = String.EMPTY,
+  @ColumnInfo(name = "subCategory", defaultValue = "") val subCategory: String = String.EMPTY,
   @ColumnInfo(name = "servings", defaultValue = "1") val servings: Int = 1,
-  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
-  @ColumnInfo(name = "thumbnailUri", defaultValue = "") val thumbnailUri: String = "",
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
+  @ColumnInfo(name = "thumbnailUri", defaultValue = "") val thumbnailUri: String = String.EMPTY,
 )
 
 @Entity(
@@ -37,9 +39,9 @@ data class Recipe(
 data class Chapter(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
-  @ColumnInfo(name = "name") val name: String = "",
+  @ColumnInfo(name = "name") val name: String = String.EMPTY,
   @ColumnInfo(name = "recipeId") val recipeId: Long = 0,
-  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
 )
 
 @Entity(
@@ -59,9 +61,9 @@ data class Step(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "chapterId") val chapterId: Long = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
-  @ColumnInfo(name = "description") val description: String = "",
+  @ColumnInfo(name = "description") val description: String = String.EMPTY,
   @ColumnInfo(name = "timerMinutes", defaultValue = "NULL") val timerMinutes: Int? = null,
-  @ColumnInfo(name = "note", defaultValue = "") val note: String = "",
+  @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
 )
 
 @Entity(
@@ -75,9 +77,9 @@ data class Step(
 data class Ingredient(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "stepId") val stepId: Long = 0,
-  @ColumnInfo(name = "name") val name: String = "",
-  @ColumnInfo(name = "amount", defaultValue = "0") val amount: Float = 0f,
-  @ColumnInfo(name = "unit", defaultValue = "") val unit: String = "",
+  @ColumnInfo(name = "name") val name: String = String.EMPTY,
+  @ColumnInfo(name = "amount", defaultValue = "0") val amount: Double = Double.Zero,
+  @ColumnInfo(name = "unit", defaultValue = "") val unit: String = String.EMPTY,
 )
 
 // TODO: rename to bookmark

@@ -4,8 +4,8 @@ import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.isValidDecimalNumberString
 import com.aamo.cookbook.utility.extensions.general.letIf
 
-data object NullableFloatFieldValidator : FieldValidator<Float?> {
-  override fun onValid(text: String, onValid: (value: Float?, text: String) -> Unit) {
+data object NullableDoubleFieldValidator : FieldValidator<Double?> {
+  override fun onValid(text: String, onValid: (value: Double?, text: String) -> Unit) {
     val result = transformText(text = text) ?: return
 
     getValueFromText(text = result) { value ->
@@ -13,7 +13,7 @@ data object NullableFloatFieldValidator : FieldValidator<Float?> {
     }
   }
 
-  override fun onValid(value: Float?, onValid: (text: String) -> Unit): Boolean {
+  override fun onValid(value: Double?, onValid: (text: String) -> Unit): Boolean {
     return if (value?.isFinite() == false) false
     else {
       onValid(getTextFromValue(value = value))
@@ -21,11 +21,11 @@ data object NullableFloatFieldValidator : FieldValidator<Float?> {
     }
   }
 
-  private fun getTextFromValue(value: Float?): String {
+  private fun getTextFromValue(value: Double?): String {
     return value?.toBigDecimal()?.stripTrailingZeros()?.toPlainString() ?: String.EMPTY
   }
 
-  private fun getValueFromText(text: String, onValid: ((Float?) -> Unit) = {}): Boolean {
+  private fun getValueFromText(text: String, onValid: ((Double?) -> Unit) = {}): Boolean {
     if (!text.isValidDecimalNumberString()) return false
 
     val value = when (text) {
@@ -33,7 +33,7 @@ data object NullableFloatFieldValidator : FieldValidator<Float?> {
       "." -> null
       "-" -> null
       "-." -> null
-      else -> text.toFloatOrNull() ?: return false
+      else -> text.toDoubleOrNull() ?: return false
     }
 
     if (value?.isFinite() == false) return false

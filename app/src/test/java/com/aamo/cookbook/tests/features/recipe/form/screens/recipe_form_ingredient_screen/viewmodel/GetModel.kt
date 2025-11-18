@@ -9,7 +9,7 @@ import org.junit.Test
 class GetModel {
   @Test
   fun `returns correct model`() {
-    val data = RecipeFormIngredientFields(name = "Name", amount = 3f, unit = "Unit")
+    val data = RecipeFormIngredientFields(name = "Name", amount = 3.0, unit = "Unit")
     val newName = "New name"
     val actual = RecipeFormIngredientScreenViewModel(formData = data).apply {
       formState.name.update(newName)

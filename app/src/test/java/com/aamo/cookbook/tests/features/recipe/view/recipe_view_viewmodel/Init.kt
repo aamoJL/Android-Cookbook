@@ -64,4 +64,28 @@ class Init {
       viewmodel.recipe.value
     )
   }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Test
+  fun `servings state set`() = runTest(UnconfinedTestDispatcher()) {
+    val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
+    val viewmodel = RecipeViewViewModel(
+      fetchData = { dataFlow },
+      updateBookmark = { _, _ -> fail() },
+      saveAsCopy = { fail() })
+
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+      viewmodel.recipe.collect { }
+    }
+
+    val servings = 5
+    val recipe =
+      RecipeMocker.getFullMocker().modify { it.copy(servings = servings) }.withIds().mock()
+    dataFlow.emit(
+      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null)
+    )
+
+    assertEquals(servings, viewmodel.servingsState.current.value)
+    assertEquals(servings, viewmodel.servingsState.baseline.value)
+  }
 }

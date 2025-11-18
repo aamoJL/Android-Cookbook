@@ -1,71 +1,26 @@
 package com.aamo.cookbook.ui.screen.recipeScreen
 
-import android.content.ActivityNotFoundException
-import android.content.ComponentName
-import android.content.Intent
 import android.net.Uri
-import android.provider.AlarmClock
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.IntrinsicSize
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.aamo.cookbook.R
-import com.aamo.cookbook.database.entities.Chapter
-import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.service.IOService
-import com.aamo.cookbook.ui.components.PrimaryTopAppBar
-import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.SnackbarProperties
-import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
-import kotlinx.coroutines.launch
 
 @Composable
 fun RecipeScreen(
@@ -134,115 +89,9 @@ fun RecipeScreenContent(
 ) {
   val pageCount = rememberSaveable(chapterPageUiStates) { chapterPageUiStates.size + 2 }
   val pagerState = rememberPagerState(pageCount = { pageCount }, initialPage = 1)
-  val scope = rememberCoroutineScope()
-  var moreDropMenuState by remember { mutableStateOf(false) }
-  val context = LocalContext.current
-  var openCalculatorNotFoundDialog by remember { mutableStateOf(false) }
-
-  if (openCalculatorNotFoundDialog) {
-    CalculatorNotFoundDialog(onConfirm = { openCalculatorNotFoundDialog = false })
-  }
 
   Scaffold(
-    topBar = {
-      PrimaryTopAppBar(title = summaryPageUiState.recipeName, onBack = onBack) {
-        IconButton(onClick = {
-          try {
-            context.startActivity(
-              Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALCULATOR)
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-            )
-          }
-          catch (_: ActivityNotFoundException) {
-            try {
-              // Samsung phones
-              context.startActivity(
-                Intent(Intent.ACTION_MAIN).addCategory(Intent.CATEGORY_LAUNCHER).setComponent(
-                  ComponentName(
-                    "com.sec.android.app.popupcalculator",
-                    "com.sec.android.app.popupcalculator.Calculator"
-                  )
-                ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-              )
-            }
-            catch (_: ActivityNotFoundException) {
-              openCalculatorNotFoundDialog = true
-            }
-          }
-        }) {
-          Icon(
-            painterResource(R.drawable.baseline_calculate_24),
-            contentDescription = stringResource(R.string.cd_open_calculator)
-          )
-        }
-        IconButton(onClick = { context.startActivity(Intent(AlarmClock.ACTION_SHOW_TIMERS)) }) {
-          Icon(
-            painterResource(R.drawable.baseline_alarm_24),
-            contentDescription = stringResource(R.string.cd_open_timer)
-          )
-        }
-        Box(modifier = Modifier) {
-          IconButton(onClick = { moreDropMenuState = !moreDropMenuState }) {
-            Icon(
-              painter = painterResource(R.drawable.rounded_more_vert_24),
-              contentDescription = stringResource(R.string.cd_more_options)
-            )
-          }
-          DropdownMenu(
-            expanded = moreDropMenuState, onDismissRequest = { moreDropMenuState = false }) {
-            DropdownMenuItem(
-              leadingIcon = {
-              Icon(
-                painter = painterResource(R.drawable.rounded_edit_24),
-                contentDescription = stringResource(R.string.cd_edit_recipe)
-              )
-            },
-              text = { Text(text = stringResource(R.string.cd_edit_recipe)) },
-              onClick = {
-                moreDropMenuState = false
-                onEditRecipe()
-              })
-            DropdownMenuItem(
-              leadingIcon = {
-              Icon(
-                painter = painterResource(id = R.drawable.baseline_content_copy_24),
-                contentDescription = stringResource(R.string.cd_copy_recipe)
-              )
-            },
-              text = { Text(text = stringResource(R.string.cd_copy_recipe)) },
-              onClick = {
-                moreDropMenuState = false
-                onCopyRecipe()
-              })
-            HorizontalDivider()
-            DropdownMenuItem(leadingIcon = {
-              if (bookmarked) {
-                Icon(
-                  painter = painterResource(R.drawable.rounded_bookmark_remove_24),
-                  contentDescription = null
-                )
-              }
-              else {
-                Icon(
-                  painter = painterResource(R.drawable.rounded_bookmark_24),
-                  contentDescription = null
-                )
-              }
-            }, text = {
-              if (bookmarked) {
-                Text(text = stringResource(R.string.button_text_remove_from_favorites))
-              }
-              else {
-                Text(text = stringResource(R.string.button_text_add_to_favorites))
-              }
-            }, onClick = {
-              moreDropMenuState = false
-              onFavoriteChange(!bookmarked)
-            })
-          }
-        }
-      }
-    }) { paddingValues ->
+    topBar = {}) { paddingValues ->
     Surface(
       modifier = modifier
         .fillMaxSize()
@@ -265,11 +114,11 @@ fun RecipeScreenContent(
                 onThumbnailChange = onThumbnailChange
               )
 
-              1 -> SummaryPage(
-                uiState = summaryPageUiState,
-                servingsState = servingsState,
-                onServingsCountChange = onServingsCountChange,
-              )
+//              1 -> SummaryPage(
+//                uiState = summaryPageUiState,
+//                servingsState = servingsState,
+//                onServingsCountChange = onServingsCountChange,
+//              )
 
               in (2..chapterPageUiStates.size + 1) -> {
                 val chapterIndex = pageIndex - 2
@@ -288,199 +137,7 @@ fun RecipeScreenContent(
             }
           }
         }
-        HorizontalDivider()
-        Pager(
-          chapterUiStates = chapterPageUiStates, pagerState = pagerState, onIndicatorClick = {
-            scope.launch {
-              pagerState.animateScrollToPage(it)
-            }
-          })
       }
     }
   }
-}
-
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-private fun Pager(
-  chapterUiStates: List<RecipeScreenViewModel.ChapterPageUiState>,
-  pagerState: PagerState,
-  onIndicatorClick: (page: Int) -> Unit,
-  modifier: Modifier = Modifier
-) {
-  Row(
-    modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center
-  ) {
-    val currentChapterIndex = chapterUiStates.indexOfFirst { state ->
-      state.progress.any { !it }
-    }
-
-    PageIndicatorItem(
-      selected = pagerState.currentPage == 0,
-      onClick = { onIndicatorClick(0) },
-      color = MaterialTheme.colorScheme.tertiaryContainer,
-      icon = painterResource(R.drawable.rounded_settings_24),
-    )
-
-    PageIndicatorItem(
-      selected = pagerState.currentPage == 1,
-      onClick = { onIndicatorClick(1) },
-      color = MaterialTheme.colorScheme.tertiaryContainer,
-      icon = painterResource(R.drawable.rounded_info_24),
-    )
-
-    repeat(chapterUiStates.size) { index ->
-      val isTargetPage = currentChapterIndex == index
-      PageIndicatorItem(
-        selected = index + 2 == pagerState.currentPage,
-        onClick = { onIndicatorClick(index + 2) },
-        isTargetPage = isTargetPage,
-        color = when {
-          currentChapterIndex == index -> MaterialTheme.colorScheme.primaryContainer
-          currentChapterIndex > index || currentChapterIndex == -1 -> MaterialTheme.colorScheme.surfaceColorAtElevation(
-            8.dp
-          )
-
-          else -> MaterialTheme.colorScheme.secondaryContainer
-        },
-        icon = if (chapterUiStates.elementAt(index).progress.all { it }) painterResource(R.drawable.rounded_check_24) else null
-      )
-    }
-  }
-}
-
-@Composable
-private fun PageIndicatorItem(
-  selected: Boolean,
-  onClick: () -> Unit,
-  modifier: Modifier = Modifier,
-  isTargetPage: Boolean = false,
-  enabled: Boolean = true,
-  color: Color = MaterialTheme.colorScheme.secondaryContainer,
-  icon: Painter? = null
-) {
-  Surface(
-    color = color,
-    onClick = onClick,
-    enabled = enabled,
-    modifier = modifier
-      .padding(10.dp)
-      .clip(CircleShape)
-      .size(
-        width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp
-      )
-  ) {
-    Box(contentAlignment = Alignment.Center) {
-      if (icon != null) {
-        Icon(painter = icon, contentDescription = null, modifier = Modifier.size(20.dp))
-      }
-      if (selected) {
-        Surface(
-          color = MaterialTheme.colorScheme.surface,
-          modifier = Modifier
-            .clip(CircleShape)
-            .size(18.dp)
-        ) {}
-      }
-    }
-  }
-}
-
-@Composable
-internal fun IngredientList(
-  ingredients: List<Ingredient>,
-  servingsMultiplier: Float,
-  modifier: Modifier = Modifier,
-  fontFamily: androidx.compose.ui.text.font.FontFamily = Handwritten,
-  textStyle: TextStyle = MaterialTheme.typography.titleMedium,
-) {
-  Row(modifier = modifier) {
-    if (ingredients.any { it.amount != 0f }) {
-      Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-        ingredients.forEach {
-          Text(
-            text = if (it.amount == 0f) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
-            style = textStyle,
-            fontFamily = fontFamily,
-            textAlign = TextAlign.End,
-            modifier = Modifier.fillMaxWidth()
-          )
-        }
-      }
-    }
-    if (ingredients.any { it.unit.isNotEmpty() }) {
-      Column(
-        modifier = Modifier
-          .defaultMinSize(minWidth = 40.dp)
-          .padding(horizontal = 8.dp)
-      ) {
-        ingredients.forEach {
-          Text(
-            text = it.unit, style = textStyle, fontFamily = fontFamily, modifier = Modifier
-          )
-        }
-      }
-    }
-    Column {
-      ingredients.forEach {
-        Text(
-          text = it.name, style = textStyle, fontFamily = fontFamily, modifier = Modifier
-        )
-      }
-    }
-  }
-}
-
-@PreviewLightDark
-@Composable
-private fun Preview() {
-  CookbookTheme {
-    RecipeScreenContent(
-      summaryPageUiState = RecipeScreenViewModel.SummaryPageUiState(
-        recipeName = "Recipe 1", recipeNote = "Recipe note.", chaptersWithIngredients = listOf(
-          Pair(
-            "Chapter 1", listOf(
-              Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
-              Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
-            )
-          ), Pair(
-            "Chapter 2", listOf(
-              Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
-              Ingredient(name = "Ingredient 2", amount = 25f, unit = "dl")
-            )
-          )
-        )
-      ),
-      chapterPageUiStates = listOf(
-        RecipeScreenViewModel.ChapterPageUiState(
-          chapter = ChapterWithStepsAndIngredients(Chapter()), progress = listOf(false)
-        )
-      ),
-      completedPageUiState = RecipeScreenViewModel.CompletedPageUiState(),
-      servingsState = RecipeScreenViewModel.ServingsState(),
-      bookmarked = true,
-      onProgressChange = { _, _, _ -> },
-      onServingsCountChange = {},
-      onFavoriteChange = {},
-      onRatingChange = {},
-      onThumbnailChange = {})
-  }
-}
-
-@Composable
-private fun CalculatorNotFoundDialog(
-  onConfirm: () -> Unit,
-) {
-  AlertDialog(
-    title = { Text(text = stringResource(R.string.dialog_title_app_not_found)) },
-    text = { Text(text = stringResource(R.string.dialog_text_calculator_app_was_not_found)) },
-    onDismissRequest = onConfirm,
-    confirmButton = {
-      TextButton(
-        onClick = onConfirm,
-      ) {
-        Text(text = stringResource(R.string.dialog_confirm_default))
-      }
-    },
-  )
 }

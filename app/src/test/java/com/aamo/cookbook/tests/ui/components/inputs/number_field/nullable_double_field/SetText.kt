@@ -1,6 +1,6 @@
 @file:Suppress("HardCodedStringLiteral")
 
-package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_float_field
+package com.aamo.cookbook.tests.ui.components.inputs.number_field.nullable_double_field
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -14,9 +14,10 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextReplacement
 import com.aamo.cookbook.test_utility.TestTags
-import com.aamo.cookbook.ui.components.inputs.number_field.NullableFloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableDoubleFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.utility.extensions.general.EMPTY
+import com.aamo.cookbook.utility.extensions.general.Zero
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertThrows
 import org.junit.Assert.assertTrue
@@ -30,14 +31,14 @@ import org.robolectric.RobolectricTestRunner
 class SetText {
   @get:Rule val rule = createComposeRule()
 
-  private var value by mutableStateOf<Float?>(0f)
-  private val validator = NullableFloatFieldValidator
+  private var value by mutableStateOf<Double?>(Double.Zero)
+  private val validator = NullableDoubleFieldValidator
 
   private fun assertText(text: String) {
     rule.onNodeWithTag(TestTags.NODE.name).assert(hasText(text))
   }
 
-  private fun assertValue(value: Float?) {
+  private fun assertValue(value: Double?) {
     assertEquals(value, this.value)
   }
 
@@ -49,7 +50,7 @@ class SetText {
     rule.onNodeWithTag(TestTags.NODE.name).performTextClearance()
   }
 
-  private fun setup(onValueChange: ((Float?) -> Unit)? = null) {
+  private fun setup(onValueChange: ((Double?) -> Unit)? = null) {
     rule.setContent {
       NumberField(
         value = value,
@@ -72,17 +73,17 @@ class SetText {
   fun `clear sanity`() {
     setup()
     replaceText("1")
-    assertValue(1f)
+    assertValue(1.0)
     clear()
     assertValue(null)
     assertText(String.EMPTY)
     replaceText("1")
-    assertValue(1f)
+    assertValue(1.0)
   }
 
   @Test
   fun `readOnly true`() {
-    val expected = 0f to "0"
+    val expected = 0.0 to "0"
     rule.setContent {
       NumberField(
         value = expected.first,
@@ -113,24 +114,28 @@ class SetText {
     setup()
 
     val inputOutputs = listOf(
-      "100" to ("100" to 100f),
-      "-100" to ("-100" to -100f),
-      "1.999" to ("1.999" to 1.999f),
-      "-1.999" to ("-1.999" to -1.999f),
-      "340282350000000000000000000000000000000" to ("340282350000000000000000000000000000000" to Float.MAX_VALUE),
-      "-340282350000000000000000000000000000000" to ("-340282350000000000000000000000000000000" to -Float.MAX_VALUE),
-      "0.0000000000000000000000000000000000000000000014" to ("0.0000000000000000000000000000000000000000000014" to Float.MIN_VALUE),
-      "-0.0000000000000000000000000000000000000000000014" to ("-0.0000000000000000000000000000000000000000000014" to -Float.MIN_VALUE),
-      "0" to ("0" to 0f),
+      "100" to ("100" to 100.0),
+      "-100" to ("-100" to -100.0),
+      "1.999" to ("1.999" to 1.9990),
+      "-1.999" to ("-1.999" to -1.9990),
+      Double.MAX_VALUE.toBigDecimal().toPlainString() to (Double.MAX_VALUE.toBigDecimal()
+        .toPlainString() to Double.MAX_VALUE),
+      (-Double.MAX_VALUE).toBigDecimal().toPlainString() to ((-Double.MAX_VALUE).toBigDecimal()
+        .toPlainString() to -Double.MAX_VALUE),
+      Double.MIN_VALUE.toBigDecimal().toPlainString() to (Double.MIN_VALUE.toBigDecimal()
+        .toPlainString() to Double.MIN_VALUE),
+      (-Double.MIN_VALUE).toBigDecimal().toPlainString() to ((-Double.MIN_VALUE).toBigDecimal()
+        .toPlainString() to -Double.MIN_VALUE),
+      "0" to ("0" to 0.0),
       String.EMPTY to (String.EMPTY to null),
-      "000" to ("0" to 0f),
-      "0.0" to ("0.0" to 0f),
-      "000.000" to ("0.000" to 0f),
+      "000" to ("0" to 0.0),
+      "0.0" to ("0.0" to 0.0),
+      "000.000" to ("0.000" to 0.0),
       "." to ("." to null),
       "-." to ("-." to null),
-      ".00" to (".00" to 0f),
-      "0.100" to ("0.100" to 0.1f),
-      "00100" to ("100" to 100f),
+      ".00" to (".00" to 0.0),
+      "0.100" to ("0.100" to 0.10),
+      "00100" to ("100" to 100.0),
       "0-" to ("-" to null),
     )
 
@@ -144,11 +149,11 @@ class SetText {
 
   @Test
   fun `input invalid text`() {
-    setup { fail() }
+    setup { fail(it?.toBigDecimal()?.toPlainString()) }
 
     val inputs = listOf(
-      "9990282350000000000000000000000000000000",
-      "-9990282350000000000000000000000000000000",
+      Double.MAX_VALUE.toBigDecimal().toPlainString() + "0000",
+      (-Double.MAX_VALUE).toBigDecimal().toPlainString() + "0000",
       "..",
       ".-1",
       "1.0.0",
@@ -162,7 +167,7 @@ class SetText {
       "1-2",
     )
 
-    val expected = "5" to 5f
+    val expected = "5" to 5.0
 
     // sanity check
     assertThrows(AssertionError::class.java) { replaceText(expected.first) }

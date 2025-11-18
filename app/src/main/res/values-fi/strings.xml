@@ -13,7 +13,7 @@
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
     <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
     <string name="screen_title_subcategories">Valitse alakategoria</string>
-    <string name="page_title_ingredients">Ainesosat</string>
+    <string name="title_ingredients">Ainesosat</string>
     <string name="title_recipe">Reseptin tiedot</string>
     <string name="form_title_chapter">%1$s. kappaleen tiedot</string>
     <string name="form_title_step">%1$s. vaiheen tiedot</string>
@@ -87,7 +87,7 @@
     <string name="cd_remove_bookmark">Poista kirjanmerkki</string>
     <string name="cd_add_bookmark">Lisää kirjanmerkki</string>
     <string name="cd_settings_page">Asetukset sivu</string>
-    <string name="cd_info_page">Tiedot sivu</string>
+    <string name="cd_summary_page">Tiedot-sivu</string>
     <string name="cd_chapter_x_page">Kappale %1$d sivu</string>
     <string name="snackbar_app_not_found">Sovellusta ei löytynyt.</string>
 </resources>

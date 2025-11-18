@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test
+import kotlin.time.Duration.Companion.seconds
 
 @Suppress("HardCodedStringLiteral")
 class Init {
@@ -56,7 +57,7 @@ class Init {
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun `category suggestions`() = runTest {
+  fun `category suggestions`() = runTest(timeout = 10.seconds) {
     val data = RecipeFormInfoFields(
       name = "Name",
       category = "Cat",

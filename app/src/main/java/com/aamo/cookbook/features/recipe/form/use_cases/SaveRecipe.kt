@@ -8,6 +8,7 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
+import com.aamo.cookbook.utility.extensions.general.Zero
 
 suspend fun saveRecipe(
   recipe: RecipeWithChaptersStepsAndIngredients,
@@ -40,7 +41,9 @@ fun RecipeFormInfoFields.toDao(
               timerMinutes = s.timerMinutes,
               note = s.note
             ), ingredients = s.ingredients.map { ing ->
-              Ingredient(name = ing.name, amount = ing.amount ?: 0f, unit = ing.unit, stepId = 0)
+              Ingredient(
+                name = ing.name, amount = ing.amount ?: Double.Zero, unit = ing.unit, stepId = 0
+              )
             })
         })
     })

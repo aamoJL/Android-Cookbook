@@ -37,7 +37,7 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
-import com.aamo.cookbook.ui.components.inputs.number_field.NullableFloatFieldValidator
+import com.aamo.cookbook.ui.components.inputs.number_field.NullableDoubleFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
@@ -171,7 +171,7 @@ private fun IngredientForm(
       NumberField(
         value = formState.amount.value,
         onValueChange = { formState.amount.update(it) },
-        validator = NullableFloatFieldValidator,
+        validator = NullableDoubleFieldValidator,
         label = { Text(stringResource(R.string.label_amount).asOptionalLabel()) },
         shape = RectangleShape,
         colors = borderlessTextFieldColors(),

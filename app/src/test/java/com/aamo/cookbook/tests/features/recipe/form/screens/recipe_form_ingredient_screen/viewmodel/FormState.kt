@@ -10,7 +10,7 @@ import org.junit.Test
 
 @Suppress("HardCodedStringLiteral")
 class FormState {
-  val data = RecipeFormIngredientFields(name = "Name", amount = 4.5f, unit = "Unit")
+  val data = RecipeFormIngredientFields(name = "Name", amount = 4.5, unit = "Unit")
 
   @Test
   fun canSave() {
@@ -26,7 +26,7 @@ class FormState {
     )
 
     assertFalse(
-      RecipeFormIngredientScreenViewModel.FormState(formData = data.copy(amount = -1f)).canSave()
+      RecipeFormIngredientScreenViewModel.FormState(formData = data.copy(amount = -1.0)).canSave()
     )
 
     assertTrue(
@@ -53,7 +53,7 @@ class FormState {
 
     assertTrue(
       RecipeFormIngredientScreenViewModel.FormState(formData = data)
-        .apply { amount.update(1f) }.savingState.unsavedChanges
+        .apply { amount.update(1.0) }.savingState.unsavedChanges
     )
 
     assertTrue(
@@ -67,7 +67,7 @@ class FormState {
     assertEquals(
       null,
       RecipeFormIngredientScreenViewModel.FormState(formData = data)
-        .apply { amount.update(0f) }.amount.value
+        .apply { amount.update(0.0) }.amount.value
     )
 
     assertEquals(
@@ -79,7 +79,7 @@ class FormState {
     assertEquals(
       null,
       RecipeFormIngredientScreenViewModel.FormState(formData = data)
-        .apply { amount.update(-1f) }.amount.value
+        .apply { amount.update(-1.0) }.amount.value
     )
   }
 }

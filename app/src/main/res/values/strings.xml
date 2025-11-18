@@ -14,7 +14,7 @@
     <string name="screen_title_new_ingredient">Add a new ingredient</string>
     <string name="screen_title_existing_ingredient">Edit ingredient</string>
     <string name="screen_title_subcategories">Choose a subcategory</string>
-    <string name="page_title_ingredients">Ingredients</string>
+    <string name="title_ingredients">Ingredients</string>
     <string name="title_recipe">Recipe information</string>
     <string name="form_title_chapter">%1$s. chapter information</string>
     <string name="form_title_step">%1$s. step information</string>
@@ -88,7 +88,7 @@
     <string name="cd_remove_bookmark">Remove bookmark</string>
     <string name="cd_add_bookmark">Add bookmark</string>
     <string name="cd_settings_page">Settings page</string>
-    <string name="cd_info_page">Info page</string>
+    <string name="cd_summary_page">Summary page</string>
     <string name="cd_chapter_x_page">Chapter %1$d page</string>
     <string name="snackbar_app_not_found">App was not found.</string>
 </resources>

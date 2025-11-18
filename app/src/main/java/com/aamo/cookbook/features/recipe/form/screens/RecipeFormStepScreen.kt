@@ -55,6 +55,7 @@ import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValid
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.SavingState
@@ -310,7 +311,7 @@ private fun IngredientListItem(
         modifier = modifier.padding(horizontal = 8.dp)
       ) {
         Text(
-          text = if (ingredient.amount == 0f || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
+          text = if (ingredient.amount == Double.Zero || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.titleMedium,
           textAlign = TextAlign.End,
         )

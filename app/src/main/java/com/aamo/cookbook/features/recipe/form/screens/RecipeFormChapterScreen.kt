@@ -54,6 +54,8 @@ import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.utility.extensions.general.EMPTY
+import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.SavingState
@@ -331,7 +333,7 @@ private fun StepListIngredientList(
     Column(modifier = Modifier.width(IntrinsicSize.Max)) {
       ingredients.forEach {
         Text(
-          text = if (it.amount == 0f || it.amount == null) "" else it.amount.toFractionFormattedString(),
+          text = if (it.amount == Double.Zero || it.amount == null) String.EMPTY else it.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.bodySmall,
           textAlign = TextAlign.End,
           modifier = Modifier.fillMaxWidth()

@@ -34,6 +34,7 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewPagerIndicators
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewTopBar
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
+import com.aamo.cookbook.features.recipe.view.screens.RecipeSummaryScreen
 import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.updateBookmark
@@ -42,8 +43,10 @@ import com.aamo.cookbook.service.TimerService
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
+import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
@@ -56,9 +59,21 @@ class RecipeViewViewModel(
   private val updateBookmark: suspend (Boolean, RecipeBookmark) -> Unit,
   private val saveAsCopy: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
-  var recipe = fetchData().stateIn(
+  class ServingsState {
+    val baseline = ViewModelState(1).validation { it > 0 }
+    val current = ViewModelState(1).validation { it > 0 }
+
+    val multiplier: Double get() = current.value.toDouble() / baseline.value.toDouble()
+  }
+
+  var recipe = fetchData().onEach { value ->
+    servingsState.baseline.update(value.recipe.recipe.servings)
+    servingsState.current.update(value.recipe.recipe.servings)
+  }.stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
+
+  val servingsState = ServingsState()
 
   fun updateBookmark(value: Boolean) {
     if (value && recipe.value?.bookmark != null) return
@@ -120,6 +135,7 @@ fun NavGraphBuilder.recipeViewPage(
         recipe = checkNotNull(recipe).recipe,
         bookmark = recipe.bookmark,
         rating = recipe.rating,
+        servingsState = viewmodel.servingsState,
         onEdit = { onOpenRecipeForm(id) },
         onCopy = { viewmodel.saveAsCopy() },
         onUpdateBookmark = { viewmodel.updateBookmark(it) },
@@ -144,6 +160,7 @@ fun RecipeViewPageContent(
   recipe: RecipeWithChaptersStepsAndIngredients,
   bookmark: RecipeBookmark?,
   rating: RecipeRating?,
+  servingsState: RecipeViewViewModel.ServingsState,
   onEdit: () -> Unit,
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
@@ -182,10 +199,20 @@ fun RecipeViewPageContent(
               .fillMaxSize()
               .weight(1f, fill = true)
           ) { pageIndex ->
-            // TODO()
+            when (pageIndex) {
+              0 -> TODO("Settings page")
+              1 -> RecipeSummaryScreen(
+                recipe = recipe,
+                servings = servingsState.current.value,
+                servingsMultiplier = servingsState.multiplier,
+                onServingsChange = { servingsState.current.update(it) })
+
+              else -> TODO("Chapter page")
+            }
           }
         }
         HorizontalDivider()
+        // TODO: progress
         RecipeViewPagerIndicators(
           pageIndex = pagerState.currentPage, recipeProgress = emptyList(), onPageChange = {
             scope.launch { pagerState.animateScrollToPage(it) }
@@ -204,6 +231,7 @@ private fun RecipeViewPageContentPreview() {
         recipe = RecipeWithChaptersStepsAndIngredients(recipe = Recipe(), chapters = emptyList()),
         bookmark = null,
         rating = null,
+        servingsState = RecipeViewViewModel.ServingsState(),
         onEdit = {},
         onCopy = {},
         onUpdateBookmark = {},

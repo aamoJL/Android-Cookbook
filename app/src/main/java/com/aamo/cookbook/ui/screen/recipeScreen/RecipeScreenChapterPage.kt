@@ -31,16 +31,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.database.entities.Chapter
-import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
-import com.aamo.cookbook.database.entities.Step
-import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.features.recipe.view.components.NoteCard
-import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.viewModel.RecipeScreenViewModel
 
@@ -132,11 +126,11 @@ private fun StepCheckBox(
               contentColor = MaterialTheme.colorScheme.onPrimaryContainer
             ), modifier = Modifier.fillMaxWidth()
           ) {
-            IngredientList(
-              ingredients = ingredients,
-              servingsMultiplier = servingsMultiplier,
-              modifier = Modifier.padding(8.dp),
-            )
+//            IngredientList(
+//              ingredients = ingredients,
+//              servingsMultiplier = servingsMultiplier,
+//              modifier = Modifier.padding(8.dp),
+//            )
           }
         }
       }
@@ -173,47 +167,4 @@ private fun StepCheckBox(
       }
     }
     else null, modifier = modifier.clickable { onCheckedChange(!checked) })
-}
-
-@PreviewLightDark
-@Composable
-private fun Preview() {
-  CookbookTheme {
-    ChapterPage(
-      uiState = RecipeScreenViewModel.ChapterPageUiState(
-        chapter = ChapterWithStepsAndIngredients(
-          chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Chapter note."),
-          steps = listOf(
-            StepWithIngredients(
-              step = Step(
-                description = "Description", note = "Step note", timerMinutes = 20
-              ), ingredients = listOf(
-                Ingredient(name = "Ingredient 1", amount = 250f, unit = "g"),
-                Ingredient(name = "Ingredient 2", amount = 0f, unit = "")
-              )
-            ), StepWithIngredients(
-              step = Step(
-                description = "This is a step with a long description",
-                note = "Step note.",
-                timerMinutes = 20
-              ), ingredients = listOf(
-                Ingredient(name = "Ingredient 1", amount = 0f, unit = ""),
-              )
-            ), StepWithIngredients(
-              step = Step(
-                description = "This is a step with a long description", timerMinutes = 20
-              )
-            ), StepWithIngredients(
-              step = Step(
-                description = "Step with note, without ingredients", note = "Note"
-              )
-            ), StepWithIngredients(
-              step = Step(
-                description = "Short desc"
-              )
-            )
-          )
-        ), progress = listOf(false), chapterNote = "Chapter note"
-      ), servingsState = RecipeScreenViewModel.ServingsState(), onProgressChange = { _, _ -> })
-  }
 }

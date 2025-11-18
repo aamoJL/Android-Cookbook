@@ -27,7 +27,7 @@ class Init {
 
   @Test
   fun `form state`() {
-    val data = RecipeFormIngredientFields(name = "Name", amount = 3f, unit = "Unit")
+    val data = RecipeFormIngredientFields(name = "Name", amount = 3.0, unit = "Unit")
     val viewmodel = RecipeFormIngredientScreenViewModel(formData = data)
 
     assertEquals(data, viewmodel.getModel())

@@ -3,7 +3,9 @@ package com.aamo.cookbook.utility.extensions.general
 import java.math.BigDecimal
 import java.math.RoundingMode
 
-fun Float.toStringWithoutZero(
+val Double.Companion.Zero: Double get() = 0.0
+
+fun Double.toStringWithoutZero(
   decimalCount: Int = 2, roundingMode: RoundingMode = RoundingMode.HALF_UP
 ): String {
   // Without converting to big decimal the string could be converted
@@ -19,7 +21,7 @@ fun Float.toStringWithoutZero(
  *
  * @param roundToNearestFraction if true, the value will be rounded to the smaller fraction. Zero will be rounded to the first fraction
  */
-fun Float.toFractionFormattedString(roundToNearestFraction: Boolean = true): String {
+fun Double.toFractionFormattedString(roundToNearestFraction: Boolean = true): String {
   // Pair of decimal values and fraction chars
   val fractions = setOf(
     Pair(.25, '¼'),

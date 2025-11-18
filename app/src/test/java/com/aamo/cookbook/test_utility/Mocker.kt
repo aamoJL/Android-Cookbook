@@ -47,7 +47,7 @@ class Mocker {
                     Ingredient(
                       id = currentIngredientId,
                       name = "ingredient $ii",
-                      amount = ii.toFloat(),
+                      amount = ii.toDouble(),
                       unit = "unit",
                       stepId = currentStepId
                     ).also { currentIngredientId++ }

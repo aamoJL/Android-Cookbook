@@ -53,7 +53,7 @@ fun RecipeViewPagerIndicators(
       PageIndicatorItem(
         selected = pageIndex == 1,
         onClick = { onPageChange(1) },
-        contentDescription = stringResource(R.string.cd_info_page),
+        contentDescription = stringResource(R.string.cd_summary_page),
         color = MaterialTheme.colorScheme.tertiaryContainer,
         icon = painterResource(R.drawable.rounded_info_24),
       )
@@ -64,8 +64,7 @@ fun RecipeViewPagerIndicators(
           onClick = { onPageChange(chapterIndicatorIndex + 2) },
           isTargetPage = currentChapterIndex == chapterIndicatorIndex,
           contentDescription = stringResource(
-            R.string.cd_chapter_x_page,
-            chapterIndicatorIndex + 1
+            R.string.cd_chapter_x_page, chapterIndicatorIndex + 1
           ),
           color = when (currentChapterIndex) {
             chapterIndicatorIndex -> MaterialTheme.colorScheme.primaryContainer
