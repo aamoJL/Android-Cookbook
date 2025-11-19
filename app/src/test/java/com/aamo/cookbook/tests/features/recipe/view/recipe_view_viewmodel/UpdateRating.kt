@@ -1,14 +1,13 @@
 package com.aamo.cookbook.tests.features.recipe.view.recipe_view_viewmodel
 
-import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -17,36 +16,38 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class Init {
+class UpdateRating {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun `recipe set`() = runTest(UnconfinedTestDispatcher()) {
+  fun `updateRating called when changed`() = runTest(UnconfinedTestDispatcher()) {
+    var called: Int? = null
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
     val viewmodel = RecipeViewViewModel(
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
-      updateRating = { _, _ -> fail() },
+      updateRating = { value, _ -> called = value },
       updateThumbnail = { _, _ -> fail() },
       saveAsCopy = { fail() })
-    var actual: RecipeWithChaptersStepsAndIngredients? = null
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      viewmodel.recipe.collect { actual = it }
+      viewmodel.recipe.collect()
     }
 
-    assertNull(actual)
-
-    val recipe = RecipeMocker.getFullMocker().withIds().mock()
     dataFlow.emit(
-      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null)
+      RecipeViewRecipeModel(
+        recipe = RecipeMocker.getFullMocker().withIds().mock(), bookmark = null, rating = null
+      )
     )
 
-    assertEquals(recipe, actual)
+    val expected = 4
+    viewmodel.updateRating(expected)
+
+    assertEquals(expected, called)
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun `servings state set`() = runTest(UnconfinedTestDispatcher()) {
+  fun `updateRating not called when not changed`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
     val viewmodel = RecipeViewViewModel(
       fetchData = { dataFlow },
@@ -56,17 +57,15 @@ class Init {
       saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      viewmodel.recipe.collect { }
+      viewmodel.recipe.collect()
     }
 
-    val servings = 5
-    val recipe =
-      RecipeMocker.getFullMocker().modify { it.copy(servings = servings) }.withIds().mock()
     dataFlow.emit(
-      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null)
+      RecipeViewRecipeModel(
+        recipe = RecipeMocker.getFullMocker().withIds().mock(), bookmark = null, rating = null
+      )
     )
 
-    assertEquals(servings, viewmodel.servingsState.current.value)
-    assertEquals(servings, viewmodel.servingsState.baseline.value)
+    viewmodel.updateRating(null)
   }
 }

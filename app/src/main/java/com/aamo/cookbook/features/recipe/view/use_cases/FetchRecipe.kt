@@ -9,15 +9,17 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 
 fun fetchRecipe(
-  fetchRecipe: suspend () -> RecipeWithChaptersStepsAndIngredients,
+  fetchRecipe: () -> Flow<RecipeWithChaptersStepsAndIngredients?>,
   fetchBookmark: () -> Flow<RecipeBookmark?>,
   fetchRating: () -> Flow<RecipeRating?>
 ): Flow<RecipeViewRecipeModel> {
   return flow {
-    val recipe = fetchRecipe()
-
-    combine(fetchBookmark(), fetchRating()) { bookmark, rating ->
-      RecipeViewRecipeModel(recipe = recipe, bookmark = bookmark, rating = rating)
+    combine(fetchRecipe(), fetchBookmark(), fetchRating()) { recipe, bookmark, rating ->
+      RecipeViewRecipeModel(
+        recipe = recipe ?: throw Error("Failed to fetch recipe"),
+        bookmark = bookmark,
+        rating = rating
+      )
     }.collect {
       this.emit(it)
     }

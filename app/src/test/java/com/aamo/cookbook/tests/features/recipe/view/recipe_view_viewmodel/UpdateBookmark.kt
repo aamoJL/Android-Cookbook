@@ -5,6 +5,7 @@ import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
 import junit.framework.TestCase
+import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.collect
@@ -26,11 +27,15 @@ class UpdateBookmark {
     )
     var bookmark: RecipeBookmark? = null
     var value: Boolean? = null
-    val viewmodel =
-      RecipeViewViewModel(fetchData = { flow { emit(model) } }, updateBookmark = { v, b ->
+    val viewmodel = RecipeViewViewModel(
+      fetchData = { flow { emit(model) } },
+      updateBookmark = { v, b ->
         value = v
         bookmark = b
-      }, saveAsCopy = { TestCase.fail() })
+      },
+      updateRating = { _, _ -> fail() },
+      updateThumbnail = { _, _ -> fail() },
+      saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
@@ -53,11 +58,15 @@ class UpdateBookmark {
       )
       var bookmark: RecipeBookmark? = null
       var value: Boolean? = null
-      val viewmodel =
-        RecipeViewViewModel(fetchData = { flow { emit(model) } }, updateBookmark = { v, b ->
+      val viewmodel = RecipeViewViewModel(
+        fetchData = { flow { emit(model) } },
+        updateBookmark = { v, b ->
           value = v
           bookmark = b
-        }, saveAsCopy = { TestCase.fail() })
+        },
+        updateRating = { _, _ -> fail() },
+        updateThumbnail = { _, _ -> fail() },
+        saveAsCopy = { fail() })
 
       backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
         viewmodel.recipe.collect()
@@ -75,8 +84,10 @@ class UpdateBookmark {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
     val viewmodel = RecipeViewViewModel(
       fetchData = { dataFlow },
-      updateBookmark = { _, _ -> TestCase.fail() },
-      saveAsCopy = { TestCase.fail() })
+      updateBookmark = { _, _ -> fail() },
+      updateRating = { _, _ -> fail() },
+      updateThumbnail = { _, _ -> fail() },
+      saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()

@@ -108,11 +108,11 @@ fun RecipeScreenContent(
               .weight(1f, true)
           ) { pageIndex ->
             when (pageIndex) {
-              0 -> CompletedPage(
-                uiState = completedPageUiState,
-                onRatingChange = onRatingChange,
-                onThumbnailChange = onThumbnailChange
-              )
+//              0 -> CompletedPage(
+//                uiState = completedPageUiState,
+//                onRatingChange = onRatingChange,
+//                onThumbnailChange = onThumbnailChange
+//              )
 
 //              1 -> SummaryPage(
 //                uiState = summaryPageUiState,

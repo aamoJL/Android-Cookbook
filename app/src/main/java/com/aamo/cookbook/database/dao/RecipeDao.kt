@@ -64,6 +64,19 @@ interface RecipeDao {
   )
   suspend fun getCompleteRecipe(recipeId: Long): RecipeWithChaptersStepsAndIngredients?
 
+  @Transaction
+  @Query(
+    """
+    SELECT * FROM recipes
+    LEFT JOIN recipeChapters AS chapters ON chapters.recipeId = recipes.id
+    LEFT JOIN chapterSteps AS steps ON steps.chapterId = chapters.id
+    LEFT JOIN ingredients ON ingredients.stepId = steps.id
+    WHERE recipes.id = :recipeId
+    ORDER BY chapters.orderNumber, steps.orderNumber, ingredients.name
+  """
+  )
+  fun getCompleteRecipeFlow(recipeId: Long): Flow<RecipeWithChaptersStepsAndIngredients?>
+
   @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
   fun getRatingFlow(recipeId: Long): Flow<RecipeRating?>
 
@@ -142,5 +155,8 @@ interface RecipeDao {
 
   @Delete
   suspend fun delete(bookmark: RecipeBookmark): Int
+
+  @Delete
+  suspend fun delete(rating: RecipeRating): Int
   // endregion
 }
