@@ -16,12 +16,13 @@ import org.junit.Assert.assertEquals
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import com.aamo.cookbook.features.recipe.view.models.ServingsState as state
 
 @RunWith(RobolectricTestRunner::class)
 class ServingsState {
   @Test
   fun init() {
-    val servingsState = RecipeViewViewModel.ServingsState()
+    val servingsState = state()
 
     assertEquals(1, servingsState.current.value)
     assertEquals(1, servingsState.baseline.value)
@@ -49,9 +50,7 @@ class ServingsState {
     val servings = 5
     val recipe =
       RecipeMocker.getFullMocker().withIds().modify { it.copy(servings = servings) }.mock()
-    dataFlow.emit(
-      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null)
-    )
+    dataFlow.emit(RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null))
 
     assertEquals(servings, servingsState.baseline.value)
     assertEquals(servings, servingsState.current.value)
@@ -81,7 +80,7 @@ class ServingsState {
 
   @Test
   fun `baseline validation`() {
-    val servingsState = RecipeViewViewModel.ServingsState()
+    val servingsState = state()
 
     4.also { a ->
       servingsState.baseline.update(a)
@@ -106,7 +105,7 @@ class ServingsState {
 
   @Test
   fun `current validation`() {
-    val servingsState = RecipeViewViewModel.ServingsState()
+    val servingsState = state()
 
     4.also { a ->
       servingsState.current.update(a)
@@ -131,7 +130,7 @@ class ServingsState {
 
   @Test
   fun multiplier() {
-    val servingsState = RecipeViewViewModel.ServingsState()
+    val servingsState = state()
 
     servingsState.baseline.update(5)
     servingsState.current.update(3)

@@ -36,6 +36,8 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewPagerIndicators
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewTopBar
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
+import com.aamo.cookbook.features.recipe.view.models.ServingsState
+import com.aamo.cookbook.features.recipe.view.screens.RecipeChapterScreen
 import com.aamo.cookbook.features.recipe.view.screens.RecipeSettingsScreen
 import com.aamo.cookbook.features.recipe.view.screens.RecipeSummaryScreen
 import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
@@ -45,23 +47,25 @@ import com.aamo.cookbook.features.recipe.view.use_cases.updateRating
 import com.aamo.cookbook.features.recipe.view.use_cases.updateThumbnail
 import com.aamo.cookbook.service.CalculatorService
 import com.aamo.cookbook.service.IOService
+import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.service.TimerService
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.letIf
-import com.aamo.cookbook.utility.viewmodels.ViewModelState
+import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.onStart
+import kotlinx.coroutines.flow.runningReduce
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.transform
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlin.time.Duration
 
 @Serializable
 data class RecipeViewPage(val id: Long)
@@ -73,57 +77,57 @@ class RecipeViewViewModel(
   private val updateThumbnail: suspend (String, Recipe) -> Unit,
   private val saveAsCopy: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
-  class ServingsState {
-    val baseline = ViewModelState(1).validation { it > 0 }
-    val current = ViewModelState(1).validation { it > 0 }
-
-    val multiplier: Double get() = current.value.toDouble() / baseline.value.toDouble()
-  }
-
-  private val _recipe = MutableStateFlow<RecipeWithChaptersStepsAndIngredients?>(null)
-  val recipe = _recipe.onStart { loadData(dataFlow = fetchData) }.onEach { value ->
-    if (value != null && servingsState.baseline.value != value.recipe.servings) {
+  val recipe = fetchData().transform { emit(it.recipe) }.runningReduce { previous, new ->
+    previous.copy(recipe = previous.recipe.copy(thumbnailUri = new.recipe.thumbnailUri))
+  }.onEach { value ->
+    if (servingsState.baseline.value != value.recipe.servings) {
       servingsState.baseline.update(value.recipe.servings)
       servingsState.current.update(value.recipe.servings)
     }
+    if (progressState.values.isEmpty()) {
+      progressState.add(*value.chapters.map { c -> c.steps.map { false } }.toTypedArray())
+    }
   }.stateIn(
-    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = _recipe.value
+    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
 
-  private val _bookmark = MutableStateFlow<RecipeBookmark?>(null)
-  val bookmark = _bookmark.asStateFlow()
+  val bookmark = fetchData().onStart { recipe.first() }.transform { emit(it.bookmark) }.stateIn(
+    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
+  )
 
-  private val _rating = MutableStateFlow<RecipeRating?>(null)
-  val rating = _rating.asStateFlow()
+  val rating = fetchData().onStart { recipe.first() }.transform { emit(it.rating) }.stateIn(
+    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
+  )
 
   val servingsState = ServingsState()
+  val progressState = ViewModelStateList<List<Boolean>>()
 
   fun updateBookmark(value: Boolean) {
-    if (value && _bookmark.value != null) return
-    if (!value && _bookmark.value == null) return
-
-    val recipe = _recipe.value ?: return
-    val bookmark = _bookmark.value ?: RecipeBookmark(recipeId = recipe.recipe.id)
+    if (value && bookmark.value != null) return
+    if (!value && bookmark.value == null) return
 
     viewModelScope.launch {
+      val recipe = recipe.value ?: return@launch
+      val bookmark = bookmark.value ?: RecipeBookmark(recipeId = recipe.recipe.id)
+
       runCatching { updateBookmark(value, bookmark) }
     }
   }
 
   fun updateRating(value: Int?) {
-    if (_rating.value?.ratingOutOfFive == value) return
+    if (rating.value?.ratingOutOfFive == value) return
 
-    val recipe = _recipe.value ?: return
-    val rating =
-      _rating.value ?: RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = value ?: 0)
 
     viewModelScope.launch {
+      val recipe = recipe.value ?: return@launch
+      val rating = rating.value ?: RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 0)
+
       runCatching { updateRating(value, rating) }
     }
   }
 
   fun updateThumbnail(value: String) {
-    val recipe = _recipe.value ?: return
+    val recipe = recipe.value ?: return
 
     if (recipe.recipe.thumbnailUri == value) return
 
@@ -133,25 +137,10 @@ class RecipeViewViewModel(
   }
 
   fun saveAsCopy() {
-    val recipe = _recipe.value ?: return
+    val recipe = recipe.value ?: return
 
     viewModelScope.launch {
       runCatching { saveAsCopy(recipe) }
-    }
-  }
-
-  private fun loadData(dataFlow: () -> Flow<RecipeViewRecipeModel>) {
-    viewModelScope.launch {
-      runCatching {
-        dataFlow().collect { value ->
-          _recipe.update { old ->
-            old?.copy(recipe = old.recipe.copy(thumbnailUri = value.recipe.recipe.thumbnailUri))
-              ?: value.recipe
-          }
-          _bookmark.update { value.bookmark }
-          _rating.update { value.rating }
-        }
-      }
     }
   }
 }
@@ -160,6 +149,7 @@ fun NavGraphBuilder.recipeViewPage(
   onOpenRecipeForm: (id: Long) -> Unit, onSnackbar: (SnackbarProperties) -> Unit, onBack: () -> Unit
 ) {
   composable<RecipeViewPage> { navStack ->
+    val context = LocalContext.current
     val (id) = navStack.toRoute<RecipeViewPage>()
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipeViewViewModel = viewModel(factory = viewModelFactory {
@@ -182,7 +172,11 @@ fun NavGraphBuilder.recipeViewPage(
             addRating = { dao.upsert(it) },
             removeRating = { dao.delete(it) })
         }, updateThumbnail = { value, recipe ->
-          updateThumbnail(recipe = recipe, value = value) { dao.upsert(it) }
+          updateThumbnail(recipe = recipe, value = value, updateRecipe = {
+            dao.upsert(it)
+          }, removeThumbnail = { fileName ->
+            PhotoService(context = context).delete(fileName)
+          })
         }, saveAsCopy = { original ->
           copyAndSaveRecipe(recipe = original) { copy ->
             dao.upsert(copy).also { id -> if (id > 0L) onOpenRecipeForm(id) }
@@ -190,7 +184,6 @@ fun NavGraphBuilder.recipeViewPage(
         })
       }
     })
-    val context = LocalContext.current
     val appNotFoundSnackbarMessage = stringResource(R.string.snackbar_app_not_found)
 
     val recipe by viewmodel.recipe.collectAsStateWithLifecycle()
@@ -203,6 +196,7 @@ fun NavGraphBuilder.recipeViewPage(
         bookmark = bookmark,
         rating = rating,
         servingsState = viewmodel.servingsState,
+        progressState = viewmodel.progressState,
         onEdit = { onOpenRecipeForm(id) },
         onCopy = { viewmodel.saveAsCopy() },
         onUpdateBookmark = { viewmodel.updateBookmark(it) },
@@ -224,6 +218,11 @@ fun NavGraphBuilder.recipeViewPage(
             onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
           })
         },
+        onStartTimer = { title, duration ->
+          TimerService.start(context = context, title = title, duration = duration, onError = {
+            onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
+          })
+        },
         onBack = onBack
       )
     }
@@ -235,7 +234,8 @@ fun RecipeViewPageContent(
   recipe: RecipeWithChaptersStepsAndIngredients,
   bookmark: RecipeBookmark?,
   rating: RecipeRating?,
-  servingsState: RecipeViewViewModel.ServingsState,
+  servingsState: ServingsState,
+  progressState: ViewModelStateList<List<Boolean>>,
   onEdit: () -> Unit,
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
@@ -243,6 +243,7 @@ fun RecipeViewPageContent(
   onUpdateThumbnail: (Uri) -> Unit,
   onOpenCalculator: () -> Unit,
   onOpenTimer: () -> Unit,
+  onStartTimer: (title: String, duration: Duration) -> Unit,
   onBack: () -> Unit,
 ) {
   val scope = rememberCoroutineScope()
@@ -290,14 +291,27 @@ fun RecipeViewPageContent(
                 servingsMultiplier = servingsState.multiplier,
                 onServingsChange = { servingsState.current.update(it) })
 
-              else -> TODO("Chapter page")
+              else -> {
+                val chapterIndex = pageIndex - 2
+
+                if (chapterIndex in 0..<recipe.chapters.size) {
+                  RecipeChapterScreen(
+                    chapter = recipe.chapters.elementAt(chapterIndex),
+                    servingsMultiplier = servingsState.multiplier,
+                    progress = progressState.values.elementAt(chapterIndex),
+                    onProgressChange = { progressState.replaceAt(index = chapterIndex, item = it) },
+                    onStartTimer = onStartTimer
+                  )
+                }
+              }
             }
           }
         }
         HorizontalDivider()
-        // TODO: progress
         RecipeViewPagerIndicators(
-          pageIndex = pagerState.currentPage, recipeProgress = emptyList(), onPageChange = {
+          pageIndex = pagerState.currentPage,
+          recipeProgress = progressState.values.map { list -> list.all { it } },
+          onPageChange = {
             scope.launch { pagerState.animateScrollToPage(it) }
           })
       }
@@ -314,7 +328,8 @@ private fun RecipeViewPageContentPreview() {
         recipe = RecipeWithChaptersStepsAndIngredients(recipe = Recipe(), chapters = emptyList()),
         bookmark = null,
         rating = null,
-        servingsState = RecipeViewViewModel.ServingsState(),
+        servingsState = ServingsState(),
+        progressState = ViewModelStateList(),
         onEdit = {},
         onCopy = {},
         onUpdateBookmark = {},
@@ -322,6 +337,7 @@ private fun RecipeViewPageContentPreview() {
         onUpdateThumbnail = {},
         onOpenCalculator = {},
         onOpenTimer = {},
+        onStartTimer = { _, _ -> },
         onBack = {})
     }
   }

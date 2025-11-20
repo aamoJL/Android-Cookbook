@@ -6,6 +6,10 @@ suspend fun updateThumbnail(
   recipe: Recipe,
   value: String,
   updateRecipe: suspend (Recipe) -> Unit,
+  removeThumbnail: (String) -> Unit,
 ) {
+  if (recipe.thumbnailUri.isNotEmpty()) {
+    removeThumbnail(recipe.thumbnailUri)
+  }
   updateRecipe(recipe.copy(thumbnailUri = value))
 }

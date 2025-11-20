@@ -38,7 +38,7 @@ class UpdateBookmark {
       saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      viewmodel.recipe.collect()
+      viewmodel.bookmark.collect()
     }
 
     viewmodel.updateBookmark(true)
@@ -69,7 +69,7 @@ class UpdateBookmark {
         saveAsCopy = { fail() })
 
       backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-        viewmodel.recipe.collect()
+        viewmodel.bookmark.collect()
       }
 
       viewmodel.updateBookmark(false)
@@ -90,7 +90,7 @@ class UpdateBookmark {
       saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      viewmodel.recipe.collect()
+      viewmodel.bookmark.collect()
     }
 
     dataFlow.emit(

@@ -32,11 +32,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
 import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.ui.components.inputs.FiveStarRating
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 
 @Composable
 fun RecipeSettingsScreen(
@@ -122,7 +124,9 @@ private fun StarRating(
 ) {
   Card {
     Column(
-      horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(8.dp)
+      horizontalAlignment = Alignment.CenterHorizontally,
+      verticalArrangement = Arrangement.spacedBy(4.dp),
+      modifier = Modifier.padding(8.dp)
     ) {
       Text(text = stringResource(R.string.text_rate_the_recipe))
       FiveStarRating(value = rating, onValueChange = onRatingChange)
@@ -155,4 +159,14 @@ private fun CameraButton(
       contentDescription = stringResource(R.string.description_take_a_photo)
     )
   }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+  RecipeSettingsScreen(
+    ratingOutOfFive = 3,
+    thumbnailUri = String.EMPTY,
+    onRatingChange = {},
+    onThumbnailChange = {})
 }

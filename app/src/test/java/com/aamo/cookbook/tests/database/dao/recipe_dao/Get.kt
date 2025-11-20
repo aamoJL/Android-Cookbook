@@ -1,42 +1,19 @@
 package com.aamo.cookbook.tests.database.dao.recipe_dao
 
-import androidx.room.Room
-import androidx.test.core.app.ApplicationProvider
-import com.aamo.cookbook.database.RecipeDatabase
-import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
 import junit.framework.TestCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
-import java.io.IOException
 
 @RunWith(RobolectricTestRunner::class)
-class Get {
-  private lateinit var database: RecipeDatabase
-  private lateinit var dao: RecipeDao
-
-  @Before
-  fun setupDatabase() {
-    database = Room.inMemoryDatabaseBuilder(
-      context = ApplicationProvider.getApplicationContext(), klass = RecipeDatabase::class.java
-    ).build()
-    dao = database.recipeDao()
-  }
-
-  @After
-  @Throws(IOException::class)
-  fun closeDatabase() {
-    database.close()
-  }
-
+class Get : RecipeDatabaseTest() {
   @Test
   fun getRecipe() = runTest {
     val recipe = RecipeMocker().mock()

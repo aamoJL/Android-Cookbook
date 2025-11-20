@@ -14,7 +14,7 @@ class PhotoService(val context: Context) {
   }
 
   fun delete(fileName: String): Boolean {
-    TODO("Photo service delete")
+    return IOService(context).deleteExternalFile(Environment.DIRECTORY_PICTURES, fileName)
   }
 
   fun getTempFileUri(): Uri {

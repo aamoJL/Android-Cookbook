@@ -1,6 +1,5 @@
 package com.aamo.cookbook.features.recipe.form
 
-import android.os.Environment
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
@@ -25,7 +24,7 @@ import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.toDao
-import com.aamo.cookbook.service.IOService
+import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.onNotNull
@@ -82,8 +81,8 @@ fun NavGraphBuilder.recipeFormPage(
           deleteData = {
             deleteRecipe(
               recipe = dao.getRecipe(recipeId) ?: throw Exception("Failed to fetch data"),
-              deleteThumbnail = { uri ->
-                IOService(localContext).deleteExternalFile(Environment.DIRECTORY_PICTURES, uri)
+              deleteThumbnail = { fileName ->
+                PhotoService(localContext).delete(fileName)
               }) { recipe -> dao.delete(recipe) > 0 }
           },
           saveData = { entity ->
