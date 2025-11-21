@@ -154,34 +154,27 @@ fun NavGraphBuilder.recipeViewPage(
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipeViewViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipeViewViewModel(fetchData = {
-          fetchRecipe(
-            fetchRecipe = { dao.getCompleteRecipeFlow(recipeId = id) },
-            fetchBookmark = { dao.getBookmarkFlow(recipeId = id) },
-            fetchRating = { dao.getRatingFlow(recipeId = id) })
-        }, updateBookmark = { value, bookmark ->
-          updateBookmark(
-            bookmark = bookmark,
-            value = value,
-            addBookmark = { dao.upsert(it) },
-            removeBookmark = { dao.delete(it) })
-        }, updateRating = { value, rating ->
-          updateRating(
-            rating = rating,
-            value = value,
-            addRating = { dao.upsert(it) },
-            removeRating = { dao.delete(it) })
-        }, updateThumbnail = { value, recipe ->
-          updateThumbnail(recipe = recipe, value = value, updateRecipe = {
-            dao.upsert(it)
-          }, removeThumbnail = { fileName ->
-            PhotoService(context = context).delete(fileName)
+        RecipeViewViewModel(
+          fetchData = { fetchRecipe(dao = dao, recipeId = id) },
+          updateBookmark = { value, bookmark ->
+            updateBookmark(dao = dao, bookmark = bookmark, value = value)
+          },
+          updateRating = { value, rating ->
+            updateRating(dao = dao, rating = rating, value = value)
+          },
+          updateThumbnail = { value, recipe ->
+            updateThumbnail(
+              dao = dao,
+              photoService = PhotoService(context = context),
+              recipe = recipe,
+              value = value
+            )
+          },
+          saveAsCopy = { recipe ->
+            copyAndSaveRecipe(dao = dao, recipe = recipe).also { id ->
+              if (id > 0L) onOpenRecipeForm(id)
+            }
           })
-        }, saveAsCopy = { original ->
-          copyAndSaveRecipe(recipe = original) { copy ->
-            dao.upsert(copy).also { id -> if (id > 0L) onOpenRecipeForm(id) }
-          }
-        })
       }
     })
     val appNotFoundSnackbarMessage = stringResource(R.string.snackbar_app_not_found)
@@ -209,17 +202,17 @@ fun NavGraphBuilder.recipeViewPage(
           )
         },
         onOpenCalculator = {
-          CalculatorService.open(context = context, onError = {
+          CalculatorService(context = context).open(onError = {
             onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
           })
         },
         onOpenTimer = {
-          TimerService.open(context = context, onError = {
+          TimerService(context = context).open(onError = {
             onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
           })
         },
         onStartTimer = { title, duration ->
-          TimerService.start(context = context, title = title, duration = duration, onError = {
+          TimerService(context = context).start(title = title, duration = duration, onError = {
             onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
           })
         },

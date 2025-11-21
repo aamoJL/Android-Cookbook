@@ -83,10 +83,7 @@ fun NavGraphBuilder.recipeSearchScreen(
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipeSearchScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipeSearchScreenViewModel(
-          fetchData = {
-            fetchRecipes { dao.getRecipesWithBookmarkAndRatingFlow() }
-          })
+        RecipeSearchScreenViewModel(fetchData = { fetchRecipes(dao) })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()

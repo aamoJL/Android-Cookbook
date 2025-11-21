@@ -1,63 +1,74 @@
 package com.aamo.cookbook.tests.features.recipe.form.use_cases
 
-import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
+import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
-import com.aamo.cookbook.features.recipe.form.use_cases.toDao
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
+import org.junit.Assert.assertEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class SaveRecipe {
-  @Test
-  fun `saveData called with correct model`() = runTest {
-    val model = RecipeMocker.getFullMocker().mock()
-    var actual: RecipeWithChaptersStepsAndIngredients? = null
-
-    saveRecipe(recipe = model) { actual = it; 1 }
-
-    Assert.assertEquals(model, actual)
-  }
-
+@RunWith(RobolectricTestRunner::class)
+class SaveRecipe : RecipeDatabaseTest() {
   @Test
   fun `returns correct id`() = runTest {
-    val expected = 0L to 1L
-    val model = RecipeMocker.getFullMocker().modify { it.copy(id = expected.first) }.mock()
+    val model = RecipeMocker.getFullMocker().mock()
+    val actual = saveRecipe(
+      dao = dao,
+      id = model.recipe.id,
+      thumbnailUri = model.recipe.thumbnailUri,
+      fields = RecipeFormInfoFields.fromDao(model)
+    )
 
-    val actual = saveRecipe(recipe = model) { expected.second }
-
-    Assert.assertEquals(expected.second, actual)
+    Assert.assertEquals(1L, actual)
   }
 
   @Test
-  fun `RecipeFormInfoFields toDao returns correct model`() {
-    val model = RecipeMocker.getFullMocker().modify { it.copy(id = 4L) }.mock()
+  fun `saves correct model`() = runTest {
+    val thumbnail = "123.jpg"
+    val mocker = RecipeMocker.getFullMocker().modify { it.copy(thumbnailUri = thumbnail) }
+    val model = mocker.mock()
+    val actual = saveRecipe(
+      dao = dao,
+      id = model.recipe.id,
+      thumbnailUri = model.recipe.thumbnailUri,
+      fields = RecipeFormInfoFields.fromDao(model)
+    ).let { id ->
+      dao.getCompleteRecipe(id)
+    }
 
-    val info = RecipeFormInfoFields(
-      name = model.recipe.name,
-      category = model.recipe.category,
-      subCategory = model.recipe.subCategory,
-      servings = model.recipe.servings,
-      note = model.recipe.note,
-      chapters = model.chapters.map { c ->
-        RecipeFormChapterFields(
-          name = c.chapter.name, note = c.chapter.note, steps = c.steps.map { s ->
-            RecipeFormStepFields(
-              description = s.step.description,
-              timerMinutes = s.step.timerMinutes,
-              note = s.step.note,
-              ingredients = s.ingredients.map { i ->
-                RecipeFormIngredientFields(name = i.name, amount = i.amount, unit = i.unit)
-              })
-          })
-      })
+    checkNotNull(actual)
+    assertEquals(mocker.withIds().mock(), actual)
+  }
 
-    val actual = info.toDao(id = model.recipe.id, thumbnailUri = model.recipe.thumbnailUri)
+  @Test
+  fun `updates model`() = runTest {
+    val mocker = RecipeMocker.getFullMocker()
+    val id = dao.upsert(mocker.mock())
+    val fields = dao.getCompleteRecipe(id)?.let {
+      RecipeFormInfoFields.fromDao(it)
+    }
 
-    Assert.assertEquals(model, actual)
+    checkNotNull(fields)
+
+    val thumbnail = "123.jpg"
+    val expected = mocker.withIds(
+      chapterId = (fields.chapters.size + 1).toLong(),
+      stepId = (fields.chapters.flatMap { it.steps }.size + 1).toLong(),
+      ingredientId = (fields.chapters.flatMap { c -> c.steps }
+        .flatMap { it.ingredients }.size + 1).toLong()
+    ).modify { it.copy(thumbnailUri = thumbnail) }.mock()
+    val actual =
+      saveRecipe(dao = dao, id = id, thumbnailUri = thumbnail, fields = fields).let { id ->
+        dao.getCompleteRecipe(id)
+      }
+
+    checkNotNull(actual)
+    assertEquals(id, actual.recipe.id)
+    assertEquals(expected, actual)
   }
 }

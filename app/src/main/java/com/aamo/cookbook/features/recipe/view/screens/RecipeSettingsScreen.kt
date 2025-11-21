@@ -149,7 +149,7 @@ private fun CameraButton(
   IconButton(
     onClick = {
       runCatching {
-        fileUri = PhotoService(context = context).getTempFileUri()
+        fileUri = PhotoService(context = context).getTemp()
         cameraLauncher.launch(fileUri)
       }
     }, modifier = modifier

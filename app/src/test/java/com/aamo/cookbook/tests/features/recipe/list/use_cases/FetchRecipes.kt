@@ -1,41 +1,92 @@
 package com.aamo.cookbook.tests.features.recipe.list.use_cases
 
-import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
+import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class FetchRecipes {
+@RunWith(RobolectricTestRunner::class)
+class FetchRecipes : RecipeDatabaseTest() {
   @Test
-  fun `returns correct models`() {
-    val recipes = listOf(
-      RecipeWithBookmarkAndRating(recipe = Recipe(id = 1), bookmark = null, rating = null),
-      RecipeWithBookmarkAndRating(
-        recipe = Recipe(id = 2), bookmark = RecipeBookmark(recipeId = 2), rating = null
-      ),
-      RecipeWithBookmarkAndRating(
-        recipe = Recipe(id = 3),
-        bookmark = null,
-        rating = RecipeRating(ratingOutOfFive = 4, recipeId = 3)
-      ),
-      RecipeWithBookmarkAndRating(
-        recipe = Recipe(id = 4),
-        bookmark = RecipeBookmark(recipeId = 4),
-        rating = RecipeRating(ratingOutOfFive = 2, recipeId = 4)
-      ),
-    )
+  fun `returns correct models`() = runTest {
+    val recipes: MutableList<RecipeWithBookmarkAndRating> = mutableListOf()
 
-    val models = runBlocking { fetchRecipes { flow { emit(recipes) } }.first() }
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = null, rating = null)
+    })
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      val bookmark = RecipeBookmark(recipeId = rId).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = null)
+    })
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      val rating =
+        RecipeRating(recipeId = rId, ratingOutOfFive = 4).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = null, rating = rating)
+    })
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      val bookmark = RecipeBookmark(recipeId = rId).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = null)
+      val rating =
+        RecipeRating(recipeId = rId, ratingOutOfFive = 2).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = rating)
+    })
+
+    val actual = fetchRecipes(dao).first()
 
     assertEquals(recipes.map {
       RecipeListRecipeModel(it.recipe, it.rating?.ratingOutOfFive, it.bookmark != null)
-    }, models)
+    }, actual)
+  }
+
+  @Test
+  fun `returns correct models with category`() = runTest {
+    val recipes: MutableList<RecipeWithBookmarkAndRating> = mutableListOf()
+
+    val category = "123"
+
+    recipes.add(
+      dao.upsert(RecipeMocker().modify { it.copy(category = category) }.mock()).let { rId ->
+        val recipe = dao.getRecipe(rId)!!
+        RecipeWithBookmarkAndRating(recipe = recipe, bookmark = null, rating = null)
+      })
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      val bookmark = RecipeBookmark(recipeId = rId).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = null)
+    })
+    recipes.add(dao.upsert(RecipeMocker().mock()).let { rId ->
+      val recipe = dao.getRecipe(rId)!!
+      val rating =
+        RecipeRating(recipeId = rId, ratingOutOfFive = 4).let { it.copy(id = dao.upsert(it)) }
+      RecipeWithBookmarkAndRating(recipe = recipe, bookmark = null, rating = rating)
+    })
+    recipes.add(
+      dao.upsert(RecipeMocker().modify { it.copy(category = category) }.mock()).let { rId ->
+        val recipe = dao.getRecipe(rId)!!
+        val bookmark = RecipeBookmark(recipeId = rId).let { it.copy(id = dao.upsert(it)) }
+        RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = null)
+        val rating =
+          RecipeRating(recipeId = rId, ratingOutOfFive = 2).let { it.copy(id = dao.upsert(it)) }
+        RecipeWithBookmarkAndRating(recipe = recipe, bookmark = bookmark, rating = rating)
+      })
+
+    val actual = fetchRecipes(dao, category = category).first()
+
+    assertEquals(recipes.filter { it.recipe.category == category }.map {
+      RecipeListRecipeModel(it.recipe, it.rating?.ratingOutOfFive, it.bookmark != null)
+    }, actual)
   }
 }

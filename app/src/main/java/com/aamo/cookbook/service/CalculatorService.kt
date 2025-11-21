@@ -5,8 +5,8 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 
-data object CalculatorService {
-  fun open(context: Context, onError: ((ActivityNotFoundException) -> Unit)? = null) {
+class CalculatorService(val context: Context) {
+  fun open(onError: ((ActivityNotFoundException) -> Unit)? = null) {
     try {
       context.startActivity(
         Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_CALCULATOR)

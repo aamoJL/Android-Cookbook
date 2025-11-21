@@ -48,11 +48,13 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
@@ -136,7 +138,7 @@ class RecipeFormInfoScreenViewModel(
 
 @Composable
 fun RecipeFormInfoScreen(
-  formData: RecipeFormInfoFields,
+  recipe: RecipeWithChaptersStepsAndIngredients,
   onSubmit: (RecipeFormInfoFields) -> Unit,
   onDeleteRecipe: () -> Unit,
   onBack: () -> Unit,
@@ -145,7 +147,7 @@ fun RecipeFormInfoScreen(
   val viewmodel: RecipeFormInfoScreenViewModel = viewModel(factory = viewModelFactory {
     initializer {
       RecipeFormInfoScreenViewModel(
-        formData = formData,
+        formData = RecipeFormInfoFields.fromDao(model = recipe),
         fetchCategorySuggestions = { dao.getCategoriesMap() },
       )
     }

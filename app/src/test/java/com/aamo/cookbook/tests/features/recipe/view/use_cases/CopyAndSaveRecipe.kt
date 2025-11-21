@@ -1,26 +1,40 @@
 package com.aamo.cookbook.tests.features.recipe.view.use_cases
 
-import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.utility.extensions.general.EMPTY
-import junit.framework.TestCase
+import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert
+import org.junit.Assert.assertNotEquals
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class CopyAndSaveRecipe {
+@RunWith(RobolectricTestRunner::class)
+class CopyAndSaveRecipe : RecipeDatabaseTest() {
   @Test
-  fun `returns correct model`() = runTest {
-    val recipe = RecipeMocker.getFullMocker().withIds().mock()
-    var actual: RecipeWithChaptersStepsAndIngredients? = null
+  fun `returns correct id`() = runTest {
+    val actual = copyAndSaveRecipe(dao = dao, recipe = RecipeMocker.getFullMocker().mock())
 
-    Assert.assertNotEquals(0L, recipe.recipe.id)
+    assertEquals(1L, actual)
+  }
 
-    copyAndSaveRecipe(recipe = recipe, saveCopy = { actual = it })
-    val expected =
-      RecipeMocker.getFullMocker().modify { it.copy(thumbnailUri = String.EMPTY) }.mock()
+  @Test
+  fun `saves model as copy`() = runTest {
+    val unexpected = RecipeMocker.getFullMocker().mock().let {
+      dao.upsert(it).let { id ->
+        dao.getCompleteRecipe(id)
+      }
+    }
 
-    TestCase.assertEquals(expected, actual)
+    checkNotNull(unexpected)
+
+    val actual = copyAndSaveRecipe(dao = dao, recipe = unexpected).let {
+      dao.getCompleteRecipe(it)
+    }
+
+    checkNotNull(actual)
+
+    assertNotEquals(unexpected, actual)
   }
 }

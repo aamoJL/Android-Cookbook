@@ -37,20 +37,22 @@ class RecipeMocker(seed: Int = 0) {
     return this
   }
 
-  fun withIds(): RecipeMocker {
-    modify { it.copy(id = 1) }
+  fun withIds(
+    recipeId: Long = 1L, chapterId: Long = 1L, stepId: Long = 1L, ingredientId: Long = 1L
+  ): RecipeMocker {
+    modify { it.copy(id = recipeId) }
 
     chapters.forEachIndexed { i, c ->
-      c.modify { it.copy(id = i + 1L) }
+      c.modify { it.copy(id = i + chapterId) }
     }
 
     chapters.flatMap { it.steps }.also { steps ->
       steps.forEachIndexed { i, s ->
-        s.modify { it.copy(id = i + 1L) }
+        s.modify { it.copy(id = i + stepId) }
       }
 
       steps.flatMap { it.ingredients }.forEachIndexed { i, ing ->
-        ing.modify { it.copy(id = i + 1L) }
+        ing.modify { it.copy(id = i + ingredientId) }
       }
     }
 

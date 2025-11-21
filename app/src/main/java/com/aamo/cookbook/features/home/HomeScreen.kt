@@ -87,7 +87,7 @@ fun NavGraphBuilder.homeScreen(
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: HomeScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow { dao.getCategoriesFlow() } })
+        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow(dao) })
       }
     })
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
@@ -239,13 +239,10 @@ private fun CategoryList(
   ) {
     items(categories) { category ->
       ElevatedButton(
-        shape = RoundedCornerShape(16.dp),
-        colors = ButtonDefaults.elevatedButtonColors(
+        shape = RoundedCornerShape(16.dp), colors = ButtonDefaults.elevatedButtonColors(
           containerColor = MaterialTheme.colorScheme.primary,
           contentColor = MaterialTheme.colorScheme.onPrimary
-        ),
-        onClick = { onSelect(category) },
-        modifier = Modifier.fillMaxWidth()
+        ), onClick = { onSelect(category) }, modifier = Modifier.fillMaxWidth()
       ) {
         Text(
           text = category,

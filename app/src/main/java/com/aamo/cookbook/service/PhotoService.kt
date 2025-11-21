@@ -8,16 +8,22 @@ import com.aamo.cookbook.BuildConfig
 import java.io.File
 import java.util.Objects
 
-class PhotoService(val context: Context) {
-  fun get(fileName: String): Uri {
+interface IPhotoService {
+  fun get(fileName: String): Uri
+  fun delete(fileName: String): Boolean
+  fun getTemp(): Uri
+}
+
+class PhotoService(val context: Context) : IPhotoService {
+  override fun get(fileName: String): Uri {
     return IOService(context = context).getExternalFileUri(Environment.DIRECTORY_PICTURES, fileName)
   }
 
-  fun delete(fileName: String): Boolean {
+  override fun delete(fileName: String): Boolean {
     return IOService(context).deleteExternalFile(Environment.DIRECTORY_PICTURES, fileName)
   }
 
-  fun getTempFileUri(): Uri {
+  override fun getTemp(): Uri {
     val storageDir: File? = IOService(context).getExternalFileDir(Environment.DIRECTORY_PICTURES)
 
     return FileProvider.getUriForFile(

@@ -94,9 +94,7 @@ fun NavGraphBuilder.recipesByCategoryScreen(
     val viewmodel: RecipesByCategoryScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipesByCategoryScreenViewModel(
-          fetchData = {
-            fetchRecipes { dao.getRecipesWithBookmarkAndRatingFlow(category = category) }
-          })
+          fetchData = { fetchRecipes(dao = dao, category = category) })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()

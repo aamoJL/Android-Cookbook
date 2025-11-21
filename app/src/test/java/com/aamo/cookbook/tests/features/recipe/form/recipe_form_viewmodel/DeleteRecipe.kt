@@ -1,51 +1,81 @@
 package com.aamo.cookbook.tests.features.recipe.form.recipe_form_viewmodel
 
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import kotlinx.coroutines.flow.drop
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import org.junit.Assert.assertFalse
+import kotlinx.coroutines.test.setMain
+import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
+import org.junit.Before
 import org.junit.Test
 
 class DeleteRecipe {
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @Before
+  fun setup() {
+    Dispatchers.setMain(UnconfinedTestDispatcher())
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  @After
+  fun cleanup() {
+    Dispatchers.resetMain()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun `deleteData called`() = runTest {
+  fun `deleteData called`() = runTest(UnconfinedTestDispatcher()) {
     var called = false
-    RecipeFormViewModel(
+    val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { null },
-      deleteData = { called = true; true }).also {
-      it.recipe.drop(1).first()
-    }.deleteRecipe()
+      saveData = { _, _, _ -> fail() },
+      deleteData = { called = true })
+
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+      viewmodel.recipe.collect()
+    }
+
+    viewmodel.deleteRecipe()
 
     assertTrue(called)
   }
 
+  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `returns correct value from deleteData`() = runTest {
-    var value = false
+    val recipe = RecipeMocker.getFullMocker().mock()
+    var value: RecipeWithChaptersStepsAndIngredients? = null
     val viewmodel = RecipeFormViewModel(
-      fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { null },
-      deleteData = { value }).also {
-      it.recipe.drop(1).first()
-    }
+      fetchData = { recipe },
+      saveData = { _, _, _ -> fail() },
+      deleteData = { value = it })
 
-    assertFalse(viewmodel.deleteRecipe())
-    value = true
-    assertTrue(viewmodel.deleteRecipe())
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+      viewmodel.recipe.collect()
+    }
+    
+    viewmodel.deleteRecipe()
+
+    assertEquals(recipe, value)
   }
 
   @Test
-  fun `returns false when error on deleteData`() = runTest {
+  fun `does not crash when error`() = runTest {
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { null },
+      saveData = { _, _, _ -> fail() },
       deleteData = { error(String.EMPTY) })
 
-    assertFalse(viewmodel.deleteRecipe())
+    viewmodel.deleteRecipe()
   }
 }

@@ -106,33 +106,35 @@ interface RecipeDao {
   suspend fun upsert(recipe: RecipeWithChaptersStepsAndIngredients): Long {
     val existingRecipe = getCompleteRecipe(recipe.recipe.id)
 
-    // Delete old chapters. Steps and ingredients will be also deleted
-    existingRecipe?.also {
-      delete(*it.chapters.map { c -> c.chapter }.toTypedArray())
-    }
-
     // Upsert function will return -1 if the function updates an existing item,
     //    so the value have to be set to the recipes id instead on the returned value
     val recipeId = upsert(recipe.recipe).let { if (it == -1L) recipe.recipe.id else it }
 
-    // Update chapter order numbers and ids
-    recipe.chapters.forEachIndexed { ci, chapter ->
-      val chapterId = upsert(
-        chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)
-      ).let { if (it == -1L) chapter.chapter.id else it }
+    if (existingRecipe?.chapters != recipe.chapters) {
+      // Delete old chapters. Steps and ingredients will also be deleted
+      existingRecipe?.also {
+        delete(*it.chapters.map { c -> c.chapter }.toTypedArray())
+      }
 
-      // Update step order numbers and ids
-      chapter.steps.forEachIndexed { si, s ->
-        s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
-          .also { step ->
-            val stepId = upsert(
-              step.step.copy(orderNumber = si + 1, chapterId = chapterId)
-            ).let { if (it == -1L) step.step.id else it }
+      // Update chapter order numbers and ids
+      recipe.chapters.forEachIndexed { ci, chapter ->
+        val chapterId = upsert(
+          chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)
+        ).let { if (it == -1L) chapter.chapter.id else it }
 
-            // Update ingredient ids
-            upsert(*step.ingredients.map { ingredient -> ingredient.copy(stepId = stepId) }
-              .toTypedArray())
-          }
+        // Update step order numbers and ids
+        chapter.steps.forEachIndexed { si, s ->
+          s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
+            .also { step ->
+              val stepId = upsert(
+                step.step.copy(orderNumber = si + 1, chapterId = chapterId)
+              ).let { if (it == -1L) step.step.id else it }
+
+              // Update ingredient ids
+              upsert(*step.ingredients.map { ingredient -> ingredient.copy(stepId = stepId) }
+                .toTypedArray())
+            }
+        }
       }
     }
 

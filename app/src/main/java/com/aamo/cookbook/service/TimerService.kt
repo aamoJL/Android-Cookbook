@@ -6,8 +6,8 @@ import android.content.Intent
 import android.provider.AlarmClock
 import kotlin.time.Duration
 
-data object TimerService {
-  fun open(context: Context, onError: ((ActivityNotFoundException) -> Unit)?) {
+class TimerService(val context: Context) {
+  fun open(onError: ((ActivityNotFoundException) -> Unit)?) {
     try {
       context.startActivity(Intent(AlarmClock.ACTION_SHOW_TIMERS))
     }
@@ -16,12 +16,14 @@ data object TimerService {
     }
   }
 
-  fun start(context: Context, title: String, duration: Duration, onError: ((ActivityNotFoundException) -> Unit)?) {
+  fun start(title: String, duration: Duration, onError: ((ActivityNotFoundException) -> Unit)?) {
     try {
-      context.startActivity(Intent(AlarmClock.ACTION_SET_TIMER)
-        .putExtra(AlarmClock.EXTRA_LENGTH, duration.inWholeSeconds)
-        .putExtra(AlarmClock.EXTRA_MESSAGE, title)
-        .putExtra(AlarmClock.EXTRA_SKIP_UI, false))
+      context.startActivity(
+        Intent(AlarmClock.ACTION_SET_TIMER).putExtra(
+            AlarmClock.EXTRA_LENGTH,
+            duration.inWholeSeconds
+          ).putExtra(AlarmClock.EXTRA_MESSAGE, title).putExtra(AlarmClock.EXTRA_SKIP_UI, false)
+      )
     }
     catch (e: ActivityNotFoundException) {
       onError?.invoke(e)

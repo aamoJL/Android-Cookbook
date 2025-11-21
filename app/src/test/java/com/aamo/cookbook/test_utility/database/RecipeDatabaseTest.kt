@@ -13,7 +13,7 @@ abstract class RecipeDatabaseTest {
   protected lateinit var dao: RecipeDao
 
   @Before
-  fun setupDatabase() {
+  open fun setup() {
     database = Room.inMemoryDatabaseBuilder(
       context = ApplicationProvider.getApplicationContext(), klass = RecipeDatabase::class.java
     ).build()
@@ -22,7 +22,7 @@ abstract class RecipeDatabaseTest {
 
   @After
   @Throws(IOException::class)
-  fun closeDatabase() {
+  open fun cleanup() {
     database.close()
   }
 }

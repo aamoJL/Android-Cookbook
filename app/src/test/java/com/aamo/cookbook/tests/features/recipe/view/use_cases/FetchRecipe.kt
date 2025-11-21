@@ -2,50 +2,61 @@ package com.aamo.cookbook.tests.features.recipe.view.use_cases
 
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
-import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.features.recipe.view.use_cases.fetchRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
 import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertNotNull
-import junit.framework.TestCase.assertNull
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
+import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.test.setMain
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
 
-class FetchRecipe {
+@RunWith(RobolectricTestRunner::class)
+class FetchRecipe : RecipeDatabaseTest() {
+  @OptIn(ExperimentalCoroutinesApi::class)
+  override fun setup() {
+    Dispatchers.setMain(UnconfinedTestDispatcher())
+    super.setup()
+  }
+
+  @OptIn(ExperimentalCoroutinesApi::class)
+  override fun cleanup() {
+    Dispatchers.resetMain()
+    super.cleanup()
+  }
+
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `returns correct model`() = runTest(UnconfinedTestDispatcher()) {
-    val recipe = RecipeMocker.getFullMocker().mock()
-    val bookmark = RecipeBookmark(recipeId = recipe.recipe.id)
-    val rating = RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 4)
-
-    val recipeFlow = MutableSharedFlow<RecipeWithChaptersStepsAndIngredients?>()
-    val bookmarkFlow = MutableSharedFlow<RecipeBookmark?>()
-    val ratingFlow = MutableSharedFlow<RecipeRating?>()
-    val useCaseFlow = fetchRecipe(
-      fetchRecipe = { recipeFlow },
-      fetchBookmark = { bookmarkFlow },
-      fetchRating = { ratingFlow })
-    var actual: RecipeViewRecipeModel? = null
-
-    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      useCaseFlow.collect { actual = it }
+    val recipe = RecipeMocker.getFullMocker().mock().let {
+      dao.upsert(it).let { id ->
+        dao.getCompleteRecipe(id)
+      }
     }
 
-    assertNull(actual)
+    checkNotNull(recipe)
 
-    recipeFlow.emit(recipe)
+    val bookmark = RecipeBookmark(recipeId = recipe.recipe.id).let {
+      dao.upsert(it).let { id ->
+        dao.getBookmarkFlow(id).first()
+      }
+    }
+    val rating = RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 4).let {
+      dao.upsert(it).let { id ->
+        dao.getRatingFlow(id).first()
+      }
+    }
 
-    bookmarkFlow.emit(bookmark)
-    assertNull(actual) // Should be emitted only when bookmark and rating has been both emitted
-
-    ratingFlow.emit(rating)
-
+    val actual = fetchRecipe(dao = dao, recipeId = recipe.recipe.id).first()
     val expected = RecipeViewRecipeModel(recipe = recipe, bookmark = bookmark, rating = rating)
     assertEquals(expected, actual)
   }
@@ -53,35 +64,46 @@ class FetchRecipe {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `returns updated model`() = runTest(UnconfinedTestDispatcher()) {
-    val recipe = RecipeMocker.getFullMocker().mock()
-
-    val recipeFlow = MutableSharedFlow<RecipeWithChaptersStepsAndIngredients?>()
-    val bookmarkFlow = MutableSharedFlow<RecipeBookmark?>()
-    val ratingFlow = MutableSharedFlow<RecipeRating?>()
-    val useCaseFlow = fetchRecipe(
-      fetchRecipe = { recipeFlow },
-      fetchBookmark = { bookmarkFlow },
-      fetchRating = { ratingFlow })
-    var actual: RecipeViewRecipeModel? = null
-
-    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
-      useCaseFlow.collect { actual = it }
+    val recipe = RecipeMocker.getFullMocker().mock().let {
+      dao.upsert(it).let { id ->
+        dao.getCompleteRecipe(id)
+      }
     }
 
-    recipeFlow.emit(recipe)
-    bookmarkFlow.emit(RecipeBookmark(recipeId = recipe.recipe.id))
-    ratingFlow.emit(RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 4))
+    checkNotNull(recipe)
 
-    assertNotNull(actual)
+    val bookmark = RecipeBookmark(recipeId = recipe.recipe.id).let {
+      dao.upsert(it).let { id ->
+        dao.getBookmarkFlow(id).first()
+      }
+    }
+    val rating = RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 4).let {
+      dao.upsert(it).let { id ->
+        dao.getRatingFlow(id).first()
+      }
+    }
 
-    bookmarkFlow.emit(null)
+    val actualFlow = fetchRecipe(dao = dao, recipeId = recipe.recipe.id)
 
-    assertNotNull(actual)
-    assertNull(actual?.bookmark)
+    backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
+      actualFlow.collect()
+    }
 
-    ratingFlow.emit(null)
+    assertEquals(
+      RecipeViewRecipeModel(recipe = recipe, bookmark = bookmark, rating = rating),
+      actualFlow.first()
+    )
 
-    assertNotNull(actual)
-    assertNull(actual?.rating)
+    dao.delete(bookmark!!)
+
+    assertEquals(
+      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = rating), actualFlow.first()
+    )
+
+    dao.delete(rating!!)
+
+    assertEquals(
+      RecipeViewRecipeModel(recipe = recipe, bookmark = null, rating = null), actualFlow.first()
+    )
   }
 }

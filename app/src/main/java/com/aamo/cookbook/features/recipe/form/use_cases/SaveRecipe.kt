@@ -1,5 +1,6 @@
 package com.aamo.cookbook.features.recipe.form.use_cases
 
+import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Ingredient
@@ -11,13 +12,15 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.utility.extensions.general.Zero
 
 suspend fun saveRecipe(
-  recipe: RecipeWithChaptersStepsAndIngredients,
-  saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Long?
-): Long? {
-  return saveData(recipe)
+  dao: RecipeDao,
+  id: Long,
+  thumbnailUri: String,
+  fields: RecipeFormInfoFields,
+): Long {
+  return dao.upsert(fields.toDao(id = id, thumbnailUri = thumbnailUri))
 }
 
-fun RecipeFormInfoFields.toDao(
+private fun RecipeFormInfoFields.toDao(
   id: Long, thumbnailUri: String
 ): RecipeWithChaptersStepsAndIngredients {
   return RecipeWithChaptersStepsAndIngredients(
