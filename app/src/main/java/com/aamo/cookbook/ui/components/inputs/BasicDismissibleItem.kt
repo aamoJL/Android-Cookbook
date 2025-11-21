@@ -65,7 +65,7 @@ private fun DismissBackground(dismissState: SwipeToDismissBoxState) {
   ) {
     if (direction == SwipeToDismissBoxValue.StartToEnd) Icon(
       painter = painterResource(R.drawable.rounded_delete_sweep_24),
-      contentDescription = stringResource(R.string.description_delete_list_item)
+      contentDescription = stringResource(R.string.cd_delete_list_item)
     )
   }
 }

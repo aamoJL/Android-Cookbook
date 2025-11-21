@@ -81,13 +81,12 @@ class SearchTextField {
       SearchTextField(value = value, onValueChange = {})
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_clear))
       .assertDoesNotExist()
 
     value = "New Value"
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
-      .assertExists()
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_clear)).assertExists()
   }
 
   @Test
@@ -99,8 +98,7 @@ class SearchTextField {
 
     Assert.assertNotEquals(String.EMPTY, value)
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.description_clear))
-      .performClick()
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_clear)).performClick()
 
     Assert.assertEquals(String.EMPTY, value)
   }

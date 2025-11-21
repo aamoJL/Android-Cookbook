@@ -100,7 +100,7 @@ private fun ThumbnailPicker(
         ) {
           Icon(
             painter = painterResource(R.drawable.rounded_delete_24),
-            contentDescription = stringResource(R.string.description_delete_photo),
+            contentDescription = stringResource(R.string.cd_delete_photo),
           )
         }
       }
@@ -156,7 +156,7 @@ private fun CameraButton(
   ) {
     Icon(
       painter = painterResource(R.drawable.baseline_add_a_photo_24),
-      contentDescription = stringResource(R.string.description_take_a_photo)
+      contentDescription = stringResource(R.string.cd_take_a_photo)
     )
   }
 }

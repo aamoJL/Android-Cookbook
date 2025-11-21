@@ -33,7 +33,7 @@ fun FiveStarRating(
         Icon(
           painter = painterResource(R.drawable.round_star_rate_24),
           contentDescription = stringResource(
-            R.string.description_star_rating_star_icon_selected, starValue
+            R.string.cd_star_rating_star_icon_selected, starValue
           ),
           tint = color,
           modifier = Modifier.fillMaxSize()
@@ -47,7 +47,7 @@ fun FiveStarRating(
         Icon(
           painter = painterResource(R.drawable.round_star_outline_24),
           contentDescription = stringResource(
-            R.string.description_star_rating_star_icon_unselected, starValue
+            R.string.cd_star_rating_star_icon_unselected, starValue
           ),
           tint = color,
           modifier = Modifier.fillMaxSize(.8f)

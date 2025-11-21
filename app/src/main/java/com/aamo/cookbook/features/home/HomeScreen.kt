@@ -180,7 +180,7 @@ private fun MainButtons(
     MainButton(
       onClick = onSearch,
       icon = painterResource(R.drawable.rounded_search_24),
-      text = stringResource(R.string.description_search),
+      text = stringResource(R.string.cd_search),
       modifier = Modifier
         .weight(1f)
         .fillMaxHeight()
@@ -188,7 +188,7 @@ private fun MainButtons(
     MainButton(
       onClick = onBookmarks,
       icon = painterResource(R.drawable.rounded_bookmark_24),
-      text = stringResource(R.string.button_text_bookmarks),
+      text = stringResource(R.string.btn_bookmarks),
       modifier = Modifier
         .weight(1f)
         .fillMaxHeight()
@@ -196,7 +196,7 @@ private fun MainButtons(
     MainButton(
       onClick = onNewRecipe,
       icon = painterResource(R.drawable.rounded_add_24),
-      text = stringResource(R.string.button_text_new),
+      text = stringResource(R.string.btn_new),
       modifier = Modifier
         .weight(1f)
         .fillMaxHeight()

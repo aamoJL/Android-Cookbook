@@ -46,19 +46,19 @@ class FiveStarRating {
     }
 
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_selected, 1)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_selected, 1)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_selected, 2)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_selected, 2)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 3)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 3)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 4)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 4)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 5)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 5)
     ).assertExists()
   }
 
@@ -72,19 +72,19 @@ class FiveStarRating {
     }
 
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 1)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 1)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 2)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 2)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 3)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 3)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 4)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 4)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 5)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 5)
     ).assertExists()
   }
 
@@ -100,7 +100,7 @@ class FiveStarRating {
     }
 
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 3)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 3)
     ).performClick()
 
     assert(called)
@@ -118,23 +118,23 @@ class FiveStarRating {
     }
 
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 3)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 3)
     ).performClick()
 
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_selected, 1)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_selected, 1)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_selected, 2)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_selected, 2)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_selected, 3)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_selected, 3)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 4)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 4)
     ).assertExists()
     rule.onNodeWithContentDescription(
-      rule.activity.getString(R.string.description_star_rating_star_icon_unselected, 5)
+      rule.activity.getString(R.string.cd_star_rating_star_icon_unselected, 5)
     ).assertExists()
   }
 }

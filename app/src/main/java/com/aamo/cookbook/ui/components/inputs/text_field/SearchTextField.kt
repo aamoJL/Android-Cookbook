@@ -41,7 +41,7 @@ fun SearchTextField(
         IconButton(onClick = { onValueChange(String.EMPTY) }) {
           Icon(
             painter = painterResource(R.drawable.round_clear_24),
-            contentDescription = stringResource(R.string.description_clear)
+            contentDescription = stringResource(R.string.cd_clear)
           )
         }
       }

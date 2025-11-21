@@ -147,7 +147,7 @@ private fun StepCheckBox(
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
               painter = painterResource(id = R.drawable.baseline_alarm_24),
-              contentDescription = stringResource(R.string.description_set_timer)
+              contentDescription = stringResource(R.string.cd_set_timer)
             )
             Text(text = stringResource(R.string.abbreviation_minutes, timerDuration.inWholeMinutes))
           }

@@ -50,7 +50,7 @@ fun ListTitleBar(title: String, onAddClick: () -> Unit, modifier: Modifier = Mod
         onClick = { onAddClick() }) {
         Icon(
           painter = painterResource(R.drawable.rounded_add_24),
-          contentDescription = stringResource(R.string.description_form_add_new_item),
+          contentDescription = stringResource(R.string.cd_form_add_new_item),
           tint = MaterialTheme.colorScheme.primary
         )
       }

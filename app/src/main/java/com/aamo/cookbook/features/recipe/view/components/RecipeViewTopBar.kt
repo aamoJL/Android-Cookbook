@@ -88,8 +88,8 @@ fun RecipeViewTopBar(
             )
           }
         }, text = {
-          if (isBookmarked) Text(text = stringResource(R.string.button_text_remove_from_favorites))
-          else Text(text = stringResource(R.string.button_text_add_to_favorites))
+          if (isBookmarked) Text(text = stringResource(R.string.btn_remove_from_favorites))
+          else Text(text = stringResource(R.string.btn_add_to_favorites))
         }, onClick = {
           openMenuDropDown = false
           onUpdateBookmark(!isBookmarked)

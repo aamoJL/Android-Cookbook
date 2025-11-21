@@ -71,7 +71,7 @@ fun CountInput(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               painter = painterResource(id = R.drawable.baseline_remove_24),
-              contentDescription = stringResource(R.string.description_decrease_value),
+              contentDescription = stringResource(R.string.cd_decrease_value),
             )
           }
         }
@@ -94,7 +94,7 @@ fun CountInput(
           Box(contentAlignment = Alignment.Center) {
             Icon(
               painter = painterResource(R.drawable.rounded_add_24),
-              contentDescription = stringResource(R.string.description_increase_value),
+              contentDescription = stringResource(R.string.cd_increase_value),
             )
           }
         }

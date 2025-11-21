@@ -213,7 +213,7 @@ private fun StepForm(
   formState: RecipeFormStepScreenViewModel.FormState,
   orderNumber: Int,
 ) {
-  FormBase(title = stringResource(R.string.form_title_step, orderNumber)) {
+  FormBase(title = stringResource(R.string.title_step, orderNumber)) {
     TextField(
       value = formState.description.value,
       onValueChange = { formState.description.update(it) },
@@ -263,7 +263,7 @@ private fun StepFormIngredientList(
   onSwap: (from: Int, to: Int) -> Unit,
 ) {
   FormList(
-    title = stringResource(R.string.form_list_title_ingredients),
+    title = stringResource(R.string.title_ingredients),
     onAddClick = onNewIngredient,
   ) {
     LazyColumn {

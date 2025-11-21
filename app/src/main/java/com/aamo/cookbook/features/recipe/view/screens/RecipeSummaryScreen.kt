@@ -75,7 +75,7 @@ fun RecipeSummaryScreen(
       ) {
         Icon(
           painter = painterResource(R.drawable.baseline_local_dining_24),
-          contentDescription = stringResource(R.string.description_servings),
+          contentDescription = stringResource(R.string.cd_servings),
         )
         CountInput(
           value = servings, onValueChange = onServingsChange, minValue = 1

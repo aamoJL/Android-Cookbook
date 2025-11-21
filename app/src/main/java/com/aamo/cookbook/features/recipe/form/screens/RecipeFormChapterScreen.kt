@@ -208,7 +208,7 @@ fun RecipeFormChapterScreenContent(
 
 @Composable
 fun ChapterForm(formState: RecipeFormChapterScreenViewModel.FormState, chapterNumber: Int) {
-  FormBase(title = stringResource(R.string.form_title_chapter, chapterNumber)) {
+  FormBase(title = stringResource(R.string.title_chapter, chapterNumber)) {
     TextField(
       value = formState.name.value,
       onValueChange = { formState.name.update(it) },
@@ -249,9 +249,7 @@ private fun StepList(
   onDeleteStep: (RecipeFormStepFields) -> Unit,
 ) {
   FormList(
-    title = stringResource(R.string.form_list_title_steps),
-    onAddClick = onNewStep,
-    modifier = modifier
+    title = stringResource(R.string.title_steps), onAddClick = onNewStep, modifier = modifier
   ) {
     LazyColumn {
       itemsIndexed(

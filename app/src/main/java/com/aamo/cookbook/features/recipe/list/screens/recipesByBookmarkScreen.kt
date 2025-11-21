@@ -130,13 +130,13 @@ private fun RecipesByBookmarkScreenContent(
         IconButton(onClick = onSearch) {
           Icon(
             painter = painterResource(R.drawable.rounded_search_24),
-            contentDescription = stringResource(R.string.description_search)
+            contentDescription = stringResource(R.string.cd_search)
           )
         }
         IconButton(onClick = onAdd) {
           Icon(
             painter = painterResource(R.drawable.rounded_add_24),
-            contentDescription = stringResource(R.string.description_add_new_recipe)
+            contentDescription = stringResource(R.string.cd_add_new_recipe)
           )
         }
       }, onBack = onBack
@@ -150,7 +150,7 @@ private fun RecipesByBookmarkScreenContent(
               painterResource(R.drawable.baseline_filter_alt_off_24)
             }, ifFalse = {
               painterResource(R.drawable.baseline_filter_list_alt_24)
-            }), contentDescription = stringResource(R.string.description_filter)
+            }), contentDescription = stringResource(R.string.cd_filter)
           )
         }
         DropdownMenu(
@@ -167,7 +167,7 @@ private fun RecipesByBookmarkScreenContent(
             HorizontalDivider()
             DropdownMenuItem(text = {
               Text(
-                text = stringResource(R.string.button_text_clear),
+                text = stringResource(R.string.btn_text_clear),
                 color = MaterialTheme.colorScheme.error
               )
             }, onClick = {
