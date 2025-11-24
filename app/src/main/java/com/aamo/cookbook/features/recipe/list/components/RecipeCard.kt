@@ -153,7 +153,7 @@ private fun StarRating(rating: Int, modifier: Modifier = Modifier) {
   Row(modifier = modifier) {
     repeat(stars) {
       Icon(
-        painter = painterResource(R.drawable.round_star_outline_24),
+        painter = painterResource(R.drawable.round_star_rate_24),
         contentDescription = null,
         tint = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.size(16.dp)

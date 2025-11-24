@@ -3,7 +3,7 @@
     <string name="app_name" translatable="false">Cookbook</string>
     <string name="recipe_name_copy">%1$s - copy</string>
     <string name="text_other_category">Other</string>
-    <string name="screen_title_categories">Choose a category</string>
+    <string name="text_choose_category">Choose a category</string>
     <string name="screen_title_error_recipes_not_found">No recipes found</string>
     <string name="screen_title_new_chapter">Add a new chapter</string>
     <string name="screen_title_existing_chapter">Edit chapter</string>
@@ -86,4 +86,5 @@
     <string name="cd_summary_page">Summary page</string>
     <string name="cd_chapter_x_page">Chapter %1$d page</string>
     <string name="snackbar_app_not_found">App was not found.</string>
+    <string name="btn_search">Search</string>
 </resources>

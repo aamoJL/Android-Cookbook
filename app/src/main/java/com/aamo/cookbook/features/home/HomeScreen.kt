@@ -25,8 +25,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
@@ -51,30 +49,17 @@ import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.Serializable
 
 @Serializable
 object HomeScreen
 
 class HomeScreenViewModel(fetchCategories: () -> Flow<List<String>>) : ViewModel() {
-  private val _categories = MutableStateFlow<List<String>>(emptyList())
-  val categories = _categories.asStateFlow()
-
-  var isLoading by mutableStateOf(true)
-    private set
-
-  init {
-    viewModelScope.launch {
-      fetchCategories().collect { result ->
-        isLoading = false
-        _categories.update { result }
-      }
-    }
-  }
+  val categories = fetchCategories().stateIn(
+    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
+  )
 }
 
 fun NavGraphBuilder.homeScreen(
@@ -92,9 +77,9 @@ fun NavGraphBuilder.homeScreen(
     })
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
 
-    LoadingScreen(loading = viewmodel.isLoading) {
+    LoadingScreen(loading = categories == null) {
       HomeScreenContent(
-        categories = categories,
+        categories = checkNotNull(categories),
         onSearch = onOpenSearch,
         onNewRecipe = onOpenRecipeForm,
         onBookmarks = onOpenBookmarks,
@@ -140,7 +125,7 @@ private fun HomeScreenContent(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 36.dp)
           )
           Text(
-            text = stringResource(R.string.screen_title_categories),
+            text = stringResource(R.string.text_choose_category),
             fontFamily = Handwritten,
             style = MaterialTheme.typography.headlineMedium
           )
@@ -180,7 +165,7 @@ private fun MainButtons(
     MainButton(
       onClick = onSearch,
       icon = painterResource(R.drawable.rounded_search_24),
-      text = stringResource(R.string.cd_search),
+      text = stringResource(R.string.btn_search),
       modifier = Modifier
         .weight(1f)
         .fillMaxHeight()

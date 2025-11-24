@@ -2,7 +2,7 @@
 <resources>
     <string name="recipe_name_copy">%1$s - kopio</string>
     <string name="text_other_category">Muut</string>
-    <string name="screen_title_categories">Valitse kategoria</string>
+    <string name="text_choose_category">Valitse kategoria</string>
     <string name="screen_title_error_recipes_not_found">Reseptejä ei löytynyt</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
@@ -85,4 +85,5 @@
     <string name="cd_summary_page">Tiedot-sivu</string>
     <string name="cd_chapter_x_page">Kappale %1$d sivu</string>
     <string name="snackbar_app_not_found">Sovellusta ei löytynyt.</string>
+    <string name="btn_search">Haku</string>
 </resources>
