@@ -36,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -48,6 +49,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.components.FormList
@@ -470,4 +472,14 @@ private fun ChapterListIngredientList(
       }
     }
   }
+}
+
+@Preview
+@Composable
+private fun Preview() {
+  RecipeFormInfoScreen(
+    recipe = RecipeWithChaptersStepsAndIngredients(recipe = Recipe()),
+    onSubmit = {},
+    onDeleteRecipe = {},
+    onBack = {})
 }

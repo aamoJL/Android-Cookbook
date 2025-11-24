@@ -28,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -200,4 +201,23 @@ private fun RecipesByBookmarkScreenContent(
       }
     }
   }
+}
+
+@Suppress("HardCodedStringLiteral")
+@Preview
+@Composable
+private fun Preview() {
+  RecipesByBookmarkScreenContent(
+    recipes = listOf(
+    RecipeListRecipeModel(
+      recipe = Recipe(name = "Recipe 1"), isBookmarked = true, rating = 3
+    )
+  ),
+    categories = listOf("Cat 1"),
+    filtered = false,
+    onFilterChange = {},
+    onRecipeSelected = {},
+    onBack = {},
+    onSearch = {},
+    onAdd = {})
 }

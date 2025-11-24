@@ -1,6 +1,5 @@
 package com.aamo.cookbook.ui_tests.features.home.home_page
 
-import androidx.annotation.StringRes
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
@@ -16,26 +15,10 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class Init : PageTest() {
-  private fun getString(@StringRes id: Int): String {
-    return rule.activity.getString(id)
-  }
-
+class Navigation : PageTest() {
   @Before
   fun setup() = runTest {
     waitForLoading()
-  }
-
-  @Test
-  fun `categories visibility`() = runTest {
-    val category = "123"
-
-    rule.onNodeWithText(category).assertDoesNotExist()
-
-    RecipeDatabase.getDatabase(rule.activity).recipeDao().upsert(Recipe(category = "123"))
-
-    rule.onNodeWithText(category).waitForDisplayed()
-    rule.onNodeWithText(category).assertExists()
   }
 
   @Test
@@ -68,7 +51,8 @@ class Init : PageTest() {
   fun `to recipesByCategoryScreen`() = runTest {
     val category = "123"
 
-    RecipeDatabase.getDatabase(rule.activity).recipeDao().upsert(Recipe(category = "123"))
+    RecipeDatabase.getDatabase(rule.activity.applicationContext).recipeDao()
+      .upsert(Recipe(category = "123"))
 
     rule.onNodeWithText(category).waitForDisplayed().also {
       it.performClick()

@@ -5,6 +5,7 @@ import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.aamo.cookbook.BuildConfig
 import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.Ingredient
@@ -36,8 +37,15 @@ abstract class RecipeDatabase : RoomDatabase() {
 
     fun getDatabase(context: Context): RecipeDatabase {
       return Instance ?: synchronized(this) {
-        Room.databaseBuilder(context, RecipeDatabase::class.java, DATABASE_NAME)
-      }.build().also { Instance = it }
+        val builder = Room.databaseBuilder(context, RecipeDatabase::class.java, DATABASE_NAME)
+
+        // Allow main thread queries on debug build so unit tests can clear the database tables after execution
+        if (BuildConfig.DEBUG) {
+          builder.allowMainThreadQueries()
+        }
+
+        builder.build()
+      }.also { Instance = it }
     }
   }
 }
