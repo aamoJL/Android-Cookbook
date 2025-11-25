@@ -2,6 +2,7 @@ package com.aamo.cookbook.features.recipe.form.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ElevatedCard
@@ -23,38 +24,26 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 @Composable
 fun FormList(
   title: String,
-  onAddClick: () -> Unit,
   modifier: Modifier = Modifier,
+  actions: @Composable (RowScope.() -> Unit) = {},
   content: @Composable () -> Unit
 ) {
   ElevatedCard(modifier = modifier) {
-    ListTitleBar(title = title, onAddClick = onAddClick)
-    content()
-  }
-}
-
-@Composable
-fun ListTitleBar(title: String, onAddClick: () -> Unit, modifier: Modifier = Modifier) {
-  Surface(color = MaterialTheme.colorScheme.surfaceVariant, modifier = modifier.fillMaxWidth()) {
-    Row(
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.SpaceBetween,
-      modifier = Modifier
-        .padding(vertical = 8.dp, horizontal = 16.dp)
-        .fillMaxWidth()
-    ) {
-      Text(
-        text = title, style = MaterialTheme.typography.titleLarge
-      )
-      OutlinedIconButton(
-        onClick = { onAddClick() }) {
-        Icon(
-          painter = painterResource(R.drawable.rounded_add_24),
-          contentDescription = stringResource(R.string.cd_form_add_new_item),
-          tint = MaterialTheme.colorScheme.primary
-        )
+    Surface(color = MaterialTheme.colorScheme.surfaceVariant, modifier = modifier.fillMaxWidth()) {
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+        modifier = Modifier
+          .padding(vertical = 8.dp, horizontal = 16.dp)
+          .fillMaxWidth()
+      ) {
+        Text(text = title, style = MaterialTheme.typography.titleLarge)
+        Row {
+          actions()
+        }
       }
     }
+    content()
   }
 }
 
@@ -63,7 +52,15 @@ fun ListTitleBar(title: String, onAddClick: () -> Unit, modifier: Modifier = Mod
 @Composable
 private fun Preview() {
   CookbookTheme {
-    FormList(title = "Title", onAddClick = {}) {
+    FormList(title = "Title", actions = {
+      OutlinedIconButton(onClick = {}) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_form_add_new_item),
+          tint = MaterialTheme.colorScheme.primary
+        )
+      }
+    }) {
       Text(text = "Content")
     }
   }

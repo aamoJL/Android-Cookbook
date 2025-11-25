@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui_tests.features.recipe.list.recipes_by_category_screen
+package com.aamo.cookbook.ui_tests.features.recipe.list.recipe_list_pages.recipes_by_category_screen
 
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.hasText

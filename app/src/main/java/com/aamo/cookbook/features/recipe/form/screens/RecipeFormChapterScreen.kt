@@ -18,6 +18,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -28,12 +29,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,6 +61,7 @@ import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -249,7 +253,15 @@ private fun StepList(
   onDeleteStep: (RecipeFormStepFields) -> Unit,
 ) {
   FormList(
-    title = stringResource(R.string.title_steps), onAddClick = onNewStep, modifier = modifier
+    title = stringResource(R.string.title_steps), actions = {
+      OutlinedIconButton(onClick = onNewStep) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_form_add_new_item),
+          tint = MaterialTheme.colorScheme.primary
+        )
+      }
+    }, modifier = modifier
   ) {
     LazyColumn {
       itemsIndexed(
@@ -268,7 +280,9 @@ private fun StepList(
               { onSwap(index, index + 1) }
             }
             else null,
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier
+              .fillMaxWidth()
+              .testTag(UITag.OPTION.name))
 
           if (index != steps.size - 1) {
             HorizontalDivider()
@@ -296,7 +310,9 @@ fun StepListItem(
         style = MaterialTheme.typography.titleMedium,
       )
     }, supportingContent = {
-      StepListIngredientList(ingredients = step.ingredients, modifier = Modifier.padding(16.dp))
+      if (step.ingredients.isNotEmpty()) {
+        StepListIngredientList(ingredients = step.ingredients, modifier = Modifier.padding(16.dp))
+      }
     }, overlineContent = step.timerMinutes?.let {
       {
         Text(
@@ -349,4 +365,24 @@ private fun StepListIngredientList(
       }
     }
   }
+}
+
+@Suppress("HardCodedStringLiteral")
+@Preview
+@Composable
+private fun Preview() {
+  RecipeFormChapterScreenContent(
+    formState = RecipeFormChapterScreenViewModel.FormState(
+    formData = RecipeFormChapterFields(
+      steps = listOf(RecipeFormStepFields(description = "Desc"))
+    )
+  ),
+    isNew = true,
+    chapterIndex = 0,
+    onNewStep = {},
+    onEditStep = {},
+    onDeleteStep = {},
+    onSwapSteps = { _, _ -> },
+    onSubmit = {},
+    onBack = {})
 }

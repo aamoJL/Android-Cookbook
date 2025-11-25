@@ -19,6 +19,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
@@ -49,6 +51,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.form.components.FormBase
@@ -68,6 +72,7 @@ import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -357,7 +362,15 @@ private fun ChapterList(
   modifier: Modifier = Modifier,
 ) {
   FormList(
-    title = stringResource(R.string.title_chapters), onAddClick = onNewChapter, modifier = modifier
+    title = stringResource(R.string.title_chapters), actions = {
+      OutlinedIconButton(onClick = onNewChapter) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_form_add_new_item),
+          tint = MaterialTheme.colorScheme.primary
+        )
+      }
+    }, modifier = modifier
   ) {
     LazyColumn {
       itemsIndexed(items = chapters, key = { _, c -> c.uuid }) { index, chapter ->
@@ -375,7 +388,9 @@ private fun ChapterList(
               { onSwap(index, index + 1) }
             }
             else null,
-            modifier = Modifier.fillMaxWidth())
+            modifier = Modifier
+              .fillMaxWidth()
+              .testTag(UITag.OPTION.name))
 
           if (index != chapters.size - 1) {
             HorizontalDivider()
@@ -398,32 +413,32 @@ private fun ChapterListItem(
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
     ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
-      Text(
-        text = "${chapterNumber}. ${chapter.name}", style = MaterialTheme.typography.titleMedium
-      )
+      Text(text = "${chapterNumber}. ${chapter.name}", style = MaterialTheme.typography.titleMedium)
     }, supportingContent = {
-      Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-          .padding(start = 16.dp, top = 4.dp)
-          .width(IntrinsicSize.Max)
-      ) {
-        chapter.steps.forEachIndexed { index, step ->
-          Column {
-            if (step.timerMinutes != null) {
+      if (chapter.steps.isNotEmpty()) {
+        Column(
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+          modifier = Modifier
+            .padding(start = 16.dp, top = 4.dp)
+            .width(IntrinsicSize.Max)
+        ) {
+          chapter.steps.forEachIndexed { index, step ->
+            Column {
+              if (step.timerMinutes != null) {
+                Text(
+                  text = stringResource(
+                    R.string.abbreviation_minutes, step.timerMinutes.toString()
+                  ), style = MaterialTheme.typography.labelSmall
+                )
+              }
               Text(
-                text = stringResource(
-                  R.string.abbreviation_minutes, step.timerMinutes.toString()
-                ), style = MaterialTheme.typography.labelSmall
+                text = "${index + 1}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
+                style = MaterialTheme.typography.bodyMedium
+              )
+              ChapterListIngredientList(
+                ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
               )
             }
-            Text(
-              text = "${index + 1}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
-              style = MaterialTheme.typography.bodyMedium
-            )
-            ChapterListIngredientList(
-              ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
-            )
           }
         }
       }
@@ -474,12 +489,14 @@ private fun ChapterListIngredientList(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @Preview
 @Composable
 private fun Preview() {
   RecipeFormInfoScreen(
-    recipe = RecipeWithChaptersStepsAndIngredients(recipe = Recipe()),
-    onSubmit = {},
-    onDeleteRecipe = {},
-    onBack = {})
+    recipe = RecipeWithChaptersStepsAndIngredients(
+    recipe = Recipe(), chapters = listOf(
+      ChapterWithStepsAndIngredients(chapter = Chapter(name = "Chap 1"))
+    )
+  ), onSubmit = {}, onDeleteRecipe = {}, onBack = {})
 }

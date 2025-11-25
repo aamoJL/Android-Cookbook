@@ -1,10 +1,11 @@
-package com.aamo.cookbook.ui_tests.features.recipe.list.recipe_search_screen
+package com.aamo.cookbook.ui_tests.features.recipe.list.recipe_list_pages.recipes_by_bookmark_screen
 
 import androidx.compose.ui.test.assertAll
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
-import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
@@ -18,15 +19,16 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("HardCodedStringLiteral")
 @RunWith(RobolectricTestRunner::class)
-class Search : PageTest() {
+class Filter : PageTest() {
   val recipes = (1..3).map {
-    Recipe(name = it.toString())
+    Recipe(name = "Recipe $it", category = "Category $it")
   }
 
   @Before
   fun setup() = runTest {
-    toRecipeSearchScreen()
+    toRecipesByBookmarkScreen()
     waitForLoading()
 
     // populate
@@ -43,8 +45,9 @@ class Search : PageTest() {
       rule.onNodeWithText(it.name).assertExists()
     }
 
-    val filter = recipes.first().name
-    rule.onNodeWithText(getString(R.string.ph_search)).performTextInput(filter)
-    rule.onAllNodesWithTag(UITag.OPTION.name).assertAll(hasText(filter))
+    val filter = recipes.first().category
+    rule.onNodeWithContentDescription(getString(R.string.cd_filter)).performClick()
+    rule.onNodeWithText(filter).performClick()
+    rule.onAllNodesWithTag(UITag.OPTION.name).assertAll(hasText(recipes.first().name))
   }
 }

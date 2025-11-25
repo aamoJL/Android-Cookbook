@@ -1,4 +1,4 @@
-package com.aamo.cookbook.ui_tests.features.recipe.list.recipe_search_screen
+package com.aamo.cookbook.ui_tests.features.recipe.list.recipe_list_pages.recipe_search_screen
 
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText

@@ -17,6 +17,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -27,6 +28,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
@@ -34,6 +36,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,6 +61,7 @@ import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+import com.aamo.cookbook.utility.tags.UITag
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -263,9 +267,15 @@ private fun StepFormIngredientList(
   onSwap: (from: Int, to: Int) -> Unit,
 ) {
   FormList(
-    title = stringResource(R.string.title_ingredients),
-    onAddClick = onNewIngredient,
-  ) {
+    title = stringResource(R.string.title_ingredients), actions = {
+      OutlinedIconButton(onClick = onNewIngredient) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_form_add_new_item),
+          tint = MaterialTheme.colorScheme.primary
+        )
+      }
+    }) {
     LazyColumn {
       itemsIndexed(
         items = ingredients,
@@ -284,7 +294,9 @@ private fun StepFormIngredientList(
               { onSwap(index, index + 1) }
             }
             else null,
-            modifier = Modifier.padding(vertical = 16.dp))
+            modifier = Modifier
+              .fillMaxWidth()
+              .testTag(UITag.OPTION.name))
 
           if (index != ingredients.size - 1) {
             HorizontalDivider()
@@ -304,12 +316,9 @@ private fun IngredientListItem(
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
 ) {
-  BasicDismissibleItem(dismissAction = onDismiss) {
+  BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
     ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
-      Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        modifier = modifier.padding(horizontal = 8.dp)
-      ) {
+      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
           text = if (ingredient.amount == Double.Zero || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
           style = MaterialTheme.typography.titleMedium,
@@ -326,7 +335,7 @@ private fun IngredientListItem(
         )
       }
     }, trailingContent = {
-      Column(modifier = Modifier) {
+      Column {
         if (onMoveUp != null) IconButton(onClick = onMoveUp) {
           Icon(
             painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
@@ -342,4 +351,23 @@ private fun IngredientListItem(
       }
     })
   }
+}
+
+@Suppress("HardCodedStringLiteral")
+@Preview
+@Composable
+private fun Preview() {
+  RecipeFormStepScreenContent(
+    formState = RecipeFormStepScreenViewModel.FormState(
+      formData = RecipeFormStepFields(ingredients = listOf(RecipeFormIngredientFields(name = "Ing 1")))
+    ),
+    isNew = true,
+    stepIndex = 0,
+    onNewIngredient = {},
+    onEditIngredient = {},
+    onDeleteIngredient = {},
+    onSwapIngredients = { _, _ -> },
+    onSubmit = {},
+    onBack = {},
+  )
 }
