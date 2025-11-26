@@ -144,7 +144,15 @@ private fun Preview() {
               StepWithIngredients(
                 step = Step(), ingredients = listOf(
                   Ingredient(name = "Ingredient 1", amount = 250.0, unit = "g"),
-                  Ingredient(name = "Ingredient 2", amount = 25.0, unit = "dl")
+                )
+              )
+            )
+          ),
+          ChapterWithStepsAndIngredients(
+            chapter = Chapter(name = "Chapter 2"), steps = listOf(
+              StepWithIngredients(
+                step = Step(), ingredients = listOf(
+                  Ingredient(name = "Ingredient 3", amount = 100.0)
                 )
               )
             )

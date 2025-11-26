@@ -48,7 +48,7 @@ class EditRecipeForm : PageTest() {
 
     // on RecipeViewPage
     rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
-    rule.onNodeWithTag(UITag.SCREEN_TITLE.name).assert(hasText("New Recipe"))
+    rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText("New Recipe"))
   }
 
   @Test

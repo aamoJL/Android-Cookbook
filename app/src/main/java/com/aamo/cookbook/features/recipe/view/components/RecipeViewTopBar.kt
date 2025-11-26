@@ -58,18 +58,18 @@ fun RecipeViewTopBar(
         DropdownMenuItem(leadingIcon = {
           Icon(
             painter = painterResource(R.drawable.rounded_edit_24),
-            contentDescription = stringResource(R.string.cd_edit_recipe)
+            contentDescription = stringResource(R.string.btn_edit_recipe)
           )
-        }, text = { Text(text = stringResource(R.string.cd_edit_recipe)) }, onClick = {
+        }, text = { Text(text = stringResource(R.string.btn_edit_recipe)) }, onClick = {
           openMenuDropDown = false
           onEdit()
         })
         DropdownMenuItem(leadingIcon = {
           Icon(
             painter = painterResource(id = R.drawable.baseline_content_copy_24),
-            contentDescription = stringResource(R.string.cd_copy_recipe)
+            contentDescription = stringResource(R.string.btn_copy_recipe)
           )
-        }, text = { Text(text = stringResource(R.string.cd_copy_recipe)) }, onClick = {
+        }, text = { Text(text = stringResource(R.string.btn_copy_recipe)) }, onClick = {
           openMenuDropDown = false
           onCopy()
         })
@@ -78,13 +78,13 @@ fun RecipeViewTopBar(
           if (isBookmarked) {
             Icon(
               painter = painterResource(R.drawable.rounded_bookmark_remove_24),
-              contentDescription = stringResource(R.string.cd_remove_bookmark)
+              contentDescription = stringResource(R.string.btn_remove_bookmark)
             )
           }
           else {
             Icon(
               painter = painterResource(R.drawable.rounded_bookmark_add_24px),
-              contentDescription = stringResource(R.string.cd_add_bookmark)
+              contentDescription = stringResource(R.string.btn_add_bookmark)
             )
           }
         }, text = {

@@ -8,6 +8,7 @@ import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.MainActivity
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.dao.RecipeDao
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import org.junit.After
@@ -21,8 +22,16 @@ open class PageTest {
     RecipeDatabase.getDatabase(rule.activity.applicationContext).clearAllTables()
   }
 
+  fun getDao(): RecipeDao {
+    return RecipeDatabase.getDatabase(rule.activity).recipeDao()
+  }
+
   fun getString(@StringRes id: Int): String {
     return rule.activity.getString(id)
+  }
+
+  fun getString(@StringRes id: Int, param: String): String {
+    return rule.activity.getString(id, param)
   }
 
   suspend fun toRecipeSearchScreen() {
@@ -36,7 +45,7 @@ open class PageTest {
   }
 
   suspend fun toRecipesByCategoryScreen(recipe: Recipe) {
-    RecipeDatabase.getDatabase(rule.activity.applicationContext).recipeDao().upsert(recipe)
+    getDao().upsert(recipe)
 
     waitForLoading()
     rule.onNodeWithText(recipe.category).waitForDisplayed().performClick()
@@ -51,14 +60,18 @@ open class PageTest {
     toRecipeViewPage(recipe)
     waitForLoading()
     rule.onNodeWithContentDescription(getString(R.string.cd_more_options)).performClick()
-    rule.onNodeWithContentDescription(getString(R.string.cd_edit_recipe)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_edit_recipe)).performClick()
   }
 
-  suspend fun toRecipeViewPage(recipe: RecipeWithChaptersStepsAndIngredients) {
-    RecipeDatabase.getDatabase(rule.activity.applicationContext).recipeDao().upsert(recipe)
+  suspend fun toRecipeViewPage(recipe: RecipeWithChaptersStepsAndIngredients): RecipeWithChaptersStepsAndIngredients {
+    val recipe = getDao().let {
+      it.getCompleteRecipe(it.upsert(recipe))
+    } ?: throw Error()
 
     toRecipeSearchScreen()
     waitForLoading()
     rule.onNodeWithText(recipe.recipe.name).performClickWithKeyboard()
+
+    return recipe
   }
 }

@@ -1,4 +1,4 @@
-package com.aamo.cookbook.tests.features.recipe.view.components
+package com.aamo.cookbook.ui_tests.features.recipe.view.components
 
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule

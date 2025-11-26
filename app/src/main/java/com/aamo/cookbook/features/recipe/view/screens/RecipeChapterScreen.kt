@@ -1,6 +1,5 @@
 package com.aamo.cookbook.features.recipe.view.screens
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
@@ -24,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -39,6 +40,7 @@ import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.features.recipe.view.components.IngredientList
 import com.aamo.cookbook.features.recipe.view.components.NoteCard
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.tags.UITag
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.minutes
 
@@ -66,6 +68,7 @@ fun RecipeChapterScreen(
         modifier = Modifier
           .fillMaxWidth()
           .padding(top = 8.dp)
+          .testTag(UITag.SCREEN_TITLE.name)
       )
       if (chapter.chapter.note.isNotEmpty()) {
         Box(modifier = Modifier.padding(8.dp)) {
@@ -154,7 +157,9 @@ private fun StepCheckBox(
         }
       }
     }
-    else null, modifier = modifier.clickable { onCheckedChange(!checked) })
+    else null, modifier = modifier.toggleable(
+      value = checked, interactionSource = null, indication = null, onValueChange = onCheckedChange
+    ).testTag(UITag.CHECK.name))
 }
 
 @Suppress("HardCodedStringLiteral")

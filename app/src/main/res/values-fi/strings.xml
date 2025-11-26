@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="recipe_name_copy">%1$s - kopio</string>
+    <string name="suffix_name_with_copy">%1$s - kopio</string>
     <string name="text_other_category">Muut</string>
     <string name="text_choose_category">Valitse kategoria</string>
     <string name="screen_title_error_recipes_not_found">Reseptejä ei löytynyt</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
     <string name="screen_title_new_recipe">Lisää uusi resepti</string>
-    <string name="screen_title_existing_recipe">Muokkaa reseptiä</string>
+    <string name="screen_title_edit_recipe">Muokkaa reseptiä</string>
     <string name="screen_title_new_step">Lisää uusi vaihe</string>
     <string name="screen_title_existing_step">Muokkaa vaihetta</string>
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
@@ -24,11 +24,11 @@
     <string name="cd_save_recipe">Tallenna resepti</string>
     <string name="cd_form_add_new_item">Lisää uusi tavara</string>
     <string name="cd_navigate_back">Takaisin</string>
-    <string name="cd_edit_recipe">Muokkaa reseptiä</string>
+    <string name="btn_edit_recipe">Muokkaa reseptiä</string>
     <string name="cd_delete_recipe">Poista resepti</string>
     <string name="cd_search">Haku</string>
     <string name="cd_filter">Suodata vaihtoehtoja</string>
-    <string name="cd_copy_recipe">Kopioi resepti</string>
+    <string name="btn_copy_recipe">Kopioi resepti</string>
     <string name="cd_delete_list_item">Poista kohde listasta</string>
     <string name="cd_move_up">Siirrä ylös</string>
     <string name="cd_move_down">Siirrä alas</string>
@@ -79,8 +79,8 @@
     <string name="btn_cancel">Peruuta</string>
     <string name="btn_yes">Kyllä</string>
     <string name="cd_save">Tallenna</string>
-    <string name="cd_remove_bookmark">Poista kirjanmerkki</string>
-    <string name="cd_add_bookmark">Lisää kirjanmerkki</string>
+    <string name="btn_remove_bookmark">Poista kirjanmerkki</string>
+    <string name="btn_add_bookmark">Lisää kirjanmerkki</string>
     <string name="cd_settings_page">Asetukset sivu</string>
     <string name="cd_summary_page">Tiedot-sivu</string>
     <string name="cd_chapter_x_page">Kappale %1$d sivu</string>

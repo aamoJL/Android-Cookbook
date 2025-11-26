@@ -230,7 +230,7 @@ fun RecipeFormInfoScreenContent(
       PrimaryTopAppBar(
         title = when (isNew) {
         true -> stringResource(R.string.screen_title_new_recipe)
-        else -> stringResource(R.string.screen_title_existing_recipe)
+        else -> stringResource(R.string.screen_title_edit_recipe)
       }, onBack = {
         if (formState.savingState.unsavedChanges) openUnsavedDialog = true
         else onBack()

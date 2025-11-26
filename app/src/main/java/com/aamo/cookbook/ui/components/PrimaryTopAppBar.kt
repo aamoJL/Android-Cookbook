@@ -21,7 +21,7 @@ fun PrimaryTopAppBar(
 ) {
   TopAppBar(
     title = {
-      Text(text = title, Modifier.testTag(UITag.SCREEN_TITLE.name))
+      Text(text = title, Modifier.testTag(UITag.PAGE_TITLE.name))
     }, colors = TopAppBarDefaults.topAppBarColors(
       actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
       navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,

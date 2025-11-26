@@ -27,7 +27,7 @@ class PrimaryTopAppBar {
         PrimaryTopAppBar(title = title)
       }
 
-      onNodeWithTag(UITag.SCREEN_TITLE.name).assertExists()
+      onNodeWithTag(UITag.PAGE_TITLE.name).assertExists()
     }
   }
 

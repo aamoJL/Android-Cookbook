@@ -90,7 +90,10 @@ fun NavGraphBuilder.recipesByBookmarkScreen(
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipesByBookmarkScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        RecipesByBookmarkScreenViewModel(fetchData = { fetchRecipes(dao = dao) })
+        RecipesByBookmarkScreenViewModel(fetchData = {
+          // TODO: does not work correctly
+          fetchRecipes(dao = dao)
+        })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()

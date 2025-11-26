@@ -9,11 +9,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
+
+enum class FiveStarRatingTags {
+  RATING_STAR
+}
 
 @Composable
 fun FiveStarRating(
@@ -36,7 +41,9 @@ fun FiveStarRating(
             R.string.cd_star_rating_star_icon_selected, starValue
           ),
           tint = color,
-          modifier = Modifier.fillMaxSize()
+          modifier = Modifier
+            .fillMaxSize()
+            .testTag(FiveStarRatingTags.RATING_STAR.name)
         )
       }
     }
@@ -50,7 +57,9 @@ fun FiveStarRating(
             R.string.cd_star_rating_star_icon_unselected, starValue
           ),
           tint = color,
-          modifier = Modifier.fillMaxSize(.8f)
+          modifier = Modifier
+            .fillMaxSize(.8f)
+            .testTag(FiveStarRatingTags.RATING_STAR.name)
         )
       }
     }

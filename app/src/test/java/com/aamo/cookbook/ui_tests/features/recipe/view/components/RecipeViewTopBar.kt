@@ -1,4 +1,4 @@
-package com.aamo.cookbook.tests.features.recipe.view.components
+package com.aamo.cookbook.ui_tests.features.recipe.view.components
 
 import androidx.activity.compose.setContent
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
@@ -97,13 +97,13 @@ class RecipeViewTopBar {
         onBack = {})
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_edit_recipe))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_edit_recipe))
       .assertDoesNotExist()
 
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_more_options))
       .performClick()
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_edit_recipe))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_edit_recipe))
       .performClick()
 
     assertTrue(called)
@@ -124,13 +124,13 @@ class RecipeViewTopBar {
         onBack = {})
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_copy_recipe))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_copy_recipe))
       .assertDoesNotExist()
 
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_more_options))
       .performClick()
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_copy_recipe))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_copy_recipe))
       .performClick()
 
     assertTrue(called)
@@ -151,13 +151,13 @@ class RecipeViewTopBar {
         onBack = {})
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_add_bookmark))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_add_bookmark))
       .assertDoesNotExist()
 
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_more_options))
       .performClick()
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_add_bookmark))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_add_bookmark))
       .performClick()
 
     assertEquals(true, value)
@@ -178,13 +178,13 @@ class RecipeViewTopBar {
         onBack = {})
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_remove_bookmark))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_remove_bookmark))
       .assertDoesNotExist()
 
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_more_options))
       .performClick()
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_remove_bookmark))
+    rule.onNodeWithContentDescription(rule.activity.getString(R.string.btn_remove_bookmark))
       .performClick()
 
     assertEquals(false, value)

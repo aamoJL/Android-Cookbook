@@ -29,6 +29,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.Chapter
+import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
@@ -171,6 +173,7 @@ fun NavGraphBuilder.recipeViewPage(
             )
           },
           saveAsCopy = { recipe ->
+            // TODO: change name to "xxx - copy"
             copyAndSaveRecipe(dao = dao, recipe = recipe).also { id ->
               if (id > 0L) onOpenRecipeForm(id)
             }
@@ -318,11 +321,17 @@ private fun RecipeViewPageContentPreview() {
   CookbookTheme(useDarkTheme = true) {
     Surface {
       RecipeViewPageContent(
-        recipe = RecipeWithChaptersStepsAndIngredients(recipe = Recipe(), chapters = emptyList()),
+        recipe = RecipeWithChaptersStepsAndIngredients(
+          recipe = Recipe(), chapters = listOf(
+            ChapterWithStepsAndIngredients(
+              chapter = Chapter()
+            )
+          )
+        ),
         bookmark = null,
         rating = null,
         servingsState = ServingsState(),
-        progressState = ViewModelStateList(),
+        progressState = ViewModelStateList(listOf(listOf(false))),
         onEdit = {},
         onCopy = {},
         onUpdateBookmark = {},

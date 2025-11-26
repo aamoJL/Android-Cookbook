@@ -35,14 +35,14 @@ class Navigation : PageTest() {
 
   @Test
   fun `on recipeFormInfoScreen`() = runTest {
-    rule.onNodeWithText(getString(R.string.screen_title_existing_recipe)).assertExists()
+    rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertExists()
   }
 
   @Test
   fun `to back`() = runTest {
     rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
     rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
-    rule.onNodeWithTag(UITag.SCREEN_TITLE.name).assert(hasText(recipe.recipe.name))
+    rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText(recipe.recipe.name))
   }
 
   @OptIn(ExperimentalCoroutinesApi::class)
@@ -73,7 +73,7 @@ class Navigation : PageTest() {
     `to recipeFormChapterScreen`()
 
     rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_recipe)).assertExists()
+    rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertExists()
   }
 
   @Test
