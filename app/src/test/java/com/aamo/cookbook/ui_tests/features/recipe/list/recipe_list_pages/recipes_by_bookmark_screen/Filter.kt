@@ -7,8 +7,8 @@ import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
-import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.test_utility.ui.rules.PageTest
 import com.aamo.cookbook.test_utility.ui.rules.waitForDisplayed
 import com.aamo.cookbook.test_utility.ui.rules.waitForLoading
@@ -33,7 +33,9 @@ class Filter : PageTest() {
 
     // populate
     recipes.forEach {
-      RecipeDatabase.getDatabase(rule.activity.applicationContext).recipeDao().upsert(it)
+      getDao().upsert(it).also { id ->
+        getDao().upsert(RecipeBookmark(recipeId = id))
+      }
     }
 
     rule.onNodeWithText(recipes.first().name).waitForDisplayed()

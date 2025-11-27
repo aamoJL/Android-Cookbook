@@ -44,7 +44,7 @@ import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
-import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
+import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipesByCategory
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -94,7 +94,7 @@ fun NavGraphBuilder.recipesByCategoryScreen(
     val viewmodel: RecipesByCategoryScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipesByCategoryScreenViewModel(
-          fetchData = { fetchRecipes(dao = dao, category = category) })
+          fetchData = { fetchRecipesByCategory(dao = dao, category = category) })
       }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()

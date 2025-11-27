@@ -43,7 +43,7 @@ import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
-import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
+import com.aamo.cookbook.features.recipe.list.use_cases.fetchBookmarks
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.utility.extensions.general.EMPTY
@@ -89,12 +89,7 @@ fun NavGraphBuilder.recipesByBookmarkScreen(
   composable<RecipesByBookmarkScreen> {
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipesByBookmarkScreenViewModel = viewModel(factory = viewModelFactory {
-      initializer {
-        RecipesByBookmarkScreenViewModel(fetchData = {
-          // TODO: does not work correctly
-          fetchRecipes(dao = dao)
-        })
-      }
+      initializer { RecipesByBookmarkScreenViewModel(fetchData = { fetchBookmarks(dao = dao) }) }
     })
     val recipes by viewmodel.recipes.collectAsStateWithLifecycle()
     val categories by viewmodel.categories.collectAsStateWithLifecycle()

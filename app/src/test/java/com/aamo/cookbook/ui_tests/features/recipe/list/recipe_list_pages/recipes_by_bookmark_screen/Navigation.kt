@@ -5,8 +5,8 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
-import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
+import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.test_utility.ui.rules.PageTest
 import com.aamo.cookbook.test_utility.ui.rules.performClickWithKeyboard
 import com.aamo.cookbook.test_utility.ui.rules.waitForDisplayed
@@ -40,8 +40,9 @@ class Navigation : PageTest() {
   @Test
   fun `to recipeViewPage`() = runTest {
     val recipeName = "123"
-    RecipeDatabase.getDatabase(rule.activity.applicationContext).recipeDao()
-      .upsert(Recipe(name = recipeName))
+    getDao().upsert(Recipe(name = recipeName)).also { id ->
+      getDao().upsert(RecipeBookmark(recipeId = id))
+    }
 
     rule.onNodeWithText(recipeName).waitForDisplayed().also {
       it.performClickWithKeyboard()
