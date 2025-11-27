@@ -7,33 +7,36 @@ import android.provider.OpenableColumns
 import androidx.core.net.toUri
 import java.io.File
 
-abstract class IOServiceBase {
+interface IIOService {
   /**
    * Returns the file name with a suffix from the [uri].
-   */
-  abstract fun getFileNameWithSuffixFromUri(uri: Uri): String?
+   * */
+  fun getFileNameWithSuffixFromUri(uri: Uri): String?
   /**
    * Deletes file from the given external file directory.
    * @param subFolder folder type from the [Environment] class, e.g. [Environment.DIRECTORY_PICTURES]
    */
-  abstract fun deleteExternalFile(subFolder: String, fileName: String) : Boolean
+  fun deleteExternalFile(subFolder: String, fileName: String): Boolean
   /**
    * Returns uri for the file in the given external directory.
    * @param subFolder folder type from the [Environment] class, e.g. [Environment.DIRECTORY_PICTURES]
    */
-  abstract fun getExternalFileUri(subFolder: String?, fileName: String): Uri
+  fun getExternalFileUri(subFolder: String?, fileName: String): Uri
+  /**
+   * Returns uri for the sub directory in the given external directory.
+   * @param subFolder folder type from the [Environment] class, e.g. [Environment.DIRECTORY_PICTURES]
+   */
+  fun getExternalFileDir(subFolder: String): File?
 }
 
-class IOService(private val context: Context) : IOServiceBase() {
-  fun getExternalFileDir(subFolder: String?): File? = context.getExternalFilesDir(subFolder)
-
+class IOService(private val context: Context) : IIOService {
   override fun getFileNameWithSuffixFromUri(uri: Uri): String? {
     var fileName: String? = null
     val cursor = context.contentResolver.query(uri, null, null, null, null)
     cursor?.moveToFirst()?.also { result ->
-      if(result){
+      if (result) {
         cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME).also { i ->
-          if(i >= 0) fileName = cursor.getString(i)
+          if (i >= 0) fileName = cursor.getString(i)
         }
       }
     }
@@ -41,12 +44,16 @@ class IOService(private val context: Context) : IOServiceBase() {
     return fileName
   }
 
-  override fun deleteExternalFile(subFolder: String, fileName: String) : Boolean {
-    val file = File(getExternalFileDir(subFolder), fileName)
+  override fun deleteExternalFile(subFolder: String, fileName: String): Boolean {
+    val file = File(context.getExternalFilesDir(subFolder), fileName)
     return file.delete()
   }
 
-  override fun getExternalFileUri(subFolder: String?, fileName: String) : Uri {
-    return File(getExternalFileDir(subFolder), fileName).toUri()
+  override fun getExternalFileUri(subFolder: String?, fileName: String): Uri {
+    return File(context.getExternalFilesDir(subFolder), fileName).toUri()
+  }
+
+  override fun getExternalFileDir(subFolder: String): File? {
+    return context.getExternalFilesDir(subFolder)
   }
 }
