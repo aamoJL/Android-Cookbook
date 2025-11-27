@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name" translatable="false">Cookbook</string>
-    <string name="suffix_name_with_copy">%1$s - copy</string>
+    <string name="suffix_copy">\u0020- copy</string>
     <string name="text_other_category">Other</string>
     <string name="text_choose_category">Choose a category</string>
     <string name="screen_title_error_recipes_not_found">No recipes found</string>

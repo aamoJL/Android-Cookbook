@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="suffix_name_with_copy">%1$s - kopio</string>
+    <string name="suffix_copy">\u0020- kopio</string>
     <string name="text_other_category">Muut</string>
     <string name="text_choose_category">Valitse kategoria</string>
     <string name="screen_title_error_recipes_not_found">Reseptejä ei löytynyt</string>

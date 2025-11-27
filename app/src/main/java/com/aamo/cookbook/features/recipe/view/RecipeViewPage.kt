@@ -16,7 +16,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -173,15 +172,14 @@ fun NavGraphBuilder.recipeViewPage(
             )
           },
           saveAsCopy = { recipe ->
-            // TODO: change name to "xxx - copy"
-            copyAndSaveRecipe(dao = dao, recipe = recipe).also { id ->
+            copyAndSaveRecipe(
+              dao = dao, recipe = recipe, nameSuffix = context.getString(R.string.suffix_copy)
+            ).also { id ->
               if (id > 0L) onOpenRecipeForm(id)
             }
           })
       }
     })
-    val appNotFoundSnackbarMessage = stringResource(R.string.snackbar_app_not_found)
-
     val recipe by viewmodel.recipe.collectAsStateWithLifecycle()
     val bookmark by viewmodel.bookmark.collectAsStateWithLifecycle()
     val rating by viewmodel.rating.collectAsStateWithLifecycle()
@@ -206,17 +204,17 @@ fun NavGraphBuilder.recipeViewPage(
         },
         onOpenCalculator = {
           CalculatorService(context = context).open(onError = {
-            onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
+            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
           })
         },
         onOpenTimer = {
           TimerService(context = context).open(onError = {
-            onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
+            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
           })
         },
         onStartTimer = { title, duration ->
           TimerService(context = context).start(title = title, duration = duration, onError = {
-            onSnackbar(SnackbarProperties(message = appNotFoundSnackbarMessage))
+            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
           })
         },
         onBack = onBack
