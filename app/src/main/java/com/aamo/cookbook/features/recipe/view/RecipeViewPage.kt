@@ -72,15 +72,18 @@ import kotlin.time.Duration
 data class RecipeViewPage(val id: Long)
 
 class RecipeViewViewModel(
-  fetchData: () -> Flow<RecipeViewRecipeModel>,
+  fetchData: () -> Flow<RecipeViewRecipeModel?>,
   private val updateBookmark: suspend (Boolean, RecipeBookmark) -> Unit,
   private val updateRating: suspend (Int?, RecipeRating) -> Unit,
   private val updateThumbnail: suspend (String, Recipe) -> Unit,
   private val saveAsCopy: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
-  val recipe = fetchData().transform { emit(it.recipe) }.runningReduce { previous, new ->
-    previous.copy(recipe = previous.recipe.copy(thumbnailUri = new.recipe.thumbnailUri))
+  val recipe = fetchData().transform { emit(it?.recipe) }.runningReduce { previous, new ->
+    if (new == null) null
+    else previous?.copy(recipe = previous.recipe.copy(thumbnailUri = new.recipe.thumbnailUri))
   }.onEach { value ->
+    if (value == null) return@onEach
+
     if (servingsState.baseline.value != value.recipe.servings) {
       servingsState.baseline.update(value.recipe.servings)
       servingsState.current.update(value.recipe.servings)
@@ -92,11 +95,11 @@ class RecipeViewViewModel(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
 
-  val bookmark = fetchData().onStart { recipe.first() }.transform { emit(it.bookmark) }.stateIn(
+  val bookmark = fetchData().onStart { recipe.first() }.transform { emit(it?.bookmark) }.stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
 
-  val rating = fetchData().onStart { recipe.first() }.transform { emit(it.rating) }.stateIn(
+  val rating = fetchData().onStart { recipe.first() }.transform { emit(it?.rating) }.stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
 

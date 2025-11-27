@@ -48,7 +48,10 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
         navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
       }, onBack = { navController.navigateUp() })
       recipeFormPage(onOpenCategories = {
-        navController.navigate(HomeScreen) { popUpTo(HomeScreen) { inclusive = true } }
+        navController.navigate(HomeScreen) {
+          popUpTo<HomeScreen> { inclusive = true }
+          launchSingleTop = true
+        }
       }, onOpenRecipe = {
         navController.navigate(RecipeViewPage(id = it)) {
           popUpTo<RecipeFormPage> { inclusive = true }

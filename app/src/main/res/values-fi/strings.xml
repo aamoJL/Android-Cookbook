@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="suffix_copy">\u0020- kopio</string>
-    <string name="text_other_category">Muut</string>
     <string name="text_choose_category">Valitse kategoria</string>
-    <string name="screen_title_error_recipes_not_found">Reseptejä ei löytynyt</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
     <string name="screen_title_new_recipe">Lisää uusi resepti</string>
@@ -12,7 +10,6 @@
     <string name="screen_title_existing_step">Muokkaa vaihetta</string>
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
     <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
-    <string name="screen_title_subcategories">Valitse alakategoria</string>
     <string name="title_ingredients">Ainesosat</string>
     <string name="title_recipe">Reseptin tiedot</string>
     <string name="title_chapter">%1$s. kappaleen tiedot</string>
@@ -21,7 +18,6 @@
     <string name="title_chapters">Kappaleet</string>
     <string name="title_steps">Vaiheet</string>
     <string name="cd_add_new_recipe">Lisää uusi resepti</string>
-    <string name="cd_save_recipe">Tallenna resepti</string>
     <string name="cd_form_add_new_item">Lisää uusi tavara</string>
     <string name="cd_navigate_back">Takaisin</string>
     <string name="btn_edit_recipe">Muokkaa reseptiä</string>
@@ -41,20 +37,12 @@
     <string name="label_amount">Määrä</string>
     <string name="label_unit">Mitta</string>
     <string name="ph_search">Hae…</string>
-    <string name="btn_save">Tallenna</string>
     <string name="btn_new">Uusi</string>
     <string name="btn_bookmarks">Suosikit</string>
-    <string name="btn_add_to_favorites">Lisää kirjanmerkki</string>
-    <string name="btn_remove_from_favorites">Poista kirjanmerkki</string>
     <string name="dialog_title_delete_recipe">Poista resepti?</string>
-    <string name="dialog_text_delete_recipe">Haluatko varmasti poistaa reseptin?</string>
     <string name="dialog_title_unsaved_changes">Tallentamattomia muutoksia</string>
     <string name="dialog_text_unsaved_changes">Palaa takaisin tallentamatta muutoksia?</string>
     <string name="snackbar_recipe_deleted_successfully">Resepti poistettu onnistuneesti.</string>
-    <string name="snackbar_recipe_copied_successfully">Resepti kopioitu onnistuneesti.</string>
-    <string name="snackbar_recipe_added_to_favorites">kirjanmerkki lisätty.</string>
-    <string name="snackbar_recipe_removed_from_favorites">kirjanmerkki poistettu.</string>
-    <string name="snackbar_recipe_saved_successfully">Resepti tallennettu onnistuneesti.</string>
     <string name="abbreviation_minutes">%1$s m</string>
     <string name="cd_set_timer">Aseta ajastin</string>
     <string name="label_step_timer">Ajastin (minuuttia)</string>
@@ -69,9 +57,6 @@
     <string name="cd_star_rating_star_icon_unselected">%1$s tähteä (ei valittu)</string>
     <string name="cd_open_timer">Ajastin</string>
     <string name="cd_open_calculator">Laskin</string>
-    <string name="dialog_title_app_not_found">Sovellusta ei löytynyt.</string>
-    <string name="dialog_text_calculator_app_was_not_found">Laskinta ei löytynyt.</string>
-    <string name="dialog_confirm_default">OK</string>
     <string name="btn_text_clear">Tyhjennä</string>
     <string name="cd_clear">Tyhjennä</string>
     <string name="screen_title_bookmarks">Kirjanmerkit</string>

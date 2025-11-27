@@ -11,8 +11,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -55,7 +55,10 @@ class RecipeFormViewModel(
 
   fun deleteRecipe() {
     viewModelScope.launch {
-      runCatching { deleteData(checkNotNull(recipe.value)) }
+      runCatching {
+        val recipe = checkNotNull(recipe.value)
+        deleteData(recipe)
+      }
     }
   }
 
@@ -78,7 +81,6 @@ fun NavGraphBuilder.recipeFormPage(
   composable<RecipeFormPage> { navStack ->
     val (recipeId) = navStack.toRoute<RecipeFormPage>()
     val localContext = LocalContext.current
-    val recipeDeletedSnackbarMessage = stringResource(R.string.snackbar_recipe_deleted_successfully)
     val dao = RecipeDatabase.getDatabase(localContext.applicationContext).recipeDao()
     val viewmodel: RecipeFormViewModel = viewModel(factory = viewModelFactory {
       initializer {
@@ -86,9 +88,11 @@ fun NavGraphBuilder.recipeFormPage(
           fetchData = { fetchRecipe(dao = dao, recipeId = recipeId) },
           deleteData = { recipe ->
             deleteRecipe(
-              dao = dao, photoService = PhotoService(context = localContext), recipe = recipe.recipe
+              dao = dao,
+              photoService = PhotoService(context = localContext.applicationContext),
+              recipe = recipe.recipe
             ).onTrue {
-              onSnackbar(SnackbarProperties(recipeDeletedSnackbarMessage))
+              onSnackbar(SnackbarProperties(localContext.getString(R.string.snackbar_recipe_deleted_successfully)))
               onOpenCategories()
             }
           },
@@ -101,7 +105,7 @@ fun NavGraphBuilder.recipeFormPage(
       }
     })
 
-    val recipe = viewmodel.recipe.collectAsStateWithLifecycle().value
+    val recipe by viewmodel.recipe.collectAsStateWithLifecycle()
 
     LoadingScreen(loading = recipe == null) {
       RecipeFormInfoScreen(

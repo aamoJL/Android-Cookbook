@@ -10,7 +10,9 @@ suspend fun deleteRecipe(
   recipe: Recipe,
 ): Boolean {
   if (dao.delete(recipe) > 0) {
-    if (recipe.thumbnailUri.isNotEmpty()) photoService.delete(recipe.thumbnailUri)
+    if (recipe.thumbnailUri.isNotEmpty()) {
+      photoService.delete(recipe.thumbnailUri)
+    }
     return true
   }
   return false

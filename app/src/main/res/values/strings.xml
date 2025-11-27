@@ -2,9 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Cookbook</string>
     <string name="suffix_copy">\u0020- copy</string>
-    <string name="text_other_category">Other</string>
     <string name="text_choose_category">Choose a category</string>
-    <string name="screen_title_error_recipes_not_found">No recipes found</string>
     <string name="screen_title_new_chapter">Add a new chapter</string>
     <string name="screen_title_existing_chapter">Edit chapter</string>
     <string name="screen_title_new_recipe">Add a new recipe</string>
@@ -13,7 +11,6 @@
     <string name="screen_title_existing_step">Edit step</string>
     <string name="screen_title_new_ingredient">Add a new ingredient</string>
     <string name="screen_title_existing_ingredient">Edit ingredient</string>
-    <string name="screen_title_subcategories">Choose a subcategory</string>
     <string name="title_ingredients">Ingredients</string>
     <string name="title_recipe">Recipe information</string>
     <string name="title_chapter">%1$s. chapter information</string>
@@ -22,7 +19,6 @@
     <string name="title_chapters">Chapters</string>
     <string name="title_steps">Steps</string>
     <string name="cd_add_new_recipe">Add a new recipe</string>
-    <string name="cd_save_recipe">Save the recipe</string>
     <string name="cd_form_add_new_item">Add new item</string>
     <string name="cd_navigate_back">Go back</string>
     <string name="btn_edit_recipe">Edit the recipe</string>
@@ -42,20 +38,12 @@
     <string name="label_amount">Amount</string>
     <string name="label_unit">Unit</string>
     <string name="ph_search">Search…</string>
-    <string name="btn_save">Save</string>
     <string name="btn_new">New</string>
     <string name="btn_bookmarks">Bookmarks</string>
-    <string name="btn_add_to_favorites">Add to favorites</string>
-    <string name="btn_remove_from_favorites">Remove from favorites</string>
     <string name="dialog_title_delete_recipe">Delete the recipe?</string>
-    <string name="dialog_text_delete_recipe">Are you sure you want to delete the recipe?</string>
     <string name="dialog_title_unsaved_changes">Unsaved changes</string>
     <string name="dialog_text_unsaved_changes">Go back without saving?</string>
     <string name="snackbar_recipe_deleted_successfully">Recipe deleted successfully.</string>
-    <string name="snackbar_recipe_copied_successfully">Recipe copied successfully.</string>
-    <string name="snackbar_recipe_added_to_favorites">Recipe added to favorites.</string>
-    <string name="snackbar_recipe_removed_from_favorites">Recipe removed from favorites.</string>
-    <string name="snackbar_recipe_saved_successfully">Recipe saved successfully.</string>
     <string name="cd_set_timer">Set timer</string>
     <string name="abbreviation_minutes">%1$s m</string>
     <string name="label_step_timer">Timer (minutes)</string>
@@ -70,9 +58,6 @@
     <string name="cd_star_rating_star_icon_unselected">%1$s star (unselected)</string>
     <string name="cd_open_timer">Timer</string>
     <string name="cd_open_calculator">Calculator</string>
-    <string name="dialog_title_app_not_found">App not found.</string>
-    <string name="dialog_text_calculator_app_was_not_found">Calculator app was not found.</string>
-    <string name="dialog_confirm_default">OK</string>
     <string name="btn_text_clear">Clear</string>
     <string name="cd_clear">Clear</string>
     <string name="screen_title_bookmarks">Bookmarks</string>
