@@ -60,6 +60,10 @@ import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.features.recipe.form.primaryEnterTransition
+import com.aamo.cookbook.features.recipe.form.primaryExitTransition
+import com.aamo.cookbook.features.recipe.form.secondaryEnterTransition
+import com.aamo.cookbook.features.recipe.form.secondaryExitTransition
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
@@ -164,7 +168,11 @@ fun RecipeFormInfoScreen(
   val suggestions = viewmodel.categorySuggestions.collectAsStateWithLifecycle()
 
   NavHost(navController = infoNavController, startDestination = RecipeFormInfoScreen) {
-    composable<RecipeFormInfoScreen> {
+    composable<RecipeFormInfoScreen>(
+      enterTransition = { null },
+      exitTransition = { primaryExitTransition() },
+      popEnterTransition = { secondaryEnterTransition() },
+      popExitTransition = { null }) {
       RecipeFormInfoScreenContent(
         formState = viewmodel.formState,
         categorySuggestions = suggestions.value,
@@ -180,14 +188,22 @@ fun RecipeFormInfoScreen(
         onBack = onBack,
       )
     }
-    recipeFormChapterScreen(formData = { index ->
-      viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
-    }, onSubmit = { chapter ->
-      viewmodel.update(chapter)
-      infoNavController.navigateUp()
-    }, onBack = {
-      infoNavController.navigateUp()
-    })
+
+    recipeFormChapterScreen(
+      enterTransition = { this.primaryEnterTransition() },
+      exitTransition = { primaryExitTransition() },
+      popEnterTransition = { secondaryEnterTransition() },
+      popExitTransition = { this.secondaryExitTransition() },
+      formData = { index ->
+        viewmodel.formState.chapters.values.elementAtOrElse(index) { RecipeFormChapterFields() }
+      },
+      onSubmit = { chapter ->
+        viewmodel.update(chapter)
+        infoNavController.navigateUp()
+      },
+      onBack = {
+        infoNavController.navigateUp()
+      })
   }
 }
 

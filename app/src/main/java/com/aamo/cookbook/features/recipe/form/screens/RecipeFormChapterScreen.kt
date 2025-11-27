@@ -1,6 +1,9 @@
 package com.aamo.cookbook.features.recipe.form.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
@@ -42,6 +45,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -112,8 +116,17 @@ fun NavGraphBuilder.recipeFormChapterScreen(
   formData: (index: Int) -> RecipeFormChapterFields,
   onSubmit: (RecipeFormChapterFields) -> Unit,
   onBack: () -> Unit,
+  enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
+  popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
 ) {
-  composable<RecipeFormChapterScreen> { navStack ->
+  composable<RecipeFormChapterScreen>(
+    enterTransition = enterTransition,
+    exitTransition = exitTransition,
+    popEnterTransition = popEnterTransition,
+    popExitTransition = popExitTransition
+  ) { navStack ->
     val (index) = navStack.toRoute<RecipeFormChapterScreen>()
     val viewmodel: RecipeFormChapterScreenViewModel = viewModel(factory = viewModelFactory {
       initializer { RecipeFormChapterScreenViewModel(formData = formData(index)) }
@@ -125,7 +138,11 @@ fun NavGraphBuilder.recipeFormChapterScreen(
       navController = chapterNavController,
       startDestination = RecipeFormChapterScreen(index = index)
     ) {
-      composable<RecipeFormChapterScreen> {
+      composable<RecipeFormChapterScreen>(
+        enterTransition = { null },
+        exitTransition = exitTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = { null }) {
         RecipeFormChapterScreenContent(
           formState = viewmodel.formState,
           isNew = viewmodel.isNew,
@@ -140,14 +157,21 @@ fun NavGraphBuilder.recipeFormChapterScreen(
           onBack = onBack,
         )
       }
-      recipeFormStepScreen(formData = { index ->
-        viewmodel.formState.steps.values.elementAtOrElse(index) { RecipeFormStepFields() }
-      }, onSubmit = { step ->
-        viewmodel.update(step)
-        chapterNavController.navigateUp()
-      }, onBack = {
-        chapterNavController.navigateUp()
-      })
+      recipeFormStepScreen(
+        enterTransition = enterTransition,
+        exitTransition = exitTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = popExitTransition,
+        formData = { index ->
+          viewmodel.formState.steps.values.elementAtOrElse(index) { RecipeFormStepFields() }
+        },
+        onSubmit = { step ->
+          viewmodel.update(step)
+          chapterNavController.navigateUp()
+        },
+        onBack = {
+          chapterNavController.navigateUp()
+        })
     }
   }
 }

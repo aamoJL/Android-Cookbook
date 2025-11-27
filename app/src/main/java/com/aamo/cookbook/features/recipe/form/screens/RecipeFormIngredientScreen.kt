@@ -1,6 +1,9 @@
 package com.aamo.cookbook.features.recipe.form.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -30,6 +33,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
@@ -88,8 +92,17 @@ fun NavGraphBuilder.recipeFormIngredientScreen(
   formData: (index: Int) -> RecipeFormIngredientFields,
   onSubmit: (RecipeFormIngredientFields) -> Unit,
   onBack: () -> Unit,
+  enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
+  popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
 ) {
-  composable<RecipeFormIngredientScreen> { navStack ->
+  composable<RecipeFormIngredientScreen>(
+    enterTransition = enterTransition,
+    exitTransition = exitTransition,
+    popEnterTransition = popEnterTransition,
+    popExitTransition = popExitTransition
+  ) { navStack ->
     val (index) = navStack.toRoute<RecipeFormIngredientScreen>()
     val viewmodel: RecipeFormIngredientScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {

@@ -1,6 +1,9 @@
 package com.aamo.cookbook.features.recipe.form.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContentTransitionScope
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -42,6 +45,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -118,8 +122,17 @@ fun NavGraphBuilder.recipeFormStepScreen(
   formData: (index: Int) -> RecipeFormStepFields,
   onSubmit: (RecipeFormStepFields) -> Unit,
   onBack: () -> Unit,
+  enterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  exitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
+  popEnterTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> EnterTransition?)? = null,
+  popExitTransition: (AnimatedContentTransitionScope<NavBackStackEntry>.() -> ExitTransition?)? = null,
 ) {
-  composable<RecipeFormStepScreen> { navStack ->
+  composable<RecipeFormStepScreen>(
+    enterTransition = enterTransition,
+    exitTransition = exitTransition,
+    popEnterTransition = popEnterTransition,
+    popExitTransition = popExitTransition
+  ) { navStack ->
     val (index) = navStack.toRoute<RecipeFormStepScreen>()
     val viewmodel: RecipeFormStepScreenViewModel = viewModel(factory = viewModelFactory {
       initializer { RecipeFormStepScreenViewModel(formData = formData(index)) }
@@ -130,7 +143,11 @@ fun NavGraphBuilder.recipeFormStepScreen(
     NavHost(
       navController = stepNavController, startDestination = RecipeFormStepScreen(index = index)
     ) {
-      composable<RecipeFormStepScreen> {
+      composable<RecipeFormStepScreen>(
+        enterTransition = { null },
+        exitTransition = exitTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = { null }) {
         RecipeFormStepScreenContent(
           formState = viewmodel.formState,
           isNew = viewmodel.isNew,
@@ -145,12 +162,19 @@ fun NavGraphBuilder.recipeFormStepScreen(
           onBack = onBack,
         )
       }
-      recipeFormIngredientScreen(formData = { index ->
-        viewmodel.formState.ingredients.values.elementAtOrElse(index) { RecipeFormIngredientFields() }
-      }, onSubmit = { ingredient ->
-        viewmodel.update(ingredient)
-        stepNavController.navigateUp()
-      }, onBack = { stepNavController.navigateUp() })
+      recipeFormIngredientScreen(
+        enterTransition = enterTransition,
+        exitTransition = exitTransition,
+        popEnterTransition = popEnterTransition,
+        popExitTransition = popExitTransition,
+        formData = { index ->
+          viewmodel.formState.ingredients.values.elementAtOrElse(index) { RecipeFormIngredientFields() }
+        },
+        onSubmit = { ingredient ->
+          viewmodel.update(ingredient)
+          stepNavController.navigateUp()
+        },
+        onBack = { stepNavController.navigateUp() })
     }
   }
 }
