@@ -6,6 +6,7 @@ import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.MapColumn
 import androidx.room.Query
+import androidx.room.RoomWarnings
 import androidx.room.Transaction
 import androidx.room.Upsert
 import com.aamo.cookbook.database.entities.Chapter
@@ -22,65 +23,68 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface RecipeDao {
   // region GET
-  @Query("SELECt * FROM recipes WHERE id = :recipeId")
+  @Query("SELECt * FROM recipe WHERE id = :recipeId")
   suspend fun getRecipe(recipeId: Long): Recipe?
 
-  @Query("SELECT DISTINCT category FROM recipes")
+  @Query("SELECT DISTINCT category FROM recipe")
   fun getCategoriesFlow(): Flow<List<String>>
 
-  @Query("SELECT category, subCategory FROM recipes")
+  @Query("SELECT category, subCategory FROM recipe")
   suspend fun getCategoriesMap(): Map<@MapColumn(columnName = "category") String, List<@MapColumn(
     columnName = "subCategory"
   ) String>>
 
   @Transaction
-  @Query("SELECT * FROM recipes ORDER BY name ASC")
+  @Query("SELECT * FROM recipe ORDER BY name ASC")
   fun getRecipesWithBookmarkAndRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
   @Transaction
-  @Query("SELECT * FROM recipes WHERE category = :category ORDER BY name ASC")
+  @Query("SELECT * FROM recipe WHERE category = :category ORDER BY name ASC")
   fun getRecipesWithBookmarkAndRatingFlow(category: String): Flow<List<RecipeWithBookmarkAndRating>>
 
+  @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
   @Transaction
   @Query(
     """
-    SELECT recipes.*, bookmarks.*, ratings.* FROM recipes
-    JOIN favoriteRecipes AS bookmarks ON bookmarks.recipeId = recipes.id
-    LEFT OUTER JOIN recipeRatings AS ratings ON ratings.recipeId = recipes.id
+    SELECT recipe.*, bookmark.*, rating.* FROM recipe
+    JOIN recipeBookmark AS bookmark ON bookmark.recipeId = recipe.id
+    LEFT OUTER JOIN recipeRating AS rating ON rating.recipeId = recipe.id
   """
   )
   fun getBookmarksWithRatingFlow(): Flow<List<RecipeWithBookmarkAndRating>>
 
+  @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
   @Transaction
   @Query(
     """
-    SELECT * FROM recipes
-    LEFT JOIN recipeChapters AS chapters ON chapters.recipeId = recipes.id
-    LEFT JOIN chapterSteps AS steps ON steps.chapterId = chapters.id
-    LEFT JOIN ingredients ON ingredients.stepId = steps.id
-    WHERE recipes.id = :recipeId
-    ORDER BY chapters.orderNumber, steps.orderNumber, ingredients.name
+    SELECT recipe.*, chapter.*, step.*, ingredient.* FROM recipe
+    LEFT JOIN recipeChapter AS chapter ON chapter.recipeId = recipe.id
+    LEFT JOIN chapterStep AS step ON step.chapterId = chapter.id
+    LEFT JOIN ingredient ON ingredient.stepId = step.id
+    WHERE recipe.id = :recipeId
+    ORDER BY chapter.orderNumber, step.orderNumber, ingredient.name
   """
   )
   suspend fun getCompleteRecipe(recipeId: Long): RecipeWithChaptersStepsAndIngredients?
 
+  @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
   @Transaction
   @Query(
     """
-    SELECT * FROM recipes
-    LEFT JOIN recipeChapters AS chapters ON chapters.recipeId = recipes.id
-    LEFT JOIN chapterSteps AS steps ON steps.chapterId = chapters.id
-    LEFT JOIN ingredients ON ingredients.stepId = steps.id
-    WHERE recipes.id = :recipeId
-    ORDER BY chapters.orderNumber, steps.orderNumber, ingredients.name
+    SELECT recipe.*, chapter.*, step.*, ingredient.* FROM recipe
+    LEFT JOIN recipeChapter AS chapter ON chapter.recipeId = recipe.id
+    LEFT JOIN chapterStep AS step ON step.chapterId = chapter.id
+    LEFT JOIN ingredient ON ingredient.stepId = step.id
+    WHERE recipe.id = :recipeId
+    ORDER BY chapter.orderNumber, step.orderNumber, ingredient.name
   """
   )
   fun getCompleteRecipeFlow(recipeId: Long): Flow<RecipeWithChaptersStepsAndIngredients?>
 
-  @Query("SELECT * FROM recipeRatings WHERE recipeId = :recipeId")
+  @Query("SELECT * FROM recipeRating WHERE recipeId = :recipeId")
   fun getRatingFlow(recipeId: Long): Flow<RecipeRating?>
 
-  @Query("SELECT * FROM favoriteRecipes WHERE recipeId = :recipeId")
+  @Query("SELECT * FROM recipeBookmark WHERE recipeId = :recipeId")
   fun getBookmarkFlow(recipeId: Long): Flow<RecipeBookmark?>
   // endregion
 

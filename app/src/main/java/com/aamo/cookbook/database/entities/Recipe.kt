@@ -6,13 +6,13 @@ import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.Zero
 
-// TODO: rename plurals to singular
-@Entity(tableName = "recipes")
+@Entity(tableName = "recipe")
 data class Recipe(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
   @ColumnInfo(name = "name") val name: String = String.EMPTY,
@@ -24,12 +24,12 @@ data class Recipe(
 )
 
 @Entity(
-  tableName = "recipeChapters", foreignKeys = [ForeignKey(
+  tableName = "recipeChapter", foreignKeys = [ForeignKey(
     entity = Recipe::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("recipeId"),
     onDelete = ForeignKey.CASCADE
-  )]
+  )], indices = [Index(value = ["recipeId"], unique = false)]
 )
 /**
  * @param [orderNumber] Chapter's order number in a recipe. Starts from one.
@@ -38,19 +38,19 @@ data class Recipe(
  */
 data class Chapter(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
+  @ColumnInfo(name = "recipeId") val recipeId: Long = 0,
   @ColumnInfo(name = "orderNumber") val orderNumber: Int = 0,
   @ColumnInfo(name = "name") val name: String = String.EMPTY,
-  @ColumnInfo(name = "recipeId") val recipeId: Long = 0,
   @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
 )
 
 @Entity(
-  tableName = "chapterSteps", foreignKeys = [ForeignKey(
+  tableName = "chapterStep", foreignKeys = [ForeignKey(
     entity = Chapter::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("chapterId"),
     onDelete = ForeignKey.CASCADE
-  )]
+  )], indices = [Index(value = ["chapterId"], unique = false)]
 )
 /**
  * @param [orderNumber] Step's order number in a chapter. Starts from one.
@@ -67,12 +67,12 @@ data class Step(
 )
 
 @Entity(
-  tableName = "ingredients", foreignKeys = [ForeignKey(
+  tableName = "ingredient", foreignKeys = [ForeignKey(
     entity = Step::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("stepId"),
     onDelete = ForeignKey.CASCADE
-  )]
+  )], indices = [Index(value = ["stepId"], unique = false)]
 )
 data class Ingredient(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -82,14 +82,13 @@ data class Ingredient(
   @ColumnInfo(name = "unit", defaultValue = "") val unit: String = String.EMPTY,
 )
 
-// TODO: rename to bookmark
 @Entity(
-  tableName = "favoriteRecipes", foreignKeys = [ForeignKey(
+  tableName = "recipeBookmark", foreignKeys = [ForeignKey(
     entity = Recipe::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("recipeId"),
     onDelete = ForeignKey.CASCADE
-  )]
+  )], indices = [Index(value = ["recipeId"], unique = true)]
 )
 data class RecipeBookmark(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -97,12 +96,12 @@ data class RecipeBookmark(
 )
 
 @Entity(
-  tableName = "recipeRatings", foreignKeys = [ForeignKey(
+  tableName = "recipeRating", foreignKeys = [ForeignKey(
     entity = Recipe::class,
     parentColumns = arrayOf("id"),
     childColumns = arrayOf("recipeId"),
     onDelete = ForeignKey.CASCADE
-  )]
+  )], indices = [Index(value = ["recipeId"], unique = true)]
 )
 data class RecipeRating(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,

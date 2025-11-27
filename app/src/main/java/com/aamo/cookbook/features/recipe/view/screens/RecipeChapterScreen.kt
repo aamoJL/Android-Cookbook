@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -112,39 +113,43 @@ private fun StepCheckBox(
   colors: ListItemColors = ListItemDefaults.colors()
 ) {
   ListItem(
-    colors = colors, headlineContent = {
-    Text(text = headline, fontFamily = Handwritten, fontWeight = FontWeight.Bold)
-  }, supportingContent = if (ingredients.isNotEmpty() || note.isNotEmpty()) {
-    {
-      Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        if (note.isNotEmpty()) {
-          NoteCard(text = note, modifier = Modifier.fillMaxWidth())
-        }
-        if (ingredients.isNotEmpty()) {
-          Card(
-            shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(
-              containerColor = MaterialTheme.colorScheme.primaryContainer,
-              contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ), modifier = Modifier.fillMaxWidth()
-          ) {
-            IngredientList(
-              ingredients = ingredients,
-              servingsMultiplier = servingsMultiplier,
-              modifier = Modifier.padding(8.dp)
-            )
+    colors = colors,
+    headlineContent = {
+      Text(text = headline, fontFamily = Handwritten, fontWeight = FontWeight.Bold)
+    },
+    supportingContent = if (ingredients.isNotEmpty() || note.isNotEmpty()) {
+      {
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+          if (note.isNotEmpty()) {
+            NoteCard(text = note, modifier = Modifier.fillMaxWidth())
+          }
+          if (ingredients.isNotEmpty()) {
+            Card(
+              shape = RoundedCornerShape(4.dp), colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+              ), modifier = Modifier.fillMaxWidth()
+            ) {
+              IngredientList(
+                ingredients = ingredients,
+                servingsMultiplier = servingsMultiplier,
+                modifier = Modifier.padding(8.dp)
+              )
+            }
           }
         }
       }
     }
-  }
-  else null, leadingContent = {
-    Box(contentAlignment = Alignment.TopCenter) {
-      Checkbox(checked = checked, onCheckedChange = null)
-    }
-  },
+    else null,
+    leadingContent = {
+      Box(contentAlignment = Alignment.TopCenter) {
+        Checkbox(checked = checked, onCheckedChange = null)
+      }
+    },
     // OverlineContent needs to be { } if the supporting content is not null,
     // otherwise the leadingContent will be aligned to center vertically.
-    overlineContent = {}, trailingContent = if (timerDuration != null) {
+    overlineContent = {},
+    trailingContent = if (timerDuration != null) {
       {
         IconButton(onClick = { onStartTimer(timerDuration) }) {
           Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -157,9 +162,12 @@ private fun StepCheckBox(
         }
       }
     }
-    else null, modifier = modifier.toggleable(
-      value = checked, interactionSource = null, indication = null, onValueChange = onCheckedChange
-    ).testTag(UITag.CHECK.name))
+    else null,
+    modifier = modifier
+      .toggleable(
+        value = checked, onValueChange = onCheckedChange, role = Role.Checkbox
+      )
+      .testTag(UITag.CHECK.name))
 }
 
 @Suppress("HardCodedStringLiteral")

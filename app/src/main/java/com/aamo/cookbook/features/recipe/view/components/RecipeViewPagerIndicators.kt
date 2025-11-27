@@ -22,6 +22,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -101,30 +103,32 @@ private fun PageIndicatorItem(
     modifier = modifier
       .padding(10.dp)
       .semantics { this.contentDescription = contentDescription }
-      .size(width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp)
-  ) {
-    if (icon != null) {
-      Icon(
-        painter = icon,
-        contentDescription = null, // Description will be on the surface element
-        modifier = Modifier.padding(4.dp)
-      )
-    }
-    else if (selected) {
+      .size(width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp)) {
+    if (selected) {
       Surface(
         color = MaterialTheme.colorScheme.primary,
         shape = CircleShape,
         modifier = Modifier.padding(4.dp)
       ) {}
     }
+    else if (icon != null) {
+      Icon(
+        painter = icon, contentDescription = null, // Description will be on the surface element
+        modifier = Modifier.padding(4.dp)
+      )
+    }
   }
 }
 
 @Preview
 @Composable
-private fun PagerPreview() {
+private fun PagerPreview(@PreviewParameter(PageIndexPreviewParameterProvider::class) pageIndex: Int) {
   CookbookTheme(useDarkTheme = true) {
     RecipeViewPagerIndicators(
-      pageIndex = 4, recipeProgress = listOf(true, false, false), onPageChange = { })
+      pageIndex = pageIndex, recipeProgress = listOf(true, false, false), onPageChange = { })
   }
+}
+
+private class PageIndexPreviewParameterProvider : PreviewParameterProvider<Int> {
+  override val values = sequenceOf(0, 1, 2, 3, 4)
 }

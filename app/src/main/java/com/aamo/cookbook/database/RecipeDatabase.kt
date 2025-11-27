@@ -13,19 +13,22 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.migrations.SixToSevenAutoMigrationSpec
 
+// Remember to update version, when adding migrations
 @Suppress("HardCodedStringLiteral")
 @Database(
   entities = [Recipe::class, Chapter::class, Step::class, Ingredient::class, RecipeBookmark::class, RecipeRating::class],
   version = RecipeDatabase.Properties.VERSION,
-  // Remember to update version, when adding migrations
   autoMigrations = [AutoMigration(from = 1, to = 2), AutoMigration(from = 2, to = 3), AutoMigration(
     from = 3, to = 4
-  ), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6)]
+  ), AutoMigration(from = 4, to = 5), AutoMigration(from = 5, to = 6), AutoMigration(
+    from = 6, to = 7, spec = SixToSevenAutoMigrationSpec::class
+  ), AutoMigration(from = 7, to = 8)]
 )
 abstract class RecipeDatabase : RoomDatabase() {
   object Properties {
-    const val VERSION = 6
+    const val VERSION = 8
   }
 
   abstract fun recipeDao(): RecipeDao
