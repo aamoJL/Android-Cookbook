@@ -29,7 +29,13 @@ interface RecipeDao {
   @Query("SELECT DISTINCT category FROM recipe")
   fun getCategoriesFlow(): Flow<List<String>>
 
-  @Query("SELECT category, subCategory FROM recipe")
+  @Query(
+    """
+    SELECT DISTINCT category, subCategory FROM recipe
+    WHERE NOT category = ''
+    ORDER BY category
+  """
+  )
   suspend fun getCategoriesMap(): Map<@MapColumn(columnName = "category") String, List<@MapColumn(
     columnName = "subCategory"
   ) String>>

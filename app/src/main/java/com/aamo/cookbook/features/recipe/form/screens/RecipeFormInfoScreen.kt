@@ -64,6 +64,7 @@ import com.aamo.cookbook.features.recipe.form.primaryEnterTransition
 import com.aamo.cookbook.features.recipe.form.primaryExitTransition
 import com.aamo.cookbook.features.recipe.form.secondaryEnterTransition
 import com.aamo.cookbook.features.recipe.form.secondaryExitTransition
+import com.aamo.cookbook.features.recipe.form.use_cases.fetchCategorySuggestions
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
@@ -159,7 +160,7 @@ fun RecipeFormInfoScreen(
     initializer {
       RecipeFormInfoScreenViewModel(
         formData = RecipeFormInfoFields.fromDao(model = recipe),
-        fetchCategorySuggestions = { dao.getCategoriesMap() },
+        fetchCategorySuggestions = { fetchCategorySuggestions(recipeDao = dao) },
       )
     }
   })

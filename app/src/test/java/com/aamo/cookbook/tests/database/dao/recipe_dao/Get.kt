@@ -5,6 +5,7 @@ import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.test_utility.database.DatabaseTest
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import junit.framework.TestCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -12,6 +13,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
+@Suppress("HardCodedStringLiteral")
 @RunWith(RobolectricTestRunner::class)
 class Get : DatabaseTest() {
   @Test
@@ -43,13 +45,21 @@ class Get : DatabaseTest() {
 
   @Test
   fun getCategoriesMap() = runTest {
-    val recipes = listOf(
-      RecipeMocker(seed = 1).mock(),
-      RecipeMocker(seed = 1).modify { it.copy(subCategory = "sub") }.mock(),
-      RecipeMocker(seed = 2).mock(),
-    ).also { it.forEach { r -> dao.upsert(r) } }
+    listOf(
+      RecipeMocker().modify { it.copy(category = "cat 1", subCategory = String.EMPTY) }.mock(),
+      RecipeMocker().modify { it.copy(category = "cat 1", subCategory = "sub 1") }.mock(),
+      RecipeMocker().modify { it.copy(category = "cat 2", subCategory = "sub 1") }.mock(),
+      RecipeMocker().modify { it.copy(category = "cat 2", subCategory = "sub 1") }.mock(),
+      RecipeMocker().modify { it.copy(category = "cat 2", subCategory = "sub 2") }.mock(),
+      RecipeMocker().modify { it.copy(category = "cat 3", subCategory = String.EMPTY) }.mock(),
+      RecipeMocker().modify { it.copy(category = String.EMPTY, subCategory = "sub 1") }.mock(),
+    ).forEach { r -> dao.upsert(r) }
 
-    val expected = recipes.groupBy({ it.recipe.category }, { it.recipe.subCategory })
+    val expected = mapOf(
+      "cat 1" to listOf(String.EMPTY, "sub 1"),
+      "cat 2" to listOf("sub 1", "sub 2"),
+      "cat 3" to listOf(String.EMPTY),
+    )
     val actual = dao.getCategoriesMap()
 
     TestCase.assertEquals(expected, actual)
