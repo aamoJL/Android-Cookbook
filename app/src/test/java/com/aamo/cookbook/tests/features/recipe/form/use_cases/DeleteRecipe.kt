@@ -4,7 +4,7 @@ package com.aamo.cookbook.tests.features.recipe.form.use_cases
 
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import com.aamo.cookbook.test_utility.service.TestPhotoService
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import kotlinx.coroutines.test.runTest
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class DeleteRecipe : RecipeDatabaseTest() {
+class DeleteRecipe : DatabaseTest() {
   @Test
   fun `recipe deleted`() = runTest {
     val recipe = Recipe().let { result ->

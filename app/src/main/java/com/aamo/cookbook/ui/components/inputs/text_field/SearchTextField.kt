@@ -23,8 +23,8 @@ import com.aamo.cookbook.utility.extensions.general.EMPTY
 fun SearchTextField(
   value: String,
   onValueChange: (String) -> Unit,
-  placeholder: String = String.EMPTY,
   modifier: Modifier = Modifier,
+  placeholder: String = String.EMPTY,
   shape: Shape = RoundedCornerShape(4.dp),
 ) {
   TextField(

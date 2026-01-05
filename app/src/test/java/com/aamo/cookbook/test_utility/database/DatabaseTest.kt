@@ -8,7 +8,7 @@ import org.junit.After
 import org.junit.Before
 import java.io.IOException
 
-abstract class RecipeDatabaseTest {
+abstract class DatabaseTest {
   protected lateinit var database: RecipeDatabase
   protected lateinit var dao: RecipeDao
 

@@ -4,6 +4,7 @@ import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.fail
@@ -13,12 +14,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class Init {
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class Init : UnconfinedTest() {
   @Test
   fun `recipe set`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
@@ -44,7 +42,6 @@ class Init {
     assertEquals(recipe, actual)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `servings state set`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

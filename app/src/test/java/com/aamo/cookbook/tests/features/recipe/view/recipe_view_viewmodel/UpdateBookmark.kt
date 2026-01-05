@@ -4,6 +4,7 @@ import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -14,12 +15,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class UpdateBookmark {
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class UpdateBookmark : UnconfinedTest() {
   @Test
   fun `updateBookmark returns new when bookmark is null`() = runTest(UnconfinedTestDispatcher()) {
     val model = RecipeViewRecipeModel(
@@ -47,7 +45,6 @@ class UpdateBookmark {
     TestCase.assertEquals(true, value)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateBookmark returns old when bookmark is not null`() =
     runTest(UnconfinedTestDispatcher()) {
@@ -78,7 +75,6 @@ class UpdateBookmark {
       TestCase.assertEquals(false, value)
     }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateBookmark not called when not changed`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

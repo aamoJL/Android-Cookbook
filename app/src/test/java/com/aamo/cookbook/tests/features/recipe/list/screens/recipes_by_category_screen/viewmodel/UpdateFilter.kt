@@ -3,37 +3,20 @@ package com.aamo.cookbook.tests.features.recipe.list.screens.recipes_by_category
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.screens.RecipesByCategoryScreenViewModel
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNotNull
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
-import org.junit.Before
 import org.junit.Test
 
-class UpdateFilter {
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @Before
-  fun setup() {
-    Dispatchers.setMain(UnconfinedTestDispatcher())
-  }
-
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @After
-  fun after() {
-    Dispatchers.resetMain()
-  }
-
+class UpdateFilter : UnconfinedTest() {
   @Test
   fun `filter set`() = runTest {
     val dataFlow = MutableSharedFlow<List<RecipeListRecipeModel>>()

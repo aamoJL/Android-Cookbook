@@ -3,6 +3,7 @@ package com.aamo.cookbook.tests.features.recipe.list.screens.recipes_by_category
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.screens.RecipesByCategoryScreenViewModel
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertNull
 import junit.framework.TestCase.assertTrue
@@ -13,12 +14,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class Init {
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class Init : UnconfinedTest() {
   @Test
   fun `recipes set`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<List<RecipeListRecipeModel>>()
@@ -37,7 +35,6 @@ class Init {
     assertEquals(list, viewmodel.recipes.value)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `subcategories set`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<List<RecipeListRecipeModel>>()

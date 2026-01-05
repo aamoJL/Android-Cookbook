@@ -9,11 +9,7 @@ import androidx.compose.ui.res.stringResource
 import com.aamo.cookbook.R
 
 @Composable
-fun UnsavedDialog(
-  open: Boolean,
-  onDismiss: () -> Unit,
-  onConfirm: () -> Unit,
-) {
+fun UnsavedDialog(open: Boolean, onDismiss: () -> Unit, onConfirm: () -> Unit) {
   if (!open) return
 
   AlertDialog(

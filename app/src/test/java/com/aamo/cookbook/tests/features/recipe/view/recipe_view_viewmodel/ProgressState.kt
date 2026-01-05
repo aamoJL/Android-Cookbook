@@ -3,6 +3,7 @@ package com.aamo.cookbook.tests.features.recipe.view.recipe_view_viewmodel
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -12,11 +13,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class ProgressState {
+@OptIn(ExperimentalCoroutinesApi::class)
+class ProgressState : UnconfinedTest() {
   @Test
   fun init() {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
@@ -31,7 +30,6 @@ class ProgressState {
     assertEquals(emptyList<List<Boolean>>(), progress.values)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `is set when recipe is set`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()
@@ -53,7 +51,6 @@ class ProgressState {
     assertEquals(recipe.chapters.map { c -> c.steps.map { false } }, progress.values)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun update() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

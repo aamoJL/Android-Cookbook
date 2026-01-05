@@ -4,37 +4,21 @@ import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert
 import org.junit.Assert.fail
-import org.junit.Before
 import org.junit.Test
 import java.util.UUID
 
 @Suppress("HardCodedStringLiteral")
-class SaveRecipe {
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @Before
-  fun setup() {
-    Dispatchers.setMain(UnconfinedTestDispatcher())
-  }
-
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @After
-  fun cleanup() {
-    Dispatchers.resetMain()
-  }
-
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class SaveRecipe : UnconfinedTest() {
   @Test
   fun `passes correct arguments to saveData`() = runTest {
     val model = RecipeMocker.getFullMocker().modify { it.copy(id = 4, thumbnailUri = "Uri") }.mock()

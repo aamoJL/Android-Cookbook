@@ -3,7 +3,7 @@ package com.aamo.cookbook.tests.features.recipe.view.use_cases
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.features.recipe.view.use_cases.updateBookmark
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import junit.framework.TestCase.assertNotNull
 import junit.framework.TestCase.assertNull
 import kotlinx.coroutines.flow.first
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class UpdateBookmark : RecipeDatabaseTest() {
+class UpdateBookmark : DatabaseTest() {
   @Test
   fun `bookmark added when value is true`() = runTest {
     val recipeId = dao.upsert(RecipeMocker().mock())

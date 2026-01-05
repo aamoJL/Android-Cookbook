@@ -4,6 +4,7 @@ import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -13,12 +14,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class UpdateRating {
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class UpdateRating : UnconfinedTest() {
   @Test
   fun `updateRating returns old when updated`() = runTest(UnconfinedTestDispatcher()) {
     var calledValue: Int? = null
@@ -46,7 +44,6 @@ class UpdateRating {
     assertEquals(rating, calledRating)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateRating returns old when removed`() = runTest(UnconfinedTestDispatcher()) {
     var calledValue: Int? = null
@@ -74,7 +71,6 @@ class UpdateRating {
     assertEquals(rating, calledRating)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateRating returns new when old is null`() = runTest(UnconfinedTestDispatcher()) {
     var calledValue: Int? = null
@@ -101,7 +97,6 @@ class UpdateRating {
     assertEquals(RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 0), calledRating)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateRating not called when not changed`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

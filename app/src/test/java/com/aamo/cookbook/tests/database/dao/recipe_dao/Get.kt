@@ -4,7 +4,7 @@ import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithBookmarkAndRating
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import junit.framework.TestCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class Get : RecipeDatabaseTest() {
+class Get : DatabaseTest() {
   @Test
   fun getRecipe() = runTest {
     val recipe = RecipeMocker().mock()

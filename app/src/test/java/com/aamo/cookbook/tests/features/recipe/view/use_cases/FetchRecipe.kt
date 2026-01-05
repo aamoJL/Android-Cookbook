@@ -5,7 +5,7 @@ import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.features.recipe.view.use_cases.fetchRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -21,7 +21,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class FetchRecipe : RecipeDatabaseTest() {
+class FetchRecipe : DatabaseTest() {
   @OptIn(ExperimentalCoroutinesApi::class)
   override fun setup() {
     Dispatchers.setMain(UnconfinedTestDispatcher())

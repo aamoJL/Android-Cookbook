@@ -29,7 +29,7 @@ class NumberField {
         value = 0f,
         onValueChange = { onValueChangedCalled = true },
         validator = FloatFieldValidator,
-        modifier = Modifier.Companion.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
     rule.waitForIdle()
@@ -47,7 +47,7 @@ class NumberField {
         onValueChange = {},
         validator = FloatFieldValidator,
         enabled = false,
-        modifier = Modifier.Companion.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
     rule.waitForIdle()
@@ -64,7 +64,7 @@ class NumberField {
         onValueChange = {},
         validator = FloatFieldValidator,
         label = { Text(labelText) },
-        modifier = Modifier.Companion.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name)
       )
     }
     rule.waitForIdle()

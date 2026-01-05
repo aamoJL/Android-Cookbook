@@ -1,7 +1,7 @@
 package com.aamo.cookbook.tests.database.dao.recipe_dao
 
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import junit.framework.TestCase
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
@@ -9,7 +9,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class Upsert: RecipeDatabaseTest() {
+class Upsert : DatabaseTest() {
   @Test
   fun upsert_RecipeWithChaptersStepsAndIngredients() = runTest {
     dao.upsert(RecipeMocker.getFullMocker().mock())

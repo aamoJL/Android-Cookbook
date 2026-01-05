@@ -2,7 +2,7 @@ package com.aamo.cookbook.tests.features.recipe.view.use_cases
 
 import com.aamo.cookbook.features.recipe.view.use_cases.updateThumbnail
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import com.aamo.cookbook.test_utility.service.TestPhotoService
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import junit.framework.TestCase.assertEquals
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class UpdateThumbnail : RecipeDatabaseTest() {
+class UpdateThumbnail : DatabaseTest() {
   @Test
   fun `thumbnail updated when value is not null`() = runTest {
     val recipe = dao.upsert(RecipeMocker().mock()).let {

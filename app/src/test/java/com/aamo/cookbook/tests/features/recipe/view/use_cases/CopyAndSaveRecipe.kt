@@ -2,7 +2,7 @@ package com.aamo.cookbook.tests.features.recipe.view.use_cases
 
 import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
@@ -13,7 +13,7 @@ import org.robolectric.RobolectricTestRunner
 
 @Suppress("HardCodedStringLiteral")
 @RunWith(RobolectricTestRunner::class)
-class CopyAndSaveRecipe : RecipeDatabaseTest() {
+class CopyAndSaveRecipe : DatabaseTest() {
   @Test
   fun `returns correct id`() = runTest {
     val actual = copyAndSaveRecipe(

@@ -3,35 +3,19 @@ package com.aamo.cookbook.tests.features.recipe.form.recipe_form_viewmodel
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
-import kotlinx.coroutines.test.setMain
-import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
-import org.junit.Before
 import org.junit.Test
 
-class DeleteRecipe {
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @Before
-  fun setup() {
-    Dispatchers.setMain(UnconfinedTestDispatcher())
-  }
-
-  @OptIn(ExperimentalCoroutinesApi::class)
-  @After
-  fun cleanup() {
-    Dispatchers.resetMain()
-  }
-
+class DeleteRecipe : UnconfinedTest() {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `deleteData called`() = runTest(UnconfinedTestDispatcher()) {
@@ -52,7 +36,7 @@ class DeleteRecipe {
 
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
-  fun `returns correct value from deleteData`() = runTest {
+  fun `returns correct value from deleteData`() = runTest(UnconfinedTestDispatcher()) {
     val recipe = RecipeMocker.getFullMocker().mock()
     var value: RecipeWithChaptersStepsAndIngredients? = null
     val viewmodel = RecipeFormViewModel(
@@ -63,7 +47,7 @@ class DeleteRecipe {
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
     }
-    
+
     viewmodel.deleteRecipe()
 
     assertEquals(recipe, value)

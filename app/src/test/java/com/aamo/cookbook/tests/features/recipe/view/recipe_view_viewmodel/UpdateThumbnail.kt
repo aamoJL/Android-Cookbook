@@ -3,6 +3,7 @@ package com.aamo.cookbook.tests.features.recipe.view.recipe_view_viewmodel
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import junit.framework.TestCase
 import junit.framework.TestCase.assertEquals
@@ -13,12 +14,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 
-@RunWith(RobolectricTestRunner::class)
-class UpdateThumbnail {
-  @OptIn(ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalCoroutinesApi::class)
+class UpdateThumbnail : UnconfinedTest() {
   @Test
   fun `updateThumbnail called when changed`() = runTest(UnconfinedTestDispatcher()) {
     var called: String? = null
@@ -45,7 +43,6 @@ class UpdateThumbnail {
     assertEquals(expected, called)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `updateThumbnail not called when not changed`() = runTest(UnconfinedTestDispatcher()) {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

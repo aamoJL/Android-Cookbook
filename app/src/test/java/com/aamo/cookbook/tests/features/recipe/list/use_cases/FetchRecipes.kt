@@ -8,7 +8,7 @@ import com.aamo.cookbook.features.recipe.list.use_cases.fetchBookmarks
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipesByCategory
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.runTest
@@ -17,7 +17,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class FetchRecipes : RecipeDatabaseTest() {
+class FetchRecipes : DatabaseTest() {
   @Test
   fun `returns correct models`() = runTest {
     val recipes: MutableList<RecipeWithBookmarkAndRating> = mutableListOf()

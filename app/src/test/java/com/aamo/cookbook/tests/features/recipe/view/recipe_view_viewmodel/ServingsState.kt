@@ -5,6 +5,7 @@ import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.features.recipe.view.RecipeViewViewModel
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.test_utility.RecipeMocker
+import com.aamo.cookbook.test_utility.ui.rules.UnconfinedTest
 import junit.framework.TestCase.fail
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -14,12 +15,10 @@ import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.robolectric.RobolectricTestRunner
 import com.aamo.cookbook.features.recipe.view.models.ServingsState as state
 
-@RunWith(RobolectricTestRunner::class)
-class ServingsState {
+@OptIn(ExperimentalCoroutinesApi::class)
+class ServingsState : UnconfinedTest() {
   @Test
   fun init() {
     val servingsState = state()
@@ -28,7 +27,6 @@ class ServingsState {
     assertEquals(1, servingsState.baseline.value)
   }
 
-  @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `does not change when bookmark or ratings changes`() = runTest {
     val dataFlow = MutableSharedFlow<RecipeViewRecipeModel>()

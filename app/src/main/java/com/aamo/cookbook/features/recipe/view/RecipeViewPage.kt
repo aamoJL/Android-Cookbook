@@ -47,7 +47,9 @@ import com.aamo.cookbook.features.recipe.view.use_cases.updateBookmark
 import com.aamo.cookbook.features.recipe.view.use_cases.updateRating
 import com.aamo.cookbook.features.recipe.view.use_cases.updateThumbnail
 import com.aamo.cookbook.service.CalculatorService
+import com.aamo.cookbook.service.ICalculatorService
 import com.aamo.cookbook.service.IOService
+import com.aamo.cookbook.service.ITimerService
 import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.service.TimerService
 import com.aamo.cookbook.ui.components.LoadingScreen
@@ -55,6 +57,7 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.letIf
+import com.aamo.cookbook.utility.extensions.general.onFalse
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -147,14 +150,26 @@ class RecipeViewViewModel(
       runCatching { saveAsCopy(recipe) }
     }
   }
+
+  fun openTimer(timerService: ITimerService): Boolean {
+    return runCatching { timerService.open() }.isSuccess
+  }
+
+  fun startTimer(timerService: ITimerService, title: String, duration: Duration): Boolean {
+    return runCatching { timerService.start(title = title, duration = duration) }.isSuccess
+  }
+
+  fun openCalculator(calculatorService: ICalculatorService): Boolean {
+    return runCatching { calculatorService.open() }.isSuccess
+  }
 }
 
 fun NavGraphBuilder.recipeViewPage(
   onOpenRecipeForm: (id: Long) -> Unit, onSnackbar: (SnackbarProperties) -> Unit, onBack: () -> Unit
 ) {
   composable<RecipeViewPage> { navStack ->
-    val context = LocalContext.current
     val (id) = navStack.toRoute<RecipeViewPage>()
+    val context = LocalContext.current
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipeViewViewModel = viewModel(factory = viewModelFactory {
       initializer {
@@ -206,19 +221,22 @@ fun NavGraphBuilder.recipeViewPage(
           )
         },
         onOpenCalculator = {
-          CalculatorService(context = context).open(onError = {
-            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
-          })
+          viewmodel.openCalculator(calculatorService = CalculatorService(context = context))
+            .onFalse {
+              onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
+            }
         },
         onOpenTimer = {
-          TimerService(context = context).open(onError = {
+          viewmodel.openTimer(timerService = TimerService(context = context)).onFalse {
             onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
-          })
+          }
         },
         onStartTimer = { title, duration ->
-          TimerService(context = context).start(title = title, duration = duration, onError = {
+          viewmodel.startTimer(
+            timerService = TimerService(context = context), title = title, duration = duration
+          ).onFalse {
             onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
-          })
+          }
         },
         onBack = onBack
       )

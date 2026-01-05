@@ -9,7 +9,7 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertEquals
 import org.junit.Test
@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import java.util.UUID
 
 @RunWith(RobolectricTestRunner::class)
-class FetchRecipe : RecipeDatabaseTest() {
+class FetchRecipe : DatabaseTest() {
   @Test
   fun `returns correct model when new`() = runTest {
     val actual = fetchRecipe(dao = dao, recipeId = 0L)

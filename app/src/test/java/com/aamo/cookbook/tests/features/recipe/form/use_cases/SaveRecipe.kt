@@ -4,7 +4,7 @@ import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
-import com.aamo.cookbook.test_utility.database.RecipeDatabaseTest
+import com.aamo.cookbook.test_utility.database.DatabaseTest
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -13,7 +13,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 
 @RunWith(RobolectricTestRunner::class)
-class SaveRecipe : RecipeDatabaseTest() {
+class SaveRecipe : DatabaseTest() {
   @Test
   fun `returns correct id`() = runTest {
     val model = RecipeMocker.getFullMocker().mock()
