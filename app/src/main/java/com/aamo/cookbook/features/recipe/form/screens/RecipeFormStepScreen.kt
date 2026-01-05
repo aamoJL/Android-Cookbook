@@ -157,7 +157,6 @@ fun NavGraphBuilder.recipeFormStepScreen(
           },
           onEditIngredient = { stepNavController.navigate(RecipeFormIngredientScreen(index = it)) },
           onDeleteIngredient = { viewmodel.formState.ingredients.remove(it) },
-          onSwapIngredients = { a, b -> viewmodel.formState.ingredients.swapAt(a, b) },
           onSubmit = { onSubmit(viewmodel.getModel()) },
           onBack = onBack,
         )
@@ -187,7 +186,6 @@ fun RecipeFormStepScreenContent(
   onNewIngredient: () -> Unit,
   onEditIngredient: (index: Int) -> Unit,
   onDeleteIngredient: (RecipeFormIngredientFields) -> Unit,
-  onSwapIngredients: (from: Int, to: Int) -> Unit,
   onSubmit: () -> Unit,
   onBack: () -> Unit,
 ) {
@@ -230,7 +228,6 @@ fun RecipeFormStepScreenContent(
         onNewIngredient = onNewIngredient,
         onEditIngredient = onEditIngredient,
         onDeleteIngredient = onDeleteIngredient,
-        onSwap = onSwapIngredients,
       )
     }
   }
@@ -288,7 +285,6 @@ private fun StepFormIngredientList(
   onNewIngredient: () -> Unit,
   onEditIngredient: (index: Int) -> Unit,
   onDeleteIngredient: (RecipeFormIngredientFields) -> Unit,
-  onSwap: (from: Int, to: Int) -> Unit,
 ) {
   FormList(
     title = stringResource(R.string.title_ingredients), actions = {
@@ -310,17 +306,10 @@ private fun StepFormIngredientList(
             ingredient = ingredient,
             onClick = { onEditIngredient(index) },
             onDismiss = { onDeleteIngredient(ingredient) },
-            onMoveUp = if (index != 0) {
-              { onSwap(index, index - 1) }
-            }
-            else null,
-            onMoveDown = if (index != ingredients.size - 1) {
-              { onSwap(index, index + 1) }
-            }
-            else null,
             modifier = Modifier
               .fillMaxWidth()
-              .testTag(UITag.OPTION.name))
+              .testTag(UITag.OPTION.name)
+          )
 
           if (index != ingredients.size - 1) {
             HorizontalDivider()
@@ -336,8 +325,6 @@ private fun IngredientListItem(
   ingredient: RecipeFormIngredientFields,
   onClick: () -> Unit,
   onDismiss: () -> Unit,
-  onMoveUp: (() -> Unit)?,
-  onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
@@ -358,21 +345,6 @@ private fun IngredientListItem(
           style = MaterialTheme.typography.titleMedium,
         )
       }
-    }, trailingContent = {
-      Column {
-        if (onMoveUp != null) IconButton(onClick = onMoveUp) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-            contentDescription = stringResource(R.string.cd_move_up)
-          )
-        }
-        if (onMoveDown != null) IconButton(onClick = onMoveDown) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-            contentDescription = stringResource(R.string.cd_move_down)
-          )
-        }
-      }
     })
   }
 }
@@ -390,7 +362,6 @@ private fun Preview() {
     onNewIngredient = {},
     onEditIngredient = {},
     onDeleteIngredient = {},
-    onSwapIngredients = { _, _ -> },
     onSubmit = {},
     onBack = {},
   )
