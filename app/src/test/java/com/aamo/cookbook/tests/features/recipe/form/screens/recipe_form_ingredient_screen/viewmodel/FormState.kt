@@ -81,5 +81,11 @@ class FormState {
       RecipeFormIngredientScreenViewModel.FormState(formData = data)
         .apply { amount.update(-1.0) }.amount.value
     )
+
+    assertEquals(
+      0.5,
+      RecipeFormIngredientScreenViewModel.FormState(formData = data)
+        .apply { amount.update(0.5) }.amount.value
+    )
   }
 }

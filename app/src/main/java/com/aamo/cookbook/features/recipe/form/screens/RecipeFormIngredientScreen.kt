@@ -59,7 +59,7 @@ class RecipeFormIngredientScreenViewModel(
   class FormState(formData: RecipeFormIngredientFields) {
     val name = ViewModelState(formData.name).onChange { onUnsavedChanges() }
     val amount = ViewModelState(formData.amount).transformation { value ->
-      if (value != null && value < 1) null else value
+      if (value != null && value <= 0) null else value
     }.onChange { onUnsavedChanges() }
     val unit = ViewModelState(formData.unit).onChange { onUnsavedChanges() }
     var savingState by mutableStateOf(SavingState())
