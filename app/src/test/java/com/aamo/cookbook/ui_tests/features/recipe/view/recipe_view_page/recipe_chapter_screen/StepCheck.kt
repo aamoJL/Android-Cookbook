@@ -40,10 +40,6 @@ class StepCheck : PageTest() {
   fun `toggle state`() {
     val check = rule.onAllNodesWithTag(UITag.CHECK.name, useUnmergedTree = true).onFirst()
 
-    check.assertIsOff()
-    check.performClick()
-    check.assertIsOn()
-    check.performClick()
-    check.assertIsOff()
+    check.assertIsOff().performClick().assertIsOn().performClick().assertIsOff()
   }
 }

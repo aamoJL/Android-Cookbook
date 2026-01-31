@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -34,7 +35,7 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
 import com.aamo.cookbook.database.entities.Step
 import com.aamo.cookbook.database.entities.StepWithIngredients
-import com.aamo.cookbook.features.recipe.view.components.IngredientList
+import com.aamo.cookbook.features.recipe.view.components.IngredientCheckBoxList
 import com.aamo.cookbook.features.recipe.view.components.NoteCard
 import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.ui.components.inputs.CountInput
@@ -106,21 +107,18 @@ fun RecipeSummaryScreen(
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
           recipe.chapters.map { it.chapter to it.steps.flatMap { (_, ingredients) -> ingredients } }
             .forEach { chapterIngredientsPair ->
-              Column(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .padding(start = 0.dp)
-              ) {
+              Column(modifier = Modifier.fillMaxWidth()) {
                 Text(
                   text = chapterIngredientsPair.first.name,
                   fontFamily = Handwritten,
-                  style = MaterialTheme.typography.labelSmall,
+                  style = MaterialTheme.typography.labelLarge,
                 )
-                IngredientList(
+                IngredientCheckBoxList(
                   ingredients = chapterIngredientsPair.second,
                   servingsMultiplier = servingsMultiplier,
                   fontFamily = Handwritten,
-                  textStyle = MaterialTheme.typography.bodyMedium
+                  textStyle = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier.fillMaxHeight()
                 )
               }
             }
@@ -144,11 +142,12 @@ private fun Preview() {
               StepWithIngredients(
                 step = Step(), ingredients = listOf(
                   Ingredient(name = "Ingredient 1", amount = 250.0, unit = "g"),
+                  Ingredient(name = "Ingredient 2", amount = 250.0, unit = "g"),
+                  Ingredient(name = "Ingredient 3", amount = 250.0, unit = "g"),
                 )
               )
             )
-          ),
-          ChapterWithStepsAndIngredients(
+          ), ChapterWithStepsAndIngredients(
             chapter = Chapter(name = "Chapter 2"), steps = listOf(
               StepWithIngredients(
                 step = Step(), ingredients = listOf(

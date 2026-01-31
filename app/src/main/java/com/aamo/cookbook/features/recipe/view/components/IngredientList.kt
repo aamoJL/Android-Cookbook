@@ -19,7 +19,6 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.database.entities.Ingredient
-import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 
@@ -28,7 +27,7 @@ fun IngredientList(
   ingredients: List<Ingredient>,
   servingsMultiplier: Double,
   modifier: Modifier = Modifier,
-  fontFamily: FontFamily = Handwritten,
+  fontFamily: FontFamily = FontFamily.Default,
   textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier) {

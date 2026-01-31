@@ -1,0 +1,117 @@
+package com.aamo.cookbook.features.recipe.view.components
+
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalMinimumInteractiveComponentSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewParameter
+import androidx.compose.ui.tooling.preview.PreviewParameterProvider
+import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.ui.components.inputs.LabelledCheckBox
+import com.aamo.cookbook.utility.extensions.general.Zero
+import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun IngredientCheckBoxList(
+  ingredients: List<Ingredient>,
+  servingsMultiplier: Double,
+  modifier: Modifier = Modifier,
+  fontFamily: FontFamily = FontFamily.Default,
+  textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+) {
+  Column(modifier = modifier) {
+    ingredients.forEach {
+      var checked by rememberSaveable { mutableStateOf(false) }
+
+      CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides 36.dp) {
+        LabelledCheckBox(
+          checked = checked,
+          onCheckedChange = { value -> checked = value },
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(start = 4.dp)
+          ) {
+            if (it.amount != Double.Zero) {
+              Text(
+                text = (it.amount * servingsMultiplier).toFractionFormattedString(),
+                style = textStyle,
+                fontFamily = fontFamily,
+                modifier = Modifier.padding(end = if (it.unit.isNotEmpty()) 2.dp else 8.dp)
+              )
+            }
+            if (it.unit.isNotEmpty()) {
+              Text(
+                text = it.unit,
+                style = textStyle,
+                fontFamily = fontFamily,
+                modifier = Modifier.padding(end = 8.dp)
+              )
+            }
+            Text(
+              text = it.name,
+              style = textStyle,
+              fontFamily = fontFamily,
+            )
+          }
+        }
+      }
+    }
+  }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun Preview(
+  @PreviewParameter(IngredientCheckBoxListPreviewParameterProvider::class)
+  ingredients: List<Ingredient>
+) {
+  IngredientCheckBoxList(
+    ingredients = ingredients, servingsMultiplier = 1.0
+  )
+}
+
+@Suppress("HardCodedStringLiteral")
+private class IngredientCheckBoxListPreviewParameterProvider :
+        PreviewParameterProvider<List<Ingredient>> {
+  override val values = sequenceOf(
+    listOf(
+      Ingredient(id = 1, name = "Ingredient 1", amount = 250.0, unit = "g"),
+      Ingredient(id = 2, name = "Ingredient 2", amount = 2.0, unit = "pieces"),
+      Ingredient(id = 3, name = "Ingredient 3", amount = 25.0, unit = "kpl"),
+    ),
+    listOf(
+      Ingredient(id = 4, name = "Ingredient 1", amount = 250.0, unit = "g"),
+      Ingredient(id = 5, name = "Ingredient 2", unit = "g"),
+      Ingredient(id = 6, name = "Ingredient 3", amount = 25.0),
+    ),
+    listOf(
+      Ingredient(id = 7, name = "Ingredient 1", unit = "g"),
+      Ingredient(id = 8, name = "Ingredient 2", unit = "g"),
+      Ingredient(id = 9, name = "Ingredient 3"),
+    ),
+    listOf(
+      Ingredient(id = 10, name = "Ingredient 1", amount = 100.0),
+      Ingredient(id = 11, name = "Ingredient 2", amount = 2.0),
+      Ingredient(id = 12, name = "Ingredient 3", amount = 19.12),
+    ),
+  )
+}

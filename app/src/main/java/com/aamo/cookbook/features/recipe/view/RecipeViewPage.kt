@@ -30,10 +30,13 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Chapter
 import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
+import com.aamo.cookbook.database.entities.Ingredient
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeBookmark
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.database.entities.Step
+import com.aamo.cookbook.database.entities.StepWithIngredients
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewPagerIndicators
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewTopBar
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
@@ -334,6 +337,7 @@ fun RecipeViewPageContent(
   }
 }
 
+@Suppress("HardCodedStringLiteral")
 @Preview
 @Composable
 private fun RecipeViewPageContentPreview() {
@@ -343,7 +347,15 @@ private fun RecipeViewPageContentPreview() {
         recipe = RecipeWithChaptersStepsAndIngredients(
           recipe = Recipe(), chapters = listOf(
             ChapterWithStepsAndIngredients(
-              chapter = Chapter()
+              chapter = Chapter(name = "Chapter 1"), steps = listOf(
+                StepWithIngredients(
+                  step = Step(), ingredients = listOf(
+                    Ingredient(id = 1, name = "Ingredient 1", amount = 1.0, unit = "dl"),
+                    Ingredient(id = 2, name = "Ingredient 2", amount = 2.0, unit = "kpl"),
+                    Ingredient(id = 3, name = "Ingredient 3", amount = 3.0, unit = "ml"),
+                  )
+                )
+              )
             )
           )
         ),

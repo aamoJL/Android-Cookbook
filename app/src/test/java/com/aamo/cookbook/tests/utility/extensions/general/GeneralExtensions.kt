@@ -3,7 +3,6 @@
 package com.aamo.cookbook.tests.utility.extensions.general
 
 import com.aamo.cookbook.utility.extensions.general.applyIf
-import com.aamo.cookbook.utility.extensions.general.equalsAny
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.extensions.general.letIf
 import com.aamo.cookbook.utility.extensions.general.onFalse
@@ -79,13 +78,5 @@ class GeneralExtensions {
   fun `ifElse test`() {
     assertTrue(ifElse(condition = false, ifTrue = { false.also { fail() } }, ifFalse = { true }))
     assertFalse(ifElse(condition = true, ifTrue = { false }, ifFalse = { true.also { fail() } }))
-  }
-
-  @Test
-  fun `equalsAny test`() {
-    assertFalse(1.equalsAny())
-    assertTrue(1.equalsAny(1))
-    assertTrue(1.equalsAny(2, 5, 4, 1, 0))
-    assertFalse(1.equalsAny(2, 5, 4, 6, 0))
   }
 }
