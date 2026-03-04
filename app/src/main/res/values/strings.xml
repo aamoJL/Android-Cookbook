@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Cookbook</string>
     <string name="suffix_copy">\u0020- copy</string>
-    <string name="text_choose_category">Choose a category</string>
+    <string name="text_menu">Menu</string>
     <string name="screen_title_new_chapter">Add a new chapter</string>
     <string name="screen_title_existing_chapter">Edit chapter</string>
     <string name="screen_title_new_recipe">Add a new recipe</string>

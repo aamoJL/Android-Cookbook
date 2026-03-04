@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="suffix_copy">\u0020- kopio</string>
-    <string name="text_choose_category">Valitse kategoria</string>
+    <string name="text_menu">Menu</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
     <string name="screen_title_new_recipe">Lisää uusi resepti</string>

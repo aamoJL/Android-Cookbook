@@ -1,5 +1,6 @@
 package com.aamo.cookbook.ui_tests.features.home.home_page
 
+import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import com.aamo.cookbook.R
@@ -28,21 +29,21 @@ class Navigation : PageTest() {
 
   @Test
   fun `to recipeSearchScreen`() = runTest {
-    rule.onNodeWithText(getString(R.string.btn_search)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_search)).performClick()
     waitForLoading()
     rule.onNodeWithText(getString(R.string.ph_search)).assertExists()
   }
 
   @Test
   fun `to recipesByBookmarkScreen`() = runTest {
-    rule.onNodeWithText(getString(R.string.btn_bookmarks)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_bookmarks)).performClick()
     waitForLoading()
     rule.onNodeWithText(getString(R.string.screen_title_bookmarks)).assertExists()
   }
 
   @Test
   fun `to recipeFormPage`() = runTest {
-    rule.onNodeWithText(getString(R.string.btn_new)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_new)).performClick()
     waitForLoading()
     rule.onNodeWithText(getString(R.string.screen_title_new_recipe)).assertExists()
   }
