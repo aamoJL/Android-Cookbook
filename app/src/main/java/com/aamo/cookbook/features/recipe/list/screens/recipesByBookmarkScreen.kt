@@ -3,6 +3,7 @@ package com.aamo.cookbook.features.recipe.list.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -45,7 +47,9 @@ import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchBookmarks
 import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.ui.components.NoisySurface
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
@@ -125,25 +129,30 @@ private fun RecipesByBookmarkScreenContent(
 
   Scaffold(topBar = {
     PrimaryTopAppBar(
-      title = stringResource(R.string.screen_title_bookmarks), actions = {
-        IconButton(onClick = onSearch) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_search_24),
-            contentDescription = stringResource(R.string.cd_search)
-          )
-        }
-        IconButton(onClick = onAdd) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_add_24),
-            contentDescription = stringResource(R.string.cd_add_new_recipe)
-          )
-        }
-      }, onBack = onBack
-    )
+      title = stringResource(R.string.screen_title_bookmarks),
+      onBack = onBack,
+      modifier = Modifier.shadow(elevation = 4.dp, shape = RectangleShape)
+    ) {
+      IconButton(onClick = onSearch) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_search_24),
+          contentDescription = stringResource(R.string.cd_search)
+        )
+      }
+      IconButton(onClick = onAdd) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_add_new_recipe)
+        )
+      }
+    }
   }, floatingActionButton = {
     if (categories.isNotEmpty()) {
       Box {
-        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
+        FloatingActionButton(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
               painterResource(R.drawable.baseline_filter_alt_off_24)
@@ -153,7 +162,9 @@ private fun RecipesByBookmarkScreenContent(
           )
         }
         DropdownMenu(
-          expanded = filterPopUpOpen, onDismissRequest = { filterPopUpOpen = false }) {
+          expanded = filterPopUpOpen,
+          containerColor = MaterialTheme.colorScheme.surface,
+          onDismissRequest = { filterPopUpOpen = false }) {
           Column {
             categories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
@@ -178,12 +189,18 @@ private fun RecipesByBookmarkScreenContent(
       }
     }
   }) {
-    Surface(modifier = Modifier.padding(it)) {
+    NoisySurface(
+      modifier = Modifier
+        .padding(it)
+        .fillMaxSize()
+    ) {
       LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
       ) {
         items(recipes) { recipe ->
           RecipeCard(
@@ -194,9 +211,11 @@ private fun RecipesByBookmarkScreenContent(
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
+              .padding(4.dp) // Prevents shadow clipping
           )
         }
       }
+
     }
   }
 }
@@ -205,17 +224,43 @@ private fun RecipesByBookmarkScreenContent(
 @Preview
 @Composable
 private fun Preview() {
-  RecipesByBookmarkScreenContent(
-    recipes = listOf(
-    RecipeListRecipeModel(
-      recipe = Recipe(name = "Recipe 1"), isBookmarked = true, rating = 3
-    )
-  ),
-    categories = listOf("Cat 1"),
-    filtered = false,
-    onFilterChange = {},
-    onRecipeSelected = {},
-    onBack = {},
-    onSearch = {},
-    onAdd = {})
+  CookbookTheme(useDarkTheme = true) {
+    RecipesByBookmarkScreenContent(
+      recipes = listOf(
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 1, name = "Recipe 1"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 2, name = "Recipe 2"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 3, name = "Recipe 3"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 4, name = "Recipe 4"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 5, name = "Recipe 5"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 6, name = "Recipe 6"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 7, name = "Recipe 7"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 8, name = "Recipe 8"), isBookmarked = true, rating = 3
+      ),
+      RecipeListRecipeModel(
+        recipe = Recipe(id = 9, name = "Recipe 9"), isBookmarked = true, rating = 3
+      ),
+    ),
+      categories = listOf("Cat 1"),
+      filtered = false,
+      onFilterChange = {},
+      onRecipeSelected = {},
+      onBack = {},
+      onSearch = {},
+      onAdd = {})
+  }
 }

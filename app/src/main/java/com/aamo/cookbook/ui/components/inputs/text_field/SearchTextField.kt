@@ -3,6 +3,7 @@ package com.aamo.cookbook.ui.components.inputs.text_field
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -32,9 +33,7 @@ fun SearchTextField(
     onValueChange = onValueChange,
     placeholder = { Text(placeholder) },
     leadingIcon = {
-      Icon(
-        painter = painterResource(R.drawable.rounded_search_24), contentDescription = null
-      )
+      Icon(painter = painterResource(R.drawable.rounded_search_24), contentDescription = null)
     },
     trailingIcon = {
       if (value.isNotEmpty()) {
@@ -53,6 +52,11 @@ fun SearchTextField(
       errorIndicatorColor = Color.Transparent,
       disabledIndicatorColor = Color.Transparent,
       unfocusedIndicatorColor = Color.Transparent,
+      focusedContainerColor = MaterialTheme.colorScheme.surface,
+      unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+      unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+      focusedTextColor = MaterialTheme.colorScheme.onSurface,
+      cursorColor = MaterialTheme.colorScheme.inversePrimary,
     ),
     modifier = modifier
   )

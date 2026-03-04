@@ -197,7 +197,7 @@ private fun CategoryList(
       shadowElevation = 2.dp,
       shape = RoundedCornerShape(10.dp),
       border = BorderStroke(
-        width = 1.dp, color = MaterialTheme.colorScheme.primary.copy(alpha = .2f)
+        width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .5f)
       ),
       modifier = Modifier
         .padding(horizontal = 64.dp)
@@ -237,13 +237,13 @@ private fun CategoryList(
   }
 }
 
-@Suppress("HardCodedStringLiteral", "SpellCheckingInspection")
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
   CookbookTheme {
     HomeScreenContent(
-      categories = listOf("Pääruoka", "Leipä", "Jälkiruoka", "Kastike"),
+      categories = listOf("Category 1", "Category 2", "Category 3", "Category 4"),
       onSearch = {},
       onNewRecipe = {},
       onBookmarks = {},

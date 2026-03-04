@@ -3,6 +3,7 @@ package com.aamo.cookbook.features.recipe.list.screens
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -17,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,6 +25,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -46,6 +48,7 @@ import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipesByCategory
 import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.ui.components.NoisySurface
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
@@ -133,25 +136,30 @@ private fun RecipesByCategoryScreenContent(
 
   Scaffold(topBar = {
     PrimaryTopAppBar(
-      title = title, actions = {
-        IconButton(onClick = onSearch) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_search_24),
-            contentDescription = stringResource(R.string.cd_search)
-          )
-        }
-        IconButton(onClick = onAdd) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_add_24),
-            contentDescription = stringResource(R.string.cd_add_new_recipe)
-          )
-        }
-      }, onBack = onBack
-    )
+      title = title,
+      onBack = onBack,
+      modifier = Modifier.shadow(elevation = 4.dp, shape = RectangleShape)
+    ) {
+      IconButton(onClick = onSearch) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_search_24),
+          contentDescription = stringResource(R.string.cd_search)
+        )
+      }
+      IconButton(onClick = onAdd) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_add_new_recipe)
+        )
+      }
+    }
   }, floatingActionButton = {
     if (subCategories.isNotEmpty()) {
       Box {
-        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
+        FloatingActionButton(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
             painterResource(R.drawable.baseline_filter_alt_off_24)
@@ -160,7 +168,9 @@ private fun RecipesByCategoryScreenContent(
           }), contentDescription = stringResource(R.string.cd_filter))
         }
         DropdownMenu(
-          expanded = filterPopUpOpen, onDismissRequest = { filterPopUpOpen = false }) {
+          expanded = filterPopUpOpen,
+          containerColor = MaterialTheme.colorScheme.surface,
+          onDismissRequest = { filterPopUpOpen = false }) {
           Column {
             subCategories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
@@ -185,12 +195,18 @@ private fun RecipesByCategoryScreenContent(
       }
     }
   }) {
-    Surface(modifier = Modifier.padding(it)) {
+    NoisySurface(
+      modifier = Modifier
+        .padding(it)
+        .fillMaxSize()
+    ) {
       LazyVerticalGrid(
         columns = GridCells.Fixed(2),
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(4.dp)
+        modifier = Modifier
+          .fillMaxSize()
+          .padding(8.dp)
       ) {
         items(recipes) { recipe ->
           RecipeCard(
@@ -201,6 +217,7 @@ private fun RecipesByCategoryScreenContent(
             modifier = Modifier
               .fillMaxWidth()
               .height(200.dp)
+              .padding(4.dp) // Prevents shadow clipping
           )
         }
       }
