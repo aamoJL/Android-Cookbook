@@ -44,7 +44,7 @@ import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.NoisySurface
+import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.inputs.BackNavigationIconButton
 import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -121,7 +121,7 @@ private fun RecipeSearchScreenContent(
         modifier = Modifier.shadow(elevation = 4.dp, shape = RectangleShape)
       )
     }) {
-    NoisySurface(
+    BackgroundSurface(
       Modifier
         .padding(it)
         .fillMaxSize()

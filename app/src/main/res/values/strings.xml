@@ -72,4 +72,5 @@
     <string name="cd_chapter_x_page">Chapter %1$d page</string>
     <string name="snackbar_app_not_found">App was not found.</string>
     <string name="btn_search">Search</string>
+    <string name="cd_change_app_theme">Change app theme</string>
 </resources>

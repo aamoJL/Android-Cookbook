@@ -47,7 +47,7 @@ import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchBookmarks
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.NoisySurface
+import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
@@ -189,7 +189,7 @@ private fun RecipesByBookmarkScreenContent(
       }
     }
   }) {
-    NoisySurface(
+    BackgroundSurface(
       modifier = Modifier
         .padding(it)
         .fillMaxSize()

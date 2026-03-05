@@ -18,7 +18,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,7 +64,7 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(2.dp)
             )
           }
@@ -75,7 +74,7 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomStart)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(2.dp)
             )
           }
@@ -97,7 +96,7 @@ fun RecipeCard(
 
 @Composable
 private fun Thumbnail(fileName: String, modifier: Modifier = Modifier) {
-  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceColorAtElevation(0.dp)) {
+  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
     if (fileName.isNotEmpty()) {
       Image(
         painter = rememberAsyncImagePainter(

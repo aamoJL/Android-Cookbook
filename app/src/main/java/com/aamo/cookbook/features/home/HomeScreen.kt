@@ -1,5 +1,7 @@
 package com.aamo.cookbook.features.home
 
+import android.app.UiModeManager
+import android.os.Build
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,12 +22,12 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -33,6 +35,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -40,6 +43,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
+import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -51,10 +55,11 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
+import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
-import com.aamo.cookbook.ui.components.NoisySurface
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -104,7 +109,10 @@ private fun HomeScreenContent(
   onBookmarks: () -> Unit,
   onSelectCategory: (String) -> Unit,
 ) {
-  NoisySurface(modifier = Modifier.fillMaxSize()) {
+  val context = LocalContext.current
+  val configuration = LocalConfiguration.current
+
+  BackgroundSurface(modifier = Modifier.fillMaxSize()) {
     Column(
       horizontalAlignment = Alignment.CenterHorizontally,
       verticalArrangement = Arrangement.spacedBy(36.dp)
@@ -116,6 +124,25 @@ private fun HomeScreenContent(
           .fillMaxWidth(),
         shadowElevation = 4.dp
       ) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+          Box(contentAlignment = Alignment.TopEnd, modifier = Modifier.padding(4.dp)) {
+            IconButton(
+              onClick = {
+                context.getSystemService<UiModeManager>()?.also { manager ->
+                  if (configuration.isNightModeActive) manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_NO)
+                  else manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
+                }
+              }) {
+              Icon(
+                painter = ifElse(
+                  condition = configuration.isNightModeActive,
+                  ifTrue = { painterResource(R.drawable.rounded_light_mode_24) },
+                  ifFalse = { painterResource(R.drawable.dark_mode_24px) }),
+                contentDescription = stringResource(R.string.cd_change_app_theme)
+              )
+            }
+          }
+        }
         Box(contentAlignment = Alignment.Center) {
           Text(
             text = stringResource(R.string.app_name),
@@ -193,13 +220,9 @@ private fun CategoryList(
 ) {
   Box(contentAlignment = Alignment.Center, modifier = modifier) {
     Surface(
-      color = MaterialTheme.colorScheme.surfaceColorAtElevation(4.dp),
-      shadowElevation = 2.dp,
-      shape = RoundedCornerShape(10.dp),
-      border = BorderStroke(
+      shadowElevation = 2.dp, shape = RoundedCornerShape(10.dp), border = BorderStroke(
         width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .5f)
-      ),
-      modifier = Modifier
+      ), modifier = Modifier
         .padding(horizontal = 64.dp)
         .padding(bottom = 18.dp)
     ) {
