@@ -25,7 +25,11 @@ fun DeleteDialog(open: Boolean, title: String, onDismiss: () -> Unit, onConfirm:
       }
     },
     dismissButton = {
-      TextButton(onClick = onDismiss) {
+      TextButton(
+        onClick = onDismiss, colors = ButtonDefaults.textButtonColors(
+          contentColor = MaterialTheme.colorScheme.inversePrimary
+        )
+      ) {
         Text(text = stringResource(R.string.btn_cancel))
       }
     },

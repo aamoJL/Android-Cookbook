@@ -25,8 +25,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -47,8 +45,8 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipesByCategory
-import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
@@ -138,7 +136,6 @@ private fun RecipesByCategoryScreenContent(
     PrimaryTopAppBar(
       title = title,
       onBack = onBack,
-      modifier = Modifier.shadow(elevation = 4.dp, shape = RectangleShape)
     ) {
       IconButton(onClick = onSearch) {
         Icon(

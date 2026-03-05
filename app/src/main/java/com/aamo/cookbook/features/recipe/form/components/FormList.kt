@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
@@ -28,21 +30,27 @@ fun FormList(
   actions: @Composable (RowScope.() -> Unit) = {},
   content: @Composable () -> Unit
 ) {
-  ElevatedCard(modifier = modifier) {
+  ElevatedCard(
+    shape = RoundedCornerShape(8.dp),
+    modifier = modifier) {
     Surface(color = MaterialTheme.colorScheme.surfaceVariant, modifier = modifier.fillMaxWidth()) {
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
-          .padding(vertical = 8.dp, horizontal = 16.dp)
+          .padding(vertical = 8.dp, horizontal = 12.dp)
           .fillMaxWidth()
       ) {
-        Text(text = title, style = MaterialTheme.typography.titleLarge)
-        Row {
+        Text(
+          text = title,
+          style = MaterialTheme.typography.titleLarge,
+        )
+        Row(modifier = Modifier.padding(end = 4.dp)) {
           actions()
         }
       }
     }
+    HorizontalDivider()
     content()
   }
 }
@@ -57,7 +65,6 @@ private fun Preview() {
         Icon(
           painter = painterResource(R.drawable.rounded_add_24),
           contentDescription = stringResource(R.string.cd_form_add_new_item),
-          tint = MaterialTheme.colorScheme.primary
         )
       }
     }) {

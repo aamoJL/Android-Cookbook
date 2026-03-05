@@ -14,7 +14,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
@@ -40,7 +40,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
@@ -56,6 +55,7 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
 import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
@@ -150,7 +150,7 @@ private fun HomeScreenContent(
             autoSize = TextAutoSize.StepBased(),
             softWrap = false,
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.headlineLarge,
+            style = MaterialTheme.typography.displayLarge,
             modifier = Modifier.padding(horizontal = 32.dp)
           )
         }
@@ -221,27 +221,25 @@ private fun CategoryList(
   Box(contentAlignment = Alignment.Center, modifier = modifier) {
     Surface(
       shadowElevation = 2.dp, shape = RoundedCornerShape(10.dp), border = BorderStroke(
-        width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .5f)
+        width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .2f)
       ), modifier = Modifier
         .padding(horizontal = 64.dp)
-        .padding(bottom = 18.dp)
+        .padding(bottom = 16.dp)
     ) {
       Column {
-        Text(
-          text = stringResource(R.string.text_menu),
+        HorizontalDividerLabel(
+          label = stringResource(R.string.text_menu),
           color = MaterialTheme.colorScheme.inversePrimary,
-          style = MaterialTheme.typography.headlineMedium,
+          style = MaterialTheme.typography.titleLarge,
           fontFamily = Handwritten,
-          textAlign = TextAlign.Center,
-          textDecoration = TextDecoration.Underline,
-          modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 8.dp)
+          modifier = modifier
+            .padding(horizontal = 16.dp)
+            .padding(top = 12.dp),
         )
         LazyColumn(
           userScrollEnabled = true, modifier = Modifier.padding(32.dp, 0.dp, 32.dp, 16.dp)
         ) {
-          itemsIndexed(categories) { i, category ->
+          items(categories) { category ->
             TextButton(
               colors = ButtonDefaults.textButtonColors(
                 contentColor = MaterialTheme.colorScheme.onSurface

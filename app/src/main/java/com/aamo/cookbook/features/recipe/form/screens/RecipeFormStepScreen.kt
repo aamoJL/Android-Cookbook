@@ -4,26 +4,32 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.EnterTransition
 import androidx.compose.animation.ExitTransition
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,16 +58,18 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
-import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
+import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -216,19 +224,20 @@ fun RecipeFormStepScreenContent(
         }
       })
   }) {
-    Column(
+    BackgroundSurface(
       modifier = Modifier
         .padding(it)
-        .padding(8.dp)
+        .fillMaxSize()
     ) {
-      StepForm(formState = formState, orderNumber = stepIndex + 1)
-      Spacer(modifier = Modifier.padding(8.dp))
-      StepFormIngredientList(
-        ingredients = formState.ingredients.values,
-        onNewIngredient = onNewIngredient,
-        onEditIngredient = onEditIngredient,
-        onDeleteIngredient = onDeleteIngredient,
-      )
+      Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(8.dp)) {
+        StepForm(formState = formState, orderNumber = stepIndex + 1)
+        StepFormIngredientList(
+          ingredients = formState.ingredients.values,
+          onNewIngredient = onNewIngredient,
+          onEditIngredient = onEditIngredient,
+          onDeleteIngredient = onDeleteIngredient,
+        )
+      }
     }
   }
 }
@@ -238,43 +247,61 @@ private fun StepForm(
   formState: RecipeFormStepScreenViewModel.FormState,
   orderNumber: Int,
 ) {
-  FormBase(title = stringResource(R.string.title_step, orderNumber)) {
-    TextField(
-      value = formState.description.value,
-      onValueChange = { formState.description.update(it) },
-      label = { Text(stringResource(R.string.label_description)) },
-      shape = RectangleShape,
-      colors = borderlessTextFieldColors(),
-      keyboardOptions = KeyboardOptions(
-        capitalization = KeyboardCapitalization.Sentences,
-        keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Next
-      ),
-      modifier = Modifier.fillMaxWidth()
+  Column {
+    HorizontalDividerLabel(
+      label = stringResource(R.string.title_step_information, orderNumber), modifier = Modifier.padding(12.dp)
     )
-    NumberField(
-      value = formState.timerMinutes.value,
-      onValueChange = { formState.timerMinutes.update(it) },
-      validator = NullableIntFieldValidator,
-      label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
-      shape = RectangleShape,
-      colors = borderlessTextFieldColors(),
-      keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-      modifier = Modifier.fillMaxWidth()
-    )
-    TextField(
-      value = formState.note.value,
-      onValueChange = { formState.note.update(it) },
-      label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
-      shape = RectangleShape,
-      colors = borderlessTextFieldColors(),
-      keyboardOptions = KeyboardOptions(
-        capitalization = KeyboardCapitalization.Sentences,
-        keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Done
-      ),
-      modifier = Modifier.fillMaxWidth()
-    )
+    ElevatedCard(
+      shape = RoundedCornerShape(8.dp), colors = CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+      )
+    ) {
+      Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+          .padding(8.dp)
+          .padding(bottom = 4.dp)
+          .fillMaxWidth()
+      ) {
+        TextField(
+          value = formState.description.value,
+          onValueChange = { formState.description.update(it) },
+          label = { Text(stringResource(R.string.label_description)) },
+          shape = RectangleShape,
+          colors = borderlessTextFieldColors(),
+          keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+          ),
+          modifier = Modifier.fillMaxWidth()
+        )
+        NumberField(
+          value = formState.timerMinutes.value,
+          onValueChange = { formState.timerMinutes.update(it) },
+          validator = NullableIntFieldValidator,
+          label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
+          shape = RectangleShape,
+          suffix = { Text(text = stringResource(R.string.suffix_minutes)) },
+          colors = borderlessTextFieldColors(),
+          keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+          modifier = Modifier.fillMaxWidth()
+        )
+        TextField(
+          value = formState.note.value,
+          onValueChange = { formState.note.update(it) },
+          label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
+          shape = RectangleShape,
+          colors = borderlessTextFieldColors(),
+          keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+          ),
+          modifier = Modifier.fillMaxWidth()
+        )
+      }
+    }
   }
 }
 
@@ -287,15 +314,23 @@ private fun StepFormIngredientList(
   onDeleteIngredient: (RecipeFormIngredientFields) -> Unit,
 ) {
   FormList(
-    title = stringResource(R.string.title_ingredients), actions = {
-      OutlinedIconButton(onClick = onNewIngredient) {
+    title = stringResource(R.string.title_ingredients),
+    actions = {
+      OutlinedIconButton(
+        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant),
+        onClick = onNewIngredient,
+        colors = IconButtonDefaults.outlinedIconButtonColors(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+        )
+      ) {
         Icon(
           painter = painterResource(R.drawable.rounded_add_24),
           contentDescription = stringResource(R.string.cd_form_add_new_item),
-          tint = MaterialTheme.colorScheme.primary
+          tint = MaterialTheme.colorScheme.onPrimaryContainer,
         )
       }
-    }) {
+    },
+  ) {
     LazyColumn {
       itemsIndexed(
         items = ingredients,
@@ -312,7 +347,7 @@ private fun StepFormIngredientList(
           )
 
           if (index != ingredients.size - 1) {
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = .2f))
           }
         }
       }
@@ -328,24 +363,27 @@ private fun IngredientListItem(
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
-    ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
-      Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(
-          text = if (ingredient.amount == Double.Zero || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
-          style = MaterialTheme.typography.titleMedium,
-          textAlign = TextAlign.End,
-        )
-        Text(
-          text = ingredient.unit,
-          style = MaterialTheme.typography.titleMedium,
-          fontStyle = FontStyle.Italic,
-        )
-        Text(
-          text = ingredient.name,
-          style = MaterialTheme.typography.titleMedium,
-        )
-      }
-    })
+    ListItem(
+      modifier = Modifier.clickable { onClick() },
+      headlineContent = {
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+          Text(
+            text = if (ingredient.amount == Double.Zero || ingredient.amount == null) "" else ingredient.amount.toFractionFormattedString(),
+            style = MaterialTheme.typography.titleMedium,
+            textAlign = TextAlign.End,
+          )
+          Text(
+            text = ingredient.unit,
+            style = MaterialTheme.typography.titleMedium,
+            fontStyle = FontStyle.Italic,
+          )
+          Text(
+            text = ingredient.name,
+            style = MaterialTheme.typography.titleMedium,
+          )
+        }
+      },
+    )
   }
 }
 
@@ -353,16 +391,22 @@ private fun IngredientListItem(
 @Preview
 @Composable
 private fun Preview() {
-  RecipeFormStepScreenContent(
-    formState = RecipeFormStepScreenViewModel.FormState(
-      formData = RecipeFormStepFields(ingredients = listOf(RecipeFormIngredientFields(name = "Ing 1")))
-    ),
-    isNew = true,
-    stepIndex = 0,
-    onNewIngredient = {},
-    onEditIngredient = {},
-    onDeleteIngredient = {},
-    onSubmit = {},
-    onBack = {},
-  )
+  CookbookTheme {
+    RecipeFormStepScreenContent(
+      formState = RecipeFormStepScreenViewModel.FormState(
+        formData = RecipeFormStepFields(
+          description = "Step 1", timerMinutes = 15, ingredients = listOf(
+            RecipeFormIngredientFields(name = "Ingredient 1", amount = 2.5, unit = "kg")
+          )
+        )
+      ),
+      isNew = true,
+      stepIndex = 0,
+      onNewIngredient = {},
+      onEditIngredient = {},
+      onDeleteIngredient = {},
+      onSubmit = {},
+      onBack = {},
+    )
+  }
 }

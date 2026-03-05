@@ -10,9 +10,12 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.components.inputs.BackNavigationIconButton
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -38,7 +41,7 @@ fun PrimaryTopAppBar(
       if (onBack != null) {
         BackNavigationIconButton(onBack = onBack)
       }
-    }, actions = actions, modifier = modifier
+    }, actions = actions, modifier = modifier.shadow(elevation = 4.dp, shape = RectangleShape)
   )
 }
 

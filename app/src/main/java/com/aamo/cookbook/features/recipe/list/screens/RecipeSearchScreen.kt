@@ -20,10 +20,8 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -43,8 +41,8 @@ import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.components.RecipeCard
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
-import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.inputs.BackNavigationIconButton
 import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -118,7 +116,6 @@ private fun RecipeSearchScreenContent(
         value = searchWord,
         onValueChange = onSearchWordChange,
         onBack = onBack,
-        modifier = Modifier.shadow(elevation = 4.dp, shape = RectangleShape)
       )
     }) {
     BackgroundSurface(

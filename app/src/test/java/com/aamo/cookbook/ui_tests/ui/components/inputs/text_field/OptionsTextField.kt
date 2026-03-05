@@ -53,7 +53,7 @@ class OptionsTextField {
         value = String.EMPTY,
         onValueChange = { called = true },
         options = emptyList(),
-        modifier = Modifier.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name),
       )
     }
 
@@ -70,7 +70,7 @@ class OptionsTextField {
         value = String.EMPTY,
         onValueChange = { },
         options = options,
-        modifier = Modifier.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name),
       )
     }
 
@@ -92,7 +92,7 @@ class OptionsTextField {
         value = String.EMPTY,
         onValueChange = { value = it },
         options = listOf(option),
-        modifier = Modifier.testTag(TestTags.NODE.name)
+        modifier = Modifier.testTag(TestTags.NODE.name),
       )
     }
 

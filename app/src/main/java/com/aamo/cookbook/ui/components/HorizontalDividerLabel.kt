@@ -1,0 +1,51 @@
+package com.aamo.cookbook.ui.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.aamo.cookbook.ui.theme.CookbookTheme
+
+@Composable
+fun HorizontalDividerLabel(
+  label: String,
+  modifier: Modifier = Modifier,
+  color: Color = MaterialTheme.colorScheme.outline,
+  style: TextStyle = MaterialTheme.typography.labelMedium,
+  fontFamily: FontFamily? = null,
+) {
+  Row(
+    verticalAlignment = Alignment.CenterVertically,
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    modifier = modifier.fillMaxWidth()
+  ) {
+    HorizontalDivider(
+      modifier = Modifier.weight(1f), color = color.copy(alpha = .7f)
+    )
+    Text(
+      text = label, color = color, style = style, fontFamily = fontFamily
+    )
+    HorizontalDivider(
+      modifier = Modifier.weight(1f), color = color.copy(alpha = .7f)
+    )
+  }
+}
+
+@Suppress("HardCodedStringLiteral")
+@Preview
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    HorizontalDividerLabel(label = "Label")
+  }
+}

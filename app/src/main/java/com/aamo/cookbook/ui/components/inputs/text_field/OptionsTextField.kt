@@ -1,6 +1,5 @@
 package com.aamo.cookbook.ui.components.inputs.text_field
 
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +34,7 @@ fun OptionsTextField(
   shape: Shape = TextFieldDefaults.shape,
   colors: TextFieldColors = TextFieldDefaults.colors(),
   keyboardOptions: KeyboardOptions = KeyboardOptions.Default,
+  singleLine: Boolean = false,
 ) {
   var expanded by remember { mutableStateOf(false) }
 
@@ -49,11 +49,10 @@ fun OptionsTextField(
       label = label,
       trailingIcon = { TrailingIcon(expanded = expanded) },
       keyboardOptions = keyboardOptions,
-      modifier = Modifier
-        .menuAnchor(
-          type = ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = options.isNotEmpty()
-        )
-        .fillMaxWidth()
+      singleLine = singleLine,
+      modifier = Modifier.menuAnchor(
+        type = ExposedDropdownMenuAnchorType.PrimaryEditable, enabled = options.isNotEmpty()
+      )
     )
     ExposedDropdownMenu(
       expanded = expanded, onDismissRequest = { expanded = false }) {

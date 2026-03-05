@@ -2,6 +2,7 @@ package com.aamo.cookbook.ui.components
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
@@ -15,7 +16,7 @@ import androidx.compose.ui.res.imageResource
 import com.aamo.cookbook.R
 
 @Composable
-fun BackgroundSurface(modifier: Modifier = Modifier, content: @Composable (() -> Unit)) {
+fun BackgroundSurface(modifier: Modifier = Modifier, content: @Composable (BoxScope.() -> Unit)) {
   val noiseTexture = ImageBitmap.imageResource(R.drawable.noisy_texture_100x100)
   val backgroundBrush = remember {
     ShaderBrush(
