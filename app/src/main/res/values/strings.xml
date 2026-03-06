@@ -74,4 +74,5 @@
     <string name="btn_search">Search</string>
     <string name="cd_change_app_theme">Change app theme</string>
     <string name="suffix_minutes">minutes</string>
+    <string name="cd_time">Time</string>
 </resources>

@@ -203,12 +203,14 @@ fun MainIconButton(
   onClick: () -> Unit, icon: Painter, text: String, modifier: Modifier = Modifier
 ) {
   FilledIconButton(
-    onClick = onClick, colors = IconButtonDefaults.filledIconButtonColors(
+    onClick = onClick,
+    colors = IconButtonDefaults.filledIconButtonColors(
       containerColor = MaterialTheme.colorScheme.primaryContainer,
       contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-    ), modifier = modifier
+    ),
+    modifier = modifier
       .size(60.dp)
-      .shadow(elevation = 2.dp, CircleShape)
+      .shadow(elevation = 2.dp, CircleShape),
   ) {
     Icon(painter = icon, contentDescription = text)
   }
@@ -220,11 +222,13 @@ private fun CategoryList(
 ) {
   Box(contentAlignment = Alignment.Center, modifier = modifier) {
     Surface(
-      shadowElevation = 2.dp, shape = RoundedCornerShape(10.dp), border = BorderStroke(
+      shadowElevation = 2.dp, shape = RoundedCornerShape(10.dp),
+      border = BorderStroke(
         width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .2f)
-      ), modifier = Modifier
+      ),
+      modifier = Modifier
         .padding(horizontal = 64.dp)
-        .padding(bottom = 16.dp)
+        .padding(bottom = 16.dp),
     ) {
       Column {
         HorizontalDividerLabel(

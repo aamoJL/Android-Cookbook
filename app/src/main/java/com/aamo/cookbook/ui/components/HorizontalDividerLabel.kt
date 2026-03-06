@@ -3,6 +3,7 @@ package com.aamo.cookbook.ui.components
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -13,6 +14,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.ui.theme.CookbookTheme
 
@@ -23,6 +25,7 @@ fun HorizontalDividerLabel(
   color: Color = MaterialTheme.colorScheme.outline,
   style: TextStyle = MaterialTheme.typography.labelMedium,
   fontFamily: FontFamily? = null,
+  minLineWidth: Dp = Dp.Unspecified,
 ) {
   Row(
     verticalAlignment = Alignment.CenterVertically,
@@ -30,13 +33,13 @@ fun HorizontalDividerLabel(
     modifier = modifier.fillMaxWidth()
   ) {
     HorizontalDivider(
-      modifier = Modifier.weight(1f), color = color.copy(alpha = .7f)
+      modifier = Modifier.weight(1f).widthIn(min = minLineWidth), color = color.copy(alpha = .7f)
     )
     Text(
       text = label, color = color, style = style, fontFamily = fontFamily
     )
     HorizontalDivider(
-      modifier = Modifier.weight(1f), color = color.copy(alpha = .7f)
+      modifier = Modifier.weight(1f).widthIn(min = minLineWidth), color = color.copy(alpha = .7f)
     )
   }
 }

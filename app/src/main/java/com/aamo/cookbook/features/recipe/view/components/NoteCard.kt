@@ -18,11 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.ui.theme.Handwritten
 
 @Composable
 fun NoteCard(
@@ -33,17 +33,15 @@ fun NoteCard(
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
   ),
 ) {
-  ElevatedCard(
-    colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)
-  ) {
+  ElevatedCard(colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)) {
     Box(modifier = modifier) {
       Column(modifier = Modifier.padding(8.dp)) {
         Text(
           text = "${stringResource(R.string.label_note)}:",
-          fontFamily = Handwritten,
+          fontStyle = FontStyle.Italic,
           style = MaterialTheme.typography.labelSmall
         )
-        Text(text = text, fontFamily = Handwritten, style = MaterialTheme.typography.bodyMedium)
+        Text(text = text, fontStyle = FontStyle.Italic, style = MaterialTheme.typography.bodySmall)
       }
       // Folded corner
       Box(
