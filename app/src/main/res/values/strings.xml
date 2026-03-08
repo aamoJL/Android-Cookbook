@@ -75,4 +75,7 @@
     <string name="cd_change_app_theme">Change app theme</string>
     <string name="suffix_minutes">minutes</string>
     <string name="cd_time">Time</string>
+    <string name="label_thumbnail">Thumbnail</string>
+    <string name="label_rating">Rating</string>
+    <string name="dialog_title_delete_thumbnail">Delete thumbnail?</string>
 </resources>

@@ -74,4 +74,7 @@
     <string name="cd_change_app_theme">Vaihda sovelluksen teemaa</string>
     <string name="suffix_minutes">minuuttia</string>
     <string name="cd_time">Aika</string>
+    <string name="label_thumbnail">Kuva</string>
+    <string name="label_rating">Arvio</string>
+    <string name="dialog_title_delete_thumbnail">Poista kuva?</string>
 </resources>

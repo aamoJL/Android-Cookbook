@@ -115,7 +115,7 @@ class Navigation : PageTest() {
 
   @Test
   fun `to recipeSettingsScreen with indicator click`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.text_rate_the_recipe))
+    val text = rule.onNodeWithText(getString(R.string.label_rating))
 
     text.assertIsNotDisplayed()
 
@@ -129,7 +129,7 @@ class Navigation : PageTest() {
 
   @Test
   fun `to recipeSettingsScreen with swipe to right`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.text_rate_the_recipe))
+    val text = rule.onNodeWithText(getString(R.string.label_rating))
 
     text.assertIsNotDisplayed()
 
