@@ -2,9 +2,9 @@ package com.aamo.cookbook.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val md_theme_light_primary = Color(0xFFFFBCA6)
+val md_theme_light_primary = Color(0xFFFFB399)
 val md_theme_light_onPrimary = Color(0xFF4D2113)
-val md_theme_light_primaryContainer = Color(0xFFFFE2D9)
+val md_theme_light_primaryContainer = Color(0xFFFFD8CC)
 val md_theme_light_onPrimaryContainer = Color(0xFF332824)
 val md_theme_light_secondary = Color(0xFF77574B)
 val md_theme_light_onSecondary = Color(0xFFFFFFFF)

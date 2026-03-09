@@ -16,7 +16,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -171,6 +172,9 @@ fun NavGraphBuilder.recipeViewPage(
   onOpenRecipeForm: (id: Long) -> Unit, onSnackbar: (SnackbarProperties) -> Unit, onBack: () -> Unit
 ) {
   composable<RecipeViewPage> { navStack ->
+    val nameSuffix = stringResource(R.string.suffix_copy)
+    val appNotFoundMessage = stringResource(R.string.snackbar_app_not_found)
+
     val (id) = navStack.toRoute<RecipeViewPage>()
     val context = LocalContext.current
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
@@ -194,7 +198,7 @@ fun NavGraphBuilder.recipeViewPage(
           },
           saveAsCopy = { recipe ->
             copyAndSaveRecipe(
-              dao = dao, recipe = recipe, nameSuffix = context.getString(R.string.suffix_copy)
+              dao = dao, recipe = recipe, nameSuffix = nameSuffix
             ).also { id ->
               if (id > 0L) onOpenRecipeForm(id)
             }
@@ -226,19 +230,19 @@ fun NavGraphBuilder.recipeViewPage(
         onOpenCalculator = {
           viewmodel.openCalculator(calculatorService = CalculatorService(context = context))
             .onFalse {
-              onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
+              onSnackbar(SnackbarProperties(message = appNotFoundMessage))
             }
         },
         onOpenTimer = {
           viewmodel.openTimer(timerService = TimerService(context = context)).onFalse {
-            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
+            onSnackbar(SnackbarProperties(message = appNotFoundMessage))
           }
         },
         onStartTimer = { title, duration ->
           viewmodel.startTimer(
             timerService = TimerService(context = context), title = title, duration = duration
           ).onFalse {
-            onSnackbar(SnackbarProperties(message = context.getString(R.string.snackbar_app_not_found)))
+            onSnackbar(SnackbarProperties(message = appNotFoundMessage))
           }
         },
         onBack = onBack
@@ -338,16 +342,16 @@ fun RecipeViewPageContent(
 }
 
 @Suppress("HardCodedStringLiteral")
-@Preview
+@PreviewLightDark
 @Composable
 private fun RecipeViewPageContentPreview() {
-  CookbookTheme(useDarkTheme = true) {
+  CookbookTheme {
     Surface {
       RecipeViewPageContent(
         recipe = RecipeWithChaptersStepsAndIngredients(
           recipe = Recipe(), chapters = listOf(
             ChapterWithStepsAndIngredients(
-              chapter = Chapter(name = "Chapter 1"), steps = listOf(
+              chapter = Chapter(id = 1, name = "Chapter 1"), steps = listOf(
                 StepWithIngredients(
                   step = Step(), ingredients = listOf(
                     Ingredient(id = 1, name = "Ingredient 1", amount = 1.0, unit = "dl"),
@@ -356,13 +360,24 @@ private fun RecipeViewPageContentPreview() {
                   )
                 )
               )
-            )
+            ),
+            ChapterWithStepsAndIngredients(
+              chapter = Chapter(id = 2, name = "Chapter 2"), steps = listOf(
+                StepWithIngredients(
+                  step = Step(), ingredients = listOf(
+                    Ingredient(id = 1, name = "Ingredient 1", amount = 1.0, unit = "dl"),
+                    Ingredient(id = 2, name = "Ingredient 2", amount = 2.0, unit = "kpl"),
+                    Ingredient(id = 3, name = "Ingredient 3", amount = 3.0, unit = "ml"),
+                  )
+                )
+              )
+            ),
           )
         ),
         bookmark = null,
         rating = null,
         servingsState = ServingsState(),
-        progressState = ViewModelStateList(listOf(listOf(false))),
+        progressState = ViewModelStateList(listOf(listOf(true), listOf(false), listOf(false))),
         onEdit = {},
         onCopy = {},
         onUpdateBookmark = {},

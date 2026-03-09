@@ -1,5 +1,6 @@
 package com.aamo.cookbook.features.recipe.view.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -10,7 +11,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -21,7 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
@@ -65,6 +65,8 @@ fun RecipeViewPagerIndicators(
       )
 
       repeat(recipeProgress.size) { chapterIndicatorIndex ->
+        val completed = recipeProgress[chapterIndicatorIndex]
+
         PageIndicatorItem(
           selected = pageIndex == chapterIndicatorIndex + 2,
           onClick = { onPageChange(chapterIndicatorIndex + 2) },
@@ -74,9 +76,9 @@ fun RecipeViewPagerIndicators(
           ),
           color = when (currentChapterIndex) {
             chapterIndicatorIndex -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surfaceColorAtElevation(8.dp)
+            else -> MaterialTheme.colorScheme.surfaceContainerHighest
           },
-          icon = if (recipeProgress[chapterIndicatorIndex]) painterResource(R.drawable.rounded_check_24) else null,
+          icon = if (completed) painterResource(R.drawable.rounded_check_24) else null,
           modifier = Modifier.testTag(RecipeViewPagerIndicatorsTags.CHAPTER_INDICATOR.name)
         )
       }
@@ -100,18 +102,12 @@ private fun PageIndicatorItem(
     onClick = onClick,
     enabled = enabled,
     shape = CircleShape,
+    border = if (selected) BorderStroke(3.dp, MaterialTheme.colorScheme.primary) else null,
     modifier = modifier
       .padding(10.dp)
       .semantics { this.contentDescription = contentDescription }
       .size(width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp)) {
-    if (selected) {
-      Surface(
-        color = MaterialTheme.colorScheme.primary,
-        shape = CircleShape,
-        modifier = Modifier.padding(4.dp)
-      ) {}
-    }
-    else if (icon != null) {
+    if (icon != null) {
       Icon(
         painter = icon, contentDescription = null, // Description will be on the surface element
         modifier = Modifier.padding(4.dp)
@@ -120,10 +116,12 @@ private fun PageIndicatorItem(
   }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
-private fun PagerPreview(@PreviewParameter(PageIndexPreviewParameterProvider::class) pageIndex: Int) {
-  CookbookTheme(useDarkTheme = true) {
+private fun PagerPreview(
+  @PreviewParameter(PageIndexPreviewParameterProvider::class) pageIndex: Int
+) {
+  CookbookTheme {
     RecipeViewPagerIndicators(
       pageIndex = pageIndex, recipeProgress = listOf(true, false, false), onPageChange = { })
   }

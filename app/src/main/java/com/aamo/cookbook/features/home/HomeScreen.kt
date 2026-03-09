@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -40,7 +43,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
@@ -124,35 +127,49 @@ private fun HomeScreenContent(
           .fillMaxWidth(),
         shadowElevation = 4.dp
       ) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-          Box(contentAlignment = Alignment.TopEnd, modifier = Modifier.padding(4.dp)) {
-            IconButton(
-              onClick = {
-                context.getSystemService<UiModeManager>()?.also { manager ->
-                  if (configuration.isNightModeActive) manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_NO)
-                  else manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
-                }
-              }) {
-              Icon(
-                painter = ifElse(
-                  condition = configuration.isNightModeActive,
-                  ifTrue = { painterResource(R.drawable.rounded_light_mode_24) },
-                  ifFalse = { painterResource(R.drawable.dark_mode_24px) }),
-                contentDescription = stringResource(R.string.cd_change_app_theme)
-              )
+        Box(
+          modifier = Modifier
+            .padding(
+              top = WindowInsets.systemBars.asPaddingValues().calculateTopPadding()
+            )
+            .fillMaxSize()
+        ) {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            Box(
+              contentAlignment = Alignment.TopEnd, modifier = Modifier
+                .fillMaxWidth()
+                .padding(4.dp)
+            ) {
+              IconButton(
+                onClick = {
+                  context.getSystemService<UiModeManager>()?.also { manager ->
+                    if (configuration.isNightModeActive) manager.setApplicationNightMode(
+                      UiModeManager.MODE_NIGHT_NO
+                    )
+                    else manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
+                  }
+                }) {
+                Icon(
+                  painter = ifElse(
+                    condition = configuration.isNightModeActive,
+                    ifTrue = { painterResource(R.drawable.rounded_light_mode_24) },
+                    ifFalse = { painterResource(R.drawable.dark_mode_24px) }),
+                  contentDescription = stringResource(R.string.cd_change_app_theme)
+                )
+              }
             }
           }
-        }
-        Box(contentAlignment = Alignment.Center) {
-          Text(
-            text = stringResource(R.string.app_name),
-            fontFamily = Handwritten,
-            autoSize = TextAutoSize.StepBased(),
-            softWrap = false,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.displayLarge,
-            modifier = Modifier.padding(horizontal = 32.dp)
-          )
+          Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+            Text(
+              text = stringResource(R.string.app_name),
+              fontFamily = Handwritten,
+              autoSize = TextAutoSize.StepBased(),
+              softWrap = false,
+              textAlign = TextAlign.Center,
+              style = MaterialTheme.typography.displayLarge,
+              modifier = Modifier.padding(horizontal = 32.dp)
+            )
+          }
         }
       }
       MainButtons(
@@ -263,10 +280,10 @@ private fun CategoryList(
 }
 
 @Suppress("HardCodedStringLiteral")
-@PreviewLightDark
+@Preview(showSystemUi = true)
 @Composable
 private fun Preview() {
-  CookbookTheme {
+  CookbookTheme(useDarkTheme = true) {
     HomeScreenContent(
       categories = listOf("Category 1", "Category 2", "Category 3", "Category 4"),
       onSearch = {},
