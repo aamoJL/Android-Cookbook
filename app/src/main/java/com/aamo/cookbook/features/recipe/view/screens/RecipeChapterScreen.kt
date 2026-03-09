@@ -1,5 +1,6 @@
 package com.aamo.cookbook.features.recipe.view.screens
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,7 +14,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,7 +53,8 @@ fun RecipeChapterScreen(
   servingsMultiplier: Double,
   progress: List<Boolean>,
   onProgressChange: (List<Boolean>) -> Unit,
-  onStartTimer: (title: String, duration: Duration) -> Unit
+  onStartTimer: (title: String, duration: Duration) -> Unit,
+  isCurrentChapter: Boolean = false,
 ) {
   val scrollState = rememberScrollState()
 
@@ -80,16 +81,21 @@ fun RecipeChapterScreen(
         }
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
           chapter.steps.forEachIndexed { index, step ->
+            val checked = progress.elementAtOrElse(index) { false }
+
             StepCheckBox(
               headline = "${step.step.description}${if (step.ingredients.isEmpty()) '.' else ':'}",
               ingredients = step.ingredients.filter { it.stepId == step.step.id },
               servingsMultiplier = servingsMultiplier,
-              checked = progress.elementAtOrElse(index) { false },
+              checked = checked,
               note = step.step.note,
               timerDuration = step.step.timerMinutes?.minutes,
               onCheckedChange = {
                 onProgressChange(
                   progress.toMutableList().apply { this[index] = it })
+              },
+              current = isCurrentChapter && !checked && progress.take(index).let {
+                it.isEmpty() || it.all { value -> value }
               },
               onStartTimer = { duration ->
                 onStartTimer(step.step.description, duration)
@@ -108,20 +114,22 @@ private fun StepCheckBox(
   ingredients: List<Ingredient>,
   servingsMultiplier: Double,
   checked: Boolean,
+  current: Boolean,
   note: String,
   timerDuration: Duration?,
   onCheckedChange: (checked: Boolean) -> Unit,
   onStartTimer: (Duration) -> Unit,
   modifier: Modifier = Modifier,
 ) {
-  ElevatedCard(
-    shape = RoundedCornerShape(4.dp), colors = CardDefaults.elevatedCardColors(
-      containerColor = MaterialTheme.colorScheme.surface
-    ), modifier = modifier
+  Surface(
+    shape = RoundedCornerShape(4.dp),
+    shadowElevation = 1.dp,
+    border = if (current) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
+    modifier = modifier
       .toggleable(
         value = checked, onValueChange = onCheckedChange, role = Role.Checkbox
       )
-      .testTag(UITag.CHECK.name)
+      .testTag(UITag.CHECK.name),
   ) {
     Row(
       horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -205,28 +213,29 @@ private fun Preview() {
   CookbookTheme {
     RecipeChapterScreen(
       chapter = ChapterWithStepsAndIngredients(
-      chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Note"), steps = listOf(
-        StepWithIngredients(
-          step = Step(
-            orderNumber = 1, description = "Lorem ipsum", timerMinutes = 120, note = "Note"
-          ), ingredients = listOf(
-            Ingredient(name = "Ing", amount = 2.0, unit = "g"),
-            Ingredient(name = "Ing", amount = 2.0, unit = "g"),
-            Ingredient(name = "Ing", amount = 2.0, unit = "g"),
-          )
-        ),
-        StepWithIngredients(
-          step = Step(orderNumber = 2, description = "Lorem ipsum"), ingredients = listOf(
-            Ingredient(name = "Ing", amount = 2.0, unit = "g"),
-            Ingredient(name = "Ing", amount = 2.0, unit = "g"),
-          )
-        ),
-        StepWithIngredients(
-          step = Step(orderNumber = 3, description = "Lorem ipsum"), ingredients = listOf()
-        ),
-      )
-    ),
+        chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Note"), steps = listOf(
+          StepWithIngredients(
+            step = Step(
+              orderNumber = 1, description = "Lorem ipsum", timerMinutes = 120, note = "Note"
+            ), ingredients = listOf(
+              Ingredient(name = "Ing", amount = 2.0, unit = "g"),
+              Ingredient(name = "Ing", amount = 2.0, unit = "g"),
+              Ingredient(name = "Ing", amount = 2.0, unit = "g"),
+            )
+          ),
+          StepWithIngredients(
+            step = Step(orderNumber = 2, description = "Lorem ipsum"), ingredients = listOf(
+              Ingredient(name = "Ing", amount = 2.0, unit = "g"),
+              Ingredient(name = "Ing", amount = 2.0, unit = "g"),
+            )
+          ),
+          StepWithIngredients(
+            step = Step(orderNumber = 3, description = "Lorem ipsum"), ingredients = listOf()
+          ),
+        )
+      ),
       servingsMultiplier = 1.0,
+      isCurrentChapter = true,
       progress = listOf(true, false, false),
       onProgressChange = {},
       onStartTimer = { _, _ -> })

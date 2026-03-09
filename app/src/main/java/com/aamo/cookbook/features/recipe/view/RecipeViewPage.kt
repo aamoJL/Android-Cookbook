@@ -320,6 +320,8 @@ fun RecipeViewPageContent(
                   RecipeChapterScreen(
                     chapter = recipe.chapters.elementAt(chapterIndex),
                     servingsMultiplier = servingsState.multiplier,
+                    isCurrentChapter = progressState.values.take(chapterIndex)
+                      .all { progress -> progress.all { it } },
                     progress = progressState.values.elementAt(chapterIndex),
                     onProgressChange = { progressState.replaceAt(index = chapterIndex, item = it) },
                     onStartTimer = onStartTimer
