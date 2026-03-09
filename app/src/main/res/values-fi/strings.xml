@@ -46,7 +46,7 @@
     <string name="abbreviation_minutes">%1$s m</string>
     <string name="cd_set_timer">Aseta ajastin</string>
     <string name="label_step_timer">Ajastin</string>
-    <string name="label_note">Huomautus</string>
+    <string name="label_note">Huomio</string>
     <string name="cd_take_a_photo">Ota kuva</string>
     <string name="cd_delete_photo">Poista kuva</string>
     <string name="text_rate_the_recipe">Arvostele resepti</string>

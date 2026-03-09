@@ -2,6 +2,7 @@ package com.aamo.cookbook.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -37,7 +38,11 @@ fun HorizontalDividerLabel(
         .widthIn(min = minLineWidth), color = color.copy(alpha = .7f)
     )
     Text(
-      text = label, color = color, style = style, fontFamily = fontFamily
+      text = label,
+      color = color,
+      style = style,
+      fontFamily = fontFamily,
+      modifier = Modifier.padding(horizontal = 2.dp)
     )
     HorizontalDivider(
       modifier = Modifier

@@ -3,8 +3,12 @@ package com.aamo.cookbook.features.recipe.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardColors
@@ -33,8 +37,14 @@ fun NoteCard(
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
   ),
 ) {
-  ElevatedCard(colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)) {
-    Box(modifier = modifier) {
+  ElevatedCard(
+    colors = colors,
+    shape = CutCornerShape(bottomEnd = 15.dp),
+    modifier = modifier
+      .height(intrinsicSize = IntrinsicSize.Max)
+      .width(intrinsicSize = IntrinsicSize.Max)
+  ) {
+    Box(modifier = Modifier.fillMaxSize()) {
       Column(modifier = Modifier.padding(8.dp)) {
         Text(
           text = "${stringResource(R.string.label_note)}:",

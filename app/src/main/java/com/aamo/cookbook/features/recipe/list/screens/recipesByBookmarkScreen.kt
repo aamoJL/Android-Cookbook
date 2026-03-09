@@ -1,15 +1,9 @@
 package com.aamo.cookbook.features.recipe.list.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -29,7 +23,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -41,7 +34,7 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.components.RecipeCard
+import com.aamo.cookbook.features.recipe.list.components.RecipeList
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchBookmarks
 import com.aamo.cookbook.ui.components.BackgroundSurface
@@ -191,28 +184,7 @@ private fun RecipesByBookmarkScreenContent(
         .padding(it)
         .fillMaxSize()
     ) {
-      LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(8.dp)
-      ) {
-        items(recipes) { recipe ->
-          RecipeCard(
-            recipe = recipe.recipe,
-            onClick = { onRecipeSelected(recipe.recipe) },
-            isBookmarked = recipe.isBookmarked,
-            rating = recipe.rating,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(200.dp)
-              .padding(4.dp) // Prevents shadow clipping
-          )
-        }
-      }
-
+      RecipeList(recipes = recipes, onRecipeSelected = onRecipeSelected)
     }
   }
 }

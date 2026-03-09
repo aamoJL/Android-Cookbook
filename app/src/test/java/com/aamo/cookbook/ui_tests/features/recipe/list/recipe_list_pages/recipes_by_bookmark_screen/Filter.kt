@@ -18,9 +18,11 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
 
 @Suppress("HardCodedStringLiteral")
 @RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "w1000dp-h1000dp-480dpi")
 class Filter : PageTest() {
   val recipes = (1..3).map {
     Recipe(name = "Recipe $it", category = "Category $it")

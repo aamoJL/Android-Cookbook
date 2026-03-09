@@ -1,14 +1,9 @@
 package com.aamo.cookbook.features.recipe.list.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -23,10 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -38,7 +31,7 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.components.RecipeCard
+import com.aamo.cookbook.features.recipe.list.components.RecipeList
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
 import com.aamo.cookbook.ui.components.BackgroundSurface
@@ -47,7 +40,6 @@ import com.aamo.cookbook.ui.components.inputs.BackNavigationIconButton
 import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -95,7 +87,7 @@ fun NavGraphBuilder.recipeSearchScreen(
         recipes = checkNotNull(recipes),
         searchWord = nameFilter,
         onSearchWordChange = { viewmodel.updateFilter(it) },
-        onRecipeSelected = onOpenRecipe,
+        onRecipeSelected = { onOpenRecipe(it.id) },
         onBack = onBack,
       )
     }
@@ -106,7 +98,7 @@ fun NavGraphBuilder.recipeSearchScreen(
 private fun RecipeSearchScreenContent(
   recipes: List<RecipeListRecipeModel>,
   searchWord: String,
-  onRecipeSelected: (id: Long) -> Unit,
+  onRecipeSelected: (recipe: Recipe) -> Unit,
   onBack: () -> Unit,
   onSearchWordChange: (String) -> Unit,
 ) {
@@ -123,28 +115,7 @@ private fun RecipeSearchScreenContent(
         .padding(it)
         .fillMaxSize()
     ) {
-      LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier
-          .fillMaxSize()
-          .padding(8.dp)
-      ) {
-        items(recipes) { recipe ->
-          RecipeCard(
-            recipe = recipe.recipe,
-            onClick = { onRecipeSelected(recipe.recipe.id) },
-            isBookmarked = recipe.isBookmarked,
-            rating = recipe.rating,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(200.dp)
-              .padding(4.dp) // Prevents shadow clipping
-              .testTag(UITag.OPTION.name)
-          )
-        }
-      }
+      RecipeList(recipes = recipes, onRecipeSelected = onRecipeSelected)
     }
   }
 }

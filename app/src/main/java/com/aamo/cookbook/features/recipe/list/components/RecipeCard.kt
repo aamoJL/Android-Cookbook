@@ -47,11 +47,7 @@ fun RecipeCard(
     modifier = modifier.then(Modifier.clickable(onClick = onClick))
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      Box(
-        modifier = Modifier
-          .weight(1f, true)
-          .fillMaxSize()
-      ) {
+      Box(modifier = Modifier.weight(1f, true)) {
         Thumbnail(fileName = recipe.thumbnailUri, modifier = Modifier.fillMaxSize())
         Box(
           modifier = Modifier
