@@ -130,7 +130,7 @@ private fun StepCheckBox(
         .fillMaxSize()
     ) {
       Column {
-        Checkbox(checked = checked, onCheckedChange = null, modifier = Modifier)
+        Checkbox(checked = checked, onCheckedChange = null)
       }
       Column(
         verticalArrangement = Arrangement.spacedBy(4.dp),
@@ -179,7 +179,7 @@ private fun StepCheckBox(
           verticalArrangement = Arrangement.Center,
           horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-          IconButton(onClick = { onStartTimer(timerDuration) }) {
+          IconButton(onClick = { onStartTimer(timerDuration) }, enabled = !checked) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
               Icon(
                 painter = painterResource(id = R.drawable.baseline_alarm_24),
@@ -208,7 +208,7 @@ private fun Preview() {
       chapter = Chapter(orderNumber = 1, name = "Chapter 1", note = "Note"), steps = listOf(
         StepWithIngredients(
           step = Step(
-            orderNumber = 1, description = "Lorem ipsum", timerMinutes = 10, note = "Note"
+            orderNumber = 1, description = "Lorem ipsum", timerMinutes = 120, note = "Note"
           ), ingredients = listOf(
             Ingredient(name = "Ing", amount = 2.0, unit = "g"),
             Ingredient(name = "Ing", amount = 2.0, unit = "g"),
