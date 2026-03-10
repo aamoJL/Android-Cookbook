@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name" translatable="false">Cookbook</string>
     <string name="suffix_copy">\u0020- copy</string>
-    <string name="text_choose_category">Choose a category</string>
+    <string name="text_menu">Menu</string>
     <string name="screen_title_new_chapter">Add a new chapter</string>
     <string name="screen_title_existing_chapter">Edit chapter</string>
     <string name="screen_title_new_recipe">Add a new recipe</string>
@@ -12,10 +12,10 @@
     <string name="screen_title_new_ingredient">Add a new ingredient</string>
     <string name="screen_title_existing_ingredient">Edit ingredient</string>
     <string name="title_ingredients">Ingredients</string>
-    <string name="title_recipe">Recipe information</string>
-    <string name="title_chapter">%1$s. chapter information</string>
-    <string name="title_step">%1$s. step information</string>
-    <string name="title_ingredient">Ingredient information</string>
+    <string name="title_recipe_info">Recipe</string>
+    <string name="title_chapter_information">Chapter %1$s</string>
+    <string name="title_step_information">Step %1$s</string>
+    <string name="title_ingredient_information">Ingredient</string>
     <string name="title_chapters">Chapters</string>
     <string name="title_steps">Steps</string>
     <string name="cd_add_new_recipe">Add a new recipe</string>
@@ -46,7 +46,7 @@
     <string name="snackbar_recipe_deleted_successfully">Recipe deleted successfully.</string>
     <string name="cd_set_timer">Set timer</string>
     <string name="abbreviation_minutes">%1$s m</string>
-    <string name="label_step_timer">Timer (minutes)</string>
+    <string name="label_step_timer">Timer</string>
     <string name="label_note">Note</string>
     <string name="cd_take_a_photo">Take a photo</string>
     <string name="cd_delete_photo">Delete photo</string>
@@ -72,4 +72,10 @@
     <string name="cd_chapter_x_page">Chapter %1$d page</string>
     <string name="snackbar_app_not_found">App was not found.</string>
     <string name="btn_search">Search</string>
+    <string name="cd_change_app_theme">Change app theme</string>
+    <string name="suffix_minutes">minutes</string>
+    <string name="cd_time">Time</string>
+    <string name="label_thumbnail">Thumbnail</string>
+    <string name="label_rating">Rating</string>
+    <string name="dialog_title_delete_thumbnail">Delete thumbnail?</string>
 </resources>

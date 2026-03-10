@@ -1,14 +1,9 @@
 package com.aamo.cookbook.features.recipe.list.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
@@ -17,7 +12,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -29,7 +23,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -42,9 +35,10 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.components.RecipeCard
+import com.aamo.cookbook.features.recipe.list.components.RecipeList
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipesByCategory
+import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
@@ -133,25 +127,29 @@ private fun RecipesByCategoryScreenContent(
 
   Scaffold(topBar = {
     PrimaryTopAppBar(
-      title = title, actions = {
-        IconButton(onClick = onSearch) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_search_24),
-            contentDescription = stringResource(R.string.cd_search)
-          )
-        }
-        IconButton(onClick = onAdd) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_add_24),
-            contentDescription = stringResource(R.string.cd_add_new_recipe)
-          )
-        }
-      }, onBack = onBack
-    )
+      title = title,
+      onBack = onBack,
+    ) {
+      IconButton(onClick = onSearch) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_search_24),
+          contentDescription = stringResource(R.string.cd_search)
+        )
+      }
+      IconButton(onClick = onAdd) {
+        Icon(
+          painter = painterResource(R.drawable.rounded_add_24),
+          contentDescription = stringResource(R.string.cd_add_new_recipe)
+        )
+      }
+    }
   }, floatingActionButton = {
     if (subCategories.isNotEmpty()) {
       Box {
-        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
+        FloatingActionButton(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+          onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
             painterResource(R.drawable.baseline_filter_alt_off_24)
@@ -160,7 +158,9 @@ private fun RecipesByCategoryScreenContent(
           }), contentDescription = stringResource(R.string.cd_filter))
         }
         DropdownMenu(
-          expanded = filterPopUpOpen, onDismissRequest = { filterPopUpOpen = false }) {
+          expanded = filterPopUpOpen,
+          containerColor = MaterialTheme.colorScheme.surface,
+          onDismissRequest = { filterPopUpOpen = false }) {
           Column {
             subCategories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
@@ -185,25 +185,12 @@ private fun RecipesByCategoryScreenContent(
       }
     }
   }) {
-    Surface(modifier = Modifier.padding(it)) {
-      LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(4.dp)
-      ) {
-        items(recipes) { recipe ->
-          RecipeCard(
-            recipe = recipe.recipe,
-            onClick = { onRecipeSelected(recipe.recipe) },
-            isBookmarked = recipe.isBookmarked,
-            rating = recipe.rating,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(200.dp)
-          )
-        }
-      }
+    BackgroundSurface(
+      modifier = Modifier
+        .padding(it)
+        .fillMaxSize()
+    ) {
+      RecipeList(recipes = recipes, onRecipeSelected = onRecipeSelected)
     }
   }
 }

@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -21,10 +22,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
@@ -32,7 +33,6 @@ import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.ui.theme.Handwritten
 
 @Composable
 fun RecipeCard(
@@ -43,17 +43,12 @@ fun RecipeCard(
   rating: Int? = 0
 ) {
   ElevatedCard(
-    shape = RectangleShape, modifier = modifier.then(Modifier.clickable(onClick = onClick))
+    shape = RoundedCornerShape(10.dp),
+    modifier = modifier.then(Modifier.clickable(onClick = onClick))
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
-      Box(
-        modifier = Modifier
-          .weight(1f, true)
-          .fillMaxSize()
-      ) {
-        Thumbnail(
-          fileName = recipe.thumbnailUri, modifier = Modifier.fillMaxSize()
-        )
+      Box(modifier = Modifier.weight(1f, true)) {
+        Thumbnail(fileName = recipe.thumbnailUri, modifier = Modifier.fillMaxSize())
         Box(
           modifier = Modifier
             .align(Alignment.BottomStart)
@@ -65,7 +60,7 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = .8f))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(2.dp)
             )
           }
@@ -75,34 +70,29 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomStart)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface.copy(alpha = .8f))
+                .background(MaterialTheme.colorScheme.surface)
                 .padding(2.dp)
             )
           }
         }
       }
       Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.fillMaxWidth()
+        color = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxWidth()
       ) {
-        Column(
-          horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(4.dp)
-        ) {
-          Text(
-            text = recipe.name,
-            fontFamily = Handwritten,
-            style = MaterialTheme.typography.titleMedium
-          )
-        }
+        Text(
+          text = recipe.name,
+          textAlign = TextAlign.Center,
+          style = MaterialTheme.typography.bodyMedium,
+          modifier = Modifier.padding(4.dp)
+        )
       }
     }
   }
 }
 
 @Composable
-private fun Thumbnail(
-  fileName: String, modifier: Modifier = Modifier
-) {
-  Surface(modifier = modifier) {
+private fun Thumbnail(fileName: String, modifier: Modifier = Modifier) {
+  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
     if (fileName.isNotEmpty()) {
       Image(
         painter = rememberAsyncImagePainter(
@@ -116,12 +106,11 @@ private fun Thumbnail(
       )
     }
     else {
-      Box {
+      Box(contentAlignment = Alignment.Center) {
         Icon(
           painter = painterResource(R.drawable.baseline_no_photography_24),
           tint = MaterialTheme.colorScheme.onSurface.copy(alpha = .3f),
           contentDescription = null,
-          modifier = Modifier.align(Alignment.Center)
         )
       }
     }
@@ -134,13 +123,7 @@ private fun BookmarkIcon(modifier: Modifier = Modifier) {
     Icon(
       painter = painterResource(R.drawable.bookmark_24px),
       contentDescription = null,
-      tint = MaterialTheme.colorScheme.tertiaryContainer,
-      modifier = Modifier.size(16.dp)
-    )
-    Icon(
-      painter = painterResource(R.drawable.rounded_bookmark_24),
-      contentDescription = null,
-      tint = MaterialTheme.colorScheme.tertiary,
+      tint = MaterialTheme.colorScheme.secondaryContainer,
       modifier = Modifier.size(16.dp)
     )
   }
@@ -155,7 +138,7 @@ private fun StarRating(rating: Int, modifier: Modifier = Modifier) {
       Icon(
         painter = painterResource(R.drawable.round_star_rate_24),
         contentDescription = null,
-        tint = MaterialTheme.colorScheme.secondary,
+        tint = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier.size(16.dp)
       )
     }
@@ -165,12 +148,6 @@ private fun StarRating(rating: Int, modifier: Modifier = Modifier) {
           painter = painterResource(R.drawable.round_star_rate_24),
           contentDescription = null,
           tint = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = .2f),
-          modifier = Modifier.size(16.dp)
-        )
-        Icon(
-          painter = painterResource(R.drawable.round_star_outline_24),
-          contentDescription = null,
-          tint = MaterialTheme.colorScheme.secondary.copy(alpha = .2f),
           modifier = Modifier.size(16.dp)
         )
       }
@@ -184,6 +161,11 @@ private fun StarRating(rating: Int, modifier: Modifier = Modifier) {
 private fun Preview() {
   CookbookTheme {
     RecipeCard(
-      recipe = Recipe(name = "Recipe 1"), isBookmarked = true, rating = 3, onClick = { })
+      recipe = Recipe(name = "Recipe 1"),
+      isBookmarked = true,
+      rating = 3,
+      onClick = { },
+      modifier = Modifier.size(150.dp)
+    )
   }
 }

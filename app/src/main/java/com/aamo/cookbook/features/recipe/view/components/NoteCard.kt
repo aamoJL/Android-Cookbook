@@ -3,8 +3,12 @@ package com.aamo.cookbook.features.recipe.view.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardColors
@@ -18,11 +22,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.ui.theme.Handwritten
 
 @Composable
 fun NoteCard(
@@ -34,16 +38,20 @@ fun NoteCard(
   ),
 ) {
   ElevatedCard(
-    colors = colors, shape = CutCornerShape(bottomEnd = 15.dp)
+    colors = colors,
+    shape = CutCornerShape(bottomEnd = 15.dp),
+    modifier = modifier
+      .height(intrinsicSize = IntrinsicSize.Max)
+      .width(intrinsicSize = IntrinsicSize.Max)
   ) {
-    Box(modifier = modifier) {
+    Box(modifier = Modifier.fillMaxSize()) {
       Column(modifier = Modifier.padding(8.dp)) {
         Text(
           text = "${stringResource(R.string.label_note)}:",
-          fontFamily = Handwritten,
+          fontStyle = FontStyle.Italic,
           style = MaterialTheme.typography.labelSmall
         )
-        Text(text = text, fontFamily = Handwritten, style = MaterialTheme.typography.bodyMedium)
+        Text(text = text, fontStyle = FontStyle.Italic, style = MaterialTheme.typography.bodySmall)
       }
       // Folded corner
       Box(

@@ -1,28 +1,36 @@
 package com.aamo.cookbook.features.recipe.form.screens
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -51,21 +59,20 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
-import com.aamo.cookbook.database.entities.Chapter
-import com.aamo.cookbook.database.entities.ChapterWithStepsAndIngredients
-import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.components.FormList
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.features.recipe.form.primaryEnterTransition
 import com.aamo.cookbook.features.recipe.form.primaryExitTransition
 import com.aamo.cookbook.features.recipe.form.secondaryEnterTransition
 import com.aamo.cookbook.features.recipe.form.secondaryExitTransition
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchCategorySuggestions
 import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
+import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.BasicDismissibleItem
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableIntFieldValidator
@@ -74,6 +81,7 @@ import com.aamo.cookbook.ui.components.inputs.text_field.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
@@ -268,20 +276,21 @@ fun RecipeFormInfoScreenContent(
         }
       })
     }) {
-    Column(
-      verticalArrangement = Arrangement.spacedBy(16.dp),
+    BackgroundSurface(
       modifier = Modifier
         .padding(it)
-        .padding(8.dp)
+        .fillMaxSize()
     ) {
-      InfoForm(formState = formState, categorySuggestions = categorySuggestions)
-      ChapterList(
-        chapters = formState.chapters.values,
-        onNewChapter = onNewChapter,
-        onEditChapter = onEditChapter,
-        onDeleteChapter = onDeleteChapter,
-        onSwap = onSwapChapters
-      )
+      Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = Modifier.padding(8.dp)) {
+        InfoForm(formState = formState, categorySuggestions = categorySuggestions)
+        ChapterList(
+          chapters = formState.chapters.values,
+          onNewChapter = onNewChapter,
+          onEditChapter = onEditChapter,
+          onDeleteChapter = onDeleteChapter,
+          onSwap = onSwapChapters
+        )
+      }
     }
   }
 }
@@ -292,78 +301,105 @@ private fun InfoForm(
   formState: RecipeFormInfoScreenViewModel.FormState,
   categorySuggestions: Map<String, List<String>>,
 ) {
-  FormBase(title = stringResource(R.string.title_recipe)) {
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-      TextField(
-        value = formState.name.value,
-        onValueChange = { formState.name.update(it) },
-        label = { Text(stringResource(R.string.label_name)) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Sentences,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Next
-        ),
-        modifier = Modifier.weight(2f, true)
+  Column {
+    HorizontalDividerLabel(
+      label = stringResource(R.string.title_recipe_info), modifier = Modifier.padding(12.dp)
+    )
+    ElevatedCard(
+      shape = RoundedCornerShape(8.dp), colors = CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
       )
-      NumberField(
-        value = formState.servings.value,
-        onValueChange = { formState.servings.update(it) },
-        validator = NullableIntFieldValidator,
-        label = { Text(stringResource(R.string.label_servings)) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-        modifier = Modifier.weight(1f, true)
-      )
-    }
-    Column(verticalArrangement = Arrangement.spacedBy(5.dp), modifier = Modifier.fillMaxWidth()) {
-      OptionsTextField(
-        value = formState.category.value,
-        label = { Text(stringResource(R.string.label_category)) },
-        onValueChange = { formState.category.update(it) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Sentences,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Next
-        ),
-        options = categorySuggestions.keys.filter {
-          it.contains(formState.category.value, ignoreCase = true)
-        }.sorted(),
-        modifier = Modifier.fillMaxWidth()
-      )
-      OptionsTextField(
-        value = formState.subCategory.value,
-        label = { Text(stringResource(R.string.label_subcategory).asOptionalLabel()) },
-        onValueChange = { formState.subCategory.update(it) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Sentences,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Next
-        ),
-        options = categorySuggestions[formState.category.value]?.filter {
-          it.contains(formState.subCategory.value, ignoreCase = true)
-        }?.sorted() ?: emptyList(),
-        modifier = Modifier.fillMaxWidth()
-      )
-      TextField(
-        value = formState.note.value,
-        onValueChange = { formState.note.update(it) },
-        label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.Sentences,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Done
-        ),
-        modifier = Modifier.fillMaxWidth()
-      )
+    ) {
+      Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+          .padding(8.dp)
+          .padding(bottom = 4.dp)
+          .fillMaxWidth()
+      ) {
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()
+        ) {
+          TextField(
+            value = formState.name.value,
+            onValueChange = { formState.name.update(it) },
+            label = { Text(stringResource(R.string.label_name)) },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Sentences,
+              keyboardType = KeyboardType.Text,
+              imeAction = ImeAction.Next
+            ),
+            modifier = Modifier.weight(2f, true)
+          )
+          NumberField(
+            value = formState.servings.value,
+            onValueChange = { formState.servings.update(it) },
+            validator = NullableIntFieldValidator,
+            label = { Text(stringResource(R.string.label_servings)) },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+            modifier = Modifier.weight(1f, true)
+          )
+        }
+        Row(
+          horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()
+        ) {
+          OptionsTextField(
+            value = formState.category.value,
+            onValueChange = { formState.category.update(it) },
+            options = categorySuggestions.keys.filter {
+              it.contains(formState.category.value, ignoreCase = true)
+            }.sorted(),
+            modifier = Modifier.weight(1f),
+            label = { Text(stringResource(R.string.label_category), softWrap = false) },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Sentences,
+              keyboardType = KeyboardType.Text,
+              imeAction = ImeAction.Next
+            ),
+          )
+          OptionsTextField(
+            value = formState.subCategory.value,
+            onValueChange = { formState.subCategory.update(it) },
+            options = categorySuggestions[formState.category.value]?.filter {
+              it.contains(formState.subCategory.value, ignoreCase = true)
+            }?.sorted() ?: emptyList(),
+            modifier = Modifier.weight(1f),
+            label = {
+              Text(
+                stringResource(R.string.label_subcategory).asOptionalLabel(), softWrap = false
+              )
+            },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            singleLine = true,
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.Sentences,
+              keyboardType = KeyboardType.Text,
+              imeAction = ImeAction.Next
+            ),
+          )
+        }
+        TextField(
+          value = formState.note.value,
+          onValueChange = { formState.note.update(it) },
+          label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
+          shape = RectangleShape,
+          colors = borderlessTextFieldColors(),
+          keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+          ),
+          modifier = Modifier.fillMaxWidth()
+        )
+      }
     }
   }
 }
@@ -379,16 +415,24 @@ private fun ChapterList(
   modifier: Modifier = Modifier,
 ) {
   FormList(
-    title = stringResource(R.string.title_chapters), actions = {
-      OutlinedIconButton(onClick = onNewChapter) {
+    title = stringResource(R.string.title_chapters),
+    actions = {
+      OutlinedIconButton(
+        border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.onSurfaceVariant),
+        onClick = onNewChapter,
+        colors = IconButtonDefaults.outlinedIconButtonColors(
+          containerColor = MaterialTheme.colorScheme.primaryContainer,
+        )
+      ) {
         Icon(
           painter = painterResource(R.drawable.rounded_add_24),
           contentDescription = stringResource(R.string.cd_form_add_new_item),
-          tint = MaterialTheme.colorScheme.primary
+          tint = MaterialTheme.colorScheme.onPrimaryContainer,
         )
       }
-    }, modifier = modifier
-  ) {
+    },
+    modifier = modifier,
+    ) {
     LazyColumn {
       itemsIndexed(items = chapters, key = { _, c -> c.uuid }) { index, chapter ->
         Column(modifier = Modifier.animateItem()) {
@@ -410,7 +454,7 @@ private fun ChapterList(
               .testTag(UITag.OPTION.name))
 
           if (index != chapters.size - 1) {
-            HorizontalDivider()
+            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = .2f))
           }
         }
       }
@@ -429,52 +473,62 @@ private fun ChapterListItem(
   modifier: Modifier = Modifier
 ) {
   BasicDismissibleItem(dismissAction = onDismiss, modifier = modifier) {
-    ListItem(modifier = Modifier.clickable { onClick() }, headlineContent = {
-      Text(text = "${chapterNumber}. ${chapter.name}", style = MaterialTheme.typography.titleMedium)
-    }, supportingContent = {
-      if (chapter.steps.isNotEmpty()) {
-        Column(
-          verticalArrangement = Arrangement.spacedBy(4.dp),
-          modifier = Modifier
-            .padding(start = 16.dp, top = 4.dp)
-            .width(IntrinsicSize.Max)
-        ) {
-          chapter.steps.forEachIndexed { index, step ->
-            Column {
-              if (step.timerMinutes != null) {
+    ListItem(
+      modifier = Modifier.clickable { onClick() },
+      colors = ListItemDefaults.colors(
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+      ),
+      headlineContent = {
+        Text(
+          text = "${chapterNumber}. ${chapter.name}", style = MaterialTheme.typography.titleMedium
+        )
+      },
+      supportingContent = {
+        if (chapter.steps.isNotEmpty()) {
+          Column(
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier
+              .padding(start = 16.dp, top = 2.dp)
+              .width(IntrinsicSize.Max)
+          ) {
+            chapter.steps.forEachIndexed { index, step ->
+              Column {
+                if (step.timerMinutes != null) {
+                  Text(
+                    text = stringResource(
+                      R.string.abbreviation_minutes, step.timerMinutes.toString()
+                    ), style = MaterialTheme.typography.labelSmall
+                  )
+                }
                 Text(
-                  text = stringResource(
-                    R.string.abbreviation_minutes, step.timerMinutes.toString()
-                  ), style = MaterialTheme.typography.labelSmall
+                  text = "${index + 1}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
+                  style = MaterialTheme.typography.bodySmall
+                )
+                ChapterListIngredientList(
+                  ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
                 )
               }
-              Text(
-                text = "${index + 1}. ${step.description}${if (step.ingredients.isEmpty()) "." else ":"}",
-                style = MaterialTheme.typography.bodyMedium
-              )
-              ChapterListIngredientList(
-                ingredients = step.ingredients, modifier = Modifier.padding(start = 16.dp)
-              )
             }
           }
         }
-      }
-    }, trailingContent = {
-      Column(modifier = Modifier) {
-        if (onMoveUp != null) IconButton(onClick = onMoveUp) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
-            contentDescription = stringResource(R.string.cd_move_up)
-          )
+      },
+      trailingContent = {
+        Column(modifier = Modifier) {
+          if (onMoveUp != null) IconButton(onClick = onMoveUp) {
+            Icon(
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_up_24),
+              contentDescription = stringResource(R.string.cd_move_up)
+            )
+          }
+          if (onMoveDown != null) IconButton(onClick = onMoveDown) {
+            Icon(
+              painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
+              contentDescription = stringResource(R.string.cd_move_down)
+            )
+          }
         }
-        if (onMoveDown != null) IconButton(onClick = onMoveDown) {
-          Icon(
-            painter = painterResource(R.drawable.rounded_keyboard_arrow_down_24),
-            contentDescription = stringResource(R.string.cd_move_down)
-          )
-        }
-      }
-    })
+      },
+    )
   }
 }
 
@@ -510,10 +564,33 @@ private fun ChapterListIngredientList(
 @Preview
 @Composable
 private fun Preview() {
-  RecipeFormInfoScreen(
-    recipe = RecipeWithChaptersStepsAndIngredients(
-    recipe = Recipe(), chapters = listOf(
-      ChapterWithStepsAndIngredients(chapter = Chapter(name = "Chap 1"))
+  CookbookTheme(useDarkTheme = true) {
+    RecipeFormInfoScreenContent(
+      formState = RecipeFormInfoScreenViewModel.FormState(
+        formData = RecipeFormInfoFields(
+          chapters = listOf(
+            RecipeFormChapterFields(
+              name = "Chapter 1", steps = listOf(
+                RecipeFormStepFields(
+                  description = "Step 1", timerMinutes = 15, ingredients = listOf(
+                    RecipeFormIngredientFields(name = "Ingredient 1", amount = 2.5, unit = "kg")
+                  )
+                )
+              )
+            ),
+            RecipeFormChapterFields(name = "Chapter 2"),
+          )
+        )
+      ),
+      categorySuggestions = emptyMap(),
+      isNew = false,
+      onNewChapter = {},
+      onEditChapter = {},
+      onDeleteChapter = {},
+      onSwapChapters = { _, _ -> },
+      onSubmit = {},
+      onDelete = {},
+      onBack = {},
     )
-  ), onSubmit = {}, onDeleteRecipe = {}, onBack = {})
+  }
 }

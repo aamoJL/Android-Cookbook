@@ -36,12 +36,12 @@ open class PageTest {
 
   suspend fun toRecipeSearchScreen() {
     waitForLoading()
-    rule.onNodeWithText(getString(R.string.btn_search)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_search)).performClick()
   }
 
   suspend fun toRecipesByBookmarkScreen() {
     waitForLoading()
-    rule.onNodeWithText(getString(R.string.btn_bookmarks)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_bookmarks)).performClick()
   }
 
   suspend fun toRecipesByCategoryScreen(recipe: Recipe) {
@@ -53,7 +53,7 @@ open class PageTest {
 
   suspend fun toRecipeFormPage() {
     waitForLoading()
-    rule.onNodeWithText(getString(R.string.btn_new)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.btn_new)).performClick()
   }
 
   suspend fun toRecipeFormPage(recipe: RecipeWithChaptersStepsAndIngredients) {

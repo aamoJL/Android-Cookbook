@@ -3,7 +3,6 @@ package com.aamo.cookbook.ui_tests.features.recipe.view.recipe_view_page
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
-import androidx.compose.ui.test.hasTestTag
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
@@ -81,41 +80,31 @@ class Navigation : PageTest() {
 
   @Test
   fun `to recipeChapterScreen with indicator click`() = runTest {
-    val title = rule.onNode(
-      hasTestTag(UITag.SCREEN_TITLE.name).and(
-        hasText(recipe.chapters.first().chapter.name, substring = true)
-      ), useUnmergedTree = true
-    )
-
-    title.assertIsNotDisplayed()
+    rule.onNodeWithText(getString(R.string.title_ingredients)).assertIsDisplayed()
 
     rule.onAllNodesWithTag(
       RecipeViewPagerIndicatorsTags.CHAPTER_INDICATOR.name, useUnmergedTree = true
     ).onFirst().performClick()
 
-    title.assertExists()
-    title.assertIsDisplayed()
+    rule.onNodeWithText(getString(R.string.title_ingredients)).assertIsNotDisplayed()
+    rule.onNodeWithText(recipe.chapters.first().chapter.name, substring = true).assertExists()
+      .assertIsDisplayed()
   }
 
   @Test
   fun `to recipeChapterScreen with swipe to left`() = runTest {
-    val title = rule.onNode(
-      hasTestTag(UITag.SCREEN_TITLE.name).and(
-        hasText(recipe.chapters.first().chapter.name, substring = true)
-      ), useUnmergedTree = true
-    )
-
-    title.assertIsNotDisplayed()
+    rule.onNodeWithText(getString(R.string.title_ingredients)).assertIsDisplayed()
 
     rule.onRoot().performTouchInput { swipeLeft() }
 
-    title.assertExists()
-    title.assertIsDisplayed()
+    rule.onNodeWithText(getString(R.string.title_ingredients)).assertIsNotDisplayed()
+    rule.onNodeWithText(recipe.chapters.first().chapter.name, substring = true).assertExists()
+      .assertIsDisplayed()
   }
 
   @Test
   fun `to recipeSettingsScreen with indicator click`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.text_rate_the_recipe))
+    val text = rule.onNodeWithText(getString(R.string.label_rating))
 
     text.assertIsNotDisplayed()
 
@@ -129,7 +118,7 @@ class Navigation : PageTest() {
 
   @Test
   fun `to recipeSettingsScreen with swipe to right`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.text_rate_the_recipe))
+    val text = rule.onNodeWithText(getString(R.string.label_rating))
 
     text.assertIsNotDisplayed()
 

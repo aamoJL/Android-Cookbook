@@ -7,15 +7,21 @@ import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +34,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -38,13 +45,15 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
-import com.aamo.cookbook.features.recipe.form.components.FormBase
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
+import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.inputs.number_field.NullableDoubleFieldValidator
 import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
@@ -152,12 +161,14 @@ fun RecipeFormIngredientScreenContent(
         }
       })
   }) {
-    Column(
+    BackgroundSurface(
       modifier = Modifier
         .padding(it)
-        .padding(8.dp)
+        .fillMaxSize()
     ) {
-      IngredientForm(formState = formState)
+      Column(modifier = Modifier.padding(8.dp)) {
+        IngredientForm(formState = formState)
+      }
     }
   }
 }
@@ -166,46 +177,80 @@ fun RecipeFormIngredientScreenContent(
 private fun IngredientForm(
   formState: RecipeFormIngredientScreenViewModel.FormState,
 ) {
-  FormBase(title = stringResource(R.string.title_ingredient)) {
-    TextField(
-      value = formState.name.value,
-      onValueChange = { formState.name.update(it) },
-      label = { Text(stringResource(R.string.label_name)) },
-      shape = RectangleShape,
-      colors = borderlessTextFieldColors(),
-      keyboardOptions = KeyboardOptions(
-        capitalization = KeyboardCapitalization.Sentences,
-        keyboardType = KeyboardType.Text,
-        imeAction = ImeAction.Next
-      ),
-      modifier = Modifier.fillMaxWidth()
+  Column {
+    HorizontalDividerLabel(
+      label = stringResource(R.string.title_ingredient_information),
+      modifier = Modifier.padding(12.dp)
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-      NumberField(
-        value = formState.amount.value,
-        onValueChange = { formState.amount.update(it) },
-        validator = NullableDoubleFieldValidator,
-        label = { Text(stringResource(R.string.label_amount).asOptionalLabel()) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          imeAction = ImeAction.Next
-        ),
-        modifier = Modifier.weight(1f, true)
+    ElevatedCard(
+      shape = RoundedCornerShape(8.dp), colors = CardDefaults.elevatedCardColors(
+        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
       )
-      TextField(
-        value = formState.unit.value,
-        onValueChange = { formState.unit.update(it) },
-        label = { Text(stringResource(R.string.label_unit).asOptionalLabel()) },
-        shape = RectangleShape,
-        colors = borderlessTextFieldColors(),
-        keyboardOptions = KeyboardOptions(
-          capitalization = KeyboardCapitalization.None,
-          keyboardType = KeyboardType.Text,
-          imeAction = ImeAction.Done
-        ),
-        modifier = Modifier.width(100.dp)
-      )
+    ) {
+      Column(
+        verticalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier
+          .padding(8.dp)
+          .padding(bottom = 4.dp)
+          .fillMaxWidth()
+      ) {
+        TextField(
+          value = formState.name.value,
+          onValueChange = { formState.name.update(it) },
+          label = { Text(stringResource(R.string.label_name)) },
+          shape = RectangleShape,
+          colors = borderlessTextFieldColors(),
+          keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.Sentences,
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Next
+          ),
+          modifier = Modifier.fillMaxWidth()
+        )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          NumberField(
+            value = formState.amount.value,
+            onValueChange = { formState.amount.update(it) },
+            validator = NullableDoubleFieldValidator,
+            label = { Text(stringResource(R.string.label_amount).asOptionalLabel()) },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            keyboardOptions = KeyboardOptions(
+              imeAction = ImeAction.Next
+            ),
+            modifier = Modifier.weight(1f, true)
+          )
+          TextField(
+            value = formState.unit.value,
+            onValueChange = { formState.unit.update(it) },
+            label = { Text(stringResource(R.string.label_unit).asOptionalLabel()) },
+            shape = RectangleShape,
+            colors = borderlessTextFieldColors(),
+            keyboardOptions = KeyboardOptions(
+              capitalization = KeyboardCapitalization.None,
+              keyboardType = KeyboardType.Text,
+              imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.width(100.dp)
+          )
+        }
+      }
     }
+  }
+}
+
+@Suppress("HardCodedStringLiteral")
+@Preview
+@Composable
+private fun Preview() {
+  CookbookTheme {
+    RecipeFormIngredientScreenContent(
+      formState = RecipeFormIngredientScreenViewModel.FormState(
+        formData = RecipeFormIngredientFields(name = "Ingredient 1", amount = 2.5, unit = "kg")
+      ),
+      isNew = false,
+      onBack = {},
+      onSubmit = {},
+    )
   }
 }

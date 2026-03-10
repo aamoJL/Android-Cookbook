@@ -8,23 +8,25 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Card
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,12 +34,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
 import com.aamo.cookbook.R
 import com.aamo.cookbook.service.PhotoService
+import com.aamo.cookbook.ui.components.BackgroundSurface
+import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.inputs.FiveStarRating
+import com.aamo.cookbook.ui.components.modals.DeleteDialog
+import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 
 @Composable
@@ -47,31 +53,47 @@ fun RecipeSettingsScreen(
   onRatingChange: (Int) -> Unit,
   onThumbnailChange: (Uri) -> Unit
 ) {
-  Surface {
+  val scrollState = rememberScrollState()
+
+  BackgroundSurface(modifier = Modifier.fillMaxSize()) {
     Column(
+      verticalArrangement = Arrangement.spacedBy(32.dp),
       modifier = Modifier
-        .fillMaxSize()
-        .padding(8.dp)
+        .verticalScroll(scrollState)
+        .fillMaxHeight()
+        .padding(vertical = 8.dp, horizontal = 32.dp)
     ) {
-      Spacer(modifier = Modifier.height(100.dp))
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
       ) {
-        ThumbnailPicker(
-          fileName = thumbnailUri,
-          onThumbnailChange = onThumbnailChange,
-          modifier = Modifier.size(200.dp)
-        )
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.widthIn(max = 400.dp)
+        ) {
+          HorizontalDividerLabel(label = stringResource(R.string.label_thumbnail))
+          ThumbnailPicker(
+            fileName = thumbnailUri,
+            onThumbnailChange = onThumbnailChange,
+            modifier = Modifier.size(200.dp)
+          )
+        }
       }
-      Spacer(modifier = Modifier.height(100.dp))
       Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
       ) {
-        StarRating(rating = ratingOutOfFive, onRatingChange = onRatingChange)
+        Column(
+          horizontalAlignment = Alignment.CenterHorizontally,
+          verticalArrangement = Arrangement.spacedBy(8.dp),
+          modifier = Modifier.widthIn(max = 400.dp)
+        ) {
+          HorizontalDividerLabel(label = stringResource(R.string.label_rating))
+          StarRating(rating = ratingOutOfFive, onRatingChange = onRatingChange)
+        }
       }
     }
   }
@@ -82,8 +104,21 @@ private fun ThumbnailPicker(
   fileName: String, onThumbnailChange: (Uri) -> Unit, modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
+  var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
 
-  Card(modifier = modifier) {
+  DeleteDialog(
+    open = openDeleteDialog,
+    title = stringResource(R.string.dialog_title_delete_thumbnail),
+    onDismiss = { openDeleteDialog = false },
+    onConfirm = {
+      openDeleteDialog = false
+      onThumbnailChange(Uri.EMPTY)
+    })
+
+  ElevatedCard(
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+    modifier = modifier
+  ) {
     if (fileName.isNotEmpty()) {
       Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -93,10 +128,12 @@ private fun ThumbnailPicker(
           modifier = Modifier.fillMaxSize()
         )
         IconButton(
-          onClick = { onThumbnailChange(Uri.EMPTY) }, colors = IconButtonDefaults.iconButtonColors(
+          onClick = { openDeleteDialog = true },
+          colors = IconButtonDefaults.iconButtonColors(
             contentColor = MaterialTheme.colorScheme.error,
             containerColor = MaterialTheme.colorScheme.surface.copy(alpha = .8f),
-          ), modifier = Modifier.align(Alignment.BottomEnd)
+          ),
+          modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp),
         ) {
           Icon(
             painter = painterResource(R.drawable.rounded_delete_24),
@@ -122,15 +159,10 @@ private fun ThumbnailPicker(
 private fun StarRating(
   rating: Int, onRatingChange: (Int) -> Unit
 ) {
-  Card {
-    Column(
-      horizontalAlignment = Alignment.CenterHorizontally,
-      verticalArrangement = Arrangement.spacedBy(4.dp),
-      modifier = Modifier.padding(8.dp)
-    ) {
-      Text(text = stringResource(R.string.text_rate_the_recipe))
-      FiveStarRating(value = rating, onValueChange = onRatingChange)
-    }
+  ElevatedCard(colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface)) {
+    FiveStarRating(
+      value = rating, onValueChange = onRatingChange, modifier = Modifier.padding(8.dp)
+    )
   }
 }
 
@@ -161,12 +193,14 @@ private fun CameraButton(
   }
 }
 
-@Preview
+@PreviewLightDark
 @Composable
 private fun Preview() {
-  RecipeSettingsScreen(
-    ratingOutOfFive = 3,
-    thumbnailUri = String.EMPTY,
-    onRatingChange = {},
-    onThumbnailChange = {})
+  CookbookTheme {
+    RecipeSettingsScreen(
+      ratingOutOfFive = 3,
+      thumbnailUri = String.EMPTY,
+      onRatingChange = {},
+      onThumbnailChange = {})
+  }
 }

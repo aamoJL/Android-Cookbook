@@ -1,17 +1,12 @@
 package com.aamo.cookbook.features.recipe.list.screens
 
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -23,10 +18,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.PreviewLightDark
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -38,15 +31,15 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.Recipe
-import com.aamo.cookbook.features.recipe.list.components.RecipeCard
+import com.aamo.cookbook.features.recipe.list.components.RecipeList
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
 import com.aamo.cookbook.features.recipe.list.use_cases.fetchRecipes
+import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.inputs.BackNavigationIconButton
 import com.aamo.cookbook.ui.components.inputs.text_field.SearchTextField
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.extensions.general.EMPTY
-import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -94,7 +87,7 @@ fun NavGraphBuilder.recipeSearchScreen(
         recipes = checkNotNull(recipes),
         searchWord = nameFilter,
         onSearchWordChange = { viewmodel.updateFilter(it) },
-        onRecipeSelected = onOpenRecipe,
+        onRecipeSelected = { onOpenRecipe(it.id) },
         onBack = onBack,
       )
     }
@@ -105,34 +98,24 @@ fun NavGraphBuilder.recipeSearchScreen(
 private fun RecipeSearchScreenContent(
   recipes: List<RecipeListRecipeModel>,
   searchWord: String,
-  onRecipeSelected: (id: Long) -> Unit,
+  onRecipeSelected: (recipe: Recipe) -> Unit,
   onBack: () -> Unit,
   onSearchWordChange: (String) -> Unit,
 ) {
   Scaffold(
     topBar = {
-      SearchTopBar(value = searchWord, onValueChange = onSearchWordChange, onBack = onBack)
+      SearchTopBar(
+        value = searchWord,
+        onValueChange = onSearchWordChange,
+        onBack = onBack,
+      )
     }) {
-    Surface(Modifier.padding(it)) {
-      LazyVerticalGrid(
-        columns = GridCells.Fixed(2),
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp),
-        modifier = Modifier.padding(4.dp)
-      ) {
-        items(recipes) { recipe ->
-          RecipeCard(
-            recipe = recipe.recipe,
-            onClick = { onRecipeSelected(recipe.recipe.id) },
-            isBookmarked = recipe.isBookmarked,
-            rating = recipe.rating,
-            modifier = Modifier
-              .fillMaxWidth()
-              .height(200.dp)
-              .testTag(UITag.OPTION.name)
-          )
-        }
-      }
+    BackgroundSurface(
+      Modifier
+        .padding(it)
+        .fillMaxSize()
+    ) {
+      RecipeList(recipes = recipes, onRecipeSelected = onRecipeSelected)
     }
   }
 }
@@ -140,7 +123,7 @@ private fun RecipeSearchScreenContent(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SearchTopBar(
-  value: String, onValueChange: (String) -> Unit, onBack: () -> Unit
+  value: String, onValueChange: (String) -> Unit, onBack: () -> Unit, modifier: Modifier = Modifier,
 ) {
   val focusRequester = remember { FocusRequester() }
 
@@ -150,10 +133,8 @@ private fun SearchTopBar(
 
   TopAppBar(
     title = { }, colors = TopAppBarDefaults.topAppBarColors(
-    actionIconContentColor = MaterialTheme.colorScheme.primaryContainer,
-    navigationIconContentColor = MaterialTheme.colorScheme.primaryContainer,
+    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
     containerColor = MaterialTheme.colorScheme.primary,
-    titleContentColor = MaterialTheme.colorScheme.primaryContainer,
   ), actions = {
     Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
       SearchTextField(
@@ -165,7 +146,8 @@ private fun SearchTopBar(
     }
   }, navigationIcon = {
     BackNavigationIconButton(onBack = onBack)
-  })
+  }, modifier = modifier
+  )
 }
 
 @Suppress("HardCodedStringLiteral")
@@ -175,9 +157,7 @@ private fun Preview() {
   CookbookTheme {
     RecipeSearchScreenContent(
       recipes = listOf(
-      RecipeListRecipeModel(
-        recipe = Recipe(name = "Recipe 1"), rating = 3, isBookmarked = false
-      ),
+      RecipeListRecipeModel(recipe = Recipe(name = "Recipe 1"), rating = 3, isBookmarked = false),
       RecipeListRecipeModel(
         recipe = Recipe(name = "Recipe 1"), rating = null, isBookmarked = false
       ),

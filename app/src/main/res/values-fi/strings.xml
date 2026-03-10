@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="suffix_copy">\u0020- kopio</string>
-    <string name="text_choose_category">Valitse kategoria</string>
+    <string name="text_menu">Menu</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
     <string name="screen_title_new_recipe">Lisää uusi resepti</string>
@@ -11,10 +11,10 @@
     <string name="screen_title_new_ingredient">Lisää uusi ainesosa</string>
     <string name="screen_title_existing_ingredient">Muokkaa ainesosaa</string>
     <string name="title_ingredients">Ainesosat</string>
-    <string name="title_recipe">Reseptin tiedot</string>
-    <string name="title_chapter">%1$s. kappaleen tiedot</string>
-    <string name="title_step">%1$s. vaiheen tiedot</string>
-    <string name="title_ingredient">Ainesosan tiedot</string>
+    <string name="title_recipe_info">Resepti</string>
+    <string name="title_chapter_information">Kappale %1$s</string>
+    <string name="title_step_information">Vaihe %1$s</string>
+    <string name="title_ingredient_information">Ainesosa</string>
     <string name="title_chapters">Kappaleet</string>
     <string name="title_steps">Vaiheet</string>
     <string name="cd_add_new_recipe">Lisää uusi resepti</string>
@@ -45,8 +45,8 @@
     <string name="snackbar_recipe_deleted_successfully">Resepti poistettu onnistuneesti.</string>
     <string name="abbreviation_minutes">%1$s m</string>
     <string name="cd_set_timer">Aseta ajastin</string>
-    <string name="label_step_timer">Ajastin (minuuttia)</string>
-    <string name="label_note">Huomautus</string>
+    <string name="label_step_timer">Ajastin</string>
+    <string name="label_note">Huomio</string>
     <string name="cd_take_a_photo">Ota kuva</string>
     <string name="cd_delete_photo">Poista kuva</string>
     <string name="text_rate_the_recipe">Arvostele resepti</string>
@@ -71,4 +71,10 @@
     <string name="cd_chapter_x_page">Kappale %1$d sivu</string>
     <string name="snackbar_app_not_found">Sovellusta ei löytynyt.</string>
     <string name="btn_search">Haku</string>
+    <string name="cd_change_app_theme">Vaihda sovelluksen teemaa</string>
+    <string name="suffix_minutes">minuuttia</string>
+    <string name="cd_time">Aika</string>
+    <string name="label_thumbnail">Kuva</string>
+    <string name="label_rating">Arvio</string>
+    <string name="dialog_title_delete_thumbnail">Poista kuva?</string>
 </resources>
