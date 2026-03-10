@@ -16,4 +16,4 @@ Can be used to store cooking recipes on the user's phone locally.
 | Rating | Recipes can be rated on the last page of the recipe screen, when the recipe has been completed. |
 
 # Screenshots
-![Cookbook-screenshots](https://github.com/aamoJL/Android-Cookbook/assets/16759549/9dac6aca-9ada-41a9-9c77-4afc5cb3910e)
+![Cookbook-screenshots](https://github.com/user-attachments/assets/077c5554-0e3a-4ed7-8deb-e68d24b06985)
