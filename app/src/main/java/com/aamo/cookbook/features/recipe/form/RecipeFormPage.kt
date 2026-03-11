@@ -13,6 +13,7 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -80,19 +81,18 @@ fun NavGraphBuilder.recipeFormPage(
 ) {
   composable<RecipeFormPage> { navStack ->
     val (recipeId) = navStack.toRoute<RecipeFormPage>()
-    val localContext = LocalContext.current
-    val dao = RecipeDatabase.getDatabase(localContext.applicationContext).recipeDao()
+    val recipeDeletedMessage = stringResource(R.string.snackbar_recipe_deleted_successfully)
+    val appContext = LocalContext.current.applicationContext
+    val dao = RecipeDatabase.getDatabase(appContext).recipeDao()
     val viewmodel: RecipeFormViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipeFormViewModel(
           fetchData = { fetchRecipe(dao = dao, recipeId = recipeId) },
           deleteData = { recipe ->
             deleteRecipe(
-              dao = dao,
-              photoService = PhotoService(context = localContext.applicationContext),
-              recipe = recipe.recipe
+              dao = dao, photoService = PhotoService(context = appContext), recipe = recipe.recipe
             ).onTrue {
-              onSnackbar(SnackbarProperties(localContext.getString(R.string.snackbar_recipe_deleted_successfully)))
+              onSnackbar(SnackbarProperties(recipeDeletedMessage))
               onOpenCategories()
             }
           },

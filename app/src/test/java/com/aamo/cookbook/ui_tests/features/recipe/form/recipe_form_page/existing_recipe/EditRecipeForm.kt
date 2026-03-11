@@ -52,6 +52,24 @@ class EditRecipeForm : PageTest() {
   }
 
   @Test
+  fun submit_correct_backstack() = runTest {
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled()
+
+    rule.onNodeWithText(getString(R.string.label_name)).performTextReplacement("New Recipe")
+
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick()
+
+    // on RecipeViewPage
+    rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
+    rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText("New Recipe"))
+
+    // back
+    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
+    rule.onNodeWithText(getString(R.string.screen_title_new_recipe)).assertDoesNotExist()
+    rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertDoesNotExist()
+  }
+
+  @Test
   fun `delete list item`() {
     assertEquals(
       recipe.chapters.size, rule.onAllNodesWithTag(UITag.OPTION.name).fetchSemanticsNodes().size

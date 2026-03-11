@@ -70,6 +70,48 @@ class NewRecipeForm : PageTest() {
   }
 
   @Test
+  fun submit_correct_backstack() = runTest {
+    // Info
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
+    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Recipe")
+    rule.onNodeWithText(getString(R.string.label_servings)).performTextReplacement("3")
+    rule.onNodeWithText(getString(R.string.label_category)).performTextInput("Category")
+
+    // Chapter
+    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
+    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Chapter")
+
+    // Step
+    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
+    rule.onNodeWithText(getString(R.string.label_description)).performTextInput("Step")
+
+    // Ingredient
+    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
+    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Ingredient")
+
+    // Save
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Step
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Chapter
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Recipe
+
+    // Submit
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick()
+
+    // on RecipeViewPage
+    rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
+    rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText("Recipe"))
+
+    // back
+    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
+    rule.onNodeWithText(getString(R.string.screen_title_new_recipe)).assertDoesNotExist()
+    rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertDoesNotExist()
+  }
+
+  @Test
   fun `delete button hidden`() = runTest {
     rule.onNodeWithContentDescription(getString(R.string.cd_delete_recipe)).assertDoesNotExist()
   }

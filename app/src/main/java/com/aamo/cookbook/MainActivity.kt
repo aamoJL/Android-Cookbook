@@ -5,6 +5,10 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
@@ -21,7 +25,6 @@ class MainActivity : ComponentActivity() {
     super.onCreate(savedInstanceState)
 
     enableEdgeToEdge()
-    
     setContent {
       CookbookTheme {
         MainContent()
@@ -47,6 +50,13 @@ fun MainContent() {
           )
         }
       })
-    SnackbarHost(hostState = snackState, Modifier.align(Alignment.BottomCenter))
+    SnackbarHost(
+      hostState = snackState,
+      modifier = Modifier
+        .align(Alignment.BottomCenter)
+        .padding(
+          bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        ),
+    )
   }
 }
