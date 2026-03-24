@@ -112,6 +112,7 @@ class RecipeViewViewModel(
 
   val servingsState = ServingsState()
   val progressState = ViewModelStateList<List<Boolean>>()
+  val ingredientSelection = ViewModelStateList<Long>()
 
   fun updateBookmark(value: Boolean) {
     if (value && bookmark.value != null) return
@@ -216,6 +217,7 @@ fun NavGraphBuilder.recipeViewPage(
         rating = rating,
         servingsState = viewmodel.servingsState,
         progressState = viewmodel.progressState,
+        ingredientSelection = viewmodel.ingredientSelection,
         onEdit = { onOpenRecipeForm(id) },
         onCopy = { viewmodel.saveAsCopy() },
         onUpdateBookmark = { viewmodel.updateBookmark(it) },
@@ -258,6 +260,7 @@ fun RecipeViewPageContent(
   rating: RecipeRating?,
   servingsState: ServingsState,
   progressState: ViewModelStateList<List<Boolean>>,
+  ingredientSelection: ViewModelStateList<Long>,
   onEdit: () -> Unit,
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
@@ -307,11 +310,14 @@ fun RecipeViewPageContent(
                 onThumbnailChange = onUpdateThumbnail
               )
 
-              1 -> RecipeSummaryScreen(
-                recipe = recipe,
-                servings = servingsState.current.value,
-                servingsMultiplier = servingsState.multiplier,
-                onServingsChange = { servingsState.current.update(it) })
+              1 -> {
+                RecipeSummaryScreen(
+                  recipe = recipe,
+                  ingredientSelection = ingredientSelection,
+                  servings = servingsState.current.value,
+                  servingsMultiplier = servingsState.multiplier,
+                  onServingsChange = { servingsState.current.update(it) })
+              }
 
               else -> {
                 val chapterIndex = pageIndex - 2
@@ -367,9 +373,9 @@ private fun RecipeViewPageContentPreview() {
               chapter = Chapter(id = 2, name = "Chapter 2"), steps = listOf(
                 StepWithIngredients(
                   step = Step(), ingredients = listOf(
-                    Ingredient(id = 1, name = "Ingredient 1", amount = 1.0, unit = "dl"),
-                    Ingredient(id = 2, name = "Ingredient 2", amount = 2.0, unit = "kpl"),
-                    Ingredient(id = 3, name = "Ingredient 3", amount = 3.0, unit = "ml"),
+                    Ingredient(id = 4, name = "Ingredient 1", amount = 1.0, unit = "dl"),
+                    Ingredient(id = 5, name = "Ingredient 2", amount = 2.0, unit = "kpl"),
+                    Ingredient(id = 6, name = "Ingredient 3", amount = 3.0, unit = "ml"),
                   )
                 )
               )
@@ -380,6 +386,7 @@ private fun RecipeViewPageContentPreview() {
         rating = null,
         servingsState = ServingsState(),
         progressState = ViewModelStateList(listOf(listOf(true), listOf(false), listOf(false))),
+        ingredientSelection = ViewModelStateList(listOf(1)),
         onEdit = {},
         onCopy = {},
         onUpdateBookmark = {},

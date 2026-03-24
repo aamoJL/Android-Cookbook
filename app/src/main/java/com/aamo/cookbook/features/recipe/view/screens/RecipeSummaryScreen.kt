@@ -56,10 +56,12 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.toStringWithoutZero
+import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
 
 @Composable
 fun RecipeSummaryScreen(
   recipe: RecipeWithChaptersStepsAndIngredients,
+  ingredientSelection: ViewModelStateList<Long>,
   servings: Int,
   servingsMultiplier: Double,
   onServingsChange: (Int) -> Unit,
@@ -128,6 +130,7 @@ fun RecipeSummaryScreen(
       ) {
         IngredientList(
           recipe = recipe,
+          ingredientSelection = ingredientSelection,
           servingsMultiplier = servingsMultiplier,
           modifier = Modifier.padding(vertical = 24.dp, horizontal = 32.dp)
         )
@@ -222,6 +225,7 @@ private fun Thumbnail(fileName: String, modifier: Modifier = Modifier) {
 @Composable
 fun IngredientList(
   recipe: RecipeWithChaptersStepsAndIngredients,
+  ingredientSelection: ViewModelStateList<Long>,
   servingsMultiplier: Double,
   modifier: Modifier = Modifier,
 ) {
@@ -246,6 +250,7 @@ fun IngredientList(
             )
             IngredientCheckBoxList(
               ingredients = chapterIngredientsPair.second,
+              ingredientSelection = ingredientSelection,
               servingsMultiplier = servingsMultiplier,
               softWrap = false,
               textStyle = MaterialTheme.typography.bodyMedium,
@@ -269,7 +274,7 @@ private fun Preview() {
             chapter = Chapter(name = "Chapter 1"), steps = listOf(
               StepWithIngredients(
                 step = Step(), ingredients = listOf(
-                  Ingredient(name = "Ingnt 1", amount = 250.0, unit = "g"),
+                  Ingredient(id = 1, name = "Ingnt 1", amount = 250.0, unit = "g"),
                   Ingredient(name = "Ingrediet 2", amount = 250.0, unit = "g"),
                   Ingredient(name = "Ingredient 3", amount = 250.0),
                 )
@@ -285,6 +290,11 @@ private fun Preview() {
             )
           )
         )
-      ), servings = 2, servingsMultiplier = 1.5, onServingsChange = {})
+      ),
+      servings = 2,
+      servingsMultiplier = 1.5,
+      onServingsChange = {},
+      ingredientSelection = ViewModelStateList(items = listOf(1)),
+    )
   }
 }
