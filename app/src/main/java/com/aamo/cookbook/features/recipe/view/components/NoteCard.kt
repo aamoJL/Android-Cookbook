@@ -32,6 +32,7 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 fun NoteCard(
   text: String,
   modifier: Modifier = Modifier,
+  label: String = "${stringResource(R.string.label_note)}:",
   colors: CardColors = CardDefaults.elevatedCardColors(
     containerColor = MaterialTheme.colorScheme.tertiaryContainer,
     contentColor = MaterialTheme.colorScheme.onTertiaryContainer
@@ -46,11 +47,13 @@ fun NoteCard(
   ) {
     Box(modifier = Modifier.fillMaxSize()) {
       Column(modifier = Modifier.padding(8.dp)) {
-        Text(
-          text = "${stringResource(R.string.label_note)}:",
-          fontStyle = FontStyle.Italic,
-          style = MaterialTheme.typography.labelSmall
-        )
+        if (label.isNotEmpty()) {
+          Text(
+            text = label,
+            fontStyle = FontStyle.Italic,
+            style = MaterialTheme.typography.labelSmall,
+          )
+        }
         Text(text = text, fontStyle = FontStyle.Italic, style = MaterialTheme.typography.bodySmall)
       }
       // Folded corner

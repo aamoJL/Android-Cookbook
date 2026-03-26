@@ -78,4 +78,18 @@
     <string name="label_thumbnail">Thumbnail</string>
     <string name="label_rating">Rating</string>
     <string name="dialog_title_delete_thumbnail">Delete thumbnail?</string>
+    <string name="btn_add_chapter">Chapter</string>
+    <string name="cd_delete_chapter">Delete chapter</string>
+    <string name="cd_add_step">Add step</string>
+    <string name="dialog_title_delete_chapter">Delete chapter?</string>
+    <string name="cd_add_new_chapter">Add new chapter</string>
+    <string name="cd_toggle_note_field">Toggle note field</string>
+    <string name="cd_toggle_timer_field">Toggle timer field</string>
+    <string name="cd_move_left">Move left</string>
+    <string name="cd_move_right">Move right</string>
+    <string name="btn_ingredient">Ingredient</string>
+    <string name="cd_add_ingredient">Add ingredient</string>
+    <string name="dialog_title_delete_step">Delete step?</string>
+    <string name="text_click_to_edit_step">Click to edit step</string>
+    <string name="cd_unselect">Unselect</string>
 </resources>

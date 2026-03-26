@@ -38,6 +38,11 @@ class ViewModelStateList<T>(items: List<T> = emptyList()) {
     }
   }
 
+  fun removeAt(index: Int) {
+    _values.removeAt(index)
+    onChange?.invoke()
+  }
+
   fun replaceAt(index: Int, item: T) {
     val validation = validationPredicate
     val value = if (validation != null) validation(item) else item

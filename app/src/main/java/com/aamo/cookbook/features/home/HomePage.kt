@@ -31,42 +31,57 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
       startDestination = HomeScreen,
       enterTransition = { fadeIn(animationSpec = tween(300, easing = LinearEasing)) },
       exitTransition = { fadeOut(animationSpec = tween(300, easing = LinearEasing)) }) {
-      homeScreen(onOpenSearch = {
-        navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
-      }, onOpenRecipeForm = {
-        navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
-      }, onOpenBookmarks = {
-        navController.navigate(RecipesByBookmarkScreen) { launchSingleTop = true }
-      }, onOpenRecipesByCategory = {
-        navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
-      })
-      recipeListPages(onOpenRecipe = {
-        navController.navigate(RecipeViewPage(id = it)) { launchSingleTop = true }
-      }, onOpenSearch = {
-        navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
-      }, onOpenRecipeForm = {
-        navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
-      }, onBack = { navController.navigateUp() })
-      recipeFormPage(onOpenCategories = {
-        navController.navigate(HomeScreen) {
-          popUpTo<HomeScreen> { inclusive = true }
-          launchSingleTop = true
-        }
-      }, onOpenRecipe = { id ->
-        navController.popBackStack(route = RecipeFormPage::class, inclusive = true)
-        navController.popBackStack(route = RecipeViewPage::class, inclusive = true)
+      homeScreen(
+        onOpenSearch = {
+          navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
+        },
+        onOpenRecipeForm = {
+          navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
+        },
+        onOpenBookmarks = {
+          navController.navigate(RecipesByBookmarkScreen) { launchSingleTop = true }
+        },
+        onOpenRecipesByCategory = {
+          navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
+        },
+      )
+      recipeListPages(
+        onOpenRecipe = {
+          navController.navigate(RecipeViewPage(id = it)) { launchSingleTop = true }
+        },
+        onOpenSearch = {
+          navController.navigate(RecipeSearchScreen) { launchSingleTop = true }
+        },
+        onOpenRecipeForm = {
+          navController.navigate(RecipeFormPage(id = 0)) { launchSingleTop = true }
+        },
+        onBack = { navController.navigateUp() },
+      )
+      recipeFormPage(
+        onOpenCategories = {
+          navController.navigate(HomeScreen) {
+            popUpTo<HomeScreen> { inclusive = true }
+            launchSingleTop = true
+          }
+        },
+        onOpenRecipe = { id ->
+          navController.popBackStack(route = RecipeFormPage::class, inclusive = true)
+          navController.popBackStack(route = RecipeViewPage::class, inclusive = true)
 
-        navController.navigate(RecipeViewPage(id = id)) {
-          launchSingleTop = true
-        }
-      }, onSnackbar = onShowSnackbar, onBack = {
-        navController.navigateUp()
-      })
-      recipeViewPage(onOpenRecipeForm = {
-        navController.navigate(RecipeFormPage(id = it)) { launchSingleTop = true }
-      }, onSnackbar = onShowSnackbar, onBack = {
-        navController.navigateUp()
-      })
+          navController.navigate(RecipeViewPage(id = id)) {
+            launchSingleTop = true
+          }
+        },
+        onSnackbar = onShowSnackbar,
+        onBack = { navController.navigateUp() },
+      )
+      recipeViewPage(
+        onOpenRecipeForm = {
+          navController.navigate(RecipeFormPage(id = it)) { launchSingleTop = true }
+        },
+        onSnackbar = onShowSnackbar,
+        onBack = { navController.navigateUp() },
+      )
     }
   }
 }
