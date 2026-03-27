@@ -1,0 +1,35 @@
+package com.aamo.cookbook.ui_tests.features.recipe.form.recipe_form_page.recipe_info_screen
+
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.isNotDisplayed
+import androidx.compose.ui.test.onNodeWithContentDescription
+import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.performClick
+import com.aamo.cookbook.R
+import com.aamo.cookbook.test_utility.ui.rules.PageTest
+import com.aamo.cookbook.test_utility.ui.rules.waitForLoading
+import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
+import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.annotation.Config
+
+@Suppress("HardCodedStringLiteral")
+@RunWith(RobolectricTestRunner::class)
+@Config(qualifiers = "w1000dp-h1000dp-480dpi")
+class RecipeNoteField : PageTest() {
+  @Before
+  fun setup() = runTest {
+    toRecipeFormPage()
+    waitForLoading()
+  }
+
+  @Test
+  fun `note field toggle`() = runTest {
+    rule.onNodeWithText(getString(R.string.label_note).asOptionalLabel()).isNotDisplayed()
+    rule.onNodeWithContentDescription(getString(R.string.cd_toggle_note_field)).performClick()
+    rule.onNodeWithText(getString(R.string.label_note).asOptionalLabel()).isDisplayed()
+  }
+}

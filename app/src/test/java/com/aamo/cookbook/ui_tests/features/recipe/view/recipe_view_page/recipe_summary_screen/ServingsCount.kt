@@ -22,7 +22,7 @@ import org.robolectric.annotation.Config
 @Config(qualifiers = "w1000dp-h1000dp-480dpi")
 @RunWith(RobolectricTestRunner::class)
 class ServingsCount : PageTest() {
-  val servings = 6
+  val servings = 123
   val recipe = RecipeMocker.getFullMocker().apply {
     modify { it.copy(name = "Recipe", servings = servings) }
     chapters.first().modify { it.copy(name = "Chapter 1") }.steps.first().ingredients.first()

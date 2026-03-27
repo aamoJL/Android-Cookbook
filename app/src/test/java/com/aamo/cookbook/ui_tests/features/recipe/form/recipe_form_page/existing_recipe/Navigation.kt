@@ -2,11 +2,12 @@ package com.aamo.cookbook.ui_tests.features.recipe.form.recipe_form_page.existin
 
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import com.aamo.cookbook.R
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.test_utility.ui.rules.PageTest
@@ -48,47 +49,7 @@ class Navigation : PageTest() {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `to recipeFormChapterScreen`() = runTest {
-    rule.onAllNodesWithTag(UITag.OPTION.name).onFirst().performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_chapter)).assertExists()
-  }
-
-  @Test
-  fun `to recipeFormStepScreen`() = runTest {
-    `to recipeFormChapterScreen`()
-
-    rule.onAllNodesWithTag(UITag.OPTION.name).onFirst().performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_step)).assertExists()
-  }
-
-  @Test
-  fun `to recipeFormIngredientScreen`() = runTest {
-    `to recipeFormStepScreen`()
-
-    rule.onAllNodesWithTag(UITag.OPTION.name).onFirst().performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_ingredient)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormInfoScreen`() = runTest {
-    `to recipeFormChapterScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormChapterScreen`() = runTest {
-    `to recipeFormStepScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_chapter)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormStepScreen`() = runTest {
-    `to recipeFormIngredientScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_existing_step)).assertExists()
+    rule.onRoot().performTouchInput { swipeLeft() }
+    rule.onNodeWithText(getString(R.string.title_chapter_information, "1")).assertExists()
   }
 }

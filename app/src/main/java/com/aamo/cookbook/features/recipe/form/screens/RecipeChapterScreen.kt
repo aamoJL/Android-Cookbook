@@ -494,7 +494,7 @@ private fun StepForm(
               IconButton(onClick = { openDeleteDialog = true }) {
                 Icon(
                   painter = painterResource(R.drawable.rounded_delete_24),
-                  contentDescription = stringResource(R.string.cd_delete_chapter),
+                  contentDescription = stringResource(R.string.cd_delete_step),
                   tint = MaterialTheme.colorScheme.error
                 )
               }
@@ -706,7 +706,7 @@ private fun IngredientForm(
     IconButton(onClick = onDelete) {
       Icon(
         painter = painterResource(R.drawable.rounded_delete_24),
-        contentDescription = stringResource(R.string.cd_delete_chapter),
+        contentDescription = stringResource(R.string.cd_delete_ingredient),
         tint = MaterialTheme.colorScheme.error
       )
     }

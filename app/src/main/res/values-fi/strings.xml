@@ -91,4 +91,6 @@
     <string name="dialog_title_delete_step">Poista vaihe?</string>
     <string name="text_click_to_edit_step">Klikkaa muokataksesi vaihetta</string>
     <string name="cd_unselect">Poista valinta</string>
+    <string name="cd_delete_step">Poista vaihe</string>
+    <string name="cd_delete_ingredient">Poista ainesosa</string>
 </resources>

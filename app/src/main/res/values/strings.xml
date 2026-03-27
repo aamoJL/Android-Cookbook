@@ -92,4 +92,6 @@
     <string name="dialog_title_delete_step">Delete step?</string>
     <string name="text_click_to_edit_step">Click to edit step</string>
     <string name="cd_unselect">Unselect</string>
+    <string name="cd_delete_step">Delete step</string>
+    <string name="cd_delete_ingredient">Delete ingredient</string>
 </resources>
