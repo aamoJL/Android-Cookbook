@@ -42,11 +42,13 @@ import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,7 +62,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
-import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel
+import com.aamo.cookbook.features.recipe.form.models.states.FormChapterState
+import com.aamo.cookbook.features.recipe.form.models.states.FormIngredientState
+import com.aamo.cookbook.features.recipe.form.models.states.FormStepState
 import com.aamo.cookbook.features.recipe.view.components.NoteCard
 import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.HorizontalDividerLabel
@@ -80,24 +84,12 @@ import java.util.UUID
 @Composable
 fun RecipeChapterScreen(
   index: Int,
-  formState: RecipeFormViewModel.FormChapterState,
+  formState: FormChapterState,
   onDelete: () -> Unit,
   onMoveLeft: (() -> Unit)?,
   onMoveRight: (() -> Unit)?,
   modifier: Modifier = Modifier,
 ) {
-  var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
-
-  DeleteDialog(
-    open = openDeleteDialog,
-    title = stringResource(R.string.dialog_title_delete_chapter),
-    onDismiss = { openDeleteDialog = false },
-    onConfirm = {
-      openDeleteDialog = false
-      onDelete()
-    },
-  )
-
   LazyColumn(
     horizontalAlignment = Alignment.CenterHorizontally,
     contentPadding = PaddingValues(bottom = 140.dp),
@@ -109,95 +101,12 @@ fun RecipeChapterScreen(
           label = stringResource(R.string.title_chapter_information, index + 1),
           modifier = Modifier.padding(12.dp)
         )
-        ElevatedCard(
-          shape = RoundedCornerShape(8.dp),
-          colors = CardDefaults.elevatedCardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
-          ),
-        ) {
-          Column {
-            Column(
-              verticalArrangement = Arrangement.spacedBy(8.dp),
-              modifier = Modifier
-                .animateContentSize()
-                .padding(8.dp)
-                .padding(bottom = 4.dp)
-                .fillMaxWidth()
-            ) {
-              TextField(
-                value = formState.name.value,
-                onValueChange = { formState.name.update(it) },
-                label = { Text(stringResource(R.string.label_name)) },
-                shape = RectangleShape,
-                colors = borderlessTextFieldColors(),
-                keyboardOptions = KeyboardOptions(
-                  capitalization = KeyboardCapitalization.Sentences,
-                  keyboardType = KeyboardType.Text,
-                  imeAction = ImeAction.Next
-                ),
-                modifier = Modifier.fillMaxWidth()
-              )
-              if (formState.noteFieldToggleValue) {
-                TextField(
-                  value = formState.note.value,
-                  onValueChange = { formState.note.update(it) },
-                  label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
-                  shape = RectangleShape,
-                  colors = borderlessTextFieldColors(),
-                  keyboardOptions = KeyboardOptions(
-                    capitalization = KeyboardCapitalization.Sentences,
-                    keyboardType = KeyboardType.Text,
-                    imeAction = ImeAction.Done
-                  ),
-                  modifier = Modifier.fillMaxWidth()
-                )
-              }
-            }
-            HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-            Surface {
-              Row(
-                horizontalArrangement = Arrangement.SpaceBetween,
-                modifier = Modifier.fillMaxWidth(),
-              ) {
-                IconButton(enabled = onMoveLeft != null, onClick = { onMoveLeft?.invoke() }) {
-                  Icon(
-                    painter = painterResource(R.drawable.keyboard_arrow_left_24px),
-                    contentDescription = stringResource(R.string.cd_move_left),
-                  )
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                  IconButton(onClick = { openDeleteDialog = true }) {
-                    Icon(
-                      painter = painterResource(R.drawable.rounded_delete_24),
-                      contentDescription = stringResource(R.string.cd_delete_chapter),
-                      tint = MaterialTheme.colorScheme.error
-                    )
-                  }
-                  IconToggleButton(
-                    enabled = formState.note.value.isEmpty(),
-                    checked = formState.noteFieldToggleValue,
-                    onCheckedChange = { formState.noteFieldToggleValue = it },
-                    colors = IconButtonDefaults.iconToggleButtonColors(
-                      checkedContentColor = MaterialTheme.colorScheme.tertiary,
-                      disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
-                    )
-                  ) {
-                    Icon(
-                      painter = painterResource(R.drawable.sticky_note_2_24px),
-                      contentDescription = stringResource(R.string.cd_toggle_note_field),
-                    )
-                  }
-                }
-                IconButton(enabled = onMoveRight != null, onClick = { onMoveRight?.invoke() }) {
-                  Icon(
-                    painter = painterResource(R.drawable.keyboard_arrow_right_24px),
-                    contentDescription = stringResource(R.string.cd_move_right),
-                  )
-                }
-              }
-            }
-          }
-        }
+        ChapterForm(
+          state = formState,
+          onDelete = onDelete,
+          onMoveLeft = onMoveLeft,
+          onMoveRight = onMoveRight,
+        )
         HorizontalDividerLabel(
           label = stringResource(R.string.title_steps), modifier = Modifier.padding(12.dp)
         )
@@ -206,7 +115,7 @@ fun RecipeChapterScreen(
     itemsIndexed(items = formState.steps.values, key = { _, x -> x.id }) { i, step ->
       if (formState.selectedStepId == step.id) {
         StepForm(
-          formState = step,
+          state = step,
           onMoveUp = ifElse(
             condition = i == 0,
             ifTrue = { null },
@@ -266,8 +175,151 @@ fun RecipeChapterScreen(
 }
 
 @Composable
+fun ChapterForm(
+  state: FormChapterState,
+  onDelete: () -> Unit,
+  onMoveLeft: (() -> Unit)?,
+  onMoveRight: (() -> Unit)?,
+  modifier: Modifier = Modifier,
+) {
+  var openDeleteDialog by rememberSaveable { mutableStateOf(false) }
+  // Textfield invokes focus change on init.
+  // This prevents the field error message showing before user has interacted with it.
+  var focusInit by remember { mutableStateOf(true) }
+  var hasFocus by remember { mutableStateOf(false) }
+
+  DeleteDialog(
+    open = openDeleteDialog,
+    title = stringResource(R.string.dialog_title_delete_chapter),
+    onDismiss = { openDeleteDialog = false },
+    onConfirm = {
+      openDeleteDialog = false
+      onDelete()
+    },
+  )
+
+  ElevatedCard(
+    shape = RoundedCornerShape(8.dp),
+    colors = CardDefaults.elevatedCardColors(
+      containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+    ),
+    modifier = modifier,
+  ) {
+    Column {
+      ChapterFormFields(
+        fields = state.fields,
+        modifier = Modifier
+          .animateContentSize()
+          .padding(8.dp)
+          .padding(bottom = 4.dp)
+          .fillMaxWidth()
+          .onFocusChanged {
+            if (it.hasFocus) hasFocus = it.hasFocus
+            if (focusInit) focusInit = false
+            else hasFocus = it.hasFocus
+          },
+      )
+      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
+      Surface {
+        Row(
+          horizontalArrangement = Arrangement.SpaceBetween,
+          modifier = Modifier.fillMaxWidth(),
+        ) {
+          IconButton(enabled = onMoveLeft != null, onClick = { onMoveLeft?.invoke() }) {
+            Icon(
+              painter = painterResource(R.drawable.keyboard_arrow_left_24px),
+              contentDescription = stringResource(R.string.cd_move_left),
+            )
+          }
+          Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            IconButton(onClick = { openDeleteDialog = true }) {
+              Icon(
+                painter = painterResource(R.drawable.rounded_delete_24),
+                contentDescription = stringResource(R.string.cd_delete_chapter),
+                tint = MaterialTheme.colorScheme.error
+              )
+            }
+            IconToggleButton(
+              enabled = state.fields.note.value.isEmpty(),
+              checked = state.fields.noteFieldToggleValue,
+              onCheckedChange = { state.fields.noteFieldToggleValue = it },
+              colors = IconButtonDefaults.iconToggleButtonColors(
+                checkedContentColor = MaterialTheme.colorScheme.tertiary,
+                disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
+              )
+            ) {
+              Icon(
+                painter = painterResource(R.drawable.sticky_note_2_24px),
+                contentDescription = stringResource(R.string.cd_toggle_note_field),
+              )
+            }
+          }
+          IconButton(enabled = onMoveRight != null, onClick = { onMoveRight?.invoke() }) {
+            Icon(
+              painter = painterResource(R.drawable.keyboard_arrow_right_24px),
+              contentDescription = stringResource(R.string.cd_move_right),
+            )
+          }
+        }
+      }
+      if (state.fields.changed && !state.fields.requiredFieldsFilled && !hasFocus) {
+        Surface(
+          color = MaterialTheme.colorScheme.errorContainer,
+          contentColor = MaterialTheme.colorScheme.onErrorContainer,
+          modifier = Modifier.fillMaxWidth()
+        ) {
+          Text(
+            text = stringResource(R.string.text_required_fields_are_not_filled),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(2.dp),
+          )
+        }
+      }
+    }
+  }
+}
+
+@Composable
+fun ChapterFormFields(fields: FormChapterState.Fields, modifier: Modifier = Modifier) {
+  Column(
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    modifier = modifier,
+  ) {
+    TextField(
+      value = fields.name.value,
+      onValueChange = { fields.name.update(it) },
+      label = { Text(stringResource(R.string.label_name)) },
+      shape = RectangleShape,
+      colors = borderlessTextFieldColors(),
+      keyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.Sentences,
+        keyboardType = KeyboardType.Text,
+        imeAction = ImeAction.Next
+      ),
+      modifier = Modifier.fillMaxWidth()
+    )
+    if (fields.noteFieldToggleValue) {
+      TextField(
+        value = fields.note.value,
+        onValueChange = { fields.note.update(it) },
+        label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Done
+        ),
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
+  }
+}
+
+@Composable
 private fun StepDisplay(
-  formState: RecipeFormViewModel.FormStepState,
+  formState: FormStepState,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   modifier: Modifier = Modifier,
@@ -290,7 +342,7 @@ private fun StepDisplay(
               verticalArrangement = Arrangement.Center,
               modifier = Modifier.fillMaxHeight(),
             ) {
-              if (formState.timerMinutes.value.let { it != null && it > 0 }) {
+              if (formState.fields.timerMinutes.value.let { it != null && it > 0 }) {
                 Column(
                   horizontalAlignment = Alignment.CenterHorizontally,
                   modifier = Modifier.minimumInteractiveComponentSize(),
@@ -301,7 +353,7 @@ private fun StepDisplay(
                   )
                   Text(
                     text = stringResource(
-                      R.string.abbreviation_minutes, formState.timerMinutes.value.toString()
+                      R.string.abbreviation_minutes, formState.fields.timerMinutes.value.toString()
                     ), style = MaterialTheme.typography.labelSmall
                   )
                 }
@@ -319,7 +371,7 @@ private fun StepDisplay(
               .padding(8.dp)
               .fillMaxWidth()
           ) {
-            if (formState.description.value.isEmpty()) {
+            if (formState.fields.description.value.isEmpty()) {
               Text(
                 text = stringResource(R.string.text_click_to_edit_step),
                 fontStyle = FontStyle.Italic,
@@ -327,11 +379,14 @@ private fun StepDisplay(
               )
             }
             else {
-              Text(text = formState.description.value, style = MaterialTheme.typography.titleMedium)
+              Text(
+                text = formState.fields.description.value,
+                style = MaterialTheme.typography.titleMedium
+              )
             }
-            if (formState.note.value.isNotEmpty()) {
+            if (formState.fields.note.value.isNotEmpty()) {
               NoteCard(
-                text = formState.note.value,
+                text = formState.fields.note.value,
                 label = String.EMPTY,
                 modifier = Modifier.fillMaxWidth()
               )
@@ -342,7 +397,7 @@ private fun StepDisplay(
                 shape = MaterialTheme.shapes.extraSmall,
               ) {
                 IngredientList(
-                  ingredients = formState.ingredients.values,
+                  fields = formState.ingredients.values.map { it.fields },
                   textStyle = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier
                     .padding(vertical = 8.dp, horizontal = 16.dp)
@@ -378,6 +433,20 @@ private fun StepDisplay(
             }
           }
         }
+        if (!formState.canSave.value) {
+          Surface(
+            color = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+            modifier = Modifier.fillMaxWidth()
+          ) {
+            Text(
+              text = stringResource(R.string.text_required_fields_are_not_filled),
+              textAlign = TextAlign.Center,
+              style = MaterialTheme.typography.bodySmall,
+              modifier = Modifier.padding(2.dp),
+            )
+          }
+        }
       }
     }
   }
@@ -385,15 +454,15 @@ private fun StepDisplay(
 
 @Composable
 private fun IngredientList(
-  ingredients: List<RecipeFormViewModel.FormIngredientState>,
+  fields: List<FormIngredientState.Fields>,
   modifier: Modifier = Modifier,
   fontFamily: FontFamily = FontFamily.Default,
   textStyle: TextStyle = MaterialTheme.typography.titleMedium,
 ) {
   Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier) {
-    if (ingredients.any { it.amount.value != Double.Zero }) {
+    if (fields.any { it.amount.value != Double.Zero }) {
       Column(modifier = Modifier.width(IntrinsicSize.Max)) {
-        ingredients.forEach {
+        fields.forEach {
           Text(
             text = if (it.amount.value == Double.Zero) String.EMPTY
             else it.amount.value?.toFractionFormattedString() ?: String.EMPTY,
@@ -405,24 +474,24 @@ private fun IngredientList(
         }
       }
     }
-    if (ingredients.any { it.unit.value.isNotEmpty() }) {
+    if (fields.any { it.unit.value.isNotEmpty() }) {
       Column(modifier = Modifier.defaultMinSize(minWidth = 20.dp)) {
-        ingredients.forEach {
-          Text(
-            text = it.unit.value, style = textStyle, fontFamily = fontFamily
-          )
+        fields.forEach {
+          Text(text = it.unit.value, style = textStyle, fontFamily = fontFamily)
         }
       }
     }
     Column {
-      ingredients.forEach { Text(text = it.name.value, style = textStyle, fontFamily = fontFamily) }
+      fields.forEach {
+        Text(text = it.name.value, style = textStyle, fontFamily = fontFamily)
+      }
     }
   }
 }
 
 @Composable
 private fun StepForm(
-  formState: RecipeFormViewModel.FormStepState,
+  state: FormStepState,
   onMoveUp: (() -> Unit)?,
   onMoveDown: (() -> Unit)?,
   onDelete: () -> Unit,
@@ -464,9 +533,9 @@ private fun StepForm(
               modifier = Modifier.fillMaxHeight(),
             ) {
               IconToggleButton(
-                enabled = formState.timerMinutes.value?.let { it > 0 } != true,
-                checked = formState.timerFieldToggleValue,
-                onCheckedChange = { formState.timerFieldToggleValue = it },
+                enabled = state.fields.timerMinutes.value?.let { it > 0 } != true,
+                checked = state.fields.timerFieldToggleValue,
+                onCheckedChange = { state.fields.timerFieldToggleValue = it },
                 colors = IconButtonDefaults.iconToggleButtonColors(
                   checkedContentColor = MaterialTheme.colorScheme.tertiary,
                   disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
@@ -478,9 +547,9 @@ private fun StepForm(
                 )
               }
               IconToggleButton(
-                enabled = formState.note.value.isEmpty(),
-                checked = formState.noteFieldToggleValue,
-                onCheckedChange = { formState.noteFieldToggleValue = it },
+                enabled = state.fields.note.value.isEmpty(),
+                checked = state.fields.noteFieldToggleValue,
+                onCheckedChange = { state.fields.noteFieldToggleValue = it },
                 colors = IconButtonDefaults.iconToggleButtonColors(
                   checkedContentColor = MaterialTheme.colorScheme.tertiary,
                   disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
@@ -501,56 +570,14 @@ private fun StepForm(
             }
           }
           VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-          Column(
-            verticalArrangement = Arrangement.spacedBy(4.dp),
+          StepFormFields(
+            fields = state.fields,
             modifier = Modifier
               .weight(1f)
               .padding(8.dp)
               .padding(bottom = 4.dp)
-              .fillMaxWidth()
-          ) {
-            TextField(
-              value = formState.description.value,
-              onValueChange = { formState.description.update(it) },
-              label = { Text(stringResource(R.string.label_description)) },
-              shape = RectangleShape,
-              colors = borderlessTextFieldColors(),
-              keyboardOptions = KeyboardOptions(
-                capitalization = KeyboardCapitalization.Sentences,
-                keyboardType = KeyboardType.Text,
-                imeAction = ImeAction.Next
-              ),
-              modifier = Modifier.fillMaxWidth()
-            )
-            if (formState.timerFieldToggleValue) {
-              NumberField(
-                value = formState.timerMinutes.value,
-                onValueChange = { formState.timerMinutes.update(it) },
-                validator = NullableIntFieldValidator,
-                label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
-                shape = RectangleShape,
-                suffix = { Text(text = stringResource(R.string.suffix_minutes)) },
-                colors = borderlessTextFieldColors(),
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                modifier = Modifier.fillMaxWidth()
-              )
-            }
-            if (formState.noteFieldToggleValue) {
-              TextField(
-                value = formState.note.value,
-                onValueChange = { formState.note.update(it) },
-                label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
-                shape = RectangleShape,
-                colors = borderlessTextFieldColors(),
-                keyboardOptions = KeyboardOptions(
-                  capitalization = KeyboardCapitalization.Sentences,
-                  keyboardType = KeyboardType.Text,
-                  imeAction = ImeAction.Done
-                ),
-                modifier = Modifier.fillMaxWidth()
-              )
-            }
-          }
+              .fillMaxWidth(),
+          )
           VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
           Surface {
             Column(
@@ -593,22 +620,22 @@ private fun StepForm(
               .fillMaxWidth()
               .padding(8.dp),
           ) {
-            if (formState.ingredients.values.isNotEmpty()) {
+            if (state.ingredients.values.isNotEmpty()) {
               HorizontalDividerLabel(
                 label = stringResource(R.string.title_ingredients),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
               )
               Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                formState.ingredients.values.forEachIndexed { i, ingredient ->
-                  IngredientForm(
-                    formState = ingredient,
-                    onDelete = { formState.ingredients.removeAt(i) },
+                state.ingredients.values.forEachIndexed { i, ingredient ->
+                  IngredientFormFields(
+                    fields = ingredient.fields,
+                    onDelete = { state.ingredients.removeAt(i) },
                   )
                 }
               }
             }
             Button(
-              onClick = { formState.addIngredient() },
+              onClick = { state.addIngredient() },
               colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -633,8 +660,55 @@ private fun StepForm(
 }
 
 @Composable
-private fun IngredientForm(
-  formState: RecipeFormViewModel.FormIngredientState,
+private fun StepFormFields(fields: FormStepState.Fields, modifier: Modifier = Modifier) {
+  Column(verticalArrangement = Arrangement.spacedBy(4.dp), modifier = modifier) {
+    TextField(
+      value = fields.description.value,
+      onValueChange = { fields.description.update(it) },
+      label = { Text(stringResource(R.string.label_description)) },
+      shape = RectangleShape,
+      colors = borderlessTextFieldColors(),
+      keyboardOptions = KeyboardOptions(
+        capitalization = KeyboardCapitalization.Sentences,
+        keyboardType = KeyboardType.Text,
+        imeAction = ImeAction.Next
+      ),
+      modifier = Modifier.fillMaxWidth()
+    )
+    if (fields.timerFieldToggleValue) {
+      NumberField(
+        value = fields.timerMinutes.value,
+        onValueChange = { fields.timerMinutes.update(it) },
+        validator = NullableIntFieldValidator,
+        label = { Text(stringResource(R.string.label_step_timer).asOptionalLabel()) },
+        shape = RectangleShape,
+        suffix = { Text(text = stringResource(R.string.suffix_minutes)) },
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
+    if (fields.noteFieldToggleValue) {
+      TextField(
+        value = fields.note.value,
+        onValueChange = { fields.note.update(it) },
+        label = { Text(stringResource(R.string.label_note).asOptionalLabel()) },
+        shape = RectangleShape,
+        colors = borderlessTextFieldColors(),
+        keyboardOptions = KeyboardOptions(
+          capitalization = KeyboardCapitalization.Sentences,
+          keyboardType = KeyboardType.Text,
+          imeAction = ImeAction.Done
+        ),
+        modifier = Modifier.fillMaxWidth()
+      )
+    }
+  }
+}
+
+@Composable
+private fun IngredientFormFields(
+  fields: FormIngredientState.Fields,
   onDelete: () -> Unit,
 ) {
   Row(
@@ -643,8 +717,8 @@ private fun IngredientForm(
     modifier = Modifier.fillMaxWidth()
   ) {
     TextField(
-      value = formState.name.value,
-      onValueChange = { formState.name.update(it) },
+      value = fields.name.value,
+      onValueChange = { fields.name.update(it) },
       label = {
         Text(
           text = stringResource(R.string.label_name),
@@ -664,8 +738,8 @@ private fun IngredientForm(
       modifier = Modifier.weight(2f)
     )
     NumberField(
-      value = formState.amount.value,
-      onValueChange = { formState.amount.update(it) },
+      value = fields.amount.value,
+      onValueChange = { fields.amount.update(it) },
       validator = NullableDoubleFieldValidator,
       label = {
         Text(
@@ -683,8 +757,8 @@ private fun IngredientForm(
       modifier = Modifier.weight(1f)
     )
     TextField(
-      value = formState.unit.value,
-      onValueChange = { formState.unit.update(it) },
+      value = fields.unit.value,
+      onValueChange = { fields.unit.update(it) },
       label = {
         Text(
           text = stringResource(R.string.label_unit).asOptionalLabel(),
@@ -717,37 +791,46 @@ private fun IngredientForm(
 @PreviewLightDark
 @Composable
 private fun Preview() {
+  val selectedId = UUID.randomUUID()
+
   CookbookTheme {
     BackgroundSurface {
       RecipeChapterScreen(
         index = 0,
-        formState = RecipeFormViewModel.FormChapterState(onChange = {}).apply {
-          name.update("Chapter 1")
-          note.update("This is a note")
+        formState = FormChapterState(onCanSaveChanged = {}).apply {
+          fields.apply {
+            note.update("This is a note")
+          }
+          selectedStepId = selectedId
           steps.add(
-            RecipeFormViewModel.FormStepState(id = UUID.randomUUID(), onChange).apply {
-              description.update("This is a description")
-              timerMinutes.update(4)
-              note.update("This is a note")
-              ingredients.add(
-                RecipeFormViewModel.FormIngredientState(
-                id = UUID.randomUUID(), onChange
-              ).apply {
-                name.update("Ingredient 1")
-                amount.update(20.0)
-                unit.update("g")
-              }, RecipeFormViewModel.FormIngredientState(id = UUID.randomUUID(), onChange).apply {
-                name.update("Ingredient 2")
-                amount.update(200.0)
-                unit.update("mg")
+            FormStepState(id = UUID.randomUUID()) {}.apply {
+              fields.apply {
+                description.update("This is a description")
+                timerMinutes.update(4)
+                note.update("This is a note")
+              }
+              ingredients.add(FormIngredientState(id = UUID.randomUUID()) {}.apply {
+                fields.apply {
+                  name.update("Ingredient 1")
+                  amount.update(20.0)
+                  unit.update("g")
+                }
+              }, FormIngredientState(id = UUID.randomUUID()) {}.apply {
+                fields.apply {
+                  name.update("Ingredient 2")
+                  amount.update(200.0)
+                  unit.update("mg")
+                }
               })
             },
-            RecipeFormViewModel.FormStepState(id = UUID.randomUUID(), onChange),
+            FormStepState(id = UUID.randomUUID()) {},
+            FormStepState(id = selectedId) {},
           )
         },
         onDelete = {},
         onMoveLeft = {},
-        onMoveRight = {})
+        onMoveRight = {},
+      )
     }
   }
 }

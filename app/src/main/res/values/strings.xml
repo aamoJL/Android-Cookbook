@@ -94,4 +94,5 @@
     <string name="cd_unselect">Unselect</string>
     <string name="cd_delete_step">Delete step</string>
     <string name="cd_delete_ingredient">Delete ingredient</string>
+    <string name="text_required_fields_are_not_filled">Required fields are not filled</string>
 </resources>

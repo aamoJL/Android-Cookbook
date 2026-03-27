@@ -90,7 +90,7 @@ class Init {
 
     viewmodel.recipe.load()
 
-    viewmodel.formInfoState.also { info ->
+    viewmodel.formRecipeState.fields.also { info ->
       assertEquals(recipe.recipe.name, info.name.value)
       assertEquals(recipe.recipe.category, info.category.value)
       assertEquals(recipe.recipe.subCategory, info.subCategory.value)
@@ -111,10 +111,10 @@ class Init {
 
     viewmodel.recipe.load()
 
-    assertEquals(3, viewmodel.formChapterStates.values.size)
-    viewmodel.formChapterStates.values.forEachIndexed { i, chapter ->
-      assertEquals(recipe.chapters[i].chapter.name, chapter.name.value)
-      assertEquals(recipe.chapters[i].chapter.note, chapter.note.value)
+    assertEquals(3, viewmodel.formRecipeState.chapterStates.values.size)
+    viewmodel.formRecipeState.chapterStates.values.forEachIndexed { i, chapter ->
+      assertEquals(recipe.chapters[i].chapter.name, chapter.fields.name.value)
+      assertEquals(recipe.chapters[i].chapter.note, chapter.fields.note.value)
     }
   }
 
@@ -131,14 +131,14 @@ class Init {
     viewmodel.recipe.load()
 
     val steps = recipe.chapters.flatMap { it.steps }
-    val viewmodelSteps = viewmodel.formChapterStates.values.flatMap { it.steps.values }
+    val viewmodelSteps = viewmodel.formRecipeState.chapterStates.values.flatMap { it.steps.values }
 
     assertEquals(4, viewmodelSteps.size)
 
     viewmodelSteps.forEachIndexed { i, step ->
-      assertEquals(steps[i].step.description, step.description.value)
-      assertEquals(steps[i].step.timerMinutes, step.timerMinutes.value)
-      assertEquals(steps[i].step.note, step.note.value)
+      assertEquals(steps[i].step.description, step.fields.description.value)
+      assertEquals(steps[i].step.timerMinutes, step.fields.timerMinutes.value)
+      assertEquals(steps[i].step.note, step.fields.note.value)
     }
   }
 
@@ -155,15 +155,16 @@ class Init {
     viewmodel.recipe.load()
 
     val ingredients = recipe.chapters.flatMap { it.steps }.flatMap { it.ingredients }
-    val viewmodelIngredients = viewmodel.formChapterStates.values.flatMap { it.steps.values }
-      .flatMap { it.ingredients.values }
+    val viewmodelIngredients =
+      viewmodel.formRecipeState.chapterStates.values.flatMap { it.steps.values }
+        .flatMap { it.ingredients.values }
 
     assertEquals(6, viewmodelIngredients.size)
 
     viewmodelIngredients.forEachIndexed { i, ingredient ->
-      assertEquals(ingredients[i].name, ingredient.name.value)
-      assertEquals(ingredients[i].amount, ingredient.amount.value)
-      assertEquals(ingredients[i].unit, ingredient.unit.value)
+      assertEquals(ingredients[i].name, ingredient.fields.name.value)
+      assertEquals(ingredients[i].amount, ingredient.fields.amount.value)
+      assertEquals(ingredients[i].unit, ingredient.fields.unit.value)
     }
   }
 }

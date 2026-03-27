@@ -47,11 +47,12 @@ import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.RecipeFormViewModel.FormInfoState
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
 import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
+import com.aamo.cookbook.features.recipe.form.models.states.FormChapterState
+import com.aamo.cookbook.features.recipe.form.models.states.FormRecipeState
 import com.aamo.cookbook.features.recipe.form.screens.RecipeChapterScreen
 import com.aamo.cookbook.features.recipe.form.screens.RecipeInfoScreen
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
@@ -65,20 +66,15 @@ import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
-import com.aamo.cookbook.utility.extensions.general.EMPTY
-import com.aamo.cookbook.utility.extensions.general.getNewUUID
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import com.aamo.cookbook.utility.viewmodels.SavingState
-import com.aamo.cookbook.utility.viewmodels.ViewModelState
-import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
-import java.util.UUID
 
 @Serializable
 data class RecipeFormPage(val id: Long)
@@ -89,114 +85,10 @@ class RecipeFormViewModel(
   private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
   private val fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
-  class FormInfoState(onChange: () -> Unit) {
-    val name = ViewModelState(String.EMPTY).onChange { onChange() }
-    val category = ViewModelState(String.EMPTY).onChange { onChange() }
-    val subCategory = ViewModelState(String.EMPTY).onChange { onChange() }
-    val servings = ViewModelState<Int?>(1).transformation { value ->
-      if (value != null && value < 1) null else value
-    }.onChange { onChange() }
-    val note = ViewModelState(String.EMPTY).onChange {
-      if (it.isNotEmpty()) noteFieldToggleValue = true
-      onChange()
-    }
-    var noteFieldToggleValue by mutableStateOf(false)
-
-    init {
-      noteFieldToggleValue = note.value.isNotEmpty()
-    }
-
-    fun canSave(): Boolean {
-      if (name.value.isEmpty()) return false
-      if (category.value.isEmpty()) return false
-      servings.value.also { if (it == null || it < 1) return false }
-      return true
-    }
-  }
-
-  class FormChapterState(val onChange: () -> Unit) {
-    val name = ViewModelState(String.EMPTY).onChange { onChange() }
-    val note = ViewModelState(String.EMPTY).onChange {
-      if (it.isNotEmpty()) noteFieldToggleValue = true
-      onChange()
-    }
-    val steps = ViewModelStateList<FormStepState>().onChange { onChange() }
-    var noteFieldToggleValue by mutableStateOf(false)
-    var selectedStepId by mutableStateOf<UUID?>(null)
-
-    init {
-      noteFieldToggleValue = note.value.isNotEmpty()
-    }
-
-    fun addStep(): FormStepState {
-      return FormStepState(
-        id = getNewUUID(used = steps.values.map { it.id }), onChange = onChange
-      ).also {
-        steps.add(it)
-      }
-    }
-
-    fun canSave(): Boolean {
-      if (name.value.isEmpty()) return false
-      if (steps.values.isEmpty()) return false
-      return true
-    }
-  }
-
-  class FormStepState(val id: UUID, val onChange: () -> Unit) {
-    val description = ViewModelState(String.EMPTY).onChange { onChange() }
-    val timerMinutes = ViewModelState<Int?>(null).transformation { value ->
-      if (value != null && value < 1) null else value
-    }.onChange {
-      if (it != null && it > 0) timerFieldToggleValue = true
-      onChange()
-    }
-    val note = ViewModelState(String.EMPTY).onChange {
-      if (it.isNotEmpty()) noteFieldToggleValue = true
-      onChange()
-    }
-    val ingredients = ViewModelStateList<FormIngredientState>().onChange { onChange() }
-    var noteFieldToggleValue by mutableStateOf(false)
-    var timerFieldToggleValue by mutableStateOf(false)
-
-    init {
-      noteFieldToggleValue = note.value.isNotEmpty()
-      timerFieldToggleValue = timerMinutes.value?.let { it > 0 } ?: false
-    }
-
-    fun addIngredient(): FormIngredientState {
-      return FormIngredientState(
-        id = getNewUUID(ingredients.values.map { it.id }), onChange = onChange
-      ).also {
-        ingredients.add(it)
-      }
-    }
-
-    fun canSave(): Boolean {
-      if (description.value.isEmpty()) return false
-      if (timerMinutes.value?.let { it < 0 } == true) return false
-      return true
-    }
-  }
-
-  class FormIngredientState(val id: UUID, onChange: () -> Unit) {
-    val name = ViewModelState(String.EMPTY).onChange { onChange() }
-    val amount = ViewModelState<Double?>(null).transformation { value ->
-      if (value != null && value <= 0) null else value
-    }.onChange { onChange() }
-    val unit = ViewModelState(String.EMPTY).onChange { onChange() }
-
-    fun canSave(): Boolean {
-      if (name.value.isEmpty()) return false
-      if (amount.value?.let { it < 0 } == true) return false
-      return true
-    }
-  }
-
   val recipe = flow { emit(fetchData()) }.onEach { value ->
     isNew = value.recipe.id == 0L
 
-    formInfoState.apply {
+    formRecipeState.fields.apply {
       name.update(value.recipe.name)
       category.update(value.recipe.category)
       subCategory.update(value.recipe.subCategory)
@@ -204,30 +96,33 @@ class RecipeFormViewModel(
       note.update(value.recipe.note)
     }
 
-    formChapterStates.clear()
-    formChapterStates.add(*value.chapters.map { chapter ->
-      FormChapterState(onChange = { onUnsavedChanges() }).apply {
-        name.update(chapter.chapter.name)
-        note.update(chapter.chapter.name)
-
+    formRecipeState.chapterStates.clear()
+    value.chapters.forEach { chapter ->
+      formRecipeState.addChapter().apply {
+        fields.apply {
+          name.update(chapter.chapter.name)
+          note.update(chapter.chapter.note)
+        }
         chapter.steps.forEach { step ->
           addStep().apply {
-            description.update(step.step.description)
-            timerMinutes.update(step.step.timerMinutes)
-            note.update(step.step.note)
-
+            fields.apply {
+              description.update(step.step.description)
+              timerMinutes.update(step.step.timerMinutes)
+              note.update(step.step.note)
+            }
             step.ingredients.forEach { ingredient ->
               addIngredient().apply {
-                name.update(ingredient.name)
-                amount.update(ingredient.amount)
-                unit.update(ingredient.unit)
+                fields.apply {
+                  name.update(ingredient.name)
+                  amount.update(ingredient.amount)
+                  unit.update(ingredient.unit)
+                }
               }
             }
           }
         }
       }
-    }.toTypedArray())
-
+    }
     savingState = SavingState()
   }.stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
@@ -236,8 +131,8 @@ class RecipeFormViewModel(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyMap()
   )
 
-  val formInfoState = FormInfoState(onChange = { onUnsavedChanges() })
-  val formChapterStates = ViewModelStateList<FormChapterState>().onChange { onUnsavedChanges() }
+  val formRecipeState =
+    FormRecipeState(onCanSaveChanged = { canSave = canSave() }, onChange = { onChange() })
   var isNew by mutableStateOf(true)
     private set
   var savingState by mutableStateOf(SavingState())
@@ -260,63 +155,49 @@ class RecipeFormViewModel(
         check(canSave())
 
         val recipe = checkNotNull(recipe.value).recipe
-        val data = RecipeFormInfoFields(
-          name = formInfoState.name.value,
-          category = formInfoState.category.value,
-          subCategory = formInfoState.subCategory.value,
-          servings = formInfoState.servings.value ?: 0,
-          note = formInfoState.note.value,
-          chapters = formChapterStates.values.map { c ->
-            RecipeFormChapterFields(
-              name = c.name.value, note = c.note.value, steps = c.steps.values.map { s ->
-                RecipeFormStepFields(
-                  uuid = s.id,
-                  description = s.description.value,
-                  timerMinutes = s.timerMinutes.value,
-                  note = s.note.value,
-                  ingredients = s.ingredients.values.map { i ->
-                    RecipeFormIngredientFields(
-                      uuid = i.id, name = i.name.value, amount = i.amount.value, unit = i.unit.value
-                    )
-                  })
-              })
-          })
+        val data = formRecipeState.let { r ->
+          RecipeFormInfoFields(
+            name = r.fields.name.value,
+            category = r.fields.category.value,
+            subCategory = r.fields.subCategory.value,
+            servings = r.fields.servings.value ?: 0,
+            note = r.fields.note.value,
+            chapters = r.chapterStates.values.map { c ->
+              RecipeFormChapterFields(
+                name = c.fields.name.value,
+                note = c.fields.note.value,
+                steps = c.steps.values.map { s ->
+                  RecipeFormStepFields(
+                    uuid = s.id,
+                    description = s.fields.description.value,
+                    timerMinutes = s.fields.timerMinutes.value,
+                    note = s.fields.note.value,
+                    ingredients = s.ingredients.values.map { i ->
+                      RecipeFormIngredientFields(
+                        uuid = i.id,
+                        name = i.fields.name.value,
+                        amount = i.fields.amount.value,
+                        unit = i.fields.unit.value
+                      )
+                    })
+                })
+            })
+        }
 
+        savingState = savingState.getAsSaving()
         saveData(data, recipe.id, recipe.thumbnailUri)
+        savingState = savingState.getAsSaved()
       }
     }
   }
 
-  fun addChapter(): FormChapterState {
-    return FormChapterState(onChange = { onUnsavedChanges() }).also {
-      formChapterStates.add(it)
-    }
-  }
-
-  fun removeChapterAt(index: Int) {
-    formChapterStates.removeAt(index)
-  }
-
-  fun swapChapters(from: Int, to: Int) {
-    formChapterStates.swapAt(from, to)
-  }
-
-  private fun onUnsavedChanges() {
+  private fun onChange() {
     savingState = savingState.copy(unsavedChanges = true)
-    canSave = canSave()
   }
 
   private fun canSave(): Boolean {
     if (savingState.state == SavingState.State.SAVING) return false
-    if (!formInfoState.canSave()) return false
-    if (formChapterStates.values.isEmpty()) return false
-    return formChapterStates.values.all { c ->
-      c.canSave() && c.steps.values.all { s ->
-        s.canSave() && s.ingredients.values.all { i ->
-          i.canSave()
-        }
-      }
-    }
+    return formRecipeState.canSave.value
   }
 }
 
@@ -359,17 +240,14 @@ fun NavGraphBuilder.recipeFormPage(
     LoadingScreen(loading = recipe == null) {
       RecipeFormContent(
         isNew = viewmodel.isNew,
-        formInfoState = viewmodel.formInfoState,
-        formChapterStates = viewmodel.formChapterStates.values,
+        formRecipeState = viewmodel.formRecipeState,
         categorySuggestions = categorySuggestions,
         savingState = viewmodel.savingState,
         canSave = viewmodel.canSave,
         onBack = onBack,
         onSubmit = { viewmodel.saveRecipe() },
         onDelete = { viewmodel.deleteRecipe() },
-        onAddChapter = { viewmodel.addChapter() },
-        onDeleteChapter = { i -> viewmodel.removeChapterAt(i) },
-        onSwapChapters = { from, to -> viewmodel.swapChapters(from, to) })
+      )
     }
   }
 }
@@ -377,22 +255,18 @@ fun NavGraphBuilder.recipeFormPage(
 @Composable
 private fun RecipeFormContent(
   isNew: Boolean,
-  formInfoState: FormInfoState,
-  formChapterStates: List<RecipeFormViewModel.FormChapterState>,
+  formRecipeState: FormRecipeState,
   categorySuggestions: Map<String, List<String>>,
   savingState: SavingState,
   canSave: Boolean,
   onBack: () -> Unit,
   onSubmit: () -> Unit,
   onDelete: () -> Unit,
-  onAddChapter: () -> Unit,
-  onDeleteChapter: (index: Int) -> Unit,
-  onSwapChapters: (from: Int, to: Int) -> Unit,
   modifier: Modifier = Modifier,
   initialPage: Int = 0,
 ) {
-  val pagerState =
-    rememberPagerState(initialPage = initialPage, pageCount = { 1 + formChapterStates.size })
+  val pagerState = rememberPagerState(
+    initialPage = initialPage, pageCount = { 1 + formRecipeState.chapterStates.values.size })
 
   var animateToPageTarget by remember { mutableStateOf<Int?>(null) }
   var openUnsavedDialog by rememberSaveable { mutableStateOf(false) }
@@ -438,7 +312,7 @@ private fun RecipeFormContent(
   }, floatingActionButton = {
     ExtendedFloatingActionButton(
       onClick = {
-        onAddChapter()
+        formRecipeState.addChapter()
         animateToPageTarget = pagerState.pageCount + 1
       },
       icon = {
@@ -461,7 +335,7 @@ private fun RecipeFormContent(
       ) { pageIndex ->
         when (pageIndex) {
           0 -> RecipeInfoScreen(
-            formState = formInfoState,
+            formState = formRecipeState,
             categorySuggestions = categorySuggestions,
             onDelete = ifElse(condition = isNew, ifTrue = { null }, ifFalse = { { onDelete() } }),
             modifier = Modifier.padding(8.dp),
@@ -469,26 +343,26 @@ private fun RecipeFormContent(
 
           else -> {
             val index = pageIndex - 1
-            val formState = formChapterStates.elementAtOrNull(index = index)
+            val formState = formRecipeState.chapterStates.values.elementAtOrNull(index = index)
 
             if (formState != null) {
               RecipeChapterScreen(
                 index = index,
                 formState = formState,
                 onDelete = {
-                  onDeleteChapter(index)
+                  formRecipeState.chapterStates.removeAt(index)
                   animateToPageTarget = pageIndex - 1
                 },
                 onMoveLeft = if (index != 0) {
                   {
-                    onSwapChapters(index, index - 1)
+                    formRecipeState.chapterStates.swapAt(index, index - 1)
                     animateToPageTarget = pageIndex - 1
                   }
                 }
                 else null,
-                onMoveRight = if (index != formChapterStates.size - 1) {
+                onMoveRight = if (index != formRecipeState.chapterStates.values.size - 1) {
                   {
-                    onSwapChapters(index, index + 1)
+                    formRecipeState.chapterStates.swapAt(index, index + 1)
                     animateToPageTarget = pageIndex + 1
                   }
                 }
@@ -531,49 +405,25 @@ private fun Preview() {
   CookbookTheme(useDarkTheme = true) {
     RecipeFormContent(
       isNew = false,
-      formInfoState = FormInfoState(onChange = {}).apply {
-        name.update("Recipe 1")
-        category.update("Cat 1")
-        subCategory.update("Sub 1")
-        note.update("This is a note")
-      },
-      formChapterStates = listOf(
-        RecipeFormViewModel.FormChapterState(onChange = {}).apply {
-          name.update("Chapter 1")
+      formRecipeState = FormRecipeState(onCanSaveChanged = {}).also {
+        it.fields.apply {
+          name.update("Recipe 1")
+          category.update("Cat 1")
+          subCategory.update("Sub 1")
           note.update("This is a note")
-          steps.add(
-            RecipeFormViewModel.FormStepState(id = UUID.randomUUID(), onChange).apply {
-              description.update("This is a description")
-              timerMinutes.update(4)
-              note.update("This is a note")
-              ingredients.add(
-                RecipeFormViewModel.FormIngredientState(
-                id = UUID.randomUUID(), onChange
-              ).apply {
-                name.update("Ingredient 1")
-                amount.update(20.0)
-                unit.update("g")
-              }, RecipeFormViewModel.FormIngredientState(id = UUID.randomUUID(), onChange).apply {
-                name.update("Ingredient 2")
-                amount.update(200.0)
-                unit.update("mg")
-              })
-            },
-            RecipeFormViewModel.FormStepState(id = UUID.randomUUID(), onChange),
-          )
-        },
-        RecipeFormViewModel.FormChapterState(onChange = {}),
-        RecipeFormViewModel.FormChapterState(onChange = {}),
-      ),
+        }
+        it.chapterStates.add(
+          FormChapterState(onCanSaveChanged = {}),
+          FormChapterState(onCanSaveChanged = {}),
+          FormChapterState(onCanSaveChanged = {}),
+        )
+      },
       categorySuggestions = emptyMap(),
       savingState = SavingState(),
       canSave = true,
       onBack = {},
       onSubmit = {},
       onDelete = {},
-      onAddChapter = {},
-      onDeleteChapter = {},
-      onSwapChapters = { _, _ -> },
       initialPage = 0,
     )
   }

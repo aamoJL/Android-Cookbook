@@ -12,7 +12,7 @@ class ViewModelState<T>(initValue: T) {
   private var transformationPredicate: ((T) -> T)? = null
   private var validationPredicate: ((T) -> Boolean)? = null
 
-  fun update(value: T): T? {
+  fun update(value: T): T {
     var newValue = value
 
     transformationPredicate?.also { newValue = it.invoke(value) }

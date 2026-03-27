@@ -28,10 +28,10 @@ class CanSave {
 
     Assert.assertTrue(viewmodel.canSave)
 
-    viewmodel.formInfoState.name.update(String.EMPTY)
+    viewmodel.formRecipeState.fields.name.update(String.EMPTY)
     Assert.assertFalse(viewmodel.canSave)
 
-    viewmodel.formInfoState.name.update("Name")
+    viewmodel.formRecipeState.fields.name.update("Name")
     Assert.assertTrue(viewmodel.canSave)
   }
 
@@ -49,7 +49,7 @@ class CanSave {
 
     Assert.assertTrue(viewmodel.canSave)
 
-    viewmodel.formChapterStates.clear()
+    viewmodel.formRecipeState.chapterStates.clear()
     Assert.assertFalse(viewmodel.canSave)
   }
 
@@ -67,7 +67,7 @@ class CanSave {
 
     Assert.assertTrue(viewmodel.canSave)
 
-    viewmodel.formChapterStates.values.first().name.update(String.EMPTY)
+    viewmodel.formRecipeState.chapterStates.values.first().fields.name.update(String.EMPTY)
     Assert.assertFalse(viewmodel.canSave)
   }
 
@@ -85,7 +85,9 @@ class CanSave {
 
     Assert.assertTrue(viewmodel.canSave)
 
-    viewmodel.formChapterStates.values.first().steps.values.first().description.update(String.EMPTY)
+    viewmodel.formRecipeState.chapterStates.values.first().steps.values.first().fields.description.update(
+      String.EMPTY
+    )
     Assert.assertFalse(viewmodel.canSave)
   }
 
@@ -104,7 +106,7 @@ class CanSave {
 
     Assert.assertTrue(viewmodel.canSave)
 
-    viewmodel.formChapterStates.values.first().steps.values.first().ingredients.values.first().name.update(
+    viewmodel.formRecipeState.chapterStates.values.first().steps.values.first().ingredients.values.first().fields.name.update(
       String.EMPTY
     )
     Assert.assertFalse(viewmodel.canSave)
