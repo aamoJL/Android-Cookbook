@@ -143,7 +143,7 @@ class StepMocker(seed: Int = 0) {
 
 class IngredientMocker(seed: Int = 0) {
   private var ingredient = Ingredient(
-    id = 0, stepId = 0, name = "$seed", amount = seed.toDouble(), unit = "$seed"
+    id = 0, stepId = 0, name = "$seed", amount = seed.toDouble() + 6.0, unit = "$seed"
   )
 
   fun modify(ingredient: (Ingredient) -> Ingredient): IngredientMocker {

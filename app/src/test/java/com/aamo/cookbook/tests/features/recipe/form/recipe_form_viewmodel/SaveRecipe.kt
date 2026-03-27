@@ -25,9 +25,11 @@ class SaveRecipe : UnconfinedTest() {
     val uuid = UUID.randomUUID()
     val expected = RecipeFormInfoFields.fromDao(model).let {
       it.copy(chapters = it.chapters.map { c ->
-        c.copy(uuid = uuid, steps = c.steps.map { s ->
+        c.copy(steps = c.steps.map { s ->
           s.copy(uuid = uuid, ingredients = s.ingredients.map { i ->
-            i.copy(uuid = uuid)
+            i.copy(uuid = uuid, amount = i.amount?.let { amount ->
+              if (amount <= 0) null else amount
+            })
           })
         })
       })
@@ -36,25 +38,30 @@ class SaveRecipe : UnconfinedTest() {
     var actualFields: RecipeFormInfoFields? = null
     var actualId: Long? = null
     var actualThumbnail: String? = null
-    val viewmodel = RecipeFormViewModel(fetchData = { model }, saveData = { fields, id, thumbnail ->
-      actualFields = fields.let {
-        it.copy(chapters = it.chapters.map { c ->
-          c.copy(uuid = uuid, steps = c.steps.map { s ->
-            s.copy(uuid = uuid, ingredients = s.ingredients.map { i ->
-              i.copy(uuid = uuid)
+    val viewmodel = RecipeFormViewModel(
+      fetchData = { model },
+      saveData = { fields, id, thumbnail ->
+        actualFields = fields.let {
+          it.copy(chapters = it.chapters.map { c ->
+            c.copy(steps = c.steps.map { s ->
+              s.copy(uuid = uuid, ingredients = s.ingredients.map { i ->
+                i.copy(uuid = uuid)
+              })
             })
           })
-        })
-      }
-      actualId = id
-      actualThumbnail = thumbnail
-    }, deleteData = { fail() })
+        }
+        actualId = id
+        actualThumbnail = thumbnail
+      },
+      deleteData = { fail() },
+      fetchCategorySuggestions = { emptyMap() },
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
     }
 
-    viewmodel.saveRecipe(RecipeFormInfoFields.fromDao(model))
+    viewmodel.saveRecipe()
 
     Assert.assertEquals(model.recipe.id, actualId)
     Assert.assertEquals(model.recipe.thumbnailUri, actualThumbnail)
@@ -66,6 +73,8 @@ class SaveRecipe : UnconfinedTest() {
     RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { _, _, _ -> error(String.EMPTY) },
-      deleteData = { fail() }).saveRecipe(RecipeFormInfoFields())
+      deleteData = { fail() },
+      fetchCategorySuggestions = { emptyMap() },
+    ).saveRecipe()
   }
 }

@@ -204,8 +204,8 @@ class RecipeFormViewModel(
       note.update(value.recipe.note)
     }
 
-    formChaptersStates.clear()
-    formChaptersStates.add(*value.chapters.map { chapter ->
+    formChapterStates.clear()
+    formChapterStates.add(*value.chapters.map { chapter ->
       FormChapterState(onChange = { onUnsavedChanges() }).apply {
         name.update(chapter.chapter.name)
         note.update(chapter.chapter.name)
@@ -237,7 +237,7 @@ class RecipeFormViewModel(
   )
 
   val formInfoState = FormInfoState(onChange = { onUnsavedChanges() })
-  val formChaptersStates = ViewModelStateList<FormChapterState>().onChange { onUnsavedChanges() }
+  val formChapterStates = ViewModelStateList<FormChapterState>().onChange { onUnsavedChanges() }
   var isNew by mutableStateOf(true)
     private set
   var savingState by mutableStateOf(SavingState())
@@ -266,11 +266,9 @@ class RecipeFormViewModel(
           subCategory = formInfoState.subCategory.value,
           servings = formInfoState.servings.value ?: 0,
           note = formInfoState.note.value,
-          chapters = formChaptersStates.values.map { c ->
+          chapters = formChapterStates.values.map { c ->
             RecipeFormChapterFields(
-              name = c.name.value,
-              note = c.note.value,
-              steps = c.steps.values.map { s ->
+              name = c.name.value, note = c.note.value, steps = c.steps.values.map { s ->
                 RecipeFormStepFields(
                   uuid = s.id,
                   description = s.description.value,
@@ -289,16 +287,18 @@ class RecipeFormViewModel(
     }
   }
 
-  fun addChapter() {
-    formChaptersStates.add(FormChapterState(onChange = { onUnsavedChanges() }))
+  fun addChapter(): FormChapterState {
+    return FormChapterState(onChange = { onUnsavedChanges() }).also {
+      formChapterStates.add(it)
+    }
   }
 
   fun removeChapterAt(index: Int) {
-    formChaptersStates.removeAt(index)
+    formChapterStates.removeAt(index)
   }
 
   fun swapChapters(from: Int, to: Int) {
-    formChaptersStates.swapAt(from, to)
+    formChapterStates.swapAt(from, to)
   }
 
   private fun onUnsavedChanges() {
@@ -309,8 +309,8 @@ class RecipeFormViewModel(
   private fun canSave(): Boolean {
     if (savingState.state == SavingState.State.SAVING) return false
     if (!formInfoState.canSave()) return false
-    if (formChaptersStates.values.isEmpty()) return false
-    return formChaptersStates.values.all { c ->
+    if (formChapterStates.values.isEmpty()) return false
+    return formChapterStates.values.all { c ->
       c.canSave() && c.steps.values.all { s ->
         s.canSave() && s.ingredients.values.all { i ->
           i.canSave()
@@ -360,7 +360,7 @@ fun NavGraphBuilder.recipeFormPage(
       RecipeFormContent(
         isNew = viewmodel.isNew,
         formInfoState = viewmodel.formInfoState,
-        formChapterStates = viewmodel.formChaptersStates.values,
+        formChapterStates = viewmodel.formChapterStates.values,
         categorySuggestions = categorySuggestions,
         savingState = viewmodel.savingState,
         canSave = viewmodel.canSave,

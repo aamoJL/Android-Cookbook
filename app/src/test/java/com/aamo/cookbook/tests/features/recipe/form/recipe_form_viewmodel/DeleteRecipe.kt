@@ -23,7 +23,9 @@ class DeleteRecipe : UnconfinedTest() {
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { _, _, _ -> fail() },
-      deleteData = { called = true })
+      deleteData = { called = true },
+      fetchCategorySuggestions = { emptyMap() },
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
@@ -42,7 +44,9 @@ class DeleteRecipe : UnconfinedTest() {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _, _, _ -> fail() },
-      deleteData = { value = it })
+      deleteData = { value = it },
+      fetchCategorySuggestions = { emptyMap() },
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
@@ -58,7 +62,9 @@ class DeleteRecipe : UnconfinedTest() {
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { _, _, _ -> fail() },
-      deleteData = { error(String.EMPTY) })
+      deleteData = { error(String.EMPTY) },
+      fetchCategorySuggestions = { emptyMap() },
+    )
 
     viewmodel.deleteRecipe()
   }

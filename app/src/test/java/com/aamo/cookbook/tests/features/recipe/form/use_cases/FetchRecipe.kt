@@ -55,7 +55,7 @@ class FetchRecipe : DatabaseTest() {
       note = model.recipe.note,
       chapters = model.chapters.map { c ->
         RecipeFormChapterFields(
-          uuid = uuid, name = c.chapter.name, note = c.chapter.note, steps = c.steps.map { s ->
+          name = c.chapter.name, note = c.chapter.note, steps = c.steps.map { s ->
             RecipeFormStepFields(
               uuid = uuid,
               description = s.step.description,
@@ -70,7 +70,7 @@ class FetchRecipe : DatabaseTest() {
       })
 
     assertEquals(expected, actual.copy(chapters = actual.chapters.map { c ->
-      c.copy(uuid = uuid, steps = c.steps.map { s ->
+      c.copy(steps = c.steps.map { s ->
         s.copy(uuid = uuid, ingredients = s.ingredients.map { i ->
           i.copy(uuid = uuid)
         })
