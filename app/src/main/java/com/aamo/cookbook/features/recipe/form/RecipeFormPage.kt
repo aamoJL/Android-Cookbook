@@ -46,11 +46,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormChapterFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormIngredientFields
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormStepFields
 import com.aamo.cookbook.features.recipe.form.models.states.FormChapterState
 import com.aamo.cookbook.features.recipe.form.models.states.FormRecipeState
 import com.aamo.cookbook.features.recipe.form.screens.RecipeChapterScreen
@@ -69,6 +66,7 @@ import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import com.aamo.cookbook.utility.viewmodels.SavingState
+import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.onEach
@@ -81,63 +79,29 @@ data class RecipeFormPage(val id: Long)
 
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
-  private val saveData: suspend (fields: RecipeFormInfoFields, id: Long, thumbnail: String) -> Unit,
+  private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
   private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
   private val fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
-  val recipe = flow { emit(fetchData()) }.onEach { value ->
-    isNew = value.recipe.id == 0L
-
-    formRecipeState.fields.apply {
-      name.update(value.recipe.name)
-      category.update(value.recipe.category)
-      subCategory.update(value.recipe.subCategory)
-      servings.update(value.recipe.servings)
-      note.update(value.recipe.note)
-    }
-
-    formRecipeState.chapterStates.clear()
-    value.chapters.forEach { chapter ->
-      formRecipeState.addChapter().apply {
-        fields.apply {
-          name.update(chapter.chapter.name)
-          note.update(chapter.chapter.note)
-        }
-        chapter.steps.forEach { step ->
-          addStep().apply {
-            fields.apply {
-              description.update(step.step.description)
-              timerMinutes.update(step.step.timerMinutes)
-              note.update(step.step.note)
-            }
-            step.ingredients.forEach { ingredient ->
-              addIngredient().apply {
-                fields.apply {
-                  name.update(ingredient.name)
-                  amount.update(ingredient.amount)
-                  unit.update(ingredient.unit)
-                }
-              }
-            }
-          }
-        }
-      }
-    }
+  val recipe = flow { emit(fetchData()) }.onEach { model ->
+    isNew = model.recipe.id == 0L
+    formRecipeState.update(createRecipeState(model = model))
     savingState = SavingState()
-  }.stateIn(
-    scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
-  )
+    validity = checkValidity()
+  }.stateIn(scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null)
   val categorySuggestions = flow { emit(fetchCategorySuggestions()) }.stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = emptyMap()
   )
 
   val formRecipeState =
-    FormRecipeState(onCanSaveChanged = { canSave = canSave() }, onChange = { onChange() })
+    ViewModelState(createRecipeState(model = RecipeWithChaptersStepsAndIngredients(recipe = Recipe()))).onChange {
+      savingState = SavingState()
+    }
   var isNew by mutableStateOf(true)
     private set
   var savingState by mutableStateOf(SavingState())
     private set
-  var canSave by mutableStateOf(canSave())
+  var validity by mutableStateOf(checkValidity())
     private set
 
   fun deleteRecipe() {
@@ -152,52 +116,30 @@ class RecipeFormViewModel(
   fun saveRecipe() {
     viewModelScope.launch {
       runCatching {
-        check(canSave())
-
-        val recipe = checkNotNull(recipe.value).recipe
-        val data = formRecipeState.let { r ->
-          RecipeFormInfoFields(
-            name = r.fields.name.value,
-            category = r.fields.category.value,
-            subCategory = r.fields.subCategory.value,
-            servings = r.fields.servings.value ?: 0,
-            note = r.fields.note.value,
-            chapters = r.chapterStates.values.map { c ->
-              RecipeFormChapterFields(
-                name = c.fields.name.value,
-                note = c.fields.note.value,
-                steps = c.steps.values.map { s ->
-                  RecipeFormStepFields(
-                    uuid = s.id,
-                    description = s.fields.description.value,
-                    timerMinutes = s.fields.timerMinutes.value,
-                    note = s.fields.note.value,
-                    ingredients = s.ingredients.values.map { i ->
-                      RecipeFormIngredientFields(
-                        uuid = i.id,
-                        name = i.fields.name.value,
-                        amount = i.fields.amount.value,
-                        unit = i.fields.unit.value
-                      )
-                    })
-                })
-            })
-        }
+        check(checkValidity())
+        checkNotNull(recipe.value)
 
         savingState = savingState.getAsSaving()
-        saveData(data, recipe.id, recipe.thumbnailUri)
+        saveData(formRecipeState.value.getModel())
         savingState = savingState.getAsSaved()
-      }
+      }.onFailure { savingState = savingState.getAsError(Error(it.localizedMessage)) }
     }
+  }
+
+  private fun createRecipeState(model: RecipeWithChaptersStepsAndIngredients): FormRecipeState {
+    return FormRecipeState(
+      model = model,
+      onValidityChanged = { validity = checkValidity() },
+      onChange = { onChange() })
   }
 
   private fun onChange() {
     savingState = savingState.copy(unsavedChanges = true)
   }
 
-  private fun canSave(): Boolean {
+  private fun checkValidity(): Boolean {
     if (savingState.state == SavingState.State.SAVING) return false
-    return formRecipeState.canSave.value
+    return formRecipeState.value.validity.value
   }
 }
 
@@ -216,10 +158,8 @@ fun NavGraphBuilder.recipeFormPage(
       initializer {
         RecipeFormViewModel(
           fetchData = { fetchRecipe(dao = dao, recipeId = recipeId) },
-          saveData = { fields, id, thumbnail ->
-            saveRecipe(
-              dao = dao, id = id, thumbnailUri = thumbnail, fields = fields
-            ).also { result -> onOpenRecipe(result) }
+          saveData = { recipe ->
+            saveRecipe(dao = dao, recipe = recipe).also { result -> onOpenRecipe(result) }
           },
           deleteData = { recipe ->
             deleteRecipe(
@@ -240,10 +180,10 @@ fun NavGraphBuilder.recipeFormPage(
     LoadingScreen(loading = recipe == null) {
       RecipeFormContent(
         isNew = viewmodel.isNew,
-        formRecipeState = viewmodel.formRecipeState,
+        formRecipeState = viewmodel.formRecipeState.value,
         categorySuggestions = categorySuggestions,
         savingState = viewmodel.savingState,
-        canSave = viewmodel.canSave,
+        canSave = viewmodel.validity,
         onBack = onBack,
         onSubmit = { viewmodel.saveRecipe() },
         onDelete = { viewmodel.deleteRecipe() },
@@ -405,7 +345,7 @@ private fun Preview() {
   CookbookTheme(useDarkTheme = true) {
     RecipeFormContent(
       isNew = false,
-      formRecipeState = FormRecipeState(onCanSaveChanged = {}).also {
+      formRecipeState = FormRecipeState(onValidityChanged = {}).also {
         it.fields.apply {
           name.update("Recipe 1")
           category.update("Cat 1")
@@ -413,9 +353,9 @@ private fun Preview() {
           note.update("This is a note")
         }
         it.chapterStates.add(
-          FormChapterState(onCanSaveChanged = {}),
-          FormChapterState(onCanSaveChanged = {}),
-          FormChapterState(onCanSaveChanged = {}),
+          FormChapterState(onValidityChanged = {}),
+          FormChapterState(onValidityChanged = {}),
+          FormChapterState(onValidityChanged = {}),
         )
       },
       categorySuggestions = emptyMap(),

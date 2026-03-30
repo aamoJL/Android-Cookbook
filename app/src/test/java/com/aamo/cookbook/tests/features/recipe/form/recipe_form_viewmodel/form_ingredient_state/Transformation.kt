@@ -9,20 +9,28 @@ class Transformation {
   @Test
   fun amount() {
     Assert.assertNull(
-      FormIngredientState(UUID.randomUUID()) { }.fields.apply { amount.update(0.0) }.amount.value
+      FormIngredientState(guid = UUID.randomUUID()) { }.fields.apply {
+        amount.update(0.0)
+      }.amount.value
     )
 
     Assert.assertNull(
-      FormIngredientState(UUID.randomUUID()) { }.fields.apply { amount.update(null) }.amount.value
+      FormIngredientState(guid = UUID.randomUUID()) { }.fields.apply {
+        amount.update(null)
+      }.amount.value
     )
 
     Assert.assertNull(
-      FormIngredientState(UUID.randomUUID()) { }.fields.apply { amount.update(-1.0) }.amount.value
+      FormIngredientState(guid = UUID.randomUUID()) { }.fields.apply {
+        amount.update(
+          -1.0
+        )
+      }.amount.value
     )
 
     Assert.assertEquals(
       0.5,
-      FormIngredientState(UUID.randomUUID()) { }.fields.apply { amount.update(0.5) }.amount.value
+      FormIngredientState(guid = UUID.randomUUID()) { }.fields.apply { amount.update(0.5) }.amount.value
     )
   }
 }

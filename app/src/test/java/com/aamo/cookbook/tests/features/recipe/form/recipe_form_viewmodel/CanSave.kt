@@ -19,20 +19,20 @@ class CanSave {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    Assert.assertTrue(viewmodel.canSave)
+    Assert.assertTrue(viewmodel.validity)
 
-    viewmodel.formRecipeState.fields.name.update(String.EMPTY)
-    Assert.assertFalse(viewmodel.canSave)
+    viewmodel.formRecipeState.value.fields.name.update(String.EMPTY)
+    Assert.assertFalse(viewmodel.validity)
 
-    viewmodel.formRecipeState.fields.name.update("Name")
-    Assert.assertTrue(viewmodel.canSave)
+    viewmodel.formRecipeState.value.fields.name.update("Name")
+    Assert.assertTrue(viewmodel.validity)
   }
 
   @Test
@@ -40,17 +40,17 @@ class CanSave {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    Assert.assertTrue(viewmodel.canSave)
+    Assert.assertTrue(viewmodel.validity)
 
-    viewmodel.formRecipeState.chapterStates.clear()
-    Assert.assertFalse(viewmodel.canSave)
+    viewmodel.formRecipeState.value.chapterStates.clear()
+    Assert.assertFalse(viewmodel.validity)
   }
 
   @Test
@@ -58,17 +58,17 @@ class CanSave {
     val recipe = RecipeMocker().add(ChapterMocker().add(StepMocker())).mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    Assert.assertTrue(viewmodel.canSave)
+    Assert.assertTrue(viewmodel.validity)
 
-    viewmodel.formRecipeState.chapterStates.values.first().fields.name.update(String.EMPTY)
-    Assert.assertFalse(viewmodel.canSave)
+    viewmodel.formRecipeState.value.chapterStates.values.first().fields.name.update(String.EMPTY)
+    Assert.assertFalse(viewmodel.validity)
   }
 
   @Test
@@ -76,19 +76,19 @@ class CanSave {
     val recipe = RecipeMocker().add(ChapterMocker().add(StepMocker())).mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    Assert.assertTrue(viewmodel.canSave)
+    Assert.assertTrue(viewmodel.validity)
 
-    viewmodel.formRecipeState.chapterStates.values.first().steps.values.first().fields.description.update(
+    viewmodel.formRecipeState.value.chapterStates.values.first().stepStates.values.first().fields.description.update(
       String.EMPTY
     )
-    Assert.assertFalse(viewmodel.canSave)
+    Assert.assertFalse(viewmodel.validity)
   }
 
   @Test
@@ -97,18 +97,18 @@ class CanSave {
       RecipeMocker().add(ChapterMocker().add(StepMocker().add(IngredientMocker()))).mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    Assert.assertTrue(viewmodel.canSave)
+    Assert.assertTrue(viewmodel.validity)
 
-    viewmodel.formRecipeState.chapterStates.values.first().steps.values.first().ingredients.values.first().fields.name.update(
+    viewmodel.formRecipeState.value.chapterStates.values.first().stepStates.values.first().ingredientStates.values.first().fields.name.update(
       String.EMPTY
     )
-    Assert.assertFalse(viewmodel.canSave)
+    Assert.assertFalse(viewmodel.validity)
   }
 }

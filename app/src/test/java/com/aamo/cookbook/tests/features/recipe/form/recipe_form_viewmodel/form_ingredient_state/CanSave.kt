@@ -9,17 +9,17 @@ import java.util.UUID
 @Suppress("HardCodedStringLiteral")
 class CanSave {
   val savableModel = {
-    FormIngredientState(id = UUID.randomUUID(), onCanSaveChanged = {}).apply {
+    FormIngredientState(guid = UUID.randomUUID(), onValidityChanged = {}).apply {
       fields.name.update("Desc")
     }
   }
 
   @Test
   fun canSave() {
-    Assert.assertTrue(savableModel().canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.amount.update(3.3) }.canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.unit.update("Unit") }.canSave.value)
+    Assert.assertTrue(savableModel().validity.value)
+    Assert.assertTrue(savableModel().apply { fields.amount.update(3.3) }.validity.value)
+    Assert.assertTrue(savableModel().apply { fields.unit.update("Unit") }.validity.value)
 
-    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.canSave.value)
+    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.validity.value)
   }
 }

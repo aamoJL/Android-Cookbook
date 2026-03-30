@@ -27,14 +27,14 @@ class CanSave {
 
   @Test
   fun canSave() {
-    Assert.assertTrue(savableModel().canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.subCategory.update("Sub") }.canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.canSave.value)
+    Assert.assertTrue(savableModel().validity.value)
+    Assert.assertTrue(savableModel().apply { fields.subCategory.update("Sub") }.validity.value)
+    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.validity.value)
 
-    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.canSave.value)
-    Assert.assertFalse(savableModel().apply { fields.category.update(String.EMPTY) }.canSave.value)
-    Assert.assertFalse(savableModel().apply { fields.servings.update(null) }.canSave.value)
-    Assert.assertFalse(savableModel().apply { fields.servings.update(0) }.canSave.value)
-    Assert.assertFalse(savableModel().apply { fields.servings.update(-1) }.canSave.value)
+    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.validity.value)
+    Assert.assertFalse(savableModel().apply { fields.category.update(String.EMPTY) }.validity.value)
+    Assert.assertFalse(savableModel().apply { fields.servings.update(null) }.validity.value)
+    Assert.assertFalse(savableModel().apply { fields.servings.update(0) }.validity.value)
+    Assert.assertFalse(savableModel().apply { fields.servings.update(-1) }.validity.value)
   }
 }

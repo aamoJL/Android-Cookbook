@@ -17,7 +17,7 @@ class Init {
     val model = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
@@ -34,7 +34,7 @@ class Init {
     val model = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
@@ -49,7 +49,7 @@ class Init {
     val model = RecipeMocker.getFullMocker().modify { it.copy(id = 1L) }.mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
@@ -66,7 +66,7 @@ class Init {
     val expected = mapOf("Cat" to listOf("Sub 1", "Sub 2"))
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { expected },
     )
@@ -79,18 +79,18 @@ class Init {
   }
 
   @Test
-  fun `form info state`() = runTest {
+  fun `form recipe state`() = runTest {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    viewmodel.formRecipeState.fields.also { info ->
+    viewmodel.formRecipeState.value.fields.also { info ->
       assertEquals(recipe.recipe.name, info.name.value)
       assertEquals(recipe.recipe.category, info.category.value)
       assertEquals(recipe.recipe.subCategory, info.subCategory.value)
@@ -104,15 +104,15 @@ class Init {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
 
     viewmodel.recipe.load()
 
-    assertEquals(3, viewmodel.formRecipeState.chapterStates.values.size)
-    viewmodel.formRecipeState.chapterStates.values.forEachIndexed { i, chapter ->
+    assertEquals(3, viewmodel.formRecipeState.value.chapterStates.values.size)
+    viewmodel.formRecipeState.value.chapterStates.values.forEachIndexed { i, chapter ->
       assertEquals(recipe.chapters[i].chapter.name, chapter.fields.name.value)
       assertEquals(recipe.chapters[i].chapter.note, chapter.fields.note.value)
     }
@@ -123,7 +123,7 @@ class Init {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
@@ -131,7 +131,8 @@ class Init {
     viewmodel.recipe.load()
 
     val steps = recipe.chapters.flatMap { it.steps }
-    val viewmodelSteps = viewmodel.formRecipeState.chapterStates.values.flatMap { it.steps.values }
+    val viewmodelSteps =
+      viewmodel.formRecipeState.value.chapterStates.values.flatMap { it.stepStates.values }
 
     assertEquals(4, viewmodelSteps.size)
 
@@ -147,7 +148,7 @@ class Init {
     val recipe = RecipeMocker.getFullMocker().mock()
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
+      saveData = { _ -> fail() },
       deleteData = { fail() },
       fetchCategorySuggestions = { emptyMap() },
     )
@@ -156,8 +157,8 @@ class Init {
 
     val ingredients = recipe.chapters.flatMap { it.steps }.flatMap { it.ingredients }
     val viewmodelIngredients =
-      viewmodel.formRecipeState.chapterStates.values.flatMap { it.steps.values }
-        .flatMap { it.ingredients.values }
+      viewmodel.formRecipeState.value.chapterStates.values.flatMap { it.stepStates.values }
+        .flatMap { it.ingredientStates.values }
 
     assertEquals(6, viewmodelIngredients.size)
 

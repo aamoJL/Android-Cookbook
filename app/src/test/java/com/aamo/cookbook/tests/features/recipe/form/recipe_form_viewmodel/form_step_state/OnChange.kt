@@ -11,12 +11,15 @@ class OnChange {
   @Test
   fun onChange() {
     var called = 0
-    val state = FormStepState(id = UUID.randomUUID(), onChange = { called++ })
+    val state = FormStepState(guid = UUID.randomUUID(), onChange = { called++ })
 
     state.fields.description.update("Desc").also { Assert.assertEquals(1, called) }
     state.fields.timerMinutes.update(3).also { Assert.assertEquals(2, called) }
     state.fields.note.update("Note").also { Assert.assertEquals(3, called) }
-    state.ingredients.add(FormIngredientState(id = UUID.randomUUID(), onCanSaveChanged = {}))
-      .also { Assert.assertEquals(4, called) }
+    state.ingredientStates.add(
+      FormIngredientState(
+        guid = UUID.randomUUID(),
+        onValidityChanged = {})
+    ).also { Assert.assertEquals(4, called) }
   }
 }

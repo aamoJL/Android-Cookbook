@@ -9,26 +9,32 @@ class Transformation {
   @Test
   fun timerMinutes() {
     Assert.assertNull(
-      FormStepState(id = UUID.randomUUID(), onCanSaveChanged = { }).fields.apply {
+      FormStepState(
+        guid = UUID.randomUUID(),
+        onValidityChanged = { }).fields.apply {
         timerMinutes.update(0)
       }.timerMinutes.value
     )
 
     Assert.assertNull(
-      FormStepState(id = UUID.randomUUID(), onCanSaveChanged = { }).fields.apply {
+      FormStepState(
+        guid = UUID.randomUUID(),
+        onValidityChanged = { }).fields.apply {
         timerMinutes.update(null)
       }.timerMinutes.value
     )
 
     Assert.assertNull(
-      FormStepState(id = UUID.randomUUID(), onCanSaveChanged = { }).fields.apply {
+      FormStepState(
+        guid = UUID.randomUUID(),
+        onValidityChanged = { }).fields.apply {
         timerMinutes.update(-1)
       }.timerMinutes.value
     )
 
     Assert.assertEquals(
       123,
-      FormStepState(id = UUID.randomUUID(), onCanSaveChanged = { }).fields.apply {
+      FormStepState(guid = UUID.randomUUID(), onValidityChanged = { }).fields.apply {
         timerMinutes.update(123)
       }.timerMinutes.value
     )

@@ -15,7 +15,7 @@ class OnChange {
 
     state.fields.name.update("Name").also { Assert.assertEquals(1, called) }
     state.fields.note.update("Note").also { Assert.assertEquals(2, called) }
-    state.steps.add(FormStepState(id = UUID.randomUUID(), onCanSaveChanged = {}))
+    state.stepStates.add(FormStepState(guid = UUID.randomUUID(), onValidityChanged = {}))
       .also { Assert.assertEquals(3, called) }
   }
 }

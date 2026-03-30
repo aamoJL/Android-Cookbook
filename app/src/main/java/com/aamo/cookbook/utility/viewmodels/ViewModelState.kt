@@ -3,6 +3,7 @@ package com.aamo.cookbook.utility.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.aamo.cookbook.utility.extensions.general.onFalse
 
 class ViewModelState<T>(initValue: T) {
   var value by mutableStateOf(initValue)
@@ -13,14 +14,17 @@ class ViewModelState<T>(initValue: T) {
   private var validationPredicate: ((T) -> Boolean)? = null
 
   fun update(value: T): T {
-    var newValue = value
-
-    transformationPredicate?.also { newValue = it.invoke(value) }
-
-    if (this.value != newValue && validationPredicate?.invoke(newValue) != false) {
-      this.value = newValue
-      onChange?.invoke(this.value)
+    val newValue = transformationPredicate.let {
+      if (it == null) value
+      else it.invoke(value)
     }
+
+    if (this.value == newValue) return this.value
+
+    validationPredicate?.invoke(newValue)?.onFalse { return this.value }
+
+    this.value = newValue
+    onChange?.invoke(this.value)
 
     return this.value
   }

@@ -147,7 +147,7 @@ fun RecipeForm(
             },
         )
       }
-      if (state.fields.changed && !state.fields.requiredFieldsFilled && !hasFocus) {
+      if (state.fields.isDirty && !state.fields.requiredFieldsFilled && !hasFocus) {
         Surface(
           color = MaterialTheme.colorScheme.errorContainer,
           contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -262,7 +262,7 @@ private fun Preview() {
   CookbookTheme {
     BackgroundSurface {
       RecipeInfoScreen(
-        formState = FormRecipeState(onCanSaveChanged = {}).apply {
+        formState = FormRecipeState(onValidityChanged = {}).apply {
           fields.apply {
             name.update("Recipe 1")
             subCategory.update("Sub 1")

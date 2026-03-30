@@ -3,28 +3,31 @@ package com.aamo.cookbook.features.recipe.form.models.states
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import com.aamo.cookbook.utility.extensions.general.EMPTY
+import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
 import java.util.UUID
 
 class FormIngredientState(
-  val id: UUID,
+  private val model: Ingredient = Ingredient(),
+  val guid: UUID,
   val onChange: () -> Unit = {},
-  onCanSaveChanged: () -> Unit = {},
+  onValidityChanged: () -> Unit = {},
 ) {
-  class Fields(val onUnsavedChanges: () -> Unit) {
-    val name = ViewModelState(String.EMPTY).onChange { onChange() }
-    val amount = ViewModelState<Double?>(null).transformation { value ->
-      if (value != null && value <= 0) null else value
-    }.onChange { onChange() }
-    val unit = ViewModelState(String.EMPTY).onChange { onChange() }
+  class Fields(private val model: Ingredient = Ingredient(), private val onChange: () -> Unit) {
+    val name = ViewModelState(model.name).onChange { onChange() }
+    val amount =
+      ViewModelState<Double?>(model.amount).onChange { onChange() }.transformation { value ->
+        if (value != null && value <= 0) null else value
+      }
+    val unit = ViewModelState(model.unit).onChange { onChange() }
 
-    var requiredFieldsFilled by mutableStateOf(false)
+    var requiredFieldsFilled by mutableStateOf(requiredFieldsFilled())
       private set
 
     private fun onChange() {
       requiredFieldsFilled = requiredFieldsFilled()
-      onUnsavedChanges()
+      onChange.invoke()
     }
 
     private fun requiredFieldsFilled(): Boolean {
@@ -32,17 +35,29 @@ class FormIngredientState(
       if (amount.value?.let { it < 0 } == true) return false
       return true
     }
+
+    fun getModel(): Ingredient {
+      return model.copy(
+        name = name.value,
+        amount = amount.value ?: Double.Zero,
+        unit = unit.value,
+      )
+    }
   }
 
-  val fields = Fields(onUnsavedChanges = { onChange() })
-  val canSave = ViewModelState(canSave()).onChange { onCanSaveChanged() }
+  val fields = Fields(model = model, onChange = { onChange() })
+  val validity = ViewModelState(checkValidity()).onChange { onValidityChanged() }
 
   private fun onChange() {
-    canSave.update(canSave())
+    validity.update(checkValidity())
     onChange.invoke()
   }
 
-  private fun canSave(): Boolean {
+  private fun checkValidity(): Boolean {
     return fields.requiredFieldsFilled
+  }
+
+  fun getModel(): Ingredient {
+    return fields.getModel()
   }
 }

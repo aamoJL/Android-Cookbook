@@ -9,7 +9,7 @@ import java.util.UUID
 @Suppress("HardCodedStringLiteral")
 class CanSave {
   val savableModel = {
-    FormStepState(id = UUID.randomUUID(), onCanSaveChanged = {}).apply {
+    FormStepState(guid = UUID.randomUUID(), onValidityChanged = {}).apply {
       fields.description.update("Desc")
       addIngredient().fields.apply {
         name.update("Ing")
@@ -19,11 +19,11 @@ class CanSave {
 
   @Test
   fun canSave() {
-    Assert.assertTrue(savableModel().canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.timerMinutes.update(3) }.canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.canSave.value)
-    Assert.assertTrue(savableModel().apply { ingredients.removeAt(0) }.canSave.value)
+    Assert.assertTrue(savableModel().validity.value)
+    Assert.assertTrue(savableModel().apply { fields.timerMinutes.update(3) }.validity.value)
+    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.validity.value)
+    Assert.assertTrue(savableModel().apply { ingredientStates.removeAt(0) }.validity.value)
 
-    Assert.assertFalse(savableModel().apply { fields.description.update(String.EMPTY) }.canSave.value)
+    Assert.assertFalse(savableModel().apply { fields.description.update(String.EMPTY) }.validity.value)
   }
 }

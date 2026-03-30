@@ -8,7 +8,7 @@ import org.junit.Test
 @Suppress("HardCodedStringLiteral")
 class CanSave {
   val savableModel = {
-    FormChapterState(onCanSaveChanged = {}).apply {
+    FormChapterState(onValidityChanged = {}).apply {
       fields.name.update("Name")
       addStep().fields.apply {
         description.update("Desc")
@@ -18,10 +18,10 @@ class CanSave {
 
   @Test
   fun canSave() {
-    Assert.assertTrue(savableModel().canSave.value)
-    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.canSave.value)
+    Assert.assertTrue(savableModel().validity.value)
+    Assert.assertTrue(savableModel().apply { fields.note.update("Note") }.validity.value)
 
-    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.canSave.value)
-    Assert.assertFalse(savableModel().apply { steps.removeAt(0) }.canSave.value)
+    Assert.assertFalse(savableModel().apply { fields.name.update(String.EMPTY) }.validity.value)
+    Assert.assertFalse(savableModel().apply { stepStates.removeAt(0) }.validity.value)
   }
 }

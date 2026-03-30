@@ -112,19 +112,19 @@ fun RecipeChapterScreen(
         )
       }
     }
-    itemsIndexed(items = formState.steps.values, key = { _, x -> x.id }) { i, step ->
-      if (formState.selectedStepId == step.id) {
+    itemsIndexed(items = formState.stepStates.values, key = { _, x -> x.guid }) { i, step ->
+      if (formState.selectedStepId == step.guid) {
         StepForm(
           state = step,
           onMoveUp = ifElse(
             condition = i == 0,
             ifTrue = { null },
-            ifFalse = { { formState.steps.swapAt(i, i - 1) } }),
+            ifFalse = { { formState.stepStates.swapAt(i, i - 1) } }),
           onMoveDown = ifElse(
-            condition = i == formState.steps.values.size - 1,
+            condition = i == formState.stepStates.values.size - 1,
             ifTrue = { null },
-            ifFalse = { { formState.steps.swapAt(i, i + 1) } }),
-          onDelete = { formState.steps.removeAt(i) },
+            ifFalse = { { formState.stepStates.swapAt(i, i + 1) } }),
+          onDelete = { formState.stepStates.removeAt(i) },
           onUnselect = { formState.selectedStepId = null },
           modifier = Modifier
             .animateItem()
@@ -137,13 +137,13 @@ fun RecipeChapterScreen(
           onMoveUp = ifElse(
             condition = i == 0,
             ifTrue = { null },
-            ifFalse = { { formState.steps.swapAt(i, i - 1) } }),
+            ifFalse = { { formState.stepStates.swapAt(i, i - 1) } }),
           onMoveDown = ifElse(
-            condition = i == formState.steps.values.size - 1,
+            condition = i == formState.stepStates.values.size - 1,
             ifTrue = { null },
-            ifFalse = { { formState.steps.swapAt(i, i + 1) } }),
+            ifFalse = { { formState.stepStates.swapAt(i, i + 1) } }),
           modifier = Modifier
-            .clickable { formState.selectedStepId = step.id }
+            .clickable { formState.selectedStepId = step.guid }
             .animateItem()
             .padding(bottom = 8.dp))
       }
@@ -153,7 +153,7 @@ fun RecipeChapterScreen(
         FilledIconButton(
           onClick = {
             formState.addStep().also {
-              formState.selectedStepId = it.id // Select the added step
+              formState.selectedStepId = it.guid // Select the added step
             }
           },
           colors = IconButtonDefaults.filledIconButtonColors(
@@ -262,7 +262,7 @@ fun ChapterForm(
           }
         }
       }
-      if (state.fields.changed && !state.fields.requiredFieldsFilled && !hasFocus) {
+      if (state.fields.isDirty && !state.fields.requiredFieldsFilled && !hasFocus) {
         Surface(
           color = MaterialTheme.colorScheme.errorContainer,
           contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -391,13 +391,13 @@ private fun StepDisplay(
                 modifier = Modifier.fillMaxWidth()
               )
             }
-            if (formState.ingredients.values.isNotEmpty()) {
+            if (formState.ingredientStates.values.isNotEmpty()) {
               Surface(
                 color = MaterialTheme.colorScheme.primaryContainer,
                 shape = MaterialTheme.shapes.extraSmall,
               ) {
                 IngredientList(
-                  fields = formState.ingredients.values.map { it.fields },
+                  fields = formState.ingredientStates.values.map { it.fields },
                   textStyle = MaterialTheme.typography.bodyMedium,
                   modifier = Modifier
                     .padding(vertical = 8.dp, horizontal = 16.dp)
@@ -433,7 +433,7 @@ private fun StepDisplay(
             }
           }
         }
-        if (!formState.canSave.value) {
+        if (!formState.validity.value) {
           Surface(
             color = MaterialTheme.colorScheme.errorContainer,
             contentColor = MaterialTheme.colorScheme.onErrorContainer,
@@ -620,16 +620,16 @@ private fun StepForm(
               .fillMaxWidth()
               .padding(8.dp),
           ) {
-            if (state.ingredients.values.isNotEmpty()) {
+            if (state.ingredientStates.values.isNotEmpty()) {
               HorizontalDividerLabel(
                 label = stringResource(R.string.title_ingredients),
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
               )
               Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                state.ingredients.values.forEachIndexed { i, ingredient ->
+                state.ingredientStates.values.forEachIndexed { i, ingredient ->
                   IngredientFormFields(
                     fields = ingredient.fields,
-                    onDelete = { state.ingredients.removeAt(i) },
+                    onDelete = { state.ingredientStates.removeAt(i) },
                   )
                 }
               }
@@ -797,25 +797,25 @@ private fun Preview() {
     BackgroundSurface {
       RecipeChapterScreen(
         index = 0,
-        formState = FormChapterState(onCanSaveChanged = {}).apply {
+        formState = FormChapterState(onValidityChanged = {}).apply {
           fields.apply {
             note.update("This is a note")
           }
           selectedStepId = selectedId
-          steps.add(
-            FormStepState(id = UUID.randomUUID()) {}.apply {
+          stepStates.add(
+            FormStepState(guid = UUID.randomUUID()) {}.apply {
               fields.apply {
                 description.update("This is a description")
                 timerMinutes.update(4)
                 note.update("This is a note")
               }
-              ingredients.add(FormIngredientState(id = UUID.randomUUID()) {}.apply {
+              ingredientStates.add(FormIngredientState(guid = UUID.randomUUID()) {}.apply {
                 fields.apply {
                   name.update("Ingredient 1")
                   amount.update(20.0)
                   unit.update("g")
                 }
-              }, FormIngredientState(id = UUID.randomUUID()) {}.apply {
+              }, FormIngredientState(guid = UUID.randomUUID()) {}.apply {
                 fields.apply {
                   name.update("Ingredient 2")
                   amount.update(200.0)
@@ -823,8 +823,8 @@ private fun Preview() {
                 }
               })
             },
-            FormStepState(id = UUID.randomUUID()) {},
-            FormStepState(id = selectedId) {},
+            FormStepState(guid = UUID.randomUUID()) {},
+            FormStepState(guid = selectedId) {},
           )
         },
         onDelete = {},

@@ -10,7 +10,7 @@ class OnChange {
   @Test
   fun onChange() {
     var called = 0
-    val state = FormIngredientState(id = UUID.randomUUID(), onChange = { called++ })
+    val state = FormIngredientState(guid = UUID.randomUUID(), onChange = { called++ })
 
     state.fields.name.update("Name").also { Assert.assertEquals(1, called) }
     state.fields.amount.update(3.3).also { Assert.assertEquals(2, called) }

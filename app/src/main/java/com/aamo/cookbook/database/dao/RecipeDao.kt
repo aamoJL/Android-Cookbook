@@ -110,7 +110,7 @@ interface RecipeDao {
   /**
    * Adds or updates the given [recipe] to the database
    * The items' order numbers will be changed according to the list indexing
-   * @return Recipe's Id, whether the recipe was inserted or updated.
+   * @return Recipe's id, whether the recipe was inserted or updated.
    */
   @Transaction
   suspend fun upsert(recipe: RecipeWithChaptersStepsAndIngredients): Long {
@@ -120,6 +120,7 @@ interface RecipeDao {
     //    so the value have to be set to the recipes id instead on the returned value
     val recipeId = upsert(recipe.recipe).let { if (it == -1L) recipe.recipe.id else it }
 
+    // TODO: don't delete existing records, update instead
     if (existingRecipe?.chapters != recipe.chapters) {
       // Delete old chapters. Steps and ingredients will also be deleted
       existingRecipe?.also {
