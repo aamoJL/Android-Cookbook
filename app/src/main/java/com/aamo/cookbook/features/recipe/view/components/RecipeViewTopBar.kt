@@ -29,6 +29,7 @@ fun RecipeViewTopBar(
   onEdit: () -> Unit,
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
+  onRate: () -> Unit,
   onOpenCalculator: () -> Unit,
   onOpenTimer: () -> Unit,
   onBack: () -> Unit
@@ -61,7 +62,8 @@ fun RecipeViewTopBar(
         onDismiss = { openMenuDropDown = false },
         onEdit = onEdit,
         onCopy = onCopy,
-        onUpdateBookmark = onUpdateBookmark
+        onUpdateBookmark = onUpdateBookmark,
+        onRate = onRate,
       )
     }
   }
@@ -75,54 +77,87 @@ private fun RecipeViewTopBarDropdownMenu(
   onEdit: () -> Unit,
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
+  onRate: () -> Unit,
 ) {
-  DropdownMenu(
-    expanded = isOpen, onDismissRequest = onDismiss
-  ) {
-    DropdownMenuItem(leadingIcon = {
-      Icon(
-        painter = painterResource(R.drawable.rounded_edit_24),
-        contentDescription = stringResource(R.string.btn_edit_recipe)
-      )
-    }, text = { Text(text = stringResource(R.string.btn_edit_recipe)) }, onClick = {
-      onDismiss()
-      onEdit()
-    })
-    DropdownMenuItem(leadingIcon = {
-      Icon(
-        painter = painterResource(id = R.drawable.baseline_content_copy_24),
-        contentDescription = stringResource(R.string.btn_copy_recipe)
-      )
-    }, text = { Text(text = stringResource(R.string.btn_copy_recipe)) }, onClick = {
-      onDismiss()
-      onCopy()
-    })
+  DropdownMenu(expanded = isOpen, onDismissRequest = onDismiss) {
+    DropdownMenuItem(
+      leadingIcon = {
+        Icon(
+          painter = painterResource(R.drawable.rounded_edit_24),
+          contentDescription = stringResource(R.string.btn_edit_recipe)
+        )
+      },
+      text = { Text(text = stringResource(R.string.btn_edit_recipe)) },
+      onClick = {
+        onDismiss()
+        onEdit()
+      },
+    )
+    DropdownMenuItem(
+      leadingIcon = {
+        Icon(
+          painter = painterResource(id = R.drawable.baseline_content_copy_24),
+          contentDescription = stringResource(R.string.btn_copy_recipe)
+        )
+      },
+      text = { Text(text = stringResource(R.string.btn_copy_recipe)) },
+      onClick = {
+        onDismiss()
+        onCopy()
+      },
+    )
     HorizontalDivider()
-    if (isBookmarked) {
-      DropdownMenuItem(leadingIcon = {
+    BookmarkMenuItem(
+      isBookmarked = isBookmarked,
+      onUpdateBookmark = {
+        onDismiss()
+        onUpdateBookmark(it)
+      },
+    )
+    DropdownMenuItem(
+      text = { Text(text = stringResource(R.string.text_rate_the_recipe)) },
+      leadingIcon = {
+        Icon(
+          painter = painterResource(id = R.drawable.round_star_outline_24),
+          contentDescription = stringResource(R.string.text_rate_the_recipe)
+        )
+      },
+      onClick = {
+        onDismiss()
+        onRate()
+      },
+    )
+  }
+}
+
+@Composable
+fun BookmarkMenuItem(
+  isBookmarked: Boolean,
+  onUpdateBookmark: (Boolean) -> Unit,
+) {
+  if (isBookmarked) {
+    DropdownMenuItem(
+      leadingIcon = {
         Icon(
           painter = painterResource(R.drawable.rounded_bookmark_remove_24),
           contentDescription = stringResource(R.string.btn_remove_bookmark)
         )
-      }, text = { Text(text = stringResource(R.string.btn_remove_bookmark)) }, onClick = {
-        onDismiss()
-        onUpdateBookmark(false)
-      })
-    }
-    else {
-      DropdownMenuItem(
-        leadingIcon = {
-          Icon(
-            painter = painterResource(R.drawable.rounded_bookmark_add_24px),
-            contentDescription = stringResource(R.string.btn_add_bookmark)
-          )
-        },
-        text = { Text(text = stringResource(R.string.btn_add_bookmark)) },
-        onClick = {
-          onDismiss()
-          onUpdateBookmark(true)
-        })
-    }
+      },
+      text = { Text(text = stringResource(R.string.btn_remove_bookmark)) },
+      onClick = { onUpdateBookmark(false) },
+    )
+  }
+  else {
+    DropdownMenuItem(
+      leadingIcon = {
+        Icon(
+          painter = painterResource(R.drawable.rounded_bookmark_add_24px),
+          contentDescription = stringResource(R.string.btn_add_bookmark)
+        )
+      },
+      text = { Text(text = stringResource(R.string.btn_add_bookmark)) },
+      onClick = { onUpdateBookmark(true) },
+    )
   }
 }
 
@@ -139,7 +174,9 @@ private fun RecipeViewTopBarPreview() {
       onUpdateBookmark = { },
       onOpenCalculator = { },
       onOpenTimer = { },
-      onBack = { })
+      onBack = { },
+      onRate = {},
+    )
   }
 }
 
@@ -153,7 +190,9 @@ private fun RecipeViewTopBarDropdownMenuPreview_Bookmarked() {
       onDismiss = {},
       onEdit = {},
       onCopy = {},
-      onUpdateBookmark = {})
+      onUpdateBookmark = {},
+      onRate = {},
+    )
   }
 }
 
@@ -167,6 +206,8 @@ private fun RecipeViewTopBarDropdownMenuPreview_NotBookmarked() {
       onDismiss = {},
       onEdit = {},
       onCopy = {},
-      onUpdateBookmark = {})
+      onUpdateBookmark = {},
+      onRate = {},
+    )
   }
 }

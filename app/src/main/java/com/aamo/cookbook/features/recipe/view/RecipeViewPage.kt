@@ -1,23 +1,32 @@
 package com.aamo.cookbook.features.recipe.view
 
-import android.net.Uri
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -43,23 +52,19 @@ import com.aamo.cookbook.features.recipe.view.components.RecipeViewTopBar
 import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.features.recipe.view.models.ServingsState
 import com.aamo.cookbook.features.recipe.view.screens.RecipeChapterScreen
-import com.aamo.cookbook.features.recipe.view.screens.RecipeSettingsScreen
 import com.aamo.cookbook.features.recipe.view.screens.RecipeSummaryScreen
 import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.updateBookmark
 import com.aamo.cookbook.features.recipe.view.use_cases.updateRating
-import com.aamo.cookbook.features.recipe.view.use_cases.updateThumbnail
 import com.aamo.cookbook.service.CalculatorService
 import com.aamo.cookbook.service.ICalculatorService
-import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.service.ITimerService
-import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.service.TimerService
 import com.aamo.cookbook.ui.components.LoadingScreen
+import com.aamo.cookbook.ui.components.inputs.FiveStarRating
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
-import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.letIf
 import com.aamo.cookbook.utility.extensions.general.onFalse
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
@@ -82,7 +87,6 @@ class RecipeViewViewModel(
   fetchData: () -> Flow<RecipeViewRecipeModel?>,
   private val updateBookmark: suspend (Boolean, RecipeBookmark) -> Unit,
   private val updateRating: suspend (Int?, RecipeRating) -> Unit,
-  private val updateThumbnail: suspend (String, Recipe) -> Unit,
   private val saveAsCopy: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
   val recipe = fetchData().transform { emit(it?.recipe) }.runningReduce { previous, new ->
@@ -138,16 +142,6 @@ class RecipeViewViewModel(
     }
   }
 
-  fun updateThumbnail(value: String) {
-    val recipe = recipe.value ?: return
-
-    if (recipe.recipe.thumbnailUri == value) return
-
-    viewModelScope.launch {
-      runCatching { updateThumbnail(value, recipe.recipe) }
-    }
-  }
-
   fun saveAsCopy() {
     val recipe = recipe.value ?: return
 
@@ -189,14 +183,6 @@ fun NavGraphBuilder.recipeViewPage(
           updateRating = { value, rating ->
             updateRating(dao = dao, rating = rating, value = value)
           },
-          updateThumbnail = { value, recipe ->
-            updateThumbnail(
-              dao = dao,
-              photoService = PhotoService(context = context),
-              recipe = recipe,
-              value = value
-            )
-          },
           saveAsCopy = { recipe ->
             copyAndSaveRecipe(
               dao = dao, recipe = recipe, nameSuffix = nameSuffix
@@ -224,11 +210,6 @@ fun NavGraphBuilder.recipeViewPage(
         onUpdateRating = {
           viewmodel.updateRating(value = (it as Int?).letIf(rating?.ratingOutOfFive == it) { null })
         },
-        onUpdateThumbnail = {
-          viewmodel.updateThumbnail(
-            IOService(context = context).getFileNameWithSuffixFromUri(it) ?: String.EMPTY
-          )
-        },
         onOpenCalculator = {
           viewmodel.openCalculator(calculatorService = CalculatorService(context = context))
             .onFalse {
@@ -253,6 +234,7 @@ fun NavGraphBuilder.recipeViewPage(
   }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RecipeViewPageContent(
   recipe: RecipeWithChaptersStepsAndIngredients,
@@ -265,14 +247,40 @@ fun RecipeViewPageContent(
   onCopy: () -> Unit,
   onUpdateBookmark: (Boolean) -> Unit,
   onUpdateRating: (Int) -> Unit,
-  onUpdateThumbnail: (Uri) -> Unit,
   onOpenCalculator: () -> Unit,
   onOpenTimer: () -> Unit,
   onStartTimer: (title: String, duration: Duration) -> Unit,
   onBack: () -> Unit,
 ) {
   val scope = rememberCoroutineScope()
-  val pagerState = rememberPagerState(pageCount = { recipe.chapters.size + 2 }, initialPage = 1)
+  val pagerState = rememberPagerState(pageCount = { recipe.chapters.size + 1 }, initialPage = 0)
+
+  var openRatingDialog by remember { mutableStateOf(false) }
+
+  if (openRatingDialog) {
+    AlertDialog(
+      title = {
+        Text(
+          text = stringResource(R.string.text_rate_the_recipe),
+          textAlign = TextAlign.Center,
+          modifier = Modifier.fillMaxWidth()
+        )
+      },
+      text = {
+        FiveStarRating(
+          value = rating?.ratingOutOfFive,
+          onValueChange = onUpdateRating,
+          modifier = Modifier.padding(8.dp),
+        )
+      },
+      onDismissRequest = { openRatingDialog = false },
+      confirmButton = {
+        TextButton(onClick = { openRatingDialog = false }) {
+          Text(text = stringResource(R.string.btn_close))
+        }
+      },
+    )
+  }
 
   Scaffold(
     topBar = {
@@ -284,6 +292,7 @@ fun RecipeViewPageContent(
         onOpenCalculator = onOpenCalculator,
         onOpenTimer = onOpenTimer,
         onUpdateBookmark = onUpdateBookmark,
+        onRate = { openRatingDialog = true },
         onBack = onBack
       )
     }) { paddingValues ->
@@ -303,14 +312,7 @@ fun RecipeViewPageContent(
               .weight(1f, fill = true)
           ) { pageIndex ->
             when (pageIndex) {
-              0 -> RecipeSettingsScreen(
-                ratingOutOfFive = rating?.ratingOutOfFive ?: 0,
-                thumbnailUri = recipe.recipe.thumbnailUri,
-                onRatingChange = onUpdateRating,
-                onThumbnailChange = onUpdateThumbnail
-              )
-
-              1 -> {
+              0 -> {
                 RecipeSummaryScreen(
                   recipe = recipe,
                   ingredientSelection = ingredientSelection,
@@ -320,7 +322,7 @@ fun RecipeViewPageContent(
               }
 
               else -> {
-                val chapterIndex = pageIndex - 2
+                val chapterIndex = pageIndex - 1
 
                 if (chapterIndex in 0..<recipe.chapters.size) {
                   RecipeChapterScreen(
@@ -391,7 +393,6 @@ private fun RecipeViewPageContentPreview() {
         onCopy = {},
         onUpdateBookmark = {},
         onUpdateRating = {},
-        onUpdateThumbnail = {},
         onOpenCalculator = {},
         onOpenTimer = {},
         onStartTimer = { _, _ -> },

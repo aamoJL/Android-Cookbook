@@ -20,8 +20,10 @@ class CanSave {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -41,8 +43,10 @@ class CanSave {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -59,8 +63,10 @@ class CanSave {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -77,8 +83,10 @@ class CanSave {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -98,8 +106,10 @@ class CanSave {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()

@@ -53,9 +53,12 @@ import com.aamo.cookbook.features.recipe.form.models.states.FormRecipeState
 import com.aamo.cookbook.features.recipe.form.screens.RecipeChapterScreen
 import com.aamo.cookbook.features.recipe.form.screens.RecipeInfoScreen
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
+import com.aamo.cookbook.features.recipe.form.use_cases.deleteThumbnail
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchCategorySuggestions
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
+import com.aamo.cookbook.features.recipe.form.use_cases.saveThumbnail
+import com.aamo.cookbook.service.IOService
 import com.aamo.cookbook.service.PhotoService
 import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
@@ -80,7 +83,9 @@ data class RecipeFormPage(val id: Long)
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
   private val saveData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
-  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
+  private val deleteData: suspend (RecipeWithChaptersStepsAndIngredients) -> Boolean,
+  private val deleteThumbnail: (String) -> Unit,
+  private val saveThumbnail: (String) -> String?,
   private val fetchCategorySuggestions: suspend () -> Map<String, List<String>>,
 ) : ViewModel() {
   val recipe = flow { emit(fetchData()) }.onEach { model ->
@@ -108,7 +113,11 @@ class RecipeFormViewModel(
     viewModelScope.launch {
       runCatching {
         val recipe = checkNotNull(recipe.value)
-        deleteData(recipe)
+        deleteData(recipe).onTrue {
+          if (recipe.recipe.thumbnailUri.isNotEmpty()) {
+            deleteThumbnail(recipe.recipe.thumbnailUri)
+          }
+        }
       }
     }
   }
@@ -116,11 +125,28 @@ class RecipeFormViewModel(
   fun saveRecipe() {
     viewModelScope.launch {
       runCatching {
+        val recipe = recipe.value
+        val newThumbnail = formRecipeState.value.fields.thumbnailUri.value
         check(checkValidity())
-        checkNotNull(recipe.value)
+        checkNotNull(recipe)
 
         savingState = savingState.getAsSaving()
+
+        if (recipe.recipe.thumbnailUri != newThumbnail) {
+          if (recipe.recipe.thumbnailUri.isNotEmpty()) {
+            // delete old thumbnail
+            deleteThumbnail(recipe.recipe.thumbnailUri)
+          }
+          if (newThumbnail.endsWith(PhotoService.TEMP_FILE_EXTENSION)) {
+            // save new thumbnail
+            saveThumbnail(newThumbnail)?.also { newThumbnail ->
+              formRecipeState.value.fields.thumbnailUri.update(newThumbnail)
+            }
+          }
+        }
+
         saveData(formRecipeState.value.getModel())
+
         savingState = savingState.getAsSaved()
       }.onFailure { savingState = savingState.getAsError(Error(it.localizedMessage)) }
     }
@@ -129,8 +155,16 @@ class RecipeFormViewModel(
   private fun createRecipeState(model: RecipeWithChaptersStepsAndIngredients): FormRecipeState {
     return FormRecipeState(
       model = model,
+      onChange = { onChange() },
       onValidityChanged = { validity = checkValidity() },
-      onChange = { onChange() })
+      onThumbnailChanging = { old ->
+        runCatching {
+          if (old.endsWith(PhotoService.TEMP_FILE_EXTENSION)) {
+            deleteThumbnail(old)
+          }
+        }
+      },
+    )
   }
 
   private fun onChange() {
@@ -140,6 +174,18 @@ class RecipeFormViewModel(
   private fun checkValidity(): Boolean {
     if (savingState.state == SavingState.State.SAVING) return false
     return formRecipeState.value.validity.value
+  }
+
+  override fun onCleared() {
+    super.onCleared()
+
+    runCatching {
+      formRecipeState.value.fields.thumbnailUri.value.also { thumbnailUri ->
+        if (thumbnailUri.endsWith(PhotoService.TEMP_FILE_EXTENSION)) {
+          deleteThumbnail(thumbnailUri)
+        }
+      }
+    }
   }
 }
 
@@ -162,12 +208,20 @@ fun NavGraphBuilder.recipeFormPage(
             saveRecipe(dao = dao, recipe = recipe).also { result -> onOpenRecipe(result) }
           },
           deleteData = { recipe ->
-            deleteRecipe(
-              dao = dao, photoService = PhotoService(context = appContext), recipe = recipe.recipe
-            ).onTrue {
+            deleteRecipe(dao = dao, recipe = recipe.recipe).onTrue {
               onSnackbar(SnackbarProperties(recipeDeletedMessage))
               onOpenCategories()
             }
+          },
+          deleteThumbnail = { fileName ->
+            deleteThumbnail(fileName = fileName, photoService = PhotoService(context = appContext))
+          },
+          saveThumbnail = { tempFile ->
+            saveThumbnail(
+              tempName = tempFile,
+              photoService = PhotoService(context = appContext),
+              ioService = IOService(context = appContext),
+            )
           },
           fetchCategorySuggestions = { fetchCategorySuggestions(recipeDao = dao) },
         )
@@ -345,7 +399,7 @@ private fun Preview() {
   CookbookTheme(useDarkTheme = true) {
     RecipeFormContent(
       isNew = false,
-      formRecipeState = FormRecipeState(onValidityChanged = {}).also {
+      formRecipeState = FormRecipeState().also {
         it.fields.apply {
           name.update("Recipe 1")
           category.update("Cat 1")

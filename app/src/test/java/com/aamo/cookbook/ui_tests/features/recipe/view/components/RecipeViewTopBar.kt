@@ -31,6 +31,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = {},
         onOpenCalculator = {},
         onOpenTimer = {},
+        onRate = {},
         onBack = { called = true })
     }
 
@@ -52,6 +53,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = {},
         onOpenCalculator = { called = true },
         onOpenTimer = {},
+        onRate = {},
         onBack = {})
     }
 
@@ -73,6 +75,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = {},
         onOpenCalculator = {},
         onOpenTimer = { called = true },
+        onRate = {},
         onBack = {})
     }
 
@@ -94,6 +97,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = {},
         onOpenCalculator = {},
         onOpenTimer = { },
+        onRate = {},
         onBack = {})
     }
 
@@ -121,6 +125,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = {},
         onOpenCalculator = {},
         onOpenTimer = { },
+        onRate = {},
         onBack = {})
     }
 
@@ -148,6 +153,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = { value = it },
         onOpenCalculator = {},
         onOpenTimer = { },
+        onRate = {},
         onBack = {})
     }
 
@@ -175,6 +181,7 @@ class RecipeViewTopBar {
         onUpdateBookmark = { value = it },
         onOpenCalculator = {},
         onOpenTimer = { },
+        onRate = {},
         onBack = {})
     }
 

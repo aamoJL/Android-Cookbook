@@ -7,21 +7,21 @@ import org.junit.Test
 class Transformation {
   @Test
   fun servings() {
-    Assert.assertNull(FormRecipeState(onValidityChanged = { }).fields.apply {
+    Assert.assertNull(FormRecipeState { }.fields.apply {
       servings.update(0)
     }.servings.value)
 
-    Assert.assertNull(FormRecipeState(onValidityChanged = { }).fields.apply {
+    Assert.assertNull(FormRecipeState { }.fields.apply {
       servings.update(null)
     }.servings.value)
 
-    Assert.assertNull(FormRecipeState(onValidityChanged = { }).fields.apply {
+    Assert.assertNull(FormRecipeState { }.fields.apply {
       servings.update(-1)
     }.servings.value)
 
     Assert.assertEquals(
       123,
-      FormRecipeState(onValidityChanged = { }).fields.apply { servings.update(123) }.servings.value
+      FormRecipeState { }.fields.apply { servings.update(123) }.servings.value
     )
   }
 }

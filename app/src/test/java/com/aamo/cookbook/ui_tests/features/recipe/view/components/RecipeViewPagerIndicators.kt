@@ -27,18 +27,14 @@ class RecipeViewPagerIndicators {
         pageIndex = 0, recipeProgress = progress, onPageChange = { page = it })
     }
 
-    rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_settings_page))
-      .performClick()
-    Assert.assertEquals(0, page)
-
     rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_summary_page))
       .performClick()
-    Assert.assertEquals(1, page)
+    Assert.assertEquals(0, page)
 
     progress.forEachIndexed { i, _ ->
       rule.onNodeWithContentDescription(rule.activity.getString(R.string.cd_chapter_x_page, i + 1))
         .performClick()
-      Assert.assertEquals(i + 2, page)
+      Assert.assertEquals(i + 1, page)
     }
   }
 }

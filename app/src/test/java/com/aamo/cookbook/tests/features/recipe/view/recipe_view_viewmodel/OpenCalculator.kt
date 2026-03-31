@@ -19,7 +19,6 @@ class OpenCalculator : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
 
     viewmodel.openCalculator(calculatorService = object : ICalculatorService {
@@ -37,7 +36,6 @@ class OpenCalculator : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
 
     val result = viewmodel.openCalculator(calculatorService = object : ICalculatorService {})
@@ -51,7 +49,6 @@ class OpenCalculator : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
 
     val result = viewmodel.openCalculator(calculatorService = object : ICalculatorService {

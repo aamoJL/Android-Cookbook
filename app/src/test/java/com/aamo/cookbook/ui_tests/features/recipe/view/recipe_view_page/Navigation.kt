@@ -13,7 +13,6 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
-import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.view.components.RecipeViewPagerIndicatorsTags
 import com.aamo.cookbook.test_utility.RecipeMocker
@@ -103,36 +102,10 @@ class Navigation : PageTest() {
   }
 
   @Test
-  fun `to recipeSettingsScreen with indicator click`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.label_rating))
-
-    text.assertIsNotDisplayed()
-
-    rule.onNodeWithTag(
-      RecipeViewPagerIndicatorsTags.SETTINGS_INDICATOR.name, useUnmergedTree = true
-    ).performClick()
-
-    text.assertExists()
-    text.assertIsDisplayed()
-  }
-
-  @Test
-  fun `to recipeSettingsScreen with swipe to right`() = runTest {
-    val text = rule.onNodeWithText(getString(R.string.label_rating))
-
-    text.assertIsNotDisplayed()
-
-    rule.onRoot().performTouchInput { swipeRight() }
-
-    text.assertExists()
-    text.assertIsDisplayed()
-  }
-
-  @Test
   fun `to recipeSummaryScreen with indicator click`() = runTest {
     val text = rule.onNodeWithText(getString(R.string.title_ingredients))
 
-    `to recipeSettingsScreen with indicator click`()
+    `to recipeChapterScreen with indicator click`()
 
     text.assertIsNotDisplayed()
 

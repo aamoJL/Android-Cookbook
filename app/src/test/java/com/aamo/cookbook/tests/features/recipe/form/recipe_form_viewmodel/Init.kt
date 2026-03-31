@@ -18,8 +18,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     Assert.assertNull(viewmodel.recipe.value)
@@ -35,8 +37,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -50,8 +54,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { model },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -67,8 +73,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { expected },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     Assert.assertTrue(viewmodel.categorySuggestions.value.isEmpty())
@@ -84,8 +92,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -105,8 +115,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -124,8 +136,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()
@@ -149,8 +163,10 @@ class Init {
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
       saveData = { _ -> fail() },
-      deleteData = { fail() },
+      deleteData = { fail(); false },
       fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
     )
 
     viewmodel.recipe.load()

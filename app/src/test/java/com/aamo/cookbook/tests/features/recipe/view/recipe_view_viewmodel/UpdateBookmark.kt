@@ -25,15 +25,11 @@ class UpdateBookmark : UnconfinedTest() {
     )
     var bookmark: RecipeBookmark? = null
     var value: Boolean? = null
-    val viewmodel = RecipeViewViewModel(
-      fetchData = { flow { emit(model) } },
-      updateBookmark = { v, b ->
+    val viewmodel =
+      RecipeViewViewModel(fetchData = { flow { emit(model) } }, updateBookmark = { v, b ->
         value = v
         bookmark = b
-      },
-      updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+      }, updateRating = { _, _ -> fail() }, saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.bookmark.collect()
@@ -55,15 +51,11 @@ class UpdateBookmark : UnconfinedTest() {
       )
       var bookmark: RecipeBookmark? = null
       var value: Boolean? = null
-      val viewmodel = RecipeViewViewModel(
-        fetchData = { flow { emit(model) } },
-        updateBookmark = { v, b ->
+      val viewmodel =
+        RecipeViewViewModel(fetchData = { flow { emit(model) } }, updateBookmark = { v, b ->
           value = v
           bookmark = b
-        },
-        updateRating = { _, _ -> fail() },
-        updateThumbnail = { _, _ -> fail() },
-        saveAsCopy = { fail() })
+        }, updateRating = { _, _ -> fail() }, saveAsCopy = { fail() })
 
       backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
         viewmodel.bookmark.collect()
@@ -82,7 +74,6 @@ class UpdateBookmark : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
       saveAsCopy = { fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {

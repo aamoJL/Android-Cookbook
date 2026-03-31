@@ -16,8 +16,13 @@ class FormRecipeState(
   ),
   val onChange: () -> Unit = {},
   onValidityChanged: () -> Unit = {},
+  onThumbnailChanging: (String) -> Unit = {},
 ) {
-  class Fields(private val model: Recipe = Recipe(), private val onChange: () -> Unit) {
+  class Fields(
+    private val model: Recipe = Recipe(),
+    private val onChange: () -> Unit,
+    private val onThumbnailChanging: (old: String) -> Unit,
+  ) {
     val name = ViewModelState(model.name).onChange { onChange() }
     val category = ViewModelState(model.category).onChange { onChange() }
     val subCategory = ViewModelState(model.subCategory).onChange { onChange() }
@@ -28,6 +33,9 @@ class FormRecipeState(
       if (it.isNotEmpty()) noteFieldToggleValue = true
       onChange()
     }
+    val thumbnailUri =
+      ViewModelState(model.thumbnailUri).onChanging { old, _ -> onThumbnailChanging(old) }
+        .onChange { onChange() }
 
     var noteFieldToggleValue by mutableStateOf(model.note.isNotEmpty())
     var isDirty by mutableStateOf(false)
@@ -42,6 +50,7 @@ class FormRecipeState(
         subCategory = subCategory.value,
         servings = servings.value ?: 0,
         note = note.value,
+        thumbnailUri = thumbnailUri.value
       )
     }
 
@@ -59,7 +68,11 @@ class FormRecipeState(
     }
   }
 
-  val fields = Fields(model = model.recipe, onChange = { onChange() })
+  val fields = Fields(
+    model = model.recipe,
+    onChange = { onChange() },
+    onThumbnailChanging = onThumbnailChanging,
+  )
   val chapterStates =
     ViewModelStateList(model.chapters.map { createChapterState(model = it) }).onChange { onChange() }
   val validity = ViewModelState(checkValidity()).onChange { onValidityChanged() }

@@ -33,7 +33,6 @@ class SaveAsCopy : UnconfinedTest() {
     },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
       saveAsCopy = { actual = it })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {

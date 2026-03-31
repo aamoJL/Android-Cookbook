@@ -94,4 +94,5 @@
     <string name="cd_delete_step">Poista vaihe</string>
     <string name="cd_delete_ingredient">Poista ainesosa</string>
     <string name="text_required_fields_are_not_filled">Pakollisia kenttiä täyttämättä</string>
+    <string name="btn_close">Sulje</string>
 </resources>

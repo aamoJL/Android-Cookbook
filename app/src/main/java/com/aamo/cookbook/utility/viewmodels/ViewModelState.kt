@@ -9,6 +9,7 @@ class ViewModelState<T>(initValue: T) {
   var value by mutableStateOf(initValue)
     private set
 
+  private var onChanging: ((old: T, new: T) -> Unit)? = null
   private var onChange: ((T) -> Unit)? = null
   private var transformationPredicate: ((T) -> T)? = null
   private var validationPredicate: ((T) -> Boolean)? = null
@@ -23,10 +24,19 @@ class ViewModelState<T>(initValue: T) {
 
     validationPredicate?.invoke(newValue)?.onFalse { return this.value }
 
+    onChanging?.invoke(this.value, newValue)
     this.value = newValue
     onChange?.invoke(this.value)
 
     return this.value
+  }
+
+  /**
+   * Adds changing function to the state
+   */
+  fun onChanging(function: (old: T, new: T) -> Unit): ViewModelState<T> {
+    onChanging = function
+    return this
   }
 
   /**

@@ -23,7 +23,6 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
     val progress = viewmodel.progressState
 
@@ -37,7 +36,6 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
     val progress = viewmodel.progressState
 
@@ -58,7 +56,6 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
       saveAsCopy = { TestCase.fail() })
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
