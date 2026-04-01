@@ -52,6 +52,7 @@ import com.aamo.cookbook.features.recipe.form.models.states.FormChapterState
 import com.aamo.cookbook.features.recipe.form.models.states.FormRecipeState
 import com.aamo.cookbook.features.recipe.form.screens.RecipeChapterScreen
 import com.aamo.cookbook.features.recipe.form.screens.RecipeInfoScreen
+import com.aamo.cookbook.features.recipe.form.use_cases.copyRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteRecipe
 import com.aamo.cookbook.features.recipe.form.use_cases.deleteThumbnail
 import com.aamo.cookbook.features.recipe.form.use_cases.fetchCategorySuggestions
@@ -67,6 +68,7 @@ import com.aamo.cookbook.ui.components.modals.UnsavedDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.general.ifElse
+import com.aamo.cookbook.utility.extensions.general.letIf
 import com.aamo.cookbook.utility.extensions.general.onTrue
 import com.aamo.cookbook.utility.viewmodels.SavingState
 import com.aamo.cookbook.utility.viewmodels.ViewModelState
@@ -78,7 +80,7 @@ import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class RecipeFormPage(val id: Long)
+data class RecipeFormPage(val id: Long, val asCopy: Boolean = false)
 
 class RecipeFormViewModel(
   private val fetchData: suspend () -> RecipeWithChaptersStepsAndIngredients,
@@ -196,14 +198,18 @@ fun NavGraphBuilder.recipeFormPage(
   onBack: () -> Unit
 ) {
   composable<RecipeFormPage> { navStack ->
-    val (recipeId) = navStack.toRoute<RecipeFormPage>()
+    val (recipeId, asCopy) = navStack.toRoute<RecipeFormPage>()
     val recipeDeletedMessage = stringResource(R.string.snackbar_recipe_deleted_successfully)
     val appContext = LocalContext.current.applicationContext
     val dao = RecipeDatabase.getDatabase(appContext).recipeDao()
     val viewmodel: RecipeFormViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipeFormViewModel(
-          fetchData = { fetchRecipe(dao = dao, recipeId = recipeId) },
+          fetchData = {
+            fetchRecipe(dao = dao, recipeId = recipeId).letIf(asCopy) {
+              copyRecipe(recipe = it, context = appContext)
+            }
+          },
           saveData = { recipe ->
             saveRecipe(dao = dao, recipe = recipe).also { result -> onOpenRecipe(result) }
           },

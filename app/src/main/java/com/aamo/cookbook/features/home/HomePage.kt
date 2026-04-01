@@ -79,6 +79,9 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
         onOpenRecipeForm = {
           navController.navigate(RecipeFormPage(id = it)) { launchSingleTop = true }
         },
+        onOpenRecipeFormAsCopy = {
+          navController.navigate(RecipeFormPage(id = it, asCopy = true)) { launchSingleTop = true }
+        },
         onSnackbar = onShowSnackbar,
         onBack = { navController.navigateUp() },
       )

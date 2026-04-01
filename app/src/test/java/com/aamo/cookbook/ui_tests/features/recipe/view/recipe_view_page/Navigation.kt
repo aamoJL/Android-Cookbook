@@ -71,9 +71,9 @@ class Navigation : PageTest() {
 
     waitForLoading()
     rule.onNodeWithTag(UITag.PAGE_TITLE.name)
-      .assert(hasText(getString(R.string.screen_title_edit_recipe)))
+      .assert(hasText(getString(R.string.screen_title_new_recipe)))
     rule.onNodeWithText(
-      "${recipe.recipe.name}${getString(R.string.suffix_copy, recipe.recipe.name)}"
+      getString(R.string.text_recipe_name_as_copy, recipe.recipe.name)
     ).assertExists()
   }
 

@@ -24,7 +24,7 @@ class StartTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     viewmodel.startTimer(
       timerService = object : ITimerService {
@@ -47,7 +47,7 @@ class StartTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     val title = "123"
     val duration = 5.minutes
@@ -73,7 +73,7 @@ class StartTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     val result = viewmodel.startTimer(
       timerService = object : ITimerService {},
@@ -90,7 +90,7 @@ class StartTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     val result = viewmodel.startTimer(
       timerService = object : ITimerService {

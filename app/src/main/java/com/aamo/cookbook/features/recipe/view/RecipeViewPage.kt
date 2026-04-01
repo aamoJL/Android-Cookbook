@@ -53,7 +53,6 @@ import com.aamo.cookbook.features.recipe.view.models.RecipeViewRecipeModel
 import com.aamo.cookbook.features.recipe.view.models.ServingsState
 import com.aamo.cookbook.features.recipe.view.screens.RecipeChapterScreen
 import com.aamo.cookbook.features.recipe.view.screens.RecipeSummaryScreen
-import com.aamo.cookbook.features.recipe.view.use_cases.copyAndSaveRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.fetchRecipe
 import com.aamo.cookbook.features.recipe.view.use_cases.updateBookmark
 import com.aamo.cookbook.features.recipe.view.use_cases.updateRating
@@ -87,7 +86,6 @@ class RecipeViewViewModel(
   fetchData: () -> Flow<RecipeViewRecipeModel?>,
   private val updateBookmark: suspend (Boolean, RecipeBookmark) -> Unit,
   private val updateRating: suspend (Int?, RecipeRating) -> Unit,
-  private val saveAsCopy: suspend (RecipeWithChaptersStepsAndIngredients) -> Unit,
 ) : ViewModel() {
   val recipe = fetchData().transform { emit(it?.recipe) }.runningReduce { previous, new ->
     if (new == null) null
@@ -142,14 +140,6 @@ class RecipeViewViewModel(
     }
   }
 
-  fun saveAsCopy() {
-    val recipe = recipe.value ?: return
-
-    viewModelScope.launch {
-      runCatching { saveAsCopy(recipe) }
-    }
-  }
-
   fun openTimer(timerService: ITimerService): Boolean {
     return runCatching { timerService.open() }.isSuccess
   }
@@ -164,32 +154,28 @@ class RecipeViewViewModel(
 }
 
 fun NavGraphBuilder.recipeViewPage(
-  onOpenRecipeForm: (id: Long) -> Unit, onSnackbar: (SnackbarProperties) -> Unit, onBack: () -> Unit
+  onOpenRecipeForm: (id: Long) -> Unit,
+  onOpenRecipeFormAsCopy: (id: Long) -> Unit,
+  onSnackbar: (SnackbarProperties) -> Unit,
+  onBack: () -> Unit,
 ) {
   composable<RecipeViewPage> { navStack ->
-    val nameSuffix = stringResource(R.string.suffix_copy)
     val appNotFoundMessage = stringResource(R.string.snackbar_app_not_found)
 
-    val (id) = navStack.toRoute<RecipeViewPage>()
+    val (recipeId) = navStack.toRoute<RecipeViewPage>()
     val context = LocalContext.current
     val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
     val viewmodel: RecipeViewViewModel = viewModel(factory = viewModelFactory {
       initializer {
         RecipeViewViewModel(
-          fetchData = { fetchRecipe(dao = dao, recipeId = id) },
+          fetchData = { fetchRecipe(dao = dao, recipeId = recipeId) },
           updateBookmark = { value, bookmark ->
             updateBookmark(dao = dao, bookmark = bookmark, value = value)
           },
           updateRating = { value, rating ->
             updateRating(dao = dao, rating = rating, value = value)
           },
-          saveAsCopy = { recipe ->
-            copyAndSaveRecipe(
-              dao = dao, recipe = recipe, nameSuffix = nameSuffix
-            ).also { id ->
-              if (id > 0L) onOpenRecipeForm(id)
-            }
-          })
+        )
       }
     })
     val recipe by viewmodel.recipe.collectAsStateWithLifecycle()
@@ -204,8 +190,8 @@ fun NavGraphBuilder.recipeViewPage(
         servingsState = viewmodel.servingsState,
         progressState = viewmodel.progressState,
         ingredientSelection = viewmodel.ingredientSelection,
-        onEdit = { onOpenRecipeForm(id) },
-        onCopy = { viewmodel.saveAsCopy() },
+        onEdit = { onOpenRecipeForm(recipeId) },
+        onCopy = { onOpenRecipeFormAsCopy(recipeId) },
         onUpdateBookmark = { viewmodel.updateBookmark(it) },
         onUpdateRating = {
           viewmodel.updateRating(value = (it as Int?).letIf(rating?.ratingOutOfFive == it) { null })
