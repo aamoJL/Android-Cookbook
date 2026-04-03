@@ -1,6 +1,7 @@
 package com.aamo.cookbook.service
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import android.util.Log
@@ -13,14 +14,20 @@ import java.util.Objects
 
 interface IPhotoService {
   fun get(fileName: String): Uri
-  fun save(file: File, fileName: String = "${System.currentTimeMillis()}.jpg"): Uri?
+  fun save(
+    file: File,
+    fileName: String = "${System.currentTimeMillis()}${PhotoService.THUMBNAIL_FILE_EXTENSION}"
+  ): Uri?
+
   fun delete(fileName: String): Boolean
   fun getTemp(name: String = System.currentTimeMillis().toString()): Uri
 }
 
 class PhotoService(val context: Context) : IPhotoService {
   companion object {
-    const val TEMP_FILE_EXTENSION: String = ".tmp"
+    const val TEMP_FILE_EXTENSION = ".tmp"
+    const val THUMBNAIL_FILE_EXTENSION = ".webp"
+    val THUMBNAIL_FILE_COMPRESS_FORMAT = Bitmap.CompressFormat.WEBP
   }
 
   private val debugTag = "PhotoService"

@@ -1,6 +1,5 @@
 package com.aamo.cookbook.features.recipe.form.screens
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.util.Log
@@ -66,7 +65,6 @@ import com.aamo.cookbook.ui.components.inputs.text_field.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
-import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.correctBitmapOrientation
 
@@ -93,7 +91,7 @@ fun RecipeInfoScreen(
       fileName = formState.fields.thumbnailUri.value,
       onThumbnailChange = {
         formState.fields.thumbnailUri.update(
-          IOService(context = context).getFileNameWithSuffixFromUri(it) ?: String.EMPTY
+          IOService(context = context).getFileNameWithSuffixFromUri(it)
         )
       },
       modifier = Modifier.size(200.dp),
@@ -379,7 +377,9 @@ private fun CameraButton(
 
           // compress image
           context.contentResolver.openOutputStream(fileUri).also {
-            if (it == null || !bitmap.compress(Bitmap.CompressFormat.WEBP, 20, it)) {
+            if (it == null || !bitmap.compress(
+                PhotoService.THUMBNAIL_FILE_COMPRESS_FORMAT, 20, it
+              )) {
               @Suppress("HardCodedStringLiteral") Log.d("error", "Compression failed")
             }
           }?.close()

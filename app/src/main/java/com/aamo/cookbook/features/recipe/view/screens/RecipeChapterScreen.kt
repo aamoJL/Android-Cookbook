@@ -171,7 +171,7 @@ private fun StepCheckBox(
               shape = RoundedCornerShape(4.dp),
             ) {
               IngredientList(
-                ingredients = ingredients,
+                ingredients = ingredients.sortedBy { it.name },
                 servingsMultiplier = servingsMultiplier,
                 textStyle = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier
