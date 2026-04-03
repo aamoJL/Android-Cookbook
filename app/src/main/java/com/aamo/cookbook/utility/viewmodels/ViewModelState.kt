@@ -3,26 +3,40 @@ package com.aamo.cookbook.utility.viewmodels
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import com.aamo.cookbook.utility.extensions.general.onFalse
 
 class ViewModelState<T>(initValue: T) {
   var value by mutableStateOf(initValue)
     private set
 
+  private var onChanging: ((old: T, new: T) -> Unit)? = null
   private var onChange: ((T) -> Unit)? = null
   private var transformationPredicate: ((T) -> T)? = null
   private var validationPredicate: ((T) -> Boolean)? = null
 
-  fun update(value: T): T? {
-    var newValue = value
-
-    transformationPredicate?.also { newValue = it.invoke(value) }
-
-    if (this.value != newValue && validationPredicate?.invoke(newValue) != false) {
-      this.value = newValue
-      onChange?.invoke(this.value)
+  fun update(value: T): T {
+    val newValue = transformationPredicate.let {
+      if (it == null) value
+      else it.invoke(value)
     }
 
+    if (this.value == newValue) return this.value
+
+    validationPredicate?.invoke(newValue)?.onFalse { return this.value }
+
+    onChanging?.invoke(this.value, newValue)
+    this.value = newValue
+    onChange?.invoke(this.value)
+
     return this.value
+  }
+
+  /**
+   * Adds changing function to the state
+   */
+  fun onChanging(function: (old: T, new: T) -> Unit): ViewModelState<T> {
+    onChanging = function
+    return this
   }
 
   /**

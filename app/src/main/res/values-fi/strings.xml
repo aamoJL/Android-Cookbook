@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="suffix_copy">\u0020- kopio</string>
     <string name="text_menu">Menu</string>
     <string name="screen_title_new_chapter">Lisää uusi kappale</string>
     <string name="screen_title_existing_chapter">Muokkaa kappaletta</string>
@@ -77,4 +76,23 @@
     <string name="label_thumbnail">Kuva</string>
     <string name="label_rating">Arvio</string>
     <string name="dialog_title_delete_thumbnail">Poista kuva?</string>
+    <string name="btn_add_chapter">Kappale</string>
+    <string name="cd_delete_chapter">Poista kappale</string>
+    <string name="cd_add_step">Lisää vaihe</string>
+    <string name="dialog_title_delete_chapter">Poista kappale?</string>
+    <string name="cd_add_new_chapter">Lisää uusi kappale</string>
+    <string name="cd_toggle_note_field">Huomautuskentän valintakytkin</string>
+    <string name="cd_toggle_timer_field">Ajastinkentän valintakytkin</string>
+    <string name="cd_move_left">Siirrä vasemmalle</string>
+    <string name="cd_move_right">Siirrä oikealle</string>
+    <string name="btn_ingredient">Ainesosa</string>
+    <string name="cd_add_ingredient">Lisää ainesosa</string>
+    <string name="dialog_title_delete_step">Poista vaihe?</string>
+    <string name="text_click_to_edit_step">Klikkaa muokataksesi vaihetta</string>
+    <string name="cd_unselect">Poista valinta</string>
+    <string name="cd_delete_step">Poista vaihe</string>
+    <string name="cd_delete_ingredient">Poista ainesosa</string>
+    <string name="text_required_fields_are_not_filled">Pakollisia kenttiä täyttämättä</string>
+    <string name="btn_close">Sulje</string>
+    <string name="text_recipe_name_as_copy">%1$s - kopio</string>
 </resources>

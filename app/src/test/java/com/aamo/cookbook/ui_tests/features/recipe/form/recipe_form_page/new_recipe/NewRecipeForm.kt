@@ -4,6 +4,8 @@ import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
+import androidx.compose.ui.test.onAllNodesWithText
+import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -41,31 +43,26 @@ class NewRecipeForm : PageTest() {
     rule.onNodeWithText(getString(R.string.label_category)).performTextInput("Category")
 
     // Chapter
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Chapter")
+    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Chapter")
 
     // Step
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_step)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
     rule.onNodeWithText(getString(R.string.label_description)).performTextInput("Step")
 
     // Ingredient
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_ingredient)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Ingredient")
-
-    // Save
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Step
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Chapter
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Recipe
+    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Ingredient")
 
     // Submit
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled()
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled().performClick()
 
     // on RecipeViewPage
-    rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
+    rule.onNodeWithContentDescription(getString(R.string.cd_open_calculator)).waitForDisplayed()
+      .assertExists()
     rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText("Recipe"))
   }
 
@@ -78,31 +75,26 @@ class NewRecipeForm : PageTest() {
     rule.onNodeWithText(getString(R.string.label_category)).performTextInput("Category")
 
     // Chapter
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Chapter")
+    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Chapter")
 
     // Step
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_step)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
     rule.onNodeWithText(getString(R.string.label_description)).performTextInput("Step")
 
     // Ingredient
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_ingredient)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Ingredient")
-
-    // Save
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Step
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Chapter
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick() // to Recipe
+    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Ingredient")
 
     // Submit
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled()
-    rule.onNodeWithContentDescription(getString(R.string.cd_save)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled().performClick()
 
     // on RecipeViewPage
-    rule.onNodeWithText(getString(R.string.title_ingredients)).waitForDisplayed().assertExists()
+    rule.onNodeWithContentDescription(getString(R.string.cd_open_calculator)).waitForDisplayed()
+      .assertExists()
     rule.onNodeWithTag(UITag.PAGE_TITLE.name).assert(hasText("Recipe"))
 
     // back

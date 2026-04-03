@@ -4,7 +4,6 @@ enum class UITag {
   PROGRESS_INDICATOR,
   BACK_BUTTON,
   PAGE_TITLE,
-  SCREEN_TITLE,
   OPTION,
   CHECK,
 }

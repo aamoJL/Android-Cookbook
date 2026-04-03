@@ -2,6 +2,7 @@
 
 package com.aamo.cookbook.database.dao
 
+import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.MapColumn
@@ -110,41 +111,68 @@ interface RecipeDao {
   /**
    * Adds or updates the given [recipe] to the database
    * The items' order numbers will be changed according to the list indexing
-   * @return Recipe's Id, whether the recipe was inserted or updated.
+   * @return Recipe's id, whether the recipe was inserted or updated.
    */
   @Transaction
   suspend fun upsert(recipe: RecipeWithChaptersStepsAndIngredients): Long {
-    val existingRecipe = getCompleteRecipe(recipe.recipe.id)
+    val dbRecipe = getCompleteRecipe(recipe.recipe.id)
 
+    // Upsert recipe
     // Upsert function will return -1 if the function updates an existing item,
     //    so the value have to be set to the recipes id instead on the returned value
     val recipeId = upsert(recipe.recipe).let { if (it == -1L) recipe.recipe.id else it }
 
-    if (existingRecipe?.chapters != recipe.chapters) {
-      // Delete old chapters. Steps and ingredients will also be deleted
-      existingRecipe?.also {
-        delete(*it.chapters.map { c -> c.chapter }.toTypedArray())
+    // Delete deleted chapters.
+    val dbChapters = dbRecipe?.chapters ?: emptyList()
+    val chapters = recipe.chapters
+    dbChapters.filter { dbC -> chapters.firstOrNull { it.chapter.id == dbC.chapter.id } == null }
+      .also { deletedChapters ->
+        if (deletedChapters.isNotEmpty()) {
+          delete(*deletedChapters.map { it.chapter }.toTypedArray())
+          Log.d("debug", "deleted chapters: ${deletedChapters.map { it.chapter.id }}")
+        }
       }
 
-      // Update chapter order numbers and ids
-      recipe.chapters.forEachIndexed { ci, chapter ->
-        val chapterId = upsert(
-          chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)
-        ).let { if (it == -1L) chapter.chapter.id else it }
-
-        // Update step order numbers and ids
-        chapter.steps.forEachIndexed { si, s ->
-          s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
-            .also { step ->
-              val stepId = upsert(
-                step.step.copy(orderNumber = si + 1, chapterId = chapterId)
-              ).let { if (it == -1L) step.step.id else it }
-
-              // Update ingredient ids
-              upsert(*step.ingredients.map { ingredient -> ingredient.copy(stepId = stepId) }
-                .toTypedArray())
-            }
+    // Delete deleted steps. Ingredients will also be deleted
+    val dbSteps = dbChapters.flatMap { it.steps }
+    val steps = recipe.chapters.flatMap { c -> c.steps }
+    dbSteps.filter { dbS -> steps.firstOrNull { it.step.id == dbS.step.id } == null }
+      .also { deletedSteps ->
+        if (deletedSteps.isNotEmpty()) {
+          delete(*deletedSteps.map { it.step }.toTypedArray())
+          Log.d("debug", "deleted steps: ${deletedSteps.map { it.step.id }}")
         }
+      }
+
+    // Delete deleted Ingredients
+    val dbIngredients = dbSteps.flatMap { it.ingredients }
+    val ingredients = steps.flatMap { it.ingredients }
+    dbIngredients.filter { dbI -> ingredients.firstOrNull { it.id == dbI.id } == null }
+      .also { deletedIngredients ->
+        if (deletedIngredients.isNotEmpty()) {
+          delete(*deletedIngredients.toTypedArray())
+          Log.d("debug", "deleted ingredients: ${deletedIngredients.map { it.id }}")
+        }
+      }
+
+    // Update chapter properties
+    recipe.chapters.forEachIndexed { ci, chapter ->
+      val chapterId = upsert(
+        chapter.chapter.copy(orderNumber = ci + 1, recipeId = recipeId)
+      ).let { if (it == -1L) chapter.chapter.id else it }
+
+      // Update step properties
+      chapter.steps.forEachIndexed { si, s ->
+        s.letIf({ it.step.timerMinutes == 0 }) { it.copy(step = s.step.copy(timerMinutes = null)) }
+          .also { step ->
+            val stepId = upsert(
+              step.step.copy(orderNumber = si + 1, chapterId = chapterId)
+            ).let { if (it == -1L) step.step.id else it }
+
+            // Update ingredient properties
+            upsert(*step.ingredients.map { ingredient -> ingredient.copy(stepId = stepId) }
+              .toTypedArray())
+          }
       }
     }
 
@@ -164,6 +192,12 @@ interface RecipeDao {
 
   @Delete
   suspend fun delete(vararg chapter: Chapter): Int
+
+  @Delete
+  suspend fun delete(vararg step: Step): Int
+
+  @Delete
+  suspend fun delete(vararg ingredient: Ingredient): Int
 
   @Delete
   suspend fun delete(bookmark: RecipeBookmark): Int

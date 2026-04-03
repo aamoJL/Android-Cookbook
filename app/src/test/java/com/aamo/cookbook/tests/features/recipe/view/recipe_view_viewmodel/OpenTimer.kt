@@ -21,8 +21,7 @@ class OpenTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     viewmodel.openTimer(timerService = object : ITimerService {
       override fun open() {
@@ -39,8 +38,7 @@ class OpenTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     val result = viewmodel.openTimer(timerService = object : ITimerService {})
 
@@ -53,8 +51,7 @@ class OpenTimer : UnconfinedTest() {
       fetchData = { flow { emit(null) } },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     val result = viewmodel.openTimer(timerService = object : ITimerService {
       override fun open() {

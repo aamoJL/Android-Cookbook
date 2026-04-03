@@ -22,8 +22,12 @@ class DeleteRecipe : UnconfinedTest() {
     var called = false
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { _, _, _ -> fail() },
-      deleteData = { called = true })
+      saveData = { _ -> fail() },
+      deleteData = { called = true; true },
+      fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
@@ -41,8 +45,12 @@ class DeleteRecipe : UnconfinedTest() {
     var value: RecipeWithChaptersStepsAndIngredients? = null
     val viewmodel = RecipeFormViewModel(
       fetchData = { recipe },
-      saveData = { _, _, _ -> fail() },
-      deleteData = { value = it })
+      saveData = { _ -> fail() },
+      deleteData = { value = it; true },
+      fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()
@@ -57,8 +65,12 @@ class DeleteRecipe : UnconfinedTest() {
   fun `does not crash when error`() = runTest {
     val viewmodel = RecipeFormViewModel(
       fetchData = { RecipeMocker.getFullMocker().mock() },
-      saveData = { _, _, _ -> fail() },
-      deleteData = { error(String.EMPTY) })
+      saveData = { _ -> fail() },
+      deleteData = { error(String.EMPTY) },
+      fetchCategorySuggestions = { emptyMap() },
+      deleteThumbnail = { fail() },
+      saveThumbnail = { fail(); null },
+    )
 
     viewmodel.deleteRecipe()
   }

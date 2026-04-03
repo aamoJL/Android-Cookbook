@@ -30,7 +30,6 @@ import com.aamo.cookbook.ui.theme.CookbookTheme
 
 enum class RecipeViewPagerIndicatorsTags {
   SUMMARY_INDICATOR,
-  SETTINGS_INDICATOR,
   CHAPTER_INDICATOR
 }
 
@@ -49,15 +48,6 @@ fun RecipeViewPagerIndicators(
       PageIndicatorItem(
         selected = pageIndex == 0,
         onClick = { onPageChange(0) },
-        contentDescription = stringResource(R.string.cd_settings_page),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
-        icon = painterResource(R.drawable.rounded_settings_24),
-        modifier = Modifier.testTag(RecipeViewPagerIndicatorsTags.SETTINGS_INDICATOR.name)
-      )
-
-      PageIndicatorItem(
-        selected = pageIndex == 1,
-        onClick = { onPageChange(1) },
         contentDescription = stringResource(R.string.cd_summary_page),
         color = MaterialTheme.colorScheme.tertiaryContainer,
         icon = painterResource(R.drawable.rounded_info_24),
@@ -68,8 +58,8 @@ fun RecipeViewPagerIndicators(
         val completed = recipeProgress[chapterIndicatorIndex]
 
         PageIndicatorItem(
-          selected = pageIndex == chapterIndicatorIndex + 2,
-          onClick = { onPageChange(chapterIndicatorIndex + 2) },
+          selected = pageIndex == chapterIndicatorIndex + 1,
+          onClick = { onPageChange(chapterIndicatorIndex + 1) },
           isTargetPage = currentChapterIndex == chapterIndicatorIndex,
           contentDescription = stringResource(
             R.string.cd_chapter_x_page, chapterIndicatorIndex + 1

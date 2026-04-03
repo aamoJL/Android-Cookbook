@@ -40,47 +40,7 @@ class Navigation : PageTest() {
   @OptIn(ExperimentalCoroutinesApi::class)
   @Test
   fun `to recipeFormChapterScreen`() = runTest {
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_chapter)).assertExists()
-  }
-
-  @Test
-  fun `to recipeFormStepScreen`() = runTest {
-    `to recipeFormChapterScreen`()
-
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_step)).assertExists()
-  }
-
-  @Test
-  fun `to recipeFormIngredientScreen`() = runTest {
-    `to recipeFormStepScreen`()
-
-    rule.onNodeWithContentDescription(getString(R.string.cd_form_add_new_item)).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_ingredient)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormInfoScreen`() = runTest {
-    `to recipeFormChapterScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_recipe)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormChapterScreen`() = runTest {
-    `to recipeFormStepScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_chapter)).assertExists()
-  }
-
-  @Test
-  fun `back to recipeFormStepScreen`() = runTest {
-    `to recipeFormIngredientScreen`()
-
-    rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
-    rule.onNodeWithText(getString(R.string.screen_title_new_step)).assertExists()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).performClick()
+    rule.onNodeWithText(getString(R.string.title_chapter_information, "1")).assertExists()
   }
 }

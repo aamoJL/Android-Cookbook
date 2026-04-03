@@ -19,6 +19,7 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.PreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.database.entities.Ingredient
+import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 
@@ -35,7 +36,7 @@ fun IngredientList(
       Column(modifier = Modifier.width(IntrinsicSize.Max)) {
         ingredients.forEach {
           Text(
-            text = if (it.amount == Double.Zero) "" else (it.amount * servingsMultiplier).toFractionFormattedString(),
+            text = if (it.amount == Double.Zero) String.EMPTY else (it.amount * servingsMultiplier).toFractionFormattedString(),
             style = textStyle,
             fontFamily = fontFamily,
             textAlign = TextAlign.End,
@@ -60,9 +61,7 @@ fun IngredientList(
 private fun Preview(
   @PreviewParameter(UserPreviewParameterProvider::class) ingredients: List<Ingredient>
 ) {
-  IngredientList(
-    ingredients = ingredients, servingsMultiplier = 1.0
-  )
+  IngredientList(ingredients = ingredients, servingsMultiplier = 1.0)
 }
 
 @Suppress("HardCodedStringLiteral")

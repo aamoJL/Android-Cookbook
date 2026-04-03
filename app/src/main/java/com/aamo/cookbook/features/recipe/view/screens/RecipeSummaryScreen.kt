@@ -27,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,9 +116,7 @@ fun RecipeSummaryScreen(
       }
       if (recipe.recipe.note.isNotEmpty()) {
         Box(modifier = Modifier.padding(horizontal = 4.dp)) {
-          NoteCard(
-            text = recipe.recipe.note, modifier = Modifier.fillMaxWidth()
-          )
+          NoteCard(text = recipe.recipe.note, modifier = Modifier.fillMaxWidth())
         }
       }
       HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp, horizontal = 32.dp))
@@ -147,9 +146,7 @@ fun SideInfo(
   servingsMultiplier: Double,
   totalTime: Int,
 ) {
-  Column(
-    verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier
-  ) {
+  Column(verticalArrangement = Arrangement.SpaceEvenly, modifier = modifier) {
     Row {
       Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
@@ -229,6 +226,13 @@ fun IngredientList(
   servingsMultiplier: Double,
   modifier: Modifier = Modifier,
 ) {
+  val chapterIngredientsPairs by remember(recipe) {
+    mutableStateOf(recipe.chapters.map { c ->
+      c.chapter to c.steps.sortedBy { it.step.orderNumber }
+        .flatMap { (_, ingredients) -> ingredients.sortedBy { it.name } }
+    })
+  }
+
   Column(verticalArrangement = Arrangement.spacedBy(16.dp), modifier = modifier) {
     HorizontalDividerLabel(
       label = stringResource(R.string.title_ingredients),
@@ -238,31 +242,30 @@ fun IngredientList(
       minLineWidth = 30.dp
     )
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-      recipe.chapters.map { it.chapter to it.steps.flatMap { (_, ingredients) -> ingredients } }
-        .forEach { chapterIngredientsPair ->
-          Column(modifier = Modifier.fillMaxWidth()) {
-            Text(
-              text = chapterIngredientsPair.first.name,
-              textAlign = TextAlign.Center,
-              style = MaterialTheme.typography.labelSmall,
-              color = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
-              modifier = Modifier.fillMaxWidth()
-            )
-            IngredientCheckBoxList(
-              ingredients = chapterIngredientsPair.second,
-              ingredientSelection = ingredientSelection,
-              servingsMultiplier = servingsMultiplier,
-              softWrap = false,
-              textStyle = MaterialTheme.typography.bodyMedium,
-              modifier = Modifier.fillMaxWidth()
-            )
-          }
+      chapterIngredientsPairs.forEach { chapterIngredientsPair ->
+        Column(modifier = Modifier.fillMaxWidth()) {
+          Text(
+            text = chapterIngredientsPair.first.name,
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = .5f),
+            modifier = Modifier.fillMaxWidth()
+          )
+          IngredientCheckBoxList(
+            ingredients = chapterIngredientsPair.second,
+            ingredientSelection = ingredientSelection,
+            servingsMultiplier = servingsMultiplier,
+            softWrap = false,
+            textStyle = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.fillMaxWidth()
+          )
         }
+      }
     }
   }
 }
 
-@Suppress("HardCodedStringLiteral", "SpellCheckingInspection")
+@Suppress("HardCodedStringLiteral")
 @PreviewLightDark
 @Composable
 private fun Preview() {
@@ -274,8 +277,8 @@ private fun Preview() {
             chapter = Chapter(name = "Chapter 1"), steps = listOf(
               StepWithIngredients(
                 step = Step(), ingredients = listOf(
-                  Ingredient(id = 1, name = "Ingnt 1", amount = 250.0, unit = "g"),
-                  Ingredient(name = "Ingrediet 2", amount = 250.0, unit = "g"),
+                  Ingredient(id = 1, name = "Ingredient 1", amount = 250.0, unit = "g"),
+                  Ingredient(name = "Ingredient 2", amount = 250.0, unit = "g"),
                   Ingredient(name = "Ingredient 3", amount = 250.0),
                 )
               )

@@ -3,22 +3,17 @@ package com.aamo.cookbook.ui_tests.features.recipe.form.recipe_form_page.existin
 import androidx.compose.ui.test.assert
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithTag
-import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextReplacement
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.R
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.test_utility.ui.rules.PageTest
 import com.aamo.cookbook.test_utility.ui.rules.waitForDisplayed
 import com.aamo.cookbook.test_utility.ui.rules.waitForLoading
 import com.aamo.cookbook.utility.tags.UITag
-import junit.framework.TestCase.assertEquals
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -67,18 +62,5 @@ class EditRecipeForm : PageTest() {
     rule.onNodeWithTag(UITag.BACK_BUTTON.name, useUnmergedTree = true).performClick()
     rule.onNodeWithText(getString(R.string.screen_title_new_recipe)).assertDoesNotExist()
     rule.onNodeWithText(getString(R.string.screen_title_edit_recipe)).assertDoesNotExist()
-  }
-
-  @Test
-  fun `delete list item`() {
-    assertEquals(
-      recipe.chapters.size, rule.onAllNodesWithTag(UITag.OPTION.name).fetchSemanticsNodes().size
-    )
-
-    rule.onAllNodesWithTag(UITag.OPTION.name).onFirst().performTouchInput { swipeRight() }
-
-    assertEquals(
-      recipe.chapters.size - 1, rule.onAllNodesWithTag(UITag.OPTION.name).fetchSemanticsNodes().size
-    )
   }
 }

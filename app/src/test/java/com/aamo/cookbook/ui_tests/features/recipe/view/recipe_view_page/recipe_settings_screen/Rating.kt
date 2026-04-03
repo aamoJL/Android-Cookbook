@@ -6,10 +6,7 @@ import androidx.compose.ui.test.assertContentDescriptionContains
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithContentDescription
-import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performClick
-import androidx.compose.ui.test.performTouchInput
-import androidx.compose.ui.test.swipeRight
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.entities.RecipeRating
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
@@ -40,12 +37,14 @@ class Rating : PageTest() {
       chapters.first().modify { it.copy(name = "Chapter 1") }
     }.mock())
     waitForLoading()
-    rule.onRoot().performTouchInput { swipeRight() }
   }
 
   @OptIn(ExperimentalTestApi::class)
   @Test
   fun `rate unrated`() = runTest {
+    rule.onNodeWithContentDescription(getString(R.string.cd_more_options)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.text_rate_the_recipe)).performClick()
+
     val starNodes =
       rule.onAllNodesWithTag(FiveStarRatingTags.RATING_STAR.name, useUnmergedTree = true)
 
@@ -85,6 +84,9 @@ class Rating : PageTest() {
   @Test
   fun `unrate rated`() = runTest {
     getDao().upsert(RecipeRating(recipeId = recipe.recipe.id, ratingOutOfFive = 3))
+
+    rule.onNodeWithContentDescription(getString(R.string.cd_more_options)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.text_rate_the_recipe)).performClick()
 
     val starNodes =
       rule.onAllNodesWithTag(FiveStarRatingTags.RATING_STAR.name, useUnmergedTree = true)

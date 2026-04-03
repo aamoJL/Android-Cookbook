@@ -34,8 +34,7 @@ class ServingsState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
     val servingsState = viewmodel.servingsState
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {

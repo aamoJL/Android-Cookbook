@@ -24,8 +24,7 @@ class Init : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
     var actual: RecipeWithChaptersStepsAndIngredients? = null
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -49,8 +48,7 @@ class Init : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect { }

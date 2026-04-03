@@ -23,8 +23,7 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
-      saveAsCopy = { TestCase.fail() })
+    )
     val progress = viewmodel.progressState
 
     assertEquals(emptyList<List<Boolean>>(), progress.values)
@@ -37,8 +36,7 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
-      saveAsCopy = { TestCase.fail() })
+    )
     val progress = viewmodel.progressState
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
@@ -58,8 +56,7 @@ class ProgressState : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> TestCase.fail() },
       updateRating = { _, _ -> TestCase.fail() },
-      updateThumbnail = { _, _ -> TestCase.fail() },
-      saveAsCopy = { TestCase.fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.recipe.collect()

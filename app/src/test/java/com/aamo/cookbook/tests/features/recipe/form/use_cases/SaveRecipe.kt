@@ -1,7 +1,5 @@
 package com.aamo.cookbook.tests.features.recipe.form.use_cases
 
-import com.aamo.cookbook.features.recipe.form.models.RecipeFormInfoFields
-import com.aamo.cookbook.features.recipe.form.use_cases.fromDao
 import com.aamo.cookbook.features.recipe.form.use_cases.saveRecipe
 import com.aamo.cookbook.test_utility.RecipeMocker
 import com.aamo.cookbook.test_utility.database.DatabaseTest
@@ -19,9 +17,7 @@ class SaveRecipe : DatabaseTest() {
     val model = RecipeMocker.getFullMocker().mock()
     val actual = saveRecipe(
       dao = dao,
-      id = model.recipe.id,
-      thumbnailUri = model.recipe.thumbnailUri,
-      fields = RecipeFormInfoFields.fromDao(model)
+      recipe = model,
     )
 
     Assert.assertEquals(1L, actual)
@@ -34,9 +30,7 @@ class SaveRecipe : DatabaseTest() {
     val model = mocker.mock()
     val actual = saveRecipe(
       dao = dao,
-      id = model.recipe.id,
-      thumbnailUri = model.recipe.thumbnailUri,
-      fields = RecipeFormInfoFields.fromDao(model)
+      recipe = model,
     ).let { id ->
       dao.getCompleteRecipe(id)
     }
@@ -48,27 +42,29 @@ class SaveRecipe : DatabaseTest() {
   @Test
   fun `updates model`() = runTest {
     val mocker = RecipeMocker.getFullMocker()
-    val id = dao.upsert(mocker.mock())
-    val fields = dao.getCompleteRecipe(id)?.let {
-      RecipeFormInfoFields.fromDao(it)
+    val model = dao.upsert(mocker.mock()).let {
+      dao.getCompleteRecipe(it)
     }
 
-    checkNotNull(fields)
+    checkNotNull(model)
 
     val thumbnail = "123.jpg"
     val expected = mocker.withIds(
-      chapterId = (fields.chapters.size + 1).toLong(),
-      stepId = (fields.chapters.flatMap { it.steps }.size + 1).toLong(),
-      ingredientId = (fields.chapters.flatMap { c -> c.steps }
+      recipeId = model.recipe.id,
+      chapterId = (model.chapters.size + 1).toLong(),
+      stepId = (model.chapters.flatMap { it.steps }.size + 1).toLong(),
+      ingredientId = (model.chapters.flatMap { c -> c.steps }
         .flatMap { it.ingredients }.size + 1).toLong()
     ).modify { it.copy(thumbnailUri = thumbnail) }.mock()
-    val actual =
-      saveRecipe(dao = dao, id = id, thumbnailUri = thumbnail, fields = fields).let { id ->
-        dao.getCompleteRecipe(id)
-      }
+    val actual = saveRecipe(
+      dao = dao,
+      recipe = expected,
+    ).let { id ->
+      dao.getCompleteRecipe(id)
+    }
 
     checkNotNull(actual)
-    assertEquals(id, actual.recipe.id)
+    assertEquals(model.recipe.id, actual.recipe.id)
     assertEquals(expected, actual)
   }
 }

@@ -26,8 +26,7 @@ class UpdateRating : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { value, rating -> calledValue = value; calledRating = rating },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.rating.collect()
@@ -53,8 +52,7 @@ class UpdateRating : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { value, rating -> calledValue = value; calledRating = rating },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.rating.collect()
@@ -80,8 +78,7 @@ class UpdateRating : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { value, rating -> calledValue = value; calledRating = rating },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.rating.collect()
@@ -104,8 +101,7 @@ class UpdateRating : UnconfinedTest() {
       fetchData = { dataFlow },
       updateBookmark = { _, _ -> fail() },
       updateRating = { _, _ -> fail() },
-      updateThumbnail = { _, _ -> fail() },
-      saveAsCopy = { fail() })
+    )
 
     backgroundScope.launch(UnconfinedTestDispatcher(testScheduler)) {
       viewmodel.rating.collect()
