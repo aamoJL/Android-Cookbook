@@ -50,6 +50,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -80,6 +81,11 @@ import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import java.util.UUID
+
+enum class RecipeChapterScreenTags {
+  CHAPTER_NAME,
+  INGREDIENT_NAME
+}
 
 @Composable
 fun RecipeChapterScreen(
@@ -297,7 +303,7 @@ fun ChapterFormFields(fields: FormChapterState.Fields, modifier: Modifier = Modi
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next
       ),
-      modifier = Modifier.fillMaxWidth()
+      modifier = Modifier.fillMaxWidth().testTag(RecipeChapterScreenTags.CHAPTER_NAME.name)
     )
     if (fields.noteFieldToggleValue) {
       TextField(
@@ -735,7 +741,7 @@ private fun IngredientFormFields(
       ),
       textStyle = MaterialTheme.typography.bodyMedium,
       singleLine = true,
-      modifier = Modifier.weight(2f)
+      modifier = Modifier.weight(2f).testTag(RecipeChapterScreenTags.INGREDIENT_NAME.name)
     )
     NumberField(
       value = fields.amount.value,

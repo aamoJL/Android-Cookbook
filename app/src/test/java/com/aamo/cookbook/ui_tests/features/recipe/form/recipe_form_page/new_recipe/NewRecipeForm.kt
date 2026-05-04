@@ -1,11 +1,11 @@
 package com.aamo.cookbook.ui_tests.features.recipe.form.recipe_form_page.new_recipe
 
+import androidx.compose.ui.semantics.SemanticsProperties.EditableText
 import androidx.compose.ui.test.assert
+import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.hasText
-import androidx.compose.ui.test.onAllNodesWithText
-import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
@@ -13,11 +13,13 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
 import com.aamo.cookbook.R
+import com.aamo.cookbook.features.recipe.form.screens.RecipeChapterScreenTags
 import com.aamo.cookbook.test_utility.ui.rules.PageTest
 import com.aamo.cookbook.test_utility.ui.rules.waitForDisplayed
 import com.aamo.cookbook.test_utility.ui.rules.waitForLoading
 import com.aamo.cookbook.utility.tags.UITag
 import kotlinx.coroutines.test.runTest
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -39,23 +41,36 @@ class NewRecipeForm : PageTest() {
     // Info
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
     rule.onNodeWithText(getString(R.string.label_name)).performTextInput("Recipe")
+
+    Assert.assertEquals(
+      "Recipe",
+      rule.onNodeWithText(getString(R.string.label_name))
+        .fetchSemanticsNode().config[EditableText].text
+    )
+
     rule.onNodeWithText(getString(R.string.label_servings)).performTextReplacement("3")
     rule.onNodeWithText(getString(R.string.label_category)).performTextInput("Category")
 
     // Chapter
-    rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).assertExists()
+      .assertIsDisplayed().performClick()
+    rule.onNodeWithText(getString(R.string.title_steps)).assertIsDisplayed()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Chapter")
+    rule.onNodeWithTag(RecipeChapterScreenTags.CHAPTER_NAME.name).assertIsDisplayed()
+      .performTextInput("Chapter")
 
     // Step
-    rule.onNodeWithContentDescription(getString(R.string.cd_add_step)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_step)).assertExists().performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
     rule.onNodeWithText(getString(R.string.label_description)).performTextInput("Step")
 
     // Ingredient
-    rule.onNodeWithContentDescription(getString(R.string.cd_add_ingredient)).performClick()
+    rule.onNodeWithContentDescription(getString(R.string.cd_add_ingredient)).assertExists()
+      .assertIsDisplayed().performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Ingredient")
+
+    rule.onNodeWithTag(RecipeChapterScreenTags.INGREDIENT_NAME.name).assertIsDisplayed()
+      .performTextInput("Ingredient")
 
     // Submit
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled().performClick()
@@ -77,7 +92,8 @@ class NewRecipeForm : PageTest() {
     // Chapter
     rule.onNodeWithContentDescription(getString(R.string.cd_add_new_chapter)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Chapter")
+    rule.onNodeWithTag(RecipeChapterScreenTags.CHAPTER_NAME.name).assertIsDisplayed()
+      .performTextInput("Chapter")
 
     // Step
     rule.onNodeWithContentDescription(getString(R.string.cd_add_step)).performClick()
@@ -87,7 +103,8 @@ class NewRecipeForm : PageTest() {
     // Ingredient
     rule.onNodeWithContentDescription(getString(R.string.cd_add_ingredient)).performClick()
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsNotEnabled()
-    rule.onAllNodesWithText(getString(R.string.label_name)).onLast().performTextInput("Ingredient")
+    rule.onNodeWithTag(RecipeChapterScreenTags.INGREDIENT_NAME.name).assertIsDisplayed()
+      .performTextInput("Ingredient")
 
     // Submit
     rule.onNodeWithContentDescription(getString(R.string.cd_save)).assertIsEnabled().performClick()
