@@ -15,9 +15,9 @@ fun Double.toStringWithoutZero(
 }
 
 /**
- * Returns float value as a string where the fractions has been changed to fraction character
+ * Returns float value as a string where the fractions have been changed to fraction character
  * if the values fractions match any of the common fraction values.
- * Otherwise the value will be formatted without fraction zeroes
+ * Otherwise, the value will be formatted without fraction zeroes
  *
  * @param roundToNearestFraction if true, the value will be rounded to the smaller fraction. Zero will be rounded to the first fraction
  */

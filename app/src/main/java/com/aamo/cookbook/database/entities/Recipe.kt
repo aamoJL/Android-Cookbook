@@ -11,7 +11,9 @@ import androidx.room.PrimaryKey
 import androidx.room.Relation
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.Zero
+import kotlinx.serialization.Serializable
 
+@Serializable
 @Entity(tableName = "recipe")
 data class Recipe(
   @PrimaryKey(autoGenerate = true) val id: Long = 0,
@@ -23,6 +25,7 @@ data class Recipe(
   @ColumnInfo(name = "thumbnailUri", defaultValue = "") val thumbnailUri: String = String.EMPTY,
 )
 
+@Serializable
 @Entity(
   tableName = "recipeChapter", foreignKeys = [ForeignKey(
     entity = Recipe::class,
@@ -44,6 +47,7 @@ data class Chapter(
   @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
 )
 
+@Serializable
 @Entity(
   tableName = "chapterStep", foreignKeys = [ForeignKey(
     entity = Chapter::class,
@@ -66,6 +70,7 @@ data class Step(
   @ColumnInfo(name = "note", defaultValue = "") val note: String = String.EMPTY,
 )
 
+@Serializable
 @Entity(
   tableName = "ingredient", foreignKeys = [ForeignKey(
     entity = Step::class,
@@ -109,18 +114,21 @@ data class RecipeRating(
   @ColumnInfo(name = "ratingOutOfFive") val ratingOutOfFive: Int,
 )
 
+@Serializable
 data class RecipeWithChaptersStepsAndIngredients(
   @Embedded val recipe: Recipe, @Relation(
     entity = Chapter::class, parentColumn = "id", entityColumn = "recipeId"
   ) val chapters: List<ChapterWithStepsAndIngredients> = emptyList()
 )
 
+@Serializable
 data class ChapterWithStepsAndIngredients(
   @Embedded val chapter: Chapter, @Relation(
     entity = Step::class, parentColumn = "id", entityColumn = "chapterId"
   ) val steps: List<StepWithIngredients> = emptyList()
 )
 
+@Serializable
 data class StepWithIngredients(
   @Embedded val step: Step, @Relation(
     entity = Ingredient::class, parentColumn = "id", entityColumn = "stepId",

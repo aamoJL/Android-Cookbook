@@ -82,6 +82,19 @@ interface RecipeDao {
     LEFT JOIN recipeChapter AS chapter ON chapter.recipeId = recipe.id
     LEFT JOIN chapterStep AS step ON step.chapterId = chapter.id
     LEFT JOIN ingredient ON ingredient.stepId = step.id
+    ORDER BY chapter.orderNumber, step.orderNumber, ingredient.name
+  """
+  )
+  suspend fun getCompleteRecipes(): List<RecipeWithChaptersStepsAndIngredients>
+
+  @SuppressWarnings(RoomWarnings.QUERY_MISMATCH)
+  @Transaction
+  @Query(
+    """
+    SELECT recipe.*, chapter.*, step.*, ingredient.* FROM recipe
+    LEFT JOIN recipeChapter AS chapter ON chapter.recipeId = recipe.id
+    LEFT JOIN chapterStep AS step ON step.chapterId = chapter.id
+    LEFT JOIN ingredient ON ingredient.stepId = step.id
     WHERE recipe.id = :recipeId
     ORDER BY chapter.orderNumber, step.orderNumber, ingredient.name
   """

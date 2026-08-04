@@ -95,4 +95,8 @@
     <string name="text_required_fields_are_not_filled">Pakollisia kenttiä täyttämättä</string>
     <string name="btn_close">Sulje</string>
     <string name="text_recipe_name_as_copy">%1$s - kopio</string>
+    <string name="btn_change_theme">Vaihda teemaa</string>
+    <string name="cd_open_options">Avaa valikko</string>
+    <string name="btn_export_recipes">Vie reseptit</string>
+    <string name="btn_import_recipes">Tuo reseptit</string>
 </resources>
