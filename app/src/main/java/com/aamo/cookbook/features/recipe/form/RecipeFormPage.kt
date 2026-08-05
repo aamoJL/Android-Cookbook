@@ -179,8 +179,6 @@ class RecipeFormViewModel(
   }
 
   override fun onCleared() {
-    super.onCleared()
-
     runCatching {
       formRecipeState.value.fields.thumbnailUri.value.also { thumbnailUri ->
         if (thumbnailUri.endsWith(PhotoService.TEMP_FILE_EXTENSION)) {

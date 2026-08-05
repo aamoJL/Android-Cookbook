@@ -100,4 +100,8 @@
     <string name="cd_open_options">Open options</string>
     <string name="btn_export_recipes">Export recipes</string>
     <string name="btn_import_recipes">Import recipes</string>
+    <string name="title_import_recipes">Import recipes</string>
+    <string name="snackbar_recipes_exported">Recipes exported</string>
+    <string name="snackbar_recipes_imported">Recipes imported</string>
+    <string name="cd_select_all">Select all</string>
 </resources>

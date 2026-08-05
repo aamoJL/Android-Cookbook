@@ -192,6 +192,14 @@ interface RecipeDao {
     return recipeId
   }
 
+  @Transaction
+  suspend fun upsert(recipes: List<RecipeWithChaptersStepsAndIngredients>): Long {
+    recipes.forEach {
+      upsert(it)
+    }
+    return recipes.count().toLong()
+  }
+
   @Upsert
   suspend fun upsert(recipeRating: RecipeRating): Long
 

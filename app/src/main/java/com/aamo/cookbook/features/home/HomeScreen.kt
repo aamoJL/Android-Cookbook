@@ -65,14 +65,16 @@ import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
 import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
-import com.aamo.cookbook.features.home.use_cases.fetchCompleteRecipes
+import com.aamo.cookbook.features.home.use_cases.fetchAllRecipes
 import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
+import com.aamo.cookbook.features.home.use_cases.loadFromFile
 import com.aamo.cookbook.features.home.use_cases.saveToFile
 import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.SnackbarProperties
 import com.aamo.cookbook.utility.extensions.asNew
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
@@ -88,7 +90,8 @@ object HomeScreen
 class HomeScreenViewModel(
   fetchCategories: () -> Flow<List<String>>,
   val fetchCompleteRecipes: suspend () -> List<RecipeWithChaptersStepsAndIngredients>,
-  val exportRecipes: (uri: Uri, json: String) -> Unit
+  val exportRecipes: (uri: Uri, json: String) -> Unit,
+  val importRecipes: (uri: Uri) -> String?,
 ) : ViewModel() {
   val categories = fetchCategories().stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
@@ -102,34 +105,52 @@ class HomeScreenViewModel(
       exportRecipes(uri, json)
     }
   }
+
+  fun importRecipes(uri: Uri): String? {
+    return importRecipes.invoke(uri)
+  }
 }
 
 fun NavGraphBuilder.homeScreen(
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
   onOpenBookmarks: () -> Unit,
-  onOpenRecipesByCategory: (category: String) -> Unit
+  onOpenRecipesByCategory: (category: String) -> Unit,
+  onOpenImport: (json: String) -> Unit,
+  onSnackbar: (SnackbarProperties) -> Unit
 ) {
   composable<HomeScreen> {
+    val recipesExportedMessage = stringResource(R.string.snackbar_recipes_exported)
     val context = LocalContext.current
     val configuration = LocalConfiguration.current
-    val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
+    val dao = RecipeDatabase.getDatabase(context.applicationContext).recipeDao()
     val viewmodel: HomeScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
         HomeScreenViewModel(
           fetchCategories = { fetchRecipeCategoriesFlow(dao) },
-          fetchCompleteRecipes = { fetchCompleteRecipes(dao) },
+          fetchCompleteRecipes = { fetchAllRecipes(dao) },
           exportRecipes = { uri, json -> saveToFile(context.contentResolver, uri, json) },
-        )
+          importRecipes = { uri ->
+            runCatching { loadFromFile(context.contentResolver, uri) }.getOrNull()
+          })
       }
     })
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
+
     val exportLauncher =
       rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {
         it?.also { uri ->
           viewmodel.exportRecipes(uri)
+          onSnackbar(SnackbarProperties(message = recipesExportedMessage))
         }
       }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+      it?.also { uri ->
+        viewmodel.importRecipes(uri)?.also { result ->
+          onOpenImport(result) // Redirect will crash if done in viewmodel
+        }
+      }
+    }
 
     LoadingScreen(loading = categories == null) {
       HomeScreenContent(
@@ -140,9 +161,7 @@ fun NavGraphBuilder.homeScreen(
         onBookmarks = onOpenBookmarks,
         onSelectCategory = onOpenRecipesByCategory,
         onExportRecipes = { exportLauncher.launch("recipes.json") },
-        onImportRecipes = {
-          // TODO: import
-        },
+        onImportRecipes = { importLauncher.launch("application/json") },
         onChangeTheme = {
           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             context.getSystemService<UiModeManager>()?.also { manager ->

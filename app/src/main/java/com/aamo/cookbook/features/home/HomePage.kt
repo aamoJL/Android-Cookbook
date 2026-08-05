@@ -17,6 +17,8 @@ import com.aamo.cookbook.features.recipe.list.recipeListPages
 import com.aamo.cookbook.features.recipe.list.screens.RecipeSearchScreen
 import com.aamo.cookbook.features.recipe.list.screens.RecipesByBookmarkScreen
 import com.aamo.cookbook.features.recipe.list.screens.RecipesByCategoryScreen
+import com.aamo.cookbook.features.recipe.recipe_import.RecipeImportPage
+import com.aamo.cookbook.features.recipe.recipe_import.recipeImportPage
 import com.aamo.cookbook.features.recipe.view.RecipeViewPage
 import com.aamo.cookbook.features.recipe.view.recipeViewPage
 import com.aamo.cookbook.utility.SnackbarProperties
@@ -44,6 +46,10 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
         onOpenRecipesByCategory = {
           navController.navigate(RecipesByCategoryScreen(category = it)) { launchSingleTop = true }
         },
+        onOpenImport = {
+          navController.navigate(RecipeImportPage(json = it)) { launchSingleTop = true }
+        },
+        onSnackbar = onShowSnackbar,
       )
       recipeListPages(
         onOpenRecipe = {
@@ -82,6 +88,10 @@ fun HomePage(onShowSnackbar: (SnackbarProperties) -> Unit) {
         onOpenRecipeFormAsCopy = {
           navController.navigate(RecipeFormPage(id = it, asCopy = true)) { launchSingleTop = true }
         },
+        onSnackbar = onShowSnackbar,
+        onBack = { navController.navigateUp() },
+      )
+      recipeImportPage(
         onSnackbar = onShowSnackbar,
         onBack = { navController.navigateUp() },
       )

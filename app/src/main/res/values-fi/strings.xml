@@ -98,5 +98,9 @@
     <string name="btn_change_theme">Vaihda teemaa</string>
     <string name="cd_open_options">Avaa valikko</string>
     <string name="btn_export_recipes">Vie reseptit</string>
-    <string name="btn_import_recipes">Tuo reseptit</string>
+    <string name="btn_import_recipes">Tuo reseptejä</string>
+    <string name="title_import_recipes">Tuo reseptejä</string>
+    <string name="snackbar_recipes_exported">Reseptit viety</string>
+    <string name="snackbar_recipes_imported">Reseptit tuotu</string>
+    <string name="cd_select_all">Valitse kaikki</string>
 </resources>
