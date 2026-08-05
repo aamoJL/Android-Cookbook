@@ -13,7 +13,7 @@ plugins {
 
 android {
   namespace = "com.aamo.cookbook"
-  compileSdk = 36
+  compileSdk = 37
 
   defaultConfig {
     applicationId = "com.aamo.cookbook"
@@ -104,10 +104,8 @@ dependencies {
 
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)
-  androidTestImplementation(platform(libs.androidx.compose.bom))
   androidTestImplementation(libs.androidx.ui.test.junit4)
   androidTestImplementation(libs.androidx.navigation.testing)
-  androidTestImplementation(libs.androidx.room.testing)
 
   debugImplementation(libs.androidx.ui.tooling)
   debugImplementation(libs.androidx.ui.test.manifest)

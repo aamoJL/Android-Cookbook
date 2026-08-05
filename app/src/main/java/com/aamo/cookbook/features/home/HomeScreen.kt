@@ -1,7 +1,10 @@
 package com.aamo.cookbook.features.home
 
 import android.app.UiModeManager
+import android.net.Uri
 import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +25,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -33,6 +38,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
@@ -56,50 +64,114 @@ import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.aamo.cookbook.R
 import com.aamo.cookbook.database.RecipeDatabase
+import com.aamo.cookbook.database.entities.RecipeWithChaptersStepsAndIngredients
+import com.aamo.cookbook.features.home.use_cases.fetchAllRecipes
 import com.aamo.cookbook.features.home.use_cases.fetchRecipeCategoriesFlow
+import com.aamo.cookbook.features.home.use_cases.loadFromFile
+import com.aamo.cookbook.features.home.use_cases.saveToFile
 import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.utility.SnackbarProperties
+import com.aamo.cookbook.utility.extensions.asNew
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.Json
 
 @Serializable
 object HomeScreen
 
-class HomeScreenViewModel(fetchCategories: () -> Flow<List<String>>) : ViewModel() {
+class HomeScreenViewModel(
+  fetchCategories: () -> Flow<List<String>>,
+  val fetchCompleteRecipes: suspend () -> List<RecipeWithChaptersStepsAndIngredients>,
+  val exportRecipes: (uri: Uri, json: String) -> Unit,
+  val importRecipes: (uri: Uri) -> String?,
+) : ViewModel() {
   val categories = fetchCategories().stateIn(
     scope = viewModelScope, started = SharingStarted.Lazily, initialValue = null
   )
+
+  fun exportRecipes(uri: Uri) {
+    viewModelScope.launch {
+      val json = fetchCompleteRecipes().map { it.asNew() }.let { recipes ->
+        Json.encodeToString(recipes)
+      }
+      exportRecipes(uri, json)
+    }
+  }
+
+  fun importRecipes(uri: Uri): String? {
+    return importRecipes.invoke(uri)
+  }
 }
 
 fun NavGraphBuilder.homeScreen(
   onOpenSearch: () -> Unit,
   onOpenRecipeForm: () -> Unit,
   onOpenBookmarks: () -> Unit,
-  onOpenRecipesByCategory: (category: String) -> Unit
+  onOpenRecipesByCategory: (category: String) -> Unit,
+  onOpenImport: (json: String) -> Unit,
+  onSnackbar: (SnackbarProperties) -> Unit
 ) {
   composable<HomeScreen> {
-    val dao = RecipeDatabase.getDatabase(LocalContext.current.applicationContext).recipeDao()
+    val recipesExportedMessage = stringResource(R.string.snackbar_recipes_exported)
+    val context = LocalContext.current
+    val configuration = LocalConfiguration.current
+    val dao = RecipeDatabase.getDatabase(context.applicationContext).recipeDao()
     val viewmodel: HomeScreenViewModel = viewModel(factory = viewModelFactory {
       initializer {
-        HomeScreenViewModel(fetchCategories = { fetchRecipeCategoriesFlow(dao) })
+        HomeScreenViewModel(
+          fetchCategories = { fetchRecipeCategoriesFlow(dao) },
+          fetchCompleteRecipes = { fetchAllRecipes(dao) },
+          exportRecipes = { uri, json -> saveToFile(context.contentResolver, uri, json) },
+          importRecipes = { uri ->
+            runCatching { loadFromFile(context.contentResolver, uri) }.getOrNull()
+          })
       }
     })
     val categories by viewmodel.categories.collectAsStateWithLifecycle()
 
+    val exportLauncher =
+      rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) {
+        it?.also { uri ->
+          viewmodel.exportRecipes(uri)
+          onSnackbar(SnackbarProperties(message = recipesExportedMessage))
+        }
+      }
+    val importLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) {
+      it?.also { uri ->
+        viewmodel.importRecipes(uri)?.also { result ->
+          onOpenImport(result) // Redirect will crash if done in viewmodel
+        }
+      }
+    }
+
     LoadingScreen(loading = categories == null) {
       HomeScreenContent(
         categories = checkNotNull(categories),
+        isNightMode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) configuration.isNightModeActive else null,
         onSearch = onOpenSearch,
         onNewRecipe = onOpenRecipeForm,
         onBookmarks = onOpenBookmarks,
-        onSelectCategory = onOpenRecipesByCategory
-      )
+        onSelectCategory = onOpenRecipesByCategory,
+        onExportRecipes = { exportLauncher.launch("recipes.json") },
+        onImportRecipes = { importLauncher.launch("application/json") },
+        onChangeTheme = {
+          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.getSystemService<UiModeManager>()?.also { manager ->
+              if (configuration.isNightModeActive) manager.setApplicationNightMode(
+                UiModeManager.MODE_NIGHT_NO
+              )
+              else manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
+            }
+          }
+        })
     }
   }
 }
@@ -107,13 +179,16 @@ fun NavGraphBuilder.homeScreen(
 @Composable
 private fun HomeScreenContent(
   categories: List<String>,
+  isNightMode: Boolean?,
   onSearch: () -> Unit,
   onNewRecipe: () -> Unit,
   onBookmarks: () -> Unit,
   onSelectCategory: (String) -> Unit,
+  onExportRecipes: () -> Unit,
+  onImportRecipes: () -> Unit,
+  onChangeTheme: () -> Unit,
 ) {
-  val context = LocalContext.current
-  val configuration = LocalConfiguration.current
+  var menuExpanded by remember { mutableStateOf(false) }
 
   BackgroundSurface(modifier = Modifier.fillMaxSize()) {
     Column(
@@ -134,28 +209,60 @@ private fun HomeScreenContent(
             )
             .fillMaxSize()
         ) {
-          if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            Box(
-              contentAlignment = Alignment.TopEnd, modifier = Modifier
-                .fillMaxWidth()
-                .padding(4.dp)
-            ) {
-              IconButton(
-                onClick = {
-                  context.getSystemService<UiModeManager>()?.also { manager ->
-                    if (configuration.isNightModeActive) manager.setApplicationNightMode(
-                      UiModeManager.MODE_NIGHT_NO
-                    )
-                    else manager.setApplicationNightMode(UiModeManager.MODE_NIGHT_YES)
-                  }
-                }) {
+
+          Box(
+            contentAlignment = Alignment.TopEnd,
+            modifier = Modifier
+              .fillMaxWidth()
+              .padding(4.dp),
+          ) {
+            Box {
+              IconButton(onClick = { menuExpanded = true }) {
                 Icon(
-                  painter = ifElse(
-                    condition = configuration.isNightModeActive,
-                    ifTrue = { painterResource(R.drawable.rounded_light_mode_24) },
-                    ifFalse = { painterResource(R.drawable.dark_mode_24px) }),
-                  contentDescription = stringResource(R.string.cd_change_app_theme)
+                  painter = painterResource(R.drawable.rounded_more_vert_24),
+                  contentDescription = stringResource(R.string.cd_open_options)
                 )
+              }
+              DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                DropdownMenuItem(
+                  text = { Text(stringResource(R.string.btn_export_recipes)) },
+                  onClick = {
+                    onExportRecipes()
+                    menuExpanded = false
+                  },
+                  leadingIcon = {
+                    Icon(
+                      painter = painterResource(R.drawable.file_export_24px),
+                      contentDescription = stringResource(R.string.btn_export_recipes),
+                    )
+                  },
+                )
+                DropdownMenuItem(
+                  text = { Text(stringResource(R.string.btn_import_recipes)) },
+                  onClick = onImportRecipes,
+                  leadingIcon = {
+                    Icon(
+                      painter = painterResource(R.drawable.file_open_24px),
+                      contentDescription = stringResource(R.string.btn_export_recipes),
+                    )
+                  },
+                )
+                if (isNightMode != null) {
+                  HorizontalDivider()
+                  DropdownMenuItem(
+                    text = { Text(stringResource(R.string.btn_change_theme)) },
+                    onClick = onChangeTheme,
+                    leadingIcon = {
+                      Icon(
+                        painter = ifElse(
+                          condition = isNightMode,
+                          ifTrue = { painterResource(R.drawable.rounded_light_mode_24) },
+                          ifFalse = { painterResource(R.drawable.dark_mode_24px) }),
+                        contentDescription = stringResource(R.string.cd_change_app_theme)
+                      )
+                    },
+                  )
+                }
               }
             }
           }
@@ -290,6 +397,10 @@ private fun Preview() {
       onNewRecipe = {},
       onBookmarks = {},
       onSelectCategory = {},
+      isNightMode = false,
+      onExportRecipes = {},
+      onImportRecipes = {},
+      onChangeTheme = {},
     )
   }
 }
