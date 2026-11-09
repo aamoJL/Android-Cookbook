@@ -35,7 +35,8 @@ fun HorizontalDividerLabel(
     HorizontalDivider(
       modifier = Modifier
         .weight(1f)
-        .widthIn(min = minLineWidth), color = color.copy(alpha = .7f)
+        .widthIn(min = minLineWidth),
+      color = color.copy(alpha = .7f),
     )
     Text(
       text = label,
@@ -47,7 +48,8 @@ fun HorizontalDividerLabel(
     HorizontalDivider(
       modifier = Modifier
         .weight(1f)
-        .widthIn(min = minLineWidth), color = color.copy(alpha = .7f)
+        .widthIn(min = minLineWidth),
+      color = color.copy(alpha = .7f),
     )
   }
 }

@@ -2,6 +2,7 @@ package com.aamo.cookbook.features.recipe.view.screens
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -10,7 +11,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
@@ -42,6 +42,8 @@ import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.HorizontalDividerLabel
 import com.aamo.cookbook.ui.theme.CookbookTheme
 import com.aamo.cookbook.ui.theme.Handwritten
+import com.aamo.cookbook.ui.theme.noteContainer
+import com.aamo.cookbook.ui.theme.onNoteContainer
 import com.aamo.cookbook.utility.extensions.general.grayScale
 import com.aamo.cookbook.utility.tags.UITag
 import kotlin.time.Duration
@@ -122,82 +124,88 @@ private fun StepCheckBox(
   modifier: Modifier = Modifier,
 ) {
   Surface(
-    shape = RoundedCornerShape(4.dp),
+    shape = MaterialTheme.shapes.small,
     shadowElevation = 1.dp,
     border = if (current) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null,
-    modifier = modifier
-      .toggleable(
-        value = checked, onValueChange = onCheckedChange, role = Role.Checkbox
-      )
-      .testTag(UITag.CHECK.name),
+    modifier = modifier,
   ) {
-    Row(
-      horizontalArrangement = Arrangement.spacedBy(12.dp),
+    Box(
       modifier = Modifier
-        .padding(12.dp)
-        .fillMaxSize()
+        .toggleable(
+          value = checked, onValueChange = onCheckedChange, role = Role.Checkbox
+        )
+        .testTag(UITag.CHECK.name),
     ) {
-      Column {
-        Checkbox(checked = checked, onCheckedChange = null)
-      }
-      Column(
-        verticalArrangement = Arrangement.spacedBy(4.dp),
+      Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
         modifier = Modifier
-          .weight(1f)
-          .grayScale(enabled = checked)
+          .padding(12.dp)
+          .fillMaxSize()
       ) {
-        Row {
-          Text(
-            text = headline,
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (checked) .5f else 1f),
-            textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None
-          )
+        Column {
+          Checkbox(checked = checked, onCheckedChange = null)
         }
-        if (note.isNotEmpty()) {
-          Row(modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)) {
-            NoteCard(
-              text = note, colors = CardDefaults.elevatedCardColors(
-                containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = if (checked) .5f else 1f),
-                contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-              ), modifier = Modifier.fillMaxWidth()
+        Column(
+          verticalArrangement = Arrangement.spacedBy(4.dp),
+          modifier = Modifier
+            .weight(1f)
+            .grayScale(enabled = checked)
+        ) {
+          Row {
+            Text(
+              text = headline,
+              style = MaterialTheme.typography.titleMedium,
+              color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (checked) .5f else 1f),
+              textDecoration = if (checked) TextDecoration.LineThrough else TextDecoration.None
             )
           }
-        }
-        Row {
-          if (ingredients.isNotEmpty()) {
-            Surface(
-              color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (checked) .5f else 1f),
-              shape = RoundedCornerShape(4.dp),
-            ) {
-              IngredientList(
-                ingredients = ingredients.sortedBy { it.name },
-                servingsMultiplier = servingsMultiplier,
-                textStyle = MaterialTheme.typography.bodyMedium,
-                modifier = Modifier
-                  .padding(vertical = 8.dp, horizontal = 16.dp)
-                  .fillMaxWidth()
+          if (note.isNotEmpty()) {
+            Row(modifier = Modifier.padding(vertical = 4.dp, horizontal = 8.dp)) {
+              NoteCard(
+                text = note,
+                colors = CardDefaults.elevatedCardColors(
+                  containerColor = MaterialTheme.colorScheme.noteContainer.copy(alpha = if (checked) .5f else 1f),
+                  contentColor = MaterialTheme.colorScheme.onNoteContainer
+                ),
+                modifier = Modifier.fillMaxWidth(),
               )
             }
           }
+          Row {
+            if (ingredients.isNotEmpty()) {
+              Surface(
+                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = if (checked) .5f else 1f),
+                shape = MaterialTheme.shapes.extraSmall,
+              ) {
+                IngredientList(
+                  ingredients = ingredients.sortedBy { it.name },
+                  servingsMultiplier = servingsMultiplier,
+                  textStyle = MaterialTheme.typography.bodyMedium,
+                  modifier = Modifier
+                    .padding(vertical = 8.dp, horizontal = 16.dp)
+                    .fillMaxWidth()
+                )
+              }
+            }
+          }
         }
-      }
-      if (timerDuration != null) {
-        Column(
-          verticalArrangement = Arrangement.Center,
-          horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-          IconButton(onClick = { onStartTimer(timerDuration) }, enabled = !checked) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-              Icon(
-                painter = painterResource(id = R.drawable.baseline_alarm_24),
-                contentDescription = stringResource(R.string.cd_set_timer)
-              )
-              Text(
-                text = stringResource(
-                  R.string.abbreviation_minutes, timerDuration.inWholeMinutes
-                ), style = MaterialTheme.typography.labelSmall
-              )
+        if (timerDuration != null) {
+          Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally,
+          ) {
+            IconButton(onClick = { onStartTimer(timerDuration) }, enabled = !checked) {
+              Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Icon(
+                  painter = painterResource(id = R.drawable.baseline_alarm_24),
+                  contentDescription = stringResource(R.string.cd_set_timer)
+                )
+                Text(
+                  text = stringResource(
+                    R.string.abbreviation_minutes, timerDuration.inWholeMinutes
+                  ), style = MaterialTheme.typography.labelSmall
+                )
+              }
             }
           }
         }

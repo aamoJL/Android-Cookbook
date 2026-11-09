@@ -10,6 +10,7 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.database.entities.Recipe
 import com.aamo.cookbook.features.recipe.list.models.RecipeListRecipeModel
@@ -21,9 +22,9 @@ fun RecipeList(
 ) {
   LazyVerticalGrid(
     columns = GridCells.Adaptive(150.dp),
-    verticalArrangement = Arrangement.spacedBy(12.dp),
-    horizontalArrangement = Arrangement.spacedBy(12.dp),
-    contentPadding = PaddingValues(12.dp),
+    verticalArrangement = Arrangement.spacedBy(8.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp),
+    contentPadding = PaddingValues(8.dp),
     modifier = Modifier.fillMaxSize()
   ) {
     items(recipes) { recipe ->
@@ -41,7 +42,7 @@ fun RecipeList(
 }
 
 @Suppress("HardCodedStringLiteral")
-@Preview(showBackground = true)
+@PreviewLightDark
 @Composable
 private fun Preview() {
   CookbookTheme {

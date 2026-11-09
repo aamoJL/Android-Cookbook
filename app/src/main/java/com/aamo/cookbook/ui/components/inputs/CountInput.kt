@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardElevation
 import androidx.compose.material3.ElevatedCard
@@ -47,13 +46,15 @@ fun CountInput(
   color: Color = MaterialTheme.colorScheme.primaryContainer,
   elevation: CardElevation = CardDefaults.elevatedCardElevation()
 ) {
-  ElevatedCard(elevation = elevation, shape = RoundedCornerShape(8.dp)) {
+  ElevatedCard(elevation = elevation, shape = MaterialTheme.shapes.small) {
     Column(modifier = modifier) {
-      if (label.isNotEmpty()) Text(
-        text = label,
-        style = MaterialTheme.typography.labelMedium,
-        modifier = Modifier.testTag(CountInputTags.TITLE.name)
-      )
+      if (label.isNotEmpty()) {
+        Text(
+          text = label,
+          style = MaterialTheme.typography.labelMedium,
+          modifier = Modifier.testTag(CountInputTags.TITLE.name)
+        )
+      }
       Row(verticalAlignment = Alignment.CenterVertically) {
         FilledIconButton(
           onClick = { onValueChange(value - 1) },

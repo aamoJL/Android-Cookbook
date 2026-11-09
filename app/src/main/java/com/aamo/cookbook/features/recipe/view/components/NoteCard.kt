@@ -27,6 +27,8 @@ import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.ui.theme.noteContainer
+import com.aamo.cookbook.ui.theme.onNoteContainer
 
 @Composable
 fun NoteCard(
@@ -34,8 +36,8 @@ fun NoteCard(
   modifier: Modifier = Modifier,
   label: String = "${stringResource(R.string.label_note)}:",
   colors: CardColors = CardDefaults.elevatedCardColors(
-    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+    containerColor = MaterialTheme.colorScheme.noteContainer,
+    contentColor = MaterialTheme.colorScheme.onNoteContainer
   ),
 ) {
   ElevatedCard(

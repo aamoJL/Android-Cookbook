@@ -38,7 +38,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.material3.minimumInteractiveComponentSize
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -61,6 +60,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.aamo.cookbook.R
 import com.aamo.cookbook.features.recipe.form.models.states.FormChapterState
@@ -75,6 +75,7 @@ import com.aamo.cookbook.ui.components.inputs.number_field.NumberField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.ui.theme.delete
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
@@ -207,7 +208,7 @@ fun ChapterForm(
   ElevatedCard(
     shape = RoundedCornerShape(8.dp),
     colors = CardDefaults.elevatedCardColors(
-      containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+      containerColor = MaterialTheme.colorScheme.surfaceContainer
     ),
     modifier = modifier,
   ) {
@@ -225,8 +226,8 @@ fun ChapterForm(
             else hasFocus = it.hasFocus
           },
       )
-      HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-      Surface {
+      HorizontalDivider(thickness = Dp.Hairline)
+      Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
         Row(
           horizontalArrangement = Arrangement.SpaceBetween,
           modifier = Modifier.fillMaxWidth(),
@@ -242,7 +243,7 @@ fun ChapterForm(
               Icon(
                 painter = painterResource(R.drawable.rounded_delete_24),
                 contentDescription = stringResource(R.string.cd_delete_chapter),
-                tint = MaterialTheme.colorScheme.error
+                tint = MaterialTheme.colorScheme.delete
               )
             }
             IconToggleButton(
@@ -250,8 +251,8 @@ fun ChapterForm(
               checked = state.fields.noteFieldToggleValue,
               onCheckedChange = { state.fields.noteFieldToggleValue = it },
               colors = IconButtonDefaults.iconToggleButtonColors(
-                checkedContentColor = MaterialTheme.colorScheme.tertiary,
-                disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
+                checkedContentColor = MaterialTheme.colorScheme.secondary,
+                disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
               )
             ) {
               Icon(
@@ -303,7 +304,9 @@ fun ChapterFormFields(fields: FormChapterState.Fields, modifier: Modifier = Modi
         keyboardType = KeyboardType.Text,
         imeAction = ImeAction.Next
       ),
-      modifier = Modifier.fillMaxWidth().testTag(RecipeChapterScreenTags.CHAPTER_NAME.name)
+      modifier = Modifier
+        .fillMaxWidth()
+        .testTag(RecipeChapterScreenTags.CHAPTER_NAME.name)
     )
     if (fields.noteFieldToggleValue) {
       TextField(
@@ -334,7 +337,7 @@ private fun StepDisplay(
     ElevatedCard(
       shape = MaterialTheme.shapes.small,
       colors = CardDefaults.elevatedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
       ),
     ) {
       Column(
@@ -343,7 +346,7 @@ private fun StepDisplay(
           .height(intrinsicSize = IntrinsicSize.Max)
       ) {
         Row(modifier = Modifier.weight(1f)) {
-          Surface {
+          Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
               verticalArrangement = Arrangement.Center,
               modifier = Modifier.fillMaxHeight(),
@@ -360,7 +363,8 @@ private fun StepDisplay(
                   Text(
                     text = stringResource(
                       R.string.abbreviation_minutes, formState.fields.timerMinutes.value.toString()
-                    ), style = MaterialTheme.typography.labelSmall
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
                   )
                 }
               }
@@ -369,7 +373,7 @@ private fun StepDisplay(
               }
             }
           }
-          VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
+          VerticalDivider(thickness = Dp.Hairline)
           Column(
             verticalArrangement = Arrangement.spacedBy(4.dp),
             modifier = Modifier
@@ -412,8 +416,8 @@ private fun StepDisplay(
               }
             }
           }
-          VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-          Surface {
+          VerticalDivider(thickness = Dp.Hairline)
+          Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
               verticalArrangement = Arrangement.SpaceBetween,
               modifier = Modifier.fillMaxHeight(),
@@ -520,7 +524,7 @@ private fun StepForm(
     ElevatedCard(
       shape = MaterialTheme.shapes.small,
       colors = CardDefaults.elevatedCardColors(
-        containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)
+        containerColor = MaterialTheme.colorScheme.surfaceContainer
       ),
     ) {
       Column(
@@ -533,7 +537,7 @@ private fun StepForm(
             .animateContentSize()
             .weight(1f)
         ) {
-          Surface {
+          Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
               verticalArrangement = Arrangement.Top,
               modifier = Modifier.fillMaxHeight(),
@@ -543,8 +547,8 @@ private fun StepForm(
                 checked = state.fields.timerFieldToggleValue,
                 onCheckedChange = { state.fields.timerFieldToggleValue = it },
                 colors = IconButtonDefaults.iconToggleButtonColors(
-                  checkedContentColor = MaterialTheme.colorScheme.tertiary,
-                  disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
+                  checkedContentColor = MaterialTheme.colorScheme.secondary,
+                  disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
                 )
               ) {
                 Icon(
@@ -557,8 +561,8 @@ private fun StepForm(
                 checked = state.fields.noteFieldToggleValue,
                 onCheckedChange = { state.fields.noteFieldToggleValue = it },
                 colors = IconButtonDefaults.iconToggleButtonColors(
-                  checkedContentColor = MaterialTheme.colorScheme.tertiary,
-                  disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
+                  checkedContentColor = MaterialTheme.colorScheme.secondary,
+                  disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
                 )
               ) {
                 Icon(
@@ -570,12 +574,12 @@ private fun StepForm(
                 Icon(
                   painter = painterResource(R.drawable.rounded_delete_24),
                   contentDescription = stringResource(R.string.cd_delete_step),
-                  tint = MaterialTheme.colorScheme.error
+                  tint = MaterialTheme.colorScheme.delete
                 )
               }
             }
           }
-          VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
+          VerticalDivider(thickness = Dp.Hairline)
           StepFormFields(
             fields = state.fields,
             modifier = Modifier
@@ -584,8 +588,8 @@ private fun StepForm(
               .padding(bottom = 4.dp)
               .fillMaxWidth(),
           )
-          VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-          Surface {
+          VerticalDivider(thickness = Dp.Hairline)
+          Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
             Column(
               verticalArrangement = Arrangement.SpaceBetween,
               modifier = Modifier.fillMaxHeight(),
@@ -617,8 +621,8 @@ private fun StepForm(
             }
           }
         }
-        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-        Surface(color = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp)) {
+        HorizontalDivider(thickness = Dp.Hairline)
+        Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
           Column(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -741,7 +745,9 @@ private fun IngredientFormFields(
       ),
       textStyle = MaterialTheme.typography.bodyMedium,
       singleLine = true,
-      modifier = Modifier.weight(2f).testTag(RecipeChapterScreenTags.INGREDIENT_NAME.name)
+      modifier = Modifier
+        .weight(2f)
+        .testTag(RecipeChapterScreenTags.INGREDIENT_NAME.name)
     )
     NumberField(
       value = fields.amount.value,
@@ -787,7 +793,7 @@ private fun IngredientFormFields(
       Icon(
         painter = painterResource(R.drawable.rounded_delete_24),
         contentDescription = stringResource(R.string.cd_delete_ingredient),
-        tint = MaterialTheme.colorScheme.error
+        tint = MaterialTheme.colorScheme.delete
       )
     }
   }

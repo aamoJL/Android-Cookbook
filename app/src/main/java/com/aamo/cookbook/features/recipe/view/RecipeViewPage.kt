@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -323,7 +324,7 @@ fun RecipeViewPageContent(
             }
           }
         }
-        HorizontalDivider()
+        HorizontalDivider(thickness = Dp.Hairline)
         RecipeViewPagerIndicators(
           pageIndex = pagerState.currentPage,
           recipeProgress = progressState.values.map { list -> list.all { it } },

@@ -1,10 +1,14 @@
+@file:Suppress("UnusedReceiverParameter")
+
 package com.aamo.cookbook.ui.theme
 
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 
 private val LightColors = lightColorScheme(
   primary = md_theme_light_primary,
@@ -36,6 +40,11 @@ private val LightColors = lightColorScheme(
   surfaceTint = md_theme_light_surfaceTint,
   outlineVariant = md_theme_light_outlineVariant,
   scrim = md_theme_light_scrim,
+  surfaceContainerLow = md_theme_light_surfaceContainerLow,
+  surfaceContainerLowest = md_theme_light_surfaceContainerLowest,
+  surfaceContainer = md_theme_light_surfaceContainer,
+  surfaceContainerHigh = md_theme_light_surfaceContainerHigh,
+  surfaceContainerHighest = md_theme_light_surfaceContainerHighest,
 )
 
 private val DarkColors = darkColorScheme(
@@ -68,6 +77,11 @@ private val DarkColors = darkColorScheme(
   surfaceTint = md_theme_dark_surfaceTint,
   outlineVariant = md_theme_dark_outlineVariant,
   scrim = md_theme_dark_scrim,
+  surfaceContainerLow = md_theme_dark_surfaceContainerLow,
+  surfaceContainerLowest = md_theme_dark_surfaceContainerLowest,
+  surfaceContainer = md_theme_dark_surfaceContainer,
+  surfaceContainerHigh = md_theme_dark_surfaceContainerHigh,
+  surfaceContainerHighest = md_theme_dark_surfaceContainerHighest,
 )
 
 @Composable
@@ -80,3 +94,12 @@ fun CookbookTheme(
     colorScheme = colors, typography = Typography, content = content
   )
 }
+
+val ColorScheme.noteContainer: Color
+  @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_noteContainer else md_theme_light_noteContainer
+
+val ColorScheme.onNoteContainer: Color
+  @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_onNoteContainer else md_theme_light_onNoteContainer
+
+val ColorScheme.delete: Color
+  @Composable get() = if (isSystemInDarkTheme()) md_theme_dark_error else md_theme_light_error

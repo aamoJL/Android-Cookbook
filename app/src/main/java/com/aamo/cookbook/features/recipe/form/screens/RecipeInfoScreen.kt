@@ -30,7 +30,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.VerticalDivider
-import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -50,6 +49,7 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.exifinterface.media.ExifInterface
 import coil.compose.rememberAsyncImagePainter
@@ -65,6 +65,7 @@ import com.aamo.cookbook.ui.components.inputs.text_field.OptionsTextField
 import com.aamo.cookbook.ui.components.inputs.text_field.borderlessTextFieldColors
 import com.aamo.cookbook.ui.components.modals.DeleteDialog
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.ui.theme.delete
 import com.aamo.cookbook.utility.extensions.general.asOptionalLabel
 import com.aamo.cookbook.utility.extensions.general.correctBitmapOrientation
 
@@ -125,7 +126,7 @@ fun RecipeForm(
   ElevatedCard(
     shape = MaterialTheme.shapes.small,
     colors = CardDefaults.elevatedCardColors(
-      containerColor = MaterialTheme.colorScheme.surfaceColorAtElevation(1.dp),
+      containerColor = MaterialTheme.colorScheme.surfaceContainer,
     ),
     modifier = modifier,
   ) {
@@ -136,15 +137,15 @@ fun RecipeForm(
           .animateContentSize()
           .height(intrinsicSize = IntrinsicSize.Max)
       ) {
-        Surface {
+        Surface(color = MaterialTheme.colorScheme.surfaceContainerLow) {
           Column(modifier = Modifier.fillMaxHeight()) {
             IconToggleButton(
               enabled = state.fields.note.value.isEmpty(),
               checked = state.fields.noteFieldToggleValue,
               onCheckedChange = { state.fields.noteFieldToggleValue = it },
               colors = IconButtonDefaults.iconToggleButtonColors(
-                checkedContentColor = MaterialTheme.colorScheme.tertiary,
-                disabledContentColor = MaterialTheme.colorScheme.tertiary.copy(alpha = 0.38f)
+                checkedContentColor = MaterialTheme.colorScheme.secondary,
+                disabledContentColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
               ),
             ) {
               Icon(
@@ -157,26 +158,27 @@ fun RecipeForm(
                 Icon(
                   painter = painterResource(R.drawable.rounded_delete_24),
                   contentDescription = stringResource(R.string.cd_delete_recipe),
-                  tint = MaterialTheme.colorScheme.error
+                  tint = MaterialTheme.colorScheme.delete
                 )
               }
             }
           }
         }
-        VerticalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = .2f))
-        RecipeFormFields(
-          fields = state.fields,
-          categorySuggestions = categorySuggestions,
-          modifier = modifier
-            .padding(8.dp)
-            .padding(bottom = 4.dp)
-            .weight(1f)
-            .onFocusChanged {
-              if (it.hasFocus) hasFocus = it.hasFocus
-              if (focusInit) focusInit = false
-              else hasFocus = it.hasFocus
-            },
-        )
+        VerticalDivider(thickness = Dp.Hairline)
+        Box(modifier = Modifier.weight(1f)) {
+          RecipeFormFields(
+            fields = state.fields,
+            categorySuggestions = categorySuggestions,
+            modifier = modifier
+              .padding(8.dp)
+              .padding(bottom = 4.dp)
+              .onFocusChanged {
+                if (it.hasFocus) hasFocus = it.hasFocus
+                if (focusInit) focusInit = false
+                else hasFocus = it.hasFocus
+              },
+          )
+        }
       }
       if (state.fields.isDirty && !state.fields.requiredFieldsFilled && !hasFocus) {
         Surface(
@@ -305,7 +307,7 @@ private fun ThumbnailPicker(
     })
 
   ElevatedCard(
-    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+    colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
     modifier = modifier
   ) {
     if (fileName.isNotEmpty()) {
@@ -411,7 +413,7 @@ private fun CameraButton(
   ) {
     Icon(
       painter = painterResource(R.drawable.baseline_add_a_photo_24),
-      contentDescription = stringResource(R.string.cd_take_a_photo)
+      contentDescription = stringResource(R.string.cd_take_a_photo),
     )
   }
 }

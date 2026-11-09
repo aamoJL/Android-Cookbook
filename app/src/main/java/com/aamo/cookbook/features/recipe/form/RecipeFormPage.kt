@@ -33,7 +33,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -385,7 +385,7 @@ private fun RecipeFormContent(
               .clip(CircleShape)
               .background(
                 if (pagerState.currentPage == i) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.surfaceContainerHighest
+                else MaterialTheme.colorScheme.surfaceVariant
               )
               .size(16.dp)
               .clickable { animateToPageTarget = i })
@@ -396,10 +396,10 @@ private fun RecipeFormContent(
 }
 
 @Suppress("HardCodedStringLiteral")
-@Preview
+@PreviewLightDark
 @Composable
 private fun Preview() {
-  CookbookTheme(useDarkTheme = true) {
+  CookbookTheme {
     RecipeFormContent(
       isNew = false,
       formRecipeState = FormRecipeState().also {

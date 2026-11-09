@@ -92,14 +92,14 @@ fun RecipeSummaryScreen(
         Column(modifier = Modifier.weight(1f)) {
           ElevatedCard(
             shape = RoundedCornerShape(8.dp),
-            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
           ) {
             Thumbnail(fileName = recipe.recipe.thumbnailUri, modifier = Modifier.aspectRatio(1f))
           }
         }
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.weight(1f)) {
           ElevatedCard(
-            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+            colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
             modifier = Modifier.fillMaxSize()
           ) {
             SideInfo(
@@ -122,7 +122,7 @@ fun RecipeSummaryScreen(
       HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp, horizontal = 32.dp))
       ElevatedCard(
         shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surface),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer),
         modifier = Modifier
           .width(intrinsicSize = IntrinsicSize.Max)
           .align(Alignment.CenterHorizontally)
@@ -238,7 +238,7 @@ fun IngredientList(
       label = stringResource(R.string.title_ingredients),
       style = MaterialTheme.typography.titleLarge,
       fontFamily = Handwritten,
-      color = MaterialTheme.colorScheme.inversePrimary,
+      color = MaterialTheme.colorScheme.primary,
       minLineWidth = 30.dp
     )
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {

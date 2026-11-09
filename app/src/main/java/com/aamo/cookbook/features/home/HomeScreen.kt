@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.TextAutoSize
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -51,7 +50,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.core.content.getSystemService
 import androidx.lifecycle.ViewModel
@@ -209,7 +209,6 @@ private fun HomeScreenContent(
             )
             .fillMaxSize()
         ) {
-
           Box(
             contentAlignment = Alignment.TopEnd,
             modifier = Modifier
@@ -324,13 +323,16 @@ private fun MainButtons(
 
 @Composable
 fun MainIconButton(
-  onClick: () -> Unit, icon: Painter, text: String, modifier: Modifier = Modifier
+  onClick: () -> Unit,
+  icon: Painter,
+  text: String,
+  modifier: Modifier = Modifier,
 ) {
   FilledIconButton(
     onClick = onClick,
     colors = IconButtonDefaults.filledIconButtonColors(
-      containerColor = MaterialTheme.colorScheme.primaryContainer,
-      contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+      containerColor = MaterialTheme.colorScheme.secondaryContainer,
+      contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
     ),
     modifier = modifier
       .size(60.dp)
@@ -342,13 +344,17 @@ fun MainIconButton(
 
 @Composable
 private fun CategoryList(
-  categories: List<String>, onSelect: (String) -> Unit, modifier: Modifier = Modifier
+  categories: List<String>,
+  onSelect: (String) -> Unit,
+  modifier: Modifier = Modifier,
 ) {
   Box(contentAlignment = Alignment.Center, modifier = modifier) {
     Surface(
-      shadowElevation = 2.dp, shape = RoundedCornerShape(10.dp),
+      shadowElevation = 2.dp,
+      shape = MaterialTheme.shapes.small,
+      color = MaterialTheme.colorScheme.surfaceContainer,
       border = BorderStroke(
-        width = 1.dp, color = MaterialTheme.colorScheme.inversePrimary.copy(alpha = .2f)
+        width = Dp.Hairline, color = MaterialTheme.colorScheme.primaryContainer
       ),
       modifier = Modifier
         .padding(horizontal = 64.dp)
@@ -357,7 +363,7 @@ private fun CategoryList(
       Column {
         HorizontalDividerLabel(
           label = stringResource(R.string.text_menu),
-          color = MaterialTheme.colorScheme.inversePrimary,
+          color = MaterialTheme.colorScheme.primary,
           style = MaterialTheme.typography.titleLarge,
           fontFamily = Handwritten,
           modifier = modifier
@@ -365,7 +371,8 @@ private fun CategoryList(
             .padding(top = 12.dp),
         )
         LazyColumn(
-          userScrollEnabled = true, modifier = Modifier.padding(32.dp, 0.dp, 32.dp, 16.dp)
+          userScrollEnabled = true,
+          modifier = Modifier.padding(32.dp, 0.dp, 32.dp, 16.dp),
         ) {
           items(categories) { category ->
             TextButton(
@@ -378,7 +385,7 @@ private fun CategoryList(
             ) {
               Text(text = category, textAlign = TextAlign.Center)
             }
-            HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = .25f))
+            HorizontalDivider()
           }
         }
       }
@@ -387,10 +394,10 @@ private fun CategoryList(
 }
 
 @Suppress("HardCodedStringLiteral")
-@Preview(showSystemUi = true)
+@PreviewLightDark
 @Composable
 private fun Preview() {
-  CookbookTheme(useDarkTheme = true) {
+  CookbookTheme {
     HomeScreenContent(
       categories = listOf("Category 1", "Category 2", "Category 3", "Category 4"),
       onSearch = {},

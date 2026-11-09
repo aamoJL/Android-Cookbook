@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
@@ -41,13 +42,13 @@ fun RecipeViewPagerIndicators(
 ) {
   val currentChapterIndex = remember(recipeProgress) { recipeProgress.indexOfFirst { !it } }
 
-  Surface {
+  Surface(color = MaterialTheme.colorScheme.surfaceContainer) {
     Row(modifier = modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
       PageIndicatorItem(
         selected = pageIndex == 0,
         onClick = { onPageChange(0) },
         contentDescription = stringResource(R.string.cd_summary_page),
-        color = MaterialTheme.colorScheme.tertiaryContainer,
+        color = MaterialTheme.colorScheme.secondaryContainer,
         icon = painterResource(R.drawable.rounded_info_24),
         modifier = Modifier.testTag(RecipeViewPagerIndicatorsTags.SUMMARY_INDICATOR.name)
       )
@@ -64,7 +65,7 @@ fun RecipeViewPagerIndicators(
           ),
           color = when (currentChapterIndex) {
             chapterIndicatorIndex -> MaterialTheme.colorScheme.primaryContainer
-            else -> MaterialTheme.colorScheme.surfaceContainerHighest
+            else -> MaterialTheme.colorScheme.surfaceVariant
           },
           icon = if (completed) painterResource(R.drawable.rounded_check_24) else null,
           modifier = Modifier.testTag(RecipeViewPagerIndicatorsTags.CHAPTER_INDICATOR.name)
@@ -97,8 +98,10 @@ private fun PageIndicatorItem(
       .size(width = if (isTargetPage) 48.dp else 32.dp, height = 32.dp)) {
     if (icon != null) {
       Icon(
-        painter = icon, contentDescription = null, // Description will be on the surface element
-        modifier = Modifier.padding(4.dp)
+        painter = icon,
+        contentDescription = null, // Description will be on the surface element
+        tint = MaterialTheme.colorScheme.contentColorFor(color),
+        modifier = Modifier.padding(4.dp),
       )
     }
   }

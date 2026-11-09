@@ -23,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.PreviewLightDark
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
@@ -41,6 +42,7 @@ import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.ui.theme.delete
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
@@ -139,22 +141,21 @@ private fun RecipesByBookmarkScreenContent(
   }, floatingActionButton = {
     if (categories.isNotEmpty()) {
       Box {
-        FloatingActionButton(
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-          onClick = { filterPopUpOpen = true }) {
+        FloatingActionButton(onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
               painterResource(R.drawable.baseline_filter_alt_off_24)
             }, ifFalse = {
               painterResource(R.drawable.baseline_filter_list_alt_24)
-            }), contentDescription = stringResource(R.string.cd_filter)
+            }),
+            contentDescription = stringResource(R.string.cd_filter),
           )
         }
         DropdownMenu(
           expanded = filterPopUpOpen,
           containerColor = MaterialTheme.colorScheme.surface,
-          onDismissRequest = { filterPopUpOpen = false }) {
+          onDismissRequest = { filterPopUpOpen = false },
+        ) {
           Column {
             categories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
@@ -165,15 +166,18 @@ private fun RecipesByBookmarkScreenContent(
           }
           if (filtered) {
             HorizontalDivider()
-            DropdownMenuItem(text = {
-              Text(
-                text = stringResource(R.string.btn_text_clear),
-                color = MaterialTheme.colorScheme.error
-              )
-            }, onClick = {
-              filterPopUpOpen = false
-              onFilterChange(String.EMPTY)
-            })
+            DropdownMenuItem(
+              text = {
+                Text(
+                  text = stringResource(R.string.btn_text_clear),
+                  color = MaterialTheme.colorScheme.delete
+                )
+              },
+              onClick = {
+                filterPopUpOpen = false
+                onFilterChange(String.EMPTY)
+              },
+            )
           }
         }
       }
@@ -190,10 +194,10 @@ private fun RecipesByBookmarkScreenContent(
 }
 
 @Suppress("HardCodedStringLiteral")
-@Preview
+@PreviewLightDark
 @Composable
 private fun Preview() {
-  CookbookTheme(useDarkTheme = true) {
+  CookbookTheme {
     RecipesByBookmarkScreenContent(
       recipes = listOf(
       RecipeListRecipeModel(

@@ -43,7 +43,7 @@ fun RecipeCard(
   rating: Int? = 0
 ) {
   ElevatedCard(
-    shape = RoundedCornerShape(10.dp),
+    shape = MaterialTheme.shapes.small,
     modifier = modifier.then(Modifier.clickable(onClick = onClick))
   ) {
     Column(modifier = Modifier.fillMaxSize()) {
@@ -60,7 +60,7 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .padding(2.dp)
             )
           }
@@ -70,7 +70,7 @@ fun RecipeCard(
               modifier = Modifier
                 .align(Alignment.BottomStart)
                 .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.surface)
+                .background(MaterialTheme.colorScheme.surfaceContainerHigh)
                 .padding(2.dp)
             )
           }
@@ -92,7 +92,7 @@ fun RecipeCard(
 
 @Composable
 private fun Thumbnail(fileName: String, modifier: Modifier = Modifier) {
-  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surface) {
+  Surface(modifier = modifier, color = MaterialTheme.colorScheme.surfaceContainer) {
     if (fileName.isNotEmpty()) {
       Image(
         painter = rememberAsyncImagePainter(

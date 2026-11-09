@@ -132,21 +132,25 @@ private fun SearchTopBar(
   }
 
   TopAppBar(
-    title = { }, colors = TopAppBarDefaults.topAppBarColors(
-    navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
-    containerColor = MaterialTheme.colorScheme.primary,
-  ), actions = {
-    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
-      SearchTextField(
-        value = value,
-        placeholder = stringResource(R.string.ph_search),
-        onValueChange = onValueChange,
-        modifier = Modifier.focusRequester(focusRequester)
-      )
-    }
-  }, navigationIcon = {
-    BackNavigationIconButton(onBack = onBack)
-  }, modifier = modifier
+    title = { },
+    colors = TopAppBarDefaults.topAppBarColors(
+      navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+      containerColor = MaterialTheme.colorScheme.primary,
+    ),
+    actions = {
+      Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+        SearchTextField(
+          value = value,
+          placeholder = stringResource(R.string.ph_search),
+          onValueChange = onValueChange,
+          modifier = Modifier.focusRequester(focusRequester)
+        )
+      }
+    },
+    navigationIcon = {
+      BackNavigationIconButton(onBack = onBack)
+    },
+    modifier = modifier,
   )
 }
 

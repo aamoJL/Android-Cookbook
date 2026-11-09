@@ -42,6 +42,7 @@ import com.aamo.cookbook.ui.components.BackgroundSurface
 import com.aamo.cookbook.ui.components.LoadingScreen
 import com.aamo.cookbook.ui.components.PrimaryTopAppBar
 import com.aamo.cookbook.ui.theme.CookbookTheme
+import com.aamo.cookbook.ui.theme.delete
 import com.aamo.cookbook.utility.extensions.general.EMPTY
 import com.aamo.cookbook.utility.extensions.general.ifElse
 import kotlinx.coroutines.flow.Flow
@@ -147,20 +148,21 @@ private fun RecipesByCategoryScreenContent(
     if (subCategories.isNotEmpty()) {
       Box {
         FloatingActionButton(
-          containerColor = MaterialTheme.colorScheme.primaryContainer,
-          contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
           onClick = { filterPopUpOpen = true }) {
           Icon(
             painter = ifElse(condition = filtered, ifTrue = {
-            painterResource(R.drawable.baseline_filter_alt_off_24)
-          }, ifFalse = {
-            painterResource(R.drawable.baseline_filter_list_alt_24)
-          }), contentDescription = stringResource(R.string.cd_filter))
+              painterResource(R.drawable.baseline_filter_alt_off_24)
+            }, ifFalse = {
+              painterResource(R.drawable.baseline_filter_list_alt_24)
+            }),
+            contentDescription = stringResource(R.string.cd_filter),
+          )
         }
         DropdownMenu(
           expanded = filterPopUpOpen,
           containerColor = MaterialTheme.colorScheme.surface,
-          onDismissRequest = { filterPopUpOpen = false }) {
+          onDismissRequest = { filterPopUpOpen = false },
+        ) {
           Column {
             subCategories.forEach { subCategory ->
               DropdownMenuItem(text = { Text(text = subCategory) }, onClick = {
@@ -174,7 +176,7 @@ private fun RecipesByCategoryScreenContent(
             DropdownMenuItem(text = {
               Text(
                 text = stringResource(R.string.btn_text_clear),
-                color = MaterialTheme.colorScheme.error
+                color = MaterialTheme.colorScheme.delete
               )
             }, onClick = {
               filterPopUpOpen = false
