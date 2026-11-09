@@ -73,8 +73,7 @@ class RecipeImportScreenViewModel(
     private set
 
   private fun checkValidity(): Boolean {
-    if (savingState.state == SavingState.State.SAVING) return false
-    return selections.values.isNotEmpty()
+    return savingState.state != SavingState.State.SAVING && selections.values.isNotEmpty()
   }
 
   fun selectRecipe(vararg recipe: RecipeWithChaptersStepsAndIngredients) {

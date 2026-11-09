@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
@@ -30,7 +29,6 @@ import com.aamo.cookbook.utility.extensions.general.Zero
 import com.aamo.cookbook.utility.extensions.general.toFractionFormattedString
 import com.aamo.cookbook.utility.viewmodels.ViewModelStateList
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun IngredientCheckBoxList(
   ingredients: List<Ingredient>,
@@ -126,7 +124,7 @@ private fun CheckboxLabel(
 @Composable
 private fun LabelPreview() {
   CookbookTheme {
-    Column() {
+    Column {
       CheckboxLabel(
         ingredient = Ingredient(id = 1, name = "Ingredient 1", amount = 250.0, unit = "g"),
         servingsMultiplier = 1.0,

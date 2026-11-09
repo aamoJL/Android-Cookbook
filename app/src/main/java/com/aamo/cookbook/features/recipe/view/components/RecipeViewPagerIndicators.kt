@@ -1,7 +1,6 @@
 package com.aamo.cookbook.features.recipe.view.components
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -33,7 +32,6 @@ enum class RecipeViewPagerIndicatorsTags {
   CHAPTER_INDICATOR
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RecipeViewPagerIndicators(
   pageIndex: Int,

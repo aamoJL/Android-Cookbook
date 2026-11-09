@@ -1,3 +1,5 @@
+@file:Suppress("SameReturnValue")
+
 package com.aamo.cookbook.utility.extensions.general
 
 import java.math.BigDecimal

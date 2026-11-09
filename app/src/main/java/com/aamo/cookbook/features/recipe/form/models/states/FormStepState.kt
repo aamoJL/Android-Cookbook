@@ -94,7 +94,6 @@ class FormStepState(
   }
 
   private fun checkValidity(): Boolean {
-    if (ingredientStates.values.any { !it.validity.value }) return false
-    return fields.requiredFieldsFilled
+    return !ingredientStates.values.any { !it.validity.value } && fields.requiredFieldsFilled
   }
 }

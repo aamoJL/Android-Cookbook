@@ -24,7 +24,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.aamo.cookbook.utility.extensions.general.letIf
 
 @Composable
-fun <T : Any?> NumberField(
+fun <T> NumberField(
   value: T,
   onValueChange: (T) -> Unit,
   validator: FieldValidator<T>,
@@ -94,7 +94,7 @@ fun <T : Any?> NumberField(
     suffix = suffix,
     keyboardOptions = keyboardOptions.copy(keyboardType = KeyboardType.Number),
     enabled = enabled,
-    readOnly = if (error == null) readOnly else true,
+    readOnly = error != null || readOnly,
     textStyle = textStyle,
     label = label,
     leadingIcon = leadingIcon,
@@ -112,7 +112,7 @@ fun <T : Any?> NumberField(
   )
 }
 
-interface FieldValidator<T : Any?> {
+interface FieldValidator<T> {
   fun onValid(text: String, onValid: (value: T, text: String) -> Unit)
   fun onValid(value: T, onValid: (text: String) -> Unit): Boolean
 }

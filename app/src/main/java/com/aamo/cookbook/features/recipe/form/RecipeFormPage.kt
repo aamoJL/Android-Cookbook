@@ -174,8 +174,7 @@ class RecipeFormViewModel(
   }
 
   private fun checkValidity(): Boolean {
-    if (savingState.state == SavingState.State.SAVING) return false
-    return formRecipeState.value.validity.value
+    return savingState.state != SavingState.State.SAVING && formRecipeState.value.validity.value
   }
 
   override fun onCleared() {

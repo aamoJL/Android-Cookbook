@@ -49,7 +49,7 @@ fun PrimaryTopAppBar(
 @Preview
 @Composable
 private fun Preview() {
-  CookbookTheme() {
+  CookbookTheme {
     PrimaryTopAppBar(title = "Title", onBack = {}) {
       IconButton(onClick = {}) {
         Icon(

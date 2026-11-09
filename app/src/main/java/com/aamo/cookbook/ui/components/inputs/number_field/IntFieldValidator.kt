@@ -12,6 +12,7 @@ data object IntFieldValidator : FieldValidator<Int> {
     onValid(value, result)
   }
 
+  @Suppress("SameReturnValue")
   override fun onValid(value: Int, onValid: (text: String) -> Unit): Boolean {
     onValid(value.toString())
     return true
